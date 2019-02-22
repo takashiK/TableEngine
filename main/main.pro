@@ -25,6 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # Input
 SOURCES += main.cpp
 
+RESOURCES += TableEngine.qrc
+
 include(../src/lib.pri)
 
 VERSION = 0.0.1
