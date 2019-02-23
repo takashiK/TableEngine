@@ -36,14 +36,10 @@ win32-msvc {
     HEADERS += $$files(platform/windows/*.h,true)
     SOURCES += $$files(platform/windows/*.cpp,true)
     INCLUDEPATH += ../packages/googletest/include
-    CONFIG(release, debug|release){
-        message(Release build!) #will print
-    }
-    CONFIG(debug, debug|release){
-        message(Debug build!) #no print
-    }
-    LIBS += ../packages/googletest/debug/gmockd.lib
-#    LIBS += ../packages/googletest/release/gmock.lib
+    QMAKE_CFLAGS += /MP
+    QMAKE_CXXFLAGS += /MP
+    QMAKE_LFLAGS_DEBUG += ../packages/googletest/debug/gmockd.lib
+    QMAKE_LFLAGS_RELEASE += ../packages/googletest/release/gmock.lib
 }
 CONFIG(debug_and_release):message(Release build!) #will print
 CONFIG(debug, debug|release):message(Debug build!) #no print
