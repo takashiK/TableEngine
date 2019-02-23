@@ -1,3 +1,5 @@
+﻿extensions: designer.cs generated.cs
+extensions: .cs .cpp .h
 /****************************************************************************
 **
 ** Copyright (C) 2018 Takashi Kuwabara.
@@ -18,17 +20,13 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#pragma once
-#include "commands/TeCommandBase.h"
-
-class TeCmdOption :
-	public TeCommandBase
-{
-public:
-	TeCmdOption();
-	virtual ~TeCmdOption();
-
-protected:
-	virtual bool execute(TeViewStore* p_store);
-};
-
+extensions: .aspx .ascx
+<%-- 
+Copyright (c) 2011 rubicon IT GmbH
+--%>
+extensions: .vb
+'Sample license text.
+extensions:  .xml .config .xsd
+<!--
+Sample license text.
+-->
