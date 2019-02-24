@@ -44,8 +44,8 @@ public:
 
 	void loadKeySetting();
 
-	bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event);
-	void requestCommandFinalize(TeCommandBase* cmdBase);
+	virtual bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event);
+	virtual void requestCommandFinalize(TeCommandBase* cmdBase);
 
 signals:
 	void commandFinalize(TeCommandBase* cmdBase);

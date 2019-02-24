@@ -18,23 +18,29 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#pragma once
 
-#include <test_mock/mock_TeViewStore.h>
-#include <test_mock/mock_TeDispatcher.h>
+#include <TeViewStore.h>
+#include <gmock/gmock.h>
 
-#include <commands/folder/TeCmdFolderCloseUnder.h>
-#include <commands/folder/TeCmdFolderOpenAll.h>
-#include <commands/folder/TeCmdFolderOpenOne.h>
-#include <commands/folder/TeCmdFolderOpenUnder.h>
-
-TEST(test_TeCmdFolderOpenClose, openOne)
-{
-	mock_TeDispatcher dispatcher;
-	mock_TeViewStore store;
-
-	TeCmdFolderOpenOne cmd;
-	cmd.setDispatcher(&dispatcher);
-
-	cmd.run(&store);
-}
-
+class mock_TeViewStore : public TeViewStore {
+public:
+	MOCK_METHOD0(mainWindow,
+		QMainWindow*());
+	MOCK_METHOD0(currentTabIndex,
+		int());
+	MOCK_METHOD1(tabIndex,
+		int(TeFileFolderView* view));
+	MOCK_METHOD1(getFolderView,
+		QList<TeFileFolderView*>(int));
+	MOCK_METHOD0(currentFolderView,
+		TeFileFolderView*());
+	MOCK_METHOD1(setCurrentFolderView,
+		void(TeFileFolderView* view));
+	MOCK_METHOD2(createFolderView,
+		TeFileFolderView*(QString, int));
+	MOCK_METHOD1(deleteFolderView,
+		void(TeFileFolderView* view));
+	MOCK_METHOD3(moveFolderView,
+		void(TeFileFolderView*, int, int));
+};

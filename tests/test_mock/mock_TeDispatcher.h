@@ -18,23 +18,15 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#pragma once
 
-#include <test_mock/mock_TeViewStore.h>
-#include <test_mock/mock_TeDispatcher.h>
+#include <TeDispatcher.h>
+#include <gmock/gmock.h>
 
-#include <commands/folder/TeCmdFolderCloseUnder.h>
-#include <commands/folder/TeCmdFolderOpenAll.h>
-#include <commands/folder/TeCmdFolderOpenOne.h>
-#include <commands/folder/TeCmdFolderOpenUnder.h>
-
-TEST(test_TeCmdFolderOpenClose, openOne)
-{
-	mock_TeDispatcher dispatcher;
-	mock_TeViewStore store;
-
-	TeCmdFolderOpenOne cmd;
-	cmd.setDispatcher(&dispatcher);
-
-	cmd.run(&store);
-}
-
+class mock_TeDispatcher : public TeDispatcher {
+public:
+	MOCK_METHOD3(dispatch,
+		bool(TeTypes::WidgetType type, QObject* obj, QEvent *event));
+	MOCK_METHOD1(requestCommandFinalize,
+		void(TeCommandBase* cmdBase));
+};
