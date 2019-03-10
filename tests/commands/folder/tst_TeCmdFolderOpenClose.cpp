@@ -19,20 +19,32 @@
 **
 ****************************************************************************/
 
+#include <gmock/gmock.h>
 #include <test_mock/mock_TeViewStore.h>
 #include <test_mock/mock_TeDispatcher.h>
+
+using ::testing::Return;
+
+#include <widgets/TeFileFolderView.h>
 
 #include <commands/folder/TeCmdFolderCloseUnder.h>
 #include <commands/folder/TeCmdFolderOpenAll.h>
 #include <commands/folder/TeCmdFolderOpenOne.h>
 #include <commands/folder/TeCmdFolderOpenUnder.h>
 
-TEST(test_TeCmdFolderOpenClose, openOne)
+TEST(test_TeCmdFolderOpenClose, openOneNormal)
 {
 	mock_TeDispatcher dispatcher;
 	mock_TeViewStore store;
+	TeFileFolderView folderview;
 
 	TeCmdFolderOpenOne cmd;
+
+	EXPECT_CALL(store, currentFolderView())
+		.WillOnce(Return(&folderview));
+	EXPECT_CALL(dispatcher, requestCommandFinalize(&cmd))
+		.Times(1);
+
 	cmd.setDispatcher(&dispatcher);
 
 	cmd.run(&store);

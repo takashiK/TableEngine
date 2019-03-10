@@ -1,6 +1,14 @@
-win32-msvc:LIBS += $$shadowed($${PWD})/tengine.lib
-unix:LIBS += -L$$shadowed($${PWD}) -ltengine
 INCLUDEPATH += $${PWD}
 DEPENDPATH += $${PWD}
-CONFIG +=  debug_and_release qt
 QT += core gui widgets
+
+win32-msvc {
+    INCLUDEPATH += ../support_package/include
+    CONFIG(debug, debug|release){
+        LIBS += $$shadowed($${PWD})/debug/tengined.lib
+        LIBS += ../support_package/debug/archived.lib
+    }else{
+        LIBS += $$shadowed($${PWD})/release/tengine.lib
+        LIBS += ../support_package/release/archive.lib
+    }
+}

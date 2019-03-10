@@ -3,9 +3,15 @@
 ######################################################################
 
 TEMPLATE = lib
-CONFIG = staticlib debug_and_release qt
-TARGET = tengine
+CONFIG += staticlib
 QT += core gui widgets
+
+CONFIG(debug, debug|release){
+    TARGET = tengined
+}else{
+    TARGET = tengine
+}
+
 
 INCLUDEPATH += .
 
@@ -35,6 +41,7 @@ SOURCES += $$files(widgets/*.cpp,true)
 win32-msvc {
     HEADERS += $$files(platform/windows/*.h,true)
     SOURCES += $$files(platform/windows/*.cpp,true)
+    INCLUDEPATH += ../support_package/include
 
     QMAKE_CFLAGS += /MP
     QMAKE_CXXFLAGS += /MP

@@ -16,11 +16,14 @@ I'm user of FD at MS-DOS and 卓駆☆ at Windows. but both are not compatible o
 ## Folder tree
 
 ```
-  + main          : provide main() function.
-  + src           : TableEngine main program.
-  + tests         : unit tests.
-  + packages      : place for support library.
-    +- googletest : 
+  + main            : provide main() function.
+  + src             : TableEngine main program.
+  + tests           : unit tests.
+  + support_package : place for support library.
+    + include       :  headers of library.
+    + debug         :  static and dynamic library for debug.
+    + release       :  static and dynamic library for release.
+    + license       :  license information for libraries.
 ```
 
 ## How to Build

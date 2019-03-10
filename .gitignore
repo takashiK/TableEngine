@@ -49,7 +49,7 @@ target_wrapper.bat
 .vs/*
 main/debug/*
 main/release/*
-packages/*
+support_package/*
 src/debug/*
 src/release/*
 tests/debug/*

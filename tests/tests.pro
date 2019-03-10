@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-CONFIG = console testcase qt debug_and_release
+CONFIG += console testcase
 TARGET = tst_tengine
 QT += testlib
 
@@ -35,13 +35,14 @@ SOURCES += $$files(widgets/*.cpp,true)
 win32-msvc {
     HEADERS += $$files(platform/windows/*.h,true)
     SOURCES += $$files(platform/windows/*.cpp,true)
-    INCLUDEPATH += ../packages/googletest/include
+    INCLUDEPATH += ../support_package/include
     QMAKE_CFLAGS += /MP
     QMAKE_CXXFLAGS += /MP
-    QMAKE_LFLAGS_DEBUG += ../packages/googletest/debug/gmockd.lib
-    QMAKE_LFLAGS_RELEASE += ../packages/googletest/release/gmock.lib
+    CONFIG(debug, debug|release){
+        LIBS += ../support_package/debug/gmockd.lib
+    }else{
+        LIBS += ../support_package/release/gmock.lib
+    }
 }
-CONFIG(debug_and_release):message(Release build!) #will print
-CONFIG(debug, debug|release):message(Debug build!) #no print
 
 include(../src/lib.pri)
