@@ -4,6 +4,7 @@
 
 #include <QFile>
 #include <QDir>
+#include <algorithm>
 
 namespace TeArchive{
 namespace {
@@ -169,15 +170,6 @@ namespace {
 
 	bool open_read_archvie(QtArchiveInfo* arInfo, const QString& path) 
 	{
-		int flags;
-		int r;
-
-		/* Select which attributes we want to restore. */
-		flags = ARCHIVE_EXTRACT_TIME;
-		flags |= ARCHIVE_EXTRACT_PERM;
-		flags |= ARCHIVE_EXTRACT_ACL;
-		flags |= ARCHIVE_EXTRACT_FFLAGS;
-
 		arInfo->ar = archive_read_new();
 		archive_read_support_format_all(arInfo->ar);
 		archive_read_support_compression_all(arInfo->ar);
@@ -272,20 +264,65 @@ namespace {
 				return false;
 
 			qint64 wsize = ofile->write(static_cast<const char*>(buff), size);
-			if (wsize < 0 | wsize < size) {
+			if (wsize < 0 || wsize < static_cast<qint64>(size)) {
 				return false;
 			}
+		}
+	}
+
+	bool open_write_archvie(QtArchiveInfo* arInfo, const QString& path, ArchiveType type)
+	{
+		arInfo->ar = archive_write_new();
+
+		switch(type){
+		case AR_ZIP:
+			archive_write_set_format_zip(arInfo->ar);
+			break;
+		case AR_7ZIP:
+			archive_write_set_format_7zip(arInfo->ar);
+			break;
+		case AR_TAR_GZIP:
+			archive_write_set_format_gnutar(arInfo->ar);
+			archive_write_set_compression_gzip(arInfo->ar);
+			break;
+		case AR_TAR_BZIP2:
+			archive_write_set_format_gnutar(arInfo->ar);
+			archive_write_set_compression_bzip2(arInfo->ar);
+			break;
+		}
+
+		arInfo->st.file.setFileName(path.toLocal8Bit());
+
+		int r = archive_write_open(arInfo->ar, &arInfo->st, qt_write_open_callback, qt_write_callback, qt_close_callback);
+		if (r != ARCHIVE_OK) {
+			archive_write_close(arInfo->ar);
+			archive_write_free(arInfo->ar);
+			arInfo->ar = Q_NULLPTR;
+			return false;
+		}
+
+		return true;
+	}
+
+	void close_write_archive(QtArchiveInfo* arInfo)
+	{
+		arInfo->entry = Q_NULLPTR;
+		if (arInfo->ar != Q_NULLPTR) {
+			archive_write_close(arInfo->ar);
+			archive_write_free(arInfo->ar);
+			arInfo->ar = Q_NULLPTR;
 		}
 	}
 }
 
 Reader::Reader(QObject *parent)
+	: QObject(parent)
 {
 	overwrite_check = Q_NULLPTR;
 }
 
 Reader::Reader(const QString & path, QObject * parent)
-	: m_path(path)
+	: m_path(path),QObject(parent)
 {
 	overwrite_check = Q_NULLPTR;
 	if (!QFile::exists(path)) {
@@ -296,6 +333,11 @@ Reader::Reader(const QString & path, QObject * parent)
 
 Reader::~Reader()
 {
+}
+
+void Reader::setCallback( bool(*overwrite)(QFile *) )
+{
+	overwrite_check = overwrite;
 }
 
 void Reader::open(const QString & path)
@@ -345,6 +387,11 @@ bool Reader::extractAll(const QString & destPath)
 				continue;
 			}
 
+			QFileInfo fileInfo(info.path);
+			if (!dir.exists(fileInfo.path())) {
+				dir.mkpath(fileInfo.path());
+			}
+
 			if (!ofile.open(QFile::WriteOnly | QFile::Truncate)) {
 				continue;
 			}
@@ -359,7 +406,7 @@ bool Reader::extractAll(const QString & destPath)
 	return true;
 }
 
-bool Reader::extract(const QString & destPath, const QString & base, const QStringList & entries, bool recursive)
+bool Reader::extract(const QString & destPath, const QString & base, const QStringList & entries)
 {
 	FileInfo info;
 
@@ -404,6 +451,11 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 			ofile.setFileName(destBase + info.path);
 			if (ofile.exists() && (overwrite_check != Q_NULLPTR) && !overwrite_check(&ofile)) {
 				continue;
+			}
+
+			QFileInfo fileInfo(info.path);
+			if (!dir.exists(fileInfo.path())) {
+				dir.mkpath(fileInfo.path());
 			}
 
 			if (!ofile.open(QFile::WriteOnly | QFile::Truncate)) {
@@ -478,6 +530,126 @@ Reader::const_iterator& Reader::const_iterator::operator++()
 			data = Q_NULLPTR;
 		}
 	}
+	return *this;
+}
+
+Writer::Writer(QObject *parent)
+	: QObject(parent)
+{
+	m_sortFlag = true;
+}
+
+
+Writer::~Writer()
+{
+}
+
+void Writer::clear()
+{
+	m_entryList.clear();
+}
+
+bool Writer::addEntry(const QString & src, const QString& dest)
+{
+	FileInfo info;
+	info.path = QDir::cleanPath(dest);
+	if(info.path.startsWith('/') || info.path.startsWith('.') || m_entryList.contains(info))
+		return false;
+
+	QFileInfo fileInfo(src);
+	if (!fileInfo.exists())
+		return false;
+
+	info.src = QDir::cleanPath(src);
+
+	if (fileInfo.isDir() && !fileInfo.isSymLink()) {
+		info.type = EN_DIR;
+		QDir dir(info.src);
+		QStringList entries = dir.entryList();
+		if (!entries.isEmpty()) {
+			return addEntries(info.src, dir.entryList(), dest);
+		}
+		else {
+			m_entryList.append(info);
+		}
+	}
+	else if (fileInfo.isFile()) {
+		info.type = EN_FILE;
+		info.size = fileInfo.size();
+		m_entryList.append(info);
+	}
+	else {
+		return false;
+	}
+	m_sortFlag = false;
+	return true;
+}
+
+bool Writer::addEntries(const QString & base, const QStringList & srcList, const QString & dest)
+{
+	bool result = false;
+	QString basePath,destPath;
+	if (base.endsWith('/')) {
+		basePath = base;
+	}
+	else {
+		basePath = base + "/";
+	}
+	if (destPath.endsWith('/')) {
+		destPath = dest;
+	}
+	else {
+		destPath = dest + "/";
+	}
+
+	for (auto& src : srcList) {
+		if (addEntry(base + src, dest + src)) {
+			result = true;
+		}
+	}
+
+	return result;
+}
+
+bool Writer::archive(const QString & dest, ArchiveType type)
+{
+	QtArchiveInfo arInfo;
+	if (!open_write_archvie(&arInfo, dest, type)) {
+		return false;
+	}
+
+	archive_entry* entry;
+	for (auto& info : m_entryList) {
+		if (info.type != EN_FILE && info.type != EN_DIR) continue;
+
+		entry = archive_entry_new();
+		archive_entry_set_pathname(entry, info.path.toLocal8Bit());
+		archive_entry_set_size(entry, info.size); // Note 3
+		if (info.type == EN_DIR) {
+			archive_entry_set_filetype(entry, AE_IFDIR);
+		}
+		else if (info.type == EN_FILE) {
+			archive_entry_set_filetype(entry, AE_IFREG);
+			archive_entry_set_perm(entry, 0644);
+		}
+		archive_write_header(arInfo.ar, entry);
+
+		if (info.size > 0) {
+			QFile file(info.src);
+			if (file.open(QFile::ReadOnly)) {
+				qint64 length = 0;
+				while ((length = file.read(arInfo.st.buffer, arInfo.st.buffer_size))>0) {
+					archive_write_data(arInfo.ar, arInfo.st.buffer, length);
+				}
+			}
+			file.close();
+		}
+
+		archive_entry_free(entry);
+	}
+
+	close_write_archive(&arInfo);
+	return true;
 }
 
 }

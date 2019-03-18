@@ -2,6 +2,7 @@
 #include <QObject>
 #include <QString>
 #include <QDateTime>
+#include <QFile>
 
 namespace TeArchive {
 
@@ -13,9 +14,23 @@ enum EntryType {
 
 struct FileInfo {
 	FileInfo() :type(EN_NONE), size(0) {}
+	bool operator==(const FileInfo& info) const Q_DECL_NOTHROW { return path == info.path;  }
+	bool operator!=(const FileInfo& info) const Q_DECL_NOTHROW  { return !(*this == info); }
+	bool operator<(const FileInfo& info) const Q_DECL_NOTHROW { return path < info.path; }
+	bool operator>(const FileInfo& info) const Q_DECL_NOTHROW { return info < *this; }
+	bool operator<=(const FileInfo& info) const Q_DECL_NOTHROW { return !(*this > info); }
+	bool operator>=(const FileInfo& info) const Q_DECL_NOTHROW { return !(*this < info); }
+
+	bool operator==(const QString& rpath) const Q_DECL_NOTHROW { return path == rpath; }
+	bool operator!=(const QString& rpath) const Q_DECL_NOTHROW { return path != rpath; }
+	bool operator<(const QString& rpath) const Q_DECL_NOTHROW { return path < rpath; }
+	bool operator>(const QString& rpath) const Q_DECL_NOTHROW { return path > rpath; }
+	bool operator<=(const QString& rpath) const Q_DECL_NOTHROW { return path <= rpath; }
+	bool operator>=(const QString& rpath) const Q_DECL_NOTHROW { return path >= rpath; }
 
 	EntryType type;
 	QString   path;
+	QString   src;
 	qint64    size;
 	QDateTime lastModifyed;
 };
@@ -37,11 +52,12 @@ public:
 	Reader(const QString& path, QObject *parent = Q_NULLPTR);
 	virtual ~Reader();
 
+	void setCallback( bool(*overwrite)(QFile*) );
 	void open( const QString& path);
 	void release();
 
 	bool extractAll(const QString& destPath);
-	bool extract( const QString& destPath, const QString& base, const QStringList& entries, bool recursive=true);
+	bool extract( const QString& destPath, const QString& base, const QStringList& entries);
 
 public:
 	class const_iterator {
@@ -53,7 +69,7 @@ public:
 		const FileInfo &operator*() const { return info; }
 		const FileInfo *operator->() const { return &info; }
 		bool operator==(const const_iterator &o) const Q_DECL_NOTHROW { return (data == o.data) && (info.path == o.info.path); }
-		bool operator!=(const const_iterator &o) const Q_DECL_NOTHROW { return (data != o.data) || (info.path != o.info.path); }
+		bool operator!=(const const_iterator &o) const Q_DECL_NOTHROW { return !(*this == o); }
 		const_iterator &operator++();
 	private:
 		FileInfo info;
@@ -67,5 +83,25 @@ public:
 private:
 	QString m_path;
 	bool(*overwrite_check)(QFile* ofile);
+};
+
+class Writer :
+	public QObject
+{
+	Q_OBJECT
+
+public:
+	Writer(QObject *parent = Q_NULLPTR);
+	virtual ~Writer();
+
+	void clear();
+
+	bool addEntry(const QString& src, const QString& dest);
+	bool addEntries(const QString& base, const QStringList& srcList, const QString& dest);
+
+	bool archive(const QString& dest, ArchiveType type);
+private:
+	QList<FileInfo> m_entryList;
+	bool m_sortFlag;
 };
 }
