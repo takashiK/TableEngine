@@ -41,44 +41,39 @@ TeCmdFolderCreate::~TeCmdFolderCreate()
 
 bool TeCmdFolderCreate::execute(TeViewStore * p_store)
 {
+	// treeView時はtreeViewのカレントインデックス以下にフォルダを作成
+	// treeViewにフォーカスがない場合は、ListViewをターゲットとしてフォルダを作成
+	// ターゲットが存在しない場合はなにもやらない。
+
 	TeFileFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr) {
-		//�R�s�[�Ώۊm��
-		QAbstractItemView* p_itemView = nullptr;
+		//処理対象ビュー確定
+		QString path;
+
 		if (p_folder->tree()->hasFocus()) {
-			p_itemView = p_folder->tree();
-		}
-		else {
-			p_itemView = p_folder->list();
-		}
-
-		QFileSystemModel* model = qobject_cast<QFileSystemModel*>(p_itemView->model());
-		QStringList paths;
-
-		if (p_itemView->currentIndex().isValid()) {
-			//�J�����g�^�[�Q�b�g��ΏۂƂ���B
-			QInputDialog dlg(p_store->mainWindow());
-			dlg.setLabelText(QInputDialog::tr("Enter Folder name."));
-			if (dlg.exec() == QInputDialog::Accepted) {
-				QString name = dlg.textValue();
-				QDir dir;
-				if (!dir.mkdir(model->filePath(p_itemView->currentIndex()) + "/" + dlg.textValue())) {
-					QMessageBox::warning(p_store->mainWindow(), TeFileFolderView::tr("Fail"), TeFileFolderView::tr("Failed: Create folder."));
+			QAbstractItemView* p_itemView = p_folder->tree();
+			if (p_itemView->currentIndex().isValid()) {
+				QFileSystemModel* model = qobject_cast<QFileSystemModel*>(p_itemView->model());
+				if (model != Q_NULLPTR) {
+					path = model->filePath(p_itemView->currentIndex());
 				}
-
 			}
 		}
-		else if(!p_folder->tree()->hasFocus()){
-			//�c���[����Ȃ��ꍇ�̓J�����g�t�H���_���^�[�Q�b�g�ɂ���
+		else {
+			path = p_folder->currentPath();
+		}
+
+		if (!path.isNull()) {
+			//カレントターゲットを対象とする。
 			QInputDialog dlg(p_store->mainWindow());
 			dlg.setLabelText(QInputDialog::tr("Enter Folder name."));
 			if (dlg.exec() == QInputDialog::Accepted) {
-				QString name = dlg.textValue();
 				QDir dir;
-				if (!dir.mkdir(p_folder->currentPath() + "/" + dlg.textValue())) {
+				if (!dir.mkdir(path + "/" + dlg.textValue())) {
 					QMessageBox::warning(p_store->mainWindow(), TeFileFolderView::tr("Fail"), TeFileFolderView::tr("Failed: Create folder."));
 				}
+
 			}
 		}
 	}
