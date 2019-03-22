@@ -340,12 +340,23 @@ void Reader::setCallback( bool(*overwrite)(QFile *) )
 	overwrite_check = overwrite;
 }
 
-void Reader::open(const QString & path)
+bool Reader::open(const QString & path)
 {
 	release();
-	if (QFile::exists(path)) {
-		m_path = path;
+	if (!QFile::exists(path)) {
+		return false;
 	}
+
+	QtArchiveInfo arInfo;
+
+	if (!open_read_archvie(&arInfo, path)) {
+		return false;
+	}
+
+	close_read_archive(&arInfo);
+	m_path = path;
+
+	return true;
 }
 
 void Reader::release()

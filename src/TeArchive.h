@@ -53,7 +53,7 @@ public:
 	virtual ~Reader();
 
 	void setCallback( bool(*overwrite)(QFile*) );
-	void open( const QString& path);
+	bool open( const QString& path);
 	void release();
 
 	bool extractAll(const QString& destPath);
