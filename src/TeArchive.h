@@ -56,6 +56,8 @@ public:
 	bool open( const QString& path);
 	void release();
 
+	const QString& path() { return m_path; }
+
 	bool extractAll(const QString& destPath);
 	bool extract( const QString& destPath, const QString& base, const QStringList& entries);
 

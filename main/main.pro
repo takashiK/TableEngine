@@ -34,3 +34,5 @@ QMAKE_TARGET_COMPANY = Personal
 QMAKE_TARGET_PRODUCT = Table Engine
 QMAKE_TARGET_DESCRIPTION = A File Explorer
 QMAKE_TARGET_COPYRIGHT = (C) 2019 Takashi Kuwabara
+
+RC_ICONS = Resources/app_icon/table_engine.ico

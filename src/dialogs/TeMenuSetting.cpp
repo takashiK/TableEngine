@@ -58,8 +58,8 @@ TeMenuSetting::TeMenuSetting(QWidget *parent)
 		combo->addItem(m_itemList[i]->windowTitle(), i);
 		vbox->addWidget(m_itemList[i]);
 		m_itemList[i]->setBuddy(cmd);
+		m_itemList[i]->setHidden(i!=0);
 	}
-	m_itemList[0]->setHidden(false);
 	connect(combo, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
 		for (int i = 0; i < m_itemList.size(); i++) {
 			if (i == index) {
@@ -380,7 +380,6 @@ TeTreeWidget * TeMenuSetting::createNewMenu(const QString & name)
 	tree->setDragDropMode(QTreeWidget::DragDrop);
 	tree->setDefaultDropAction(Qt::MoveAction);
 	tree->setContextMenuPolicy(Qt::CustomContextMenu);
-	tree->setHidden(true);
 	tree->setRootIndex(tree->model()->index(0, 0));
 
 	connect(tree, &TeTreeWidget::customContextMenuRequested,

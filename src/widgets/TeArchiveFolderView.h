@@ -5,8 +5,14 @@
 #include <QModelIndex>
 
 class TeEventFilter;
+class QAbstractItemView;
+class QStandardItem;
+class QFileIconProvider;
+
 namespace TeArchive {
 	class Reader;
+	class Writer;
+	enum  EntryType;
 }
 
 class TeArchiveFolderView : public TeFolderView
@@ -32,8 +38,11 @@ public:
 	bool setArchive(const QString& path);
 	bool setArchive(TeArchive::Reader* p_archive);
 
+	void addEntry(const QString& path, qint64 size, TeArchive::EntryType type, const QDateTime& date);
+
 protected:
 	QString modelPath(QAbstractItemModel* p_model, const QModelIndex &index);
+	QStandardItem* mkpath(QStandardItem* root, const QVector<QStringRef>& paths, const QFileIconProvider& iconProvider);
 	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos) const;
 
 protected slots:

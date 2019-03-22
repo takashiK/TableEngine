@@ -322,12 +322,10 @@ Reader::Reader(QObject *parent)
 }
 
 Reader::Reader(const QString & path, QObject * parent)
-	: m_path(path),QObject(parent)
+	: QObject(parent)
 {
 	overwrite_check = Q_NULLPTR;
-	if (!QFile::exists(path)) {
-		m_path.clear();
-	}
+	open(path);
 }
 
 
