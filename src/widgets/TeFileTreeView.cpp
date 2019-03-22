@@ -59,12 +59,12 @@ QModelIndex TeFileTreeView::visualRootIndex()
 	return m_rootIndex;
 }
 
-TeFileFolderView * TeFileTreeView::folderView()
+TeFolderView * TeFileTreeView::folderView()
 {
 	return mp_folderView;
 }
 
-void TeFileTreeView::setFolderView(TeFileFolderView * view)
+void TeFileTreeView::setFolderView(TeFolderView * view)
 {
 	mp_folderView = view;
 }

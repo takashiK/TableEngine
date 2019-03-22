@@ -33,12 +33,12 @@ TeFileListView::~TeFileListView()
 {
 }
 
-TeFileFolderView * TeFileListView::folderView()
+TeFolderView * TeFileListView::folderView()
 {
 	return mp_folderView;
 }
 
-void TeFileListView::setFolderView(TeFileFolderView * view)
+void TeFileListView::setFolderView(TeFolderView * view)
 {
 	mp_folderView = view;
 }

@@ -36,7 +36,7 @@ public:
 	};
 	Q_ENUM(CreateMode)
 public:
-	TeAskCreationModeDialog(QWidget *parent);
+	TeAskCreationModeDialog(QWidget *parent=Q_NULLPTR);
 	virtual  ~TeAskCreationModeDialog();
 
 	void setModeEnabled(CreateMode mode, bool flag);

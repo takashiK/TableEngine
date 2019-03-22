@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 **
 ** Copyright (C) 2018 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
 	//View生成
 	TeViewStore store;
-	store.createWindow();
+	store.initialize();
 	store.setDispatcher(&dispatcher); //ViewをDispatcherに接続
 	store.show();
 

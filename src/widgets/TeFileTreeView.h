@@ -23,7 +23,7 @@
 #include <QTreeView>
 #include <QList>
 
-class TeFileFolderView;
+class TeFolderView;
 
 class TeFileTreeView : public QTreeView
 {
@@ -35,8 +35,8 @@ public:
 
 	void	setVisualRootIndex(const QModelIndex &index);
 	QModelIndex visualRootIndex();
-	virtual TeFileFolderView* folderView();
-	void setFolderView(TeFileFolderView* view);
+	virtual TeFolderView* folderView();
+	void setFolderView(TeFolderView* view);
 
 protected slots:
 	virtual void	rowsInserted(const QModelIndex &parent, int start, int end);
@@ -44,5 +44,5 @@ protected slots:
 private:
 	QModelIndex m_rootIndex;
 	QModelIndex m_rootIndexParent;
-	TeFileFolderView* mp_folderView;
+	TeFolderView* mp_folderView;
 };

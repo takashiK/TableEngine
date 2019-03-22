@@ -24,6 +24,7 @@
 #include <QPoint>
 #include <QAbstractItemView>
 #include "TeDispatchable.h"
+#include "TeFolderView.h"
 
 class TeFileTreeView;
 class TeFileListView;
@@ -31,7 +32,7 @@ class QFileSystemModel;
 class TeEventFilter;
 class TeDispatcher;
 
-class TeFileFolderView : public QWidget, public TeDispatchable
+class TeFileFolderView : public TeFolderView
 {
 	Q_OBJECT
 
@@ -42,16 +43,12 @@ public:
 	virtual TeFileTreeView* tree();
 	virtual TeFileListView* list();
 
-	void setDispatcher(TeDispatchable* p_dispatcher);
-	bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event);
-
 	virtual void setRootPath(const QString& path);
 	virtual QString rootPath();
 	virtual void setCurrentPath(const QString& path);
 	virtual QString currentPath();
 
 protected:
-	bool isDispatchable(TeTypes::WidgetType type, QObject* obj, QEvent *event) const;
 	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos) const;
 
 private:
@@ -64,5 +61,4 @@ private:
 	TeEventFilter* mp_treeEvent;
 	TeEventFilter* mp_listEvent;
 
-	TeDispatchable* mp_dispatcher;
 };

@@ -56,7 +56,7 @@ TeViewStore::~TeViewStore()
 	if (mp_mainWindow) delete mp_mainWindow;
 }
 
-void TeViewStore::createWindow()
+void TeViewStore::initialize()
 {
 	//Main window
 	mp_mainWindow = new TeMainWindow;
@@ -144,20 +144,6 @@ void TeViewStore::loadMenu()
 }
 
 /*!
- * アプリケーションの実行状態を設定ファイルから復帰させる。
- */
-void TeViewStore::loadStatus()
-{
-	//FolderView復帰
-	QSettings settings;
-	QStringList paths = settings.value("initialState/paths",QStringList(QDir::rootPath())).toStringList();
-	
-	for (QString& path : paths) {
-		createFolderView(path);
-	}
-}
-
-/*!
  * アプリケーションの設定情報を設定ファイルから読み込む。
  */
 void TeViewStore::loadSetting()
@@ -167,6 +153,20 @@ void TeViewStore::loadSetting()
 void TeViewStore::loadKeySetting()
 {
 	if (mp_dispatcher) mp_dispatcher->loadKeySetting();
+}
+
+/*!
+ * アプリケーションの実行状態を設定ファイルから復帰させる。
+ */
+void TeViewStore::loadStatus()
+{
+	//FolderView復帰
+	QSettings settings;
+	QStringList paths = settings.value("initialState/paths", QStringList(QDir::rootPath())).toStringList();
+
+	for (QString& path : paths) {
+		createFolderView(path);
+	}
 }
 
 void TeViewStore::show()
@@ -189,7 +189,7 @@ bool TeViewStore::dispatch(TeTypes::WidgetType type, QObject * obj, QEvent * eve
 	return false;
 }
 
-QMainWindow * TeViewStore::mainWindow()
+QWidget * TeViewStore::mainWindow()
 {
 	return mp_mainWindow;
 }
@@ -284,11 +284,11 @@ void TeViewStore::setCurrentFolderView(TeFileFolderView * view)
 			}
 			else {
 				//カレント変更
-				disconnect(mp_driveBar, &TeDriveBar::changeDrive, tree->folderView(), &TeFileFolderView::setRootPath);
+				disconnect(mp_driveBar, &TeDriveBar::changeDrive, tree->folderView(), &TeFolderView::setRootPath);
 				mp_split->replaceWidget(0, view->tree());
 				view->tree()->setHidden(false);
 			}
-			connect(mp_driveBar, &TeDriveBar::changeDrive, view, &TeFileFolderView::setRootPath);
+			connect(mp_driveBar, &TeDriveBar::changeDrive, view, &TeFolderView::setRootPath);
 		}
 	}
 }

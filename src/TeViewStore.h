@@ -46,21 +46,19 @@ public:
 	TeViewStore(QObject *parent = Q_NULLPTR);
 	virtual  ~TeViewStore();
 
-	void createWindow();
+	void initialize();
 	void show();
 
 	void loadMenu();
+	void loadSetting();
+	void loadKeySetting();
 
 	void loadStatus();
-
-	void loadSetting();
-
-	void loadKeySetting();
 
 	void setDispatcher(TeDispatcher* p_dispatcher);
 	bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event);
 
-	virtual QMainWindow*  mainWindow();
+	virtual QWidget*  mainWindow();
 
 	virtual int currentTabIndex();
 	virtual int tabIndex(TeFileFolderView* view);
