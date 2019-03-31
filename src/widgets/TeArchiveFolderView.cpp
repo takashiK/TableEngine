@@ -1,3 +1,23 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 Takashi Kuwabara.
+** Contact: laffile@gmail.com
+**
+** This file is part of the Table Engine.
+**
+** $QT_BEGIN_LICENSE:GPL$
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU General
+** Public license version 2 or any later version.
+** The licenses are as published by the Free Software Foundation and
+** appearing in the file LICENSE.GPL2
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 #include "TeArchiveFolderView.h"
 
 #include "TeEventFilter.h"
@@ -13,6 +33,8 @@
 #include <QVector>
 #include <QFileIconProvider>
 #include <QApplication>
+#include <QIcon>
+#include <QDir>
 
 const QString TeArchiveFolderView::URI_WRITE(u8"ar_write:");
 const QString TeArchiveFolderView::URI_READ(u8"ar_read:");
@@ -51,15 +73,10 @@ TeArchiveFolderView::TeArchiveFolderView(QWidget *parent)
 	//Initialize as write mode.
 	clear();
 
-	//Hide headers of treeView.
-//	for (int i = 1; i < mp_treeView->header()->count(); i++) {
-//		mp_treeView->header()->setSectionHidden(i, true);
-//	}
-
 	//Synchronize views when current directory changed.
 	connect(mp_treeView->selectionModel(), &QItemSelectionModel::currentChanged,
 		[this](const QModelIndex &current, const QModelIndex &previous)
-	{ setCurrentPath(modelPath(mp_treeView->model(),current)); });
+	{ setCurrentPath(indexToPath(current)); });
 
 	connect(mp_listView, &QListView::activated, this, &TeArchiveFolderView::itemActivated);
 
@@ -96,15 +113,23 @@ TeArchiveFolderView::~TeArchiveFolderView()
 		model = mp_treeView->model();
 		delete mp_treeView;
 		delete model;
+		mp_treeView = nullptr;
 	}
-	if (mp_treeEvent) delete mp_treeEvent;
+	if (mp_treeEvent) {
+		delete mp_treeEvent;
+		mp_treeEvent = nullptr;
+	}
 
 	if (mp_listView) {
 		model = mp_listView->model();
 		delete mp_listView;
 		delete model;
+		mp_listView = nullptr;
 	}
-	if (mp_listEvent) delete mp_listEvent;
+	if (mp_listEvent) {
+		delete mp_listEvent;
+		mp_listEvent = nullptr;
+	}
 }
 
 TeFileTreeView * TeArchiveFolderView::tree()
@@ -153,15 +178,51 @@ QString TeArchiveFolderView::rootPath()
 
 void TeArchiveFolderView::setCurrentPath(const QString & path)
 {
+	QString cur = currentPath();
+	if (currentPath() != path) {
+		QString target = QDir::cleanPath(path);
+
+		QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
+		QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
+
+		QStandardItem* entry = findPath(tree_model->item(0), target);
+		if (entry != nullptr) {
+			mp_treeView->setCurrentIndex(tree_model->indexFromItem(entry));
+			mp_listView->clearSelection();
+			entry = findPath(list_model->item(0), target);
+			mp_listView->setRootIndex(list_model->indexFromItem(entry));
+		}
+		else {
+			mp_treeView->setCurrentIndex(tree_model->index(0, 0));
+			mp_listView->setRootIndex(list_model->index(0, 0));
+		}
+	}
 }
 
 QString TeArchiveFolderView::currentPath()
 {
-	return QString();
+	return indexToPath(mp_listView->rootIndex());
 }
 
 void TeArchiveFolderView::clear()
 {
+	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
+	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
+	tree_model->clear();
+	list_model->clear();
+
+	m_rootPath.clear();
+
+	m_mode = MODE_WRITE;
+	tree_model->appendRow(createRootEntry());
+	list_model->appendRow(createRootEntry());
+
+	mp_listView->setRootIndex(list_model->index(0,0));
+
+	//Hide headers of treeView.
+	for (int i = 1; i < mp_treeView->header()->count(); i++) {
+		mp_treeView->header()->setSectionHidden(i, true);
+	}
 }
 
 bool TeArchiveFolderView::setArchive(const QString & path)
@@ -183,77 +244,344 @@ bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 
 	m_mode = MODE_READ;
 	m_rootPath = p_archive->path();
+	QFileInfo info(m_rootPath);
+
+	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
+	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
+	
+	tree_model->item(0)->setData(info.fileName(), Qt::DisplayRole);
+	list_model->item(0)->setData(info.fileName(), Qt::DisplayRole);
 
 	for (const auto& entry : *p_archive) {
-		addEntry(entry.path, entry.size, entry.type, entry.lastModifyed);
+		switch (entry.type) {
+		case TeArchive::EN_DIR:
+			internalAddDirEntry(entry.path);
+			break;
+		case TeArchive::EN_FILE:
+			internalAddEntry(entry.path, entry.size, entry.lastModifyed, entry.src);
+			break;
+		default:
+			break;
+		}
 	}
 
 	return true;
 }
 
-void TeArchiveFolderView::addEntry(const QString & path, qint64 size, TeArchive::EntryType type, const QDateTime & date)
+TeArchive::Writer * TeArchiveFolderView::archive()
+{
+	if (m_mode != MODE_WRITE) return nullptr;
+	QStandardItemModel * model = qobject_cast<QStandardItemModel*>(mp_listView->model());
+	if (!model->item(0)->hasChildren()) return nullptr;
+
+	TeArchive::Writer* writer = new TeArchive::Writer();
+
+	buildArchiveEntry(writer, model->item(0));
+
+	return writer;
+}
+
+bool TeArchiveFolderView::archive(const QString & path, TeArchive::ArchiveType type)
+{
+	TeArchive::Writer* writer = archive();
+	if (writer == nullptr) return false;
+
+	bool result = writer->archive(path, type);
+	delete writer;
+
+	return result;
+}
+
+void TeArchiveFolderView::addEntry(const QString & path, qint64 size, const QDateTime & lastModified, const QString& src)
 {
 	if (m_mode != MODE_WRITE) return;
+	internalAddEntry(path, size, lastModified, src);
+}
+
+void TeArchiveFolderView::internalAddEntry(const QString & path, qint64 size, const QDateTime & lastModified, const QString& src)
+{
 	if (path.startsWith('/')) return;
 
 	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
 	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
 
-	QVector<QStringRef> paths = path.splitRef('/');
+	QVector<QStringRef> paths = QDir::cleanPath(path).splitRef('/');
 
 	QFileIconProvider iconProvider;
 
-	QStandardItem* tree = mkpath(tree_model->invisibleRootItem(),paths,iconProvider);
-	QStandardItem* list = mkpath(list_model->invisibleRootItem(),paths,iconProvider);
+	mkpath(iconProvider,tree_model->item(0),paths,false);
+	QStandardItem* list = mkpath(iconProvider,list_model->item(0),paths,true);
 
+	if (list != nullptr && findChild(list, paths.last()) == nullptr) {
+		list->appendRow(createFileEntry(iconProvider, paths.last().toString(), size, lastModified, src));
+	}
 }
 
-QString TeArchiveFolderView::modelPath(QAbstractItemModel * p_model, const QModelIndex & index)
+void TeArchiveFolderView::addDirEntry(const QString & path)
+{
+	if (m_mode != MODE_WRITE) return;
+	internalAddDirEntry(path);
+}
+
+void TeArchiveFolderView::internalAddDirEntry(const QString & path)
+{
+	if (path.startsWith('/')) return;
+
+	QString destPath;
+	if (path.endsWith('/')) {
+		destPath = QDir::cleanPath(path);
+	}
+	else {
+		destPath = QDir::cleanPath(path) + "/";
+	}
+
+	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
+	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
+
+	QVector<QStringRef> paths = destPath.splitRef('/');
+
+	QFileIconProvider iconProvider;
+	mkpath(iconProvider, tree_model->item(0), paths,false);
+	mkpath(iconProvider, list_model->item(0), paths,true);
+}
+
+QString TeArchiveFolderView::indexToPath(const QModelIndex & index)
 {
 	QString path;
 
-	QStandardItemModel* model = qobject_cast<QStandardItemModel*>(p_model);
+	const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(index.model());
 	if (model != nullptr) {
 		QStandardItem* item = model->itemFromIndex(index);
-		while (item != nullptr) {
+		QStandardItem* root = model->item(0);
+		while (item != nullptr && item != root) {
 			path.prepend("/" + item->text());
+			item = item->parent();
 		}
 	}
 
-	return path;
+	return path.mid(1);
 }
 
-QStandardItem * TeArchiveFolderView::mkpath(QStandardItem * root, const QVector<QStringRef>& paths, const QFileIconProvider & iconProvider)
+QStandardItem * TeArchiveFolderView::findPath(QStandardItem* root, const QString & path)
 {
-	QStandardItem* rootItem = root;
-	for (int i = 0; i < paths.count() - 1; i++) {
-		int row = 0;
-		for (row = 0; row < rootItem->rowCount(); row++) {
-			if (rootItem->child(row)->text() == paths[i]) {
-				rootItem = rootItem->child(row);
-				break;
-			}
-		}
-		if (row == rootItem->rowCount()) {
-			QStandardItem* item = new QStandardItem(iconProvider.icon(QFileIconProvider::Folder) ,paths[i].toString());
-			rootItem->appendRow(item);
-			rootItem = item;
-#ifdef Q_OS_WIN
-			item = new QStandardItem(QApplication::translate("QFileDialog", "File Folder", "Match Windows Explorer"));
-#else
-			item = new QStandardItem(QApplication::translate("QFileDialog", "Folder", "All other platforms"));
-#endif
-			rootItem->appendColumns();
+	QStandardItem* entry = root;
+	QVector<QStringRef> paths = path.splitRef('/');
+
+	for (int i = 0; i < paths.count(); i++) {
+		entry = findChild(entry, paths[i]);
+		if (entry == nullptr) {
+			break;
 		}
 	}
 
-	return rootItem;
+	return entry;
+}
+
+QStandardItem * TeArchiveFolderView::mkpath(const QFileIconProvider & iconProvider, QStandardItem * root, const QVector<QStringRef>& paths, bool bParentEntry)
+{
+	QStandardItem* parent = root;
+	for (int i = 0; i < paths.count() - 1; i++) {
+		QStandardItem* child = findChild(parent,paths[i]);
+		if (child != nullptr) {
+			parent = child;
+		}
+		else{
+			QList<QStandardItem*> entries = createDirEntry(iconProvider, paths[i].toString());
+			parent->appendRow(entries);
+			parent = entries[0];
+			if (bParentEntry == true) {
+				parent->appendRow(createParentEntry());
+			}
+		}
+	}
+
+	return parent;
+}
+
+QStandardItem * TeArchiveFolderView::findChild(const QStandardItem * parent, const QString & name)
+{
+	if (parent == nullptr) return nullptr;
+
+	QStandardItem* child = nullptr;
+	for (int row = 0; row < parent->rowCount(); row++) {
+		if (parent->child(row)->text() == name) {
+			child = parent->child(row);
+			break;
+		}
+	}
+	return child;
+}
+
+QStandardItem * TeArchiveFolderView::findChild(const QStandardItem * parent, const QStringRef & name)
+{
+	if (parent == nullptr) return nullptr;
+
+	QStandardItem* child = nullptr;
+	for (int row = 0; row < parent->rowCount(); row++) {
+		if (parent->child(row)->text() == name) {
+			child = parent->child(row);
+			break;
+		}
+	}
+	return child;
+}
+
+QList<QStandardItem*> TeArchiveFolderView::createRootEntry()
+{
+	QList<QStandardItem*> entries;
+
+	// Entry Name and referenced path.
+	QStandardItem* entry = new QStandardItem(QIcon(":/TableEngine/archiveBox.png"), tr("Archive"));
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// Size
+	entry = new QStandardItem("");
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// Type
+	entry = new QStandardItem("");
+	entry->setData(TeArchive::EN_NONE);
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// lastModified Date
+	entry = new QStandardItem("");
+	entry->setEditable(false);
+	entries.append(entry);
+
+	return entries;
+}
+
+QList<QStandardItem*> TeArchiveFolderView::createParentEntry()
+{
+	QList<QStandardItem*> entries;
+
+	// Entry Name and referenced path.
+	QStandardItem* entry = new QStandardItem("..");
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// Size
+	entry = new QStandardItem("");
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// Type
+	entry = new QStandardItem("");
+	entry->setData(TeArchive::EN_PARENT);
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// lastModified Date
+	entry = new QStandardItem("");
+	entry->setEditable(false);
+	entries.append(entry);
+
+	return entries;
+}
+
+QList<QStandardItem*> TeArchiveFolderView::createDirEntry(const QFileIconProvider & iconProvider, const QString & name)
+{
+	QList<QStandardItem*> entries;
+
+	// Entry Name and referenced path.
+	QStandardItem* entry = new QStandardItem(iconProvider.icon(QFileIconProvider::Folder), name);
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// Size
+	entry = new QStandardItem(""); //directory entry doesn't have "Size". 
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// Type
+#ifdef Q_OS_WIN
+	entry = new QStandardItem(QApplication::translate("QFileDialog", "File Folder", "Match Windows Explorer"));
+#else
+	entry = new QStandardItem(QApplication::translate("QFileDialog", "Folder", "All other platforms"));
+#endif
+	entry->setData(TeArchive::EN_DIR);
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// lastModified Date
+	entry = new QStandardItem(""); //directory entry doesn't have "lastModified Date".
+	entry->setEditable(false);
+	entries.append(entry);
+
+	return entries;
+}
+
+QList<QStandardItem*> TeArchiveFolderView::createFileEntry(const QFileIconProvider & iconProvider, const QString & name, qint64 size, const QDateTime & lastModified, const QString& src)
+{
+	QList<QStandardItem*> entries;
+
+	// Entry Name and referenced path.
+	QStandardItem* entry = new QStandardItem(iconProvider.icon(QFileIconProvider::File), name);
+	entry->setData(src);
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// Size
+	entry = new QStandardItem(QLocale::system().formattedDataSize(size));
+	entry->setData(size);
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// Type
+	int index = name.lastIndexOf('.');
+	if (index >= 0 && index+1 < name.count()) {
+		//: %1 is a file name suffix, for example txt
+		entry = new QStandardItem(QApplication::translate("QFileDialog", "%1 File").arg(name.midRef(index+1)));
+	}
+	else {
+		entry = new QStandardItem(QApplication::translate("QFileDialog", "File"));
+	}
+
+	entry->setData(TeArchive::EN_FILE);
+	entry->setEditable(false);
+	entries.append(entry);
+
+	// lastModified Date
+	entry = new QStandardItem(lastModified.toString(Qt::SystemLocaleDate));
+	entry->setData(lastModified);
+	entry->setEditable(false);
+	entries.append(entry);
+
+	return entries;
+}
+
+void TeArchiveFolderView::buildArchiveEntry(TeArchive::Writer * writer, QStandardItem * rootItem)
+{
+	for (int i = 0; i < rootItem->rowCount(); i++) {
+		QStandardItem* item = rootItem->child(i);
+		
+		if (rootItem->child(i, COL_TYPE)->data().toInt() == TeArchive::EN_FILE) {
+			QString dstPath = indexToPath(item->index());
+			QString srcPath = item->data().toString();
+			if (!dstPath.isNull() && !srcPath.isNull()) {
+				writer->addEntry(srcPath, dstPath);
+			}
+		}
+
+		if (item->hasChildren()) {
+			buildArchiveEntry(writer, item);
+		}
+	}
 }
 
 void TeArchiveFolderView::showContextMenu(const QAbstractItemView * pView, const QPoint & pos) const
 {
+	
 }
 
 void TeArchiveFolderView::itemActivated(const QModelIndex & index)
 {
+	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
+	int type = list_model->index(index.row(), 2, index.parent()).data(Qt::UserRole + 1).toInt();
+	if (type == TeArchive::EN_DIR || type == TeArchive::EN_PARENT) {
+		setCurrentPath(indexToPath(index));
+	}
 }

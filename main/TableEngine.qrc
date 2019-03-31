@@ -14,8 +14,11 @@
         <file alias="collapse.png">Resources/icon/iconmonstr-copy-7-64.png</file>
         <file alias="expand.png">Resources/icon/iconmonstr-share-11-64.png</file>
         <file alias="expandFollow.png">Resources/icon/iconmonstr-share-11-64_double.png</file>
-        <file alias="expandAll.png">Resources/icon/iconmonstr-shipping-box-7-64.png</file>
-        <file alias="collapseAll.png">Resources/icon/iconmonstr-shipping-box-8-64.png</file>
+        <file alias="archive.png">Resources/icon/iconmonstr-shipping-box-8-64.png</file>
         <file alias="newFolder.png">Resources/icon/iconmonstr-folder-4-64.png</file>
+        <file alias="collapseAll.png">Resources/icon/iconmonstr-inbox-5-64.png</file>
+        <file alias="expandAll.png">Resources/icon/iconmonstr-inbox-6-64.png</file>
+        <file alias="extract.png">Resources/icon/iconmonstr-shipping-box-9-64.png</file>
+        <file alias="archiveBox.png">Resources/icon/iconmonstr-shipping-box-2-64.png</file>
     </qresource>
 </RCC>

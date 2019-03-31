@@ -32,6 +32,8 @@ SOURCES += $$files(commands/*.cpp,true)
 SOURCES += $$files(dialogs/*.cpp,true)
 SOURCES += $$files(widgets/*.cpp,true)
 
+include(../src/lib.pri)
+
 win32-msvc {
     HEADERS += $$files(platform/windows/*.h,true)
     SOURCES += $$files(platform/windows/*.cpp,true)
@@ -40,9 +42,17 @@ win32-msvc {
     QMAKE_CXXFLAGS += /MP
     CONFIG(debug, debug|release){
         LIBS += ../support_package/debug/gmockd.lib
+        COPYDIR = debug
     }else{
         LIBS += ../support_package/release/gmock.lib
+        COPYDIR = release
+    }
+
+    COPYFILES = $${DLL_FILES}
+    COPYFILES ~= s,/,\\,g
+    COPYDIR   ~= s,/,\\,g
+
+    for(FILE,COPYFILES){
+        QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${COPYDIR}$$escape_expand(\n\t))
     }
 }
-
-include(../src/lib.pri)

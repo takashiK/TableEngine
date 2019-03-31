@@ -8,17 +8,16 @@
 ** $QT_BEGIN_LICENSE:GPL$
 ** GNU General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU General
-** Public license version 3 or any later version.
+** Public license version 2 or any later version.
 ** The licenses are as published by the Free Software Foundation and
-** appearing in the file LICENSE.GPL3
+** appearing in the file LICENSE.GPL2
 ** included in the packaging of this file. Please review the following
 ** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+** be met: https://www.gnu.org/licenses/gpl-2.0.html.
 **
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
 #include <gmock/gmock.h>
 #include <test_mock/mock_TeViewStore.h>
 #include <test_mock/mock_TeDispatcher.h>
@@ -32,7 +31,7 @@ using ::testing::Return;
 #include <commands/folder/TeCmdFolderOpenOne.h>
 #include <commands/folder/TeCmdFolderOpenUnder.h>
 
-TEST(test_TeCmdFolderOpenClose, openOneNormal)
+TEST(tst_TeCmdFolderOpenClose, openOneNormal)
 {
 	mock_TeDispatcher dispatcher;
 	mock_TeViewStore store;

@@ -8,12 +8,12 @@
 ** $QT_BEGIN_LICENSE:GPL$
 ** GNU General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU General
-** Public license version 3 or any later version.
+** Public license version 2 or any later version.
 ** The licenses are as published by the Free Software Foundation and
-** appearing in the file LICENSE.GPL3
+** appearing in the file LICENSE.GPL2
 ** included in the packaging of this file. Please review the following
 ** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+** be met: https://www.gnu.org/licenses/gpl-2.0.html.
 **
 ** $QT_END_LICENSE$
 **
@@ -51,6 +51,14 @@ TeViewStore::TeViewStore(QObject *parent)
 
 TeViewStore::~TeViewStore()
 {
+	//Order of deletion is important.
+	//TeFileTree is chiled of both QMainWindow and TeFolderView.
+	//and relationship TeFileTree and TeFolderView is not depended "Qt Object System".
+	//if QMainWindow is destroyed before TeFolderView then TeFileTree has double free.
+	//Same things for QTab. It is child of both QMainWindow and TeViewStore.
+	//
+	//so we need delete QTab before QMainWindow.
+	//TeFolderView is child of QTab. so this action do "delete TeFolderView before QMainWindow."
 	if (mp_tab[TAB_LEFT]) delete mp_tab[TAB_LEFT];
 	if (mp_tab[TAB_RIGHT]) delete mp_tab[TAB_RIGHT];
 	if (mp_mainWindow) delete mp_mainWindow;
