@@ -7,13 +7,15 @@
 **
 ** $QT_BEGIN_LICENSE:GPL$
 ** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU General
-** Public license version 3 or any later version.
-** The licenses are as published by the Free Software Foundation and
-** appearing in the file LICENSE.GPL3
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
 ** included in the packaging of this file. Please review the following
 ** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
 **
 ** $QT_END_LICENSE$
 **
@@ -134,29 +136,22 @@
 #include <QDebug>
 #include <QDir>
 
-TEST(tst_TeArchive, archive_flatfile_zip)
+bool checkArchive(const QStringList& expect, const QStringList& setup, TeArchive::ArchiveType type)
 {
 	cleanFileTree("debug/test");
 	cleanFileTree("debug/test2");
 	QFile::remove("debug/test.zip");
 
-	QStringList list;
-	list.append("file1.txt");
-	list.append("file2.txt");
-	list.append("file3.txt");
-	list.append("file4.txt");
-
-	createFileTree("debug/test", list);
+	createFileTree("debug/test", expect);
 
 	FileEntry entries(nullptr, "root");
-	expectEntries(&entries, list, QDateTime(), true);
+	expectEntries(&entries, expect, QDateTime(), true);
 
 	TeArchive::Writer writer;
 	TeArchive::Reader reader;
 
-	//writer.addEntry("debug/test", "");
-	writer.addEntries("debug/test", list, "");
-	writer.archive("debug/test.zip", TeArchive::AR_ZIP);
+	writer.addEntries("debug/test", setup, "");
+	writer.archive("debug/test.zip", type);
 
 	reader.open("debug/test.zip");
 
@@ -171,43 +166,28 @@ TEST(tst_TeArchive, archive_flatfile_zip)
 	cleanFileTree("debug/test");
 	cleanFileTree("debug/test2");
 	QFile::remove("debug/test.zip");
+
+	return r1 && r2;
+}
+
+TEST(tst_TeArchive, archive_flatfile_zip)
+{
+	QStringList list;
+	list.append("file1.txt");
+	list.append("file2.txt");
+	list.append("file3.txt");
+	list.append("file4.txt");
+	
+	checkArchive(list, list, TeArchive::AR_ZIP);
 }
 
 TEST(tst_TeArchive, archive_rankfile_zip)
 {
-	cleanFileTree("debug/test");
-	cleanFileTree("debug/test2");
-	QFile::remove("debug/test.zip");
-
 	QStringList list;
 	list.append("dir1/dir1_1/dir1_1_1/file1_1_1_1.txt");
 	list.append("dir3/dir3_2/file3_2_1.txt");
 	list.append("dir1/file1_2.txt");
 	list.append("dir1/file1_1.txt");
 
-	createFileTree("debug/test", list);
-
-	FileEntry entries(nullptr, "root");
-	expectEntries(&entries, list, QDateTime(), true);
-
-	TeArchive::Writer writer;
-	TeArchive::Reader reader;
-
-	//writer.addEntry("debug/test", "");
-	writer.addEntries("debug/test", list, "");
-	writer.archive("debug/test.zip", TeArchive::AR_ZIP);
-
-	reader.open("debug/test.zip");
-
-	QDir dir;
-	dir.mkpath("debug/test2");
-	reader.extractAll("debug/test2");
-	reader.release();
-
-	bool r1 = compareFileTree("debug/test", "debug/test2", true);
-	bool r2 = compareFileTree(&entries, "debug/test2", true);
-
-	cleanFileTree("debug/test");
-	cleanFileTree("debug/test2");
-	QFile::remove("debug/test.zip");
+	checkArchive(list, list, TeArchive::AR_ZIP);
 }
