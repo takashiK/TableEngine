@@ -24,39 +24,12 @@
 #include <widgets/TeFileTreeView.h>
 #include <widgets/TeFileListView.h>
 #include <test_util/FileEntry.h>
+#include <test_util/TestFileCreator.h>
 
 #include <QStringList>
 #include <QStandardItem>
 #include <QStandardItemModel>
 #include <QDebug>
-
-FileEntry* expectEntries(const QStringList& paths) 
-{
-	FileEntry* root = new FileEntry(nullptr, "root");
-	root->setObjectName("root");
-	for (auto& path : paths) {
-		FileEntry* parent = root;
-		QStringList spath = path.split('/');
-		for (auto& name : spath) {
-			FileEntry* entry = parent->findChild<FileEntry*>(name);
-			if (entry == nullptr) {
-				if (name.indexOf(".") > 0) {
-					entry = new FileEntry(parent, name, 100, QDateTime(QDate(2019,3,31)), "srcPath");
-				}
-				else {
-					entry = new FileEntry(parent, name);
-					FileEntry* pp = new FileEntry(entry, "..");
-					pp->setObjectName("..");
-				}
-				entry->setObjectName(name);
-//				qDebug() << "parent: " << parent->path << "=> child: " << entry->path;
-			}
-			parent = entry;
-		}
-	}
-
-	return root;
-}
 
 QString modelPath(const QStandardItem* item) 
 {
@@ -100,7 +73,7 @@ bool checkEntries(const FileEntry* expect, const QStandardItem* check)
 			}
 		}
 		if (i >= check->rowCount()) {
-			EXPECT_TRUE(false) << "Failed Added: " << qobject_cast<FileEntry*>(entry)->path.toStdString();
+			ADD_FAILURE() << "Failed Added: " << qobject_cast<FileEntry*>(entry)->path.toStdString();
 			result = false;
 		}
 	}
@@ -123,7 +96,8 @@ TEST(tst_TeArchiveFolderView, addDirEntry_normal)
 	paths.append("dir3/dir3_2/dir3_2_1");
 	paths.append("dir3/dir3_2/dir3_2_2");
 
-	FileEntry* entries = expectEntries(paths);
+	FileEntry entries(nullptr, "root");
+	expectEntries(&entries, paths);
 
 	TeArchiveFolderView folderView;
 	for (auto& path : paths) {
@@ -132,7 +106,7 @@ TEST(tst_TeArchiveFolderView, addDirEntry_normal)
 
 	QStandardItemModel* model = qobject_cast<QStandardItemModel*>(folderView.list()->model());
 	QStandardItem* item = model->item(0);
-	checkEntries(entries, item);
+	checkEntries(&entries, item);
 }
 
 TEST(tst_TeArchiveFolderView, addDirEntry_shuffleAdd)
@@ -151,7 +125,8 @@ TEST(tst_TeArchiveFolderView, addDirEntry_shuffleAdd)
 	paths.append("dir1/dir1_1/dir1_1_1");
 	paths.append("dir3/dir3_2/dir3_2_2");
 
-	FileEntry* entries = expectEntries(paths);
+	FileEntry entries(nullptr,"root");
+	expectEntries(&entries, paths);
 
 	TeArchiveFolderView folderView;
 	for (auto& path : paths) {
@@ -160,7 +135,7 @@ TEST(tst_TeArchiveFolderView, addDirEntry_shuffleAdd)
 
 	QStandardItemModel* model = qobject_cast<QStandardItemModel*>(folderView.list()->model());
 	QStandardItem* item = model->item(0);
-	checkEntries(entries, item);
+	checkEntries(&entries, item);
 }
 
 TEST(tst_TeArchiveFolderView, addDirEntry_skipAdd)
@@ -171,7 +146,8 @@ TEST(tst_TeArchiveFolderView, addDirEntry_skipAdd)
 	paths.append("dir1/dir1_1/dir1_1_1");
 	paths.append("dir3/dir3_2/dir3_2_2");
 
-	FileEntry* entries = expectEntries(paths);
+	FileEntry entries(nullptr, "root");
+	expectEntries(&entries, paths);
 
 	TeArchiveFolderView folderView;
 	for (auto& path : paths) {
@@ -180,7 +156,7 @@ TEST(tst_TeArchiveFolderView, addDirEntry_skipAdd)
 
 	QStandardItemModel* model = qobject_cast<QStandardItemModel*>(folderView.list()->model());
 	QStandardItem* item = model->item(0);
-	checkEntries(entries, item);
+	checkEntries(&entries, item);
 }
 
 TEST(tst_TeArchiveFolderView, addFileEntry_normal)
@@ -203,12 +179,15 @@ TEST(tst_TeArchiveFolderView, addFileEntry_normal)
 	paths.append("dir3/dir3_2/dir3_2_1");
 	paths.append("dir3/dir3_2/dir3_2_2");
 
-	FileEntry* entries = expectEntries(paths);
+	QDateTime date(QDateTime(QDate(2019, 3, 31)));
+
+	FileEntry entries(nullptr, "root");
+	expectEntries(&entries, paths, date);
 
 	TeArchiveFolderView folderView;
 	for (auto& path : paths) {
 		if (path.indexOf(".") > 0) {
-			folderView.addEntry(path, 100, QDateTime(QDate(2019, 3, 31)), "srcPath");
+			folderView.addEntry(path, path.size(), date, path);
 		}
 		else {
 			folderView.addDirEntry(path);
@@ -217,7 +196,7 @@ TEST(tst_TeArchiveFolderView, addFileEntry_normal)
 
 	QStandardItemModel* model = qobject_cast<QStandardItemModel*>(folderView.list()->model());
 	QStandardItem* item = model->item(0);
-	checkEntries(entries, item);
+	checkEntries(&entries, item);
 }
 
 TEST(tst_TeArchiveFolderView, addFileEntry_shuffle)
@@ -240,12 +219,15 @@ TEST(tst_TeArchiveFolderView, addFileEntry_shuffle)
 	paths.append("dir1/dir1_1/dir1_1_1");
 	paths.append("dir3/dir3_2/dir3_2_2");
 
-	FileEntry* entries = expectEntries(paths);
+	QDateTime date(QDateTime(QDate(2019, 3, 31)));
+
+	FileEntry entries(nullptr, "root");
+	expectEntries(&entries, paths, date);
 
 	TeArchiveFolderView folderView;
 	for (auto& path : paths) {
 		if (path.indexOf(".") > 0) {
-			folderView.addEntry(path, 100, QDateTime(QDate(2019, 3, 31)), "srcPath");
+			folderView.addEntry(path, path.size(), date, path);
 		}
 		else {
 			folderView.addDirEntry(path);
@@ -254,7 +236,7 @@ TEST(tst_TeArchiveFolderView, addFileEntry_shuffle)
 
 	QStandardItemModel* model = qobject_cast<QStandardItemModel*>(folderView.list()->model());
 	QStandardItem* item = model->item(0);
-	checkEntries(entries, item);
+	checkEntries(&entries, item);
 }
 
 TEST(tst_TeArchiveFolderView, addFileEntry_skipAdd)
@@ -266,12 +248,15 @@ TEST(tst_TeArchiveFolderView, addFileEntry_skipAdd)
 	paths.append("dir1/file1_2.txt");
 	paths.append("dir1/file1_1.txt");
 
-	FileEntry* entries = expectEntries(paths);
+	QDateTime date(QDateTime(QDate(2019, 3, 31)));
+
+	FileEntry entries(nullptr, "root");
+	expectEntries(&entries, paths, date);
 
 	TeArchiveFolderView folderView;
 	for (auto& path : paths) {
 		if (path.indexOf(".") > 0) {
-			folderView.addEntry(path, 100, QDateTime(QDate(2019, 3, 31)), "srcPath");
+			folderView.addEntry(path, path.size(), date, path);
 		}
 		else {
 			folderView.addDirEntry(path);
@@ -280,5 +265,5 @@ TEST(tst_TeArchiveFolderView, addFileEntry_skipAdd)
 
 	QStandardItemModel* model = qobject_cast<QStandardItemModel*>(folderView.list()->model());
 	QStandardItem* item = model->item(0);
-	checkEntries(entries, item);
+	checkEntries(&entries, item);
 }

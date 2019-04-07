@@ -50,8 +50,11 @@ target_wrapper.bat
 .vs/*
 main/debug/*
 main/release/*
+main/GeneratedFiles/*
 support_package/*
 src/debug/*
 src/release/*
+src/GeneratedFiles/*
 tests/debug/*
 tests/release/*
+tests/GeneratedFiles/*

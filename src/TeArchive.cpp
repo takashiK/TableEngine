@@ -354,7 +354,7 @@ Reader::~Reader()
 {
 }
 
-void Reader::setCallback( bool(*overwrite)(QFile *) )
+void Reader::setCallback( bool(*overwrite)(QFileInfo*) )
 {
 	overwrite_check = overwrite;
 }
@@ -405,23 +405,22 @@ bool Reader::extractAll(const QString & destPath)
 		destBase = destPath + "/";
 	}
 
-	QFile ofile;
 	QDir dir;
 	while (read_next_entry(&arInfo, &info)) {
 		if (info.type == EN_DIR) {
 			dir.mkpath(destBase + info.path);
 		}
 		else if (info.type == EN_FILE) {
-			ofile.setFileName(destBase + info.path);
-			if (ofile.exists() && (overwrite_check != Q_NULLPTR) && !overwrite_check(&ofile)) {
+			QFileInfo fileInfo(destBase + info.path);
+			if (fileInfo.exists() && (overwrite_check != Q_NULLPTR) && !overwrite_check(&fileInfo)) {
 				continue;
 			}
 
-			QFileInfo fileInfo(info.path);
 			if (!dir.exists(fileInfo.path())) {
 				dir.mkpath(fileInfo.path());
 			}
 
+			QFile ofile(fileInfo.filePath());
 			if (!ofile.open(QFile::WriteOnly | QFile::Truncate)) {
 				continue;
 			}
@@ -458,7 +457,6 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 		destBase = destPath + "/";
 	}
 
-	QFile ofile;
 	QDir dir;
 	while (read_next_entry(&arInfo, &info)) {
 		if (info.type == EN_DIR || info.type == EN_FILE) {
@@ -478,16 +476,16 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 			dir.mkpath(destBase + info.path);
 		}
 		else if (info.type == EN_FILE) {
-			ofile.setFileName(destBase + info.path);
-			if (ofile.exists() && (overwrite_check != Q_NULLPTR) && !overwrite_check(&ofile)) {
+			QFileInfo fileInfo(destBase + info.path);
+			if (fileInfo.exists() && (overwrite_check != Q_NULLPTR) && !overwrite_check(&fileInfo)) {
 				continue;
 			}
 
-			QFileInfo fileInfo(info.path);
 			if (!dir.exists(fileInfo.path())) {
 				dir.mkpath(fileInfo.path());
 			}
 
+			QFile ofile(fileInfo.filePath());
 			if (!ofile.open(QFile::WriteOnly | QFile::Truncate)) {
 				continue;
 			}
@@ -595,9 +593,9 @@ bool Writer::addEntry(const QString & src, const QString& dest)
 	if (fileInfo.isDir() && !fileInfo.isSymLink()) {
 		info.type = EN_DIR;
 		QDir dir(info.src);
-		QStringList entries = dir.entryList();
+		QStringList entries = dir.entryList(QDir::Dirs | QDir::Files|QDir::NoDotAndDotDot|QDir::System|QDir::Hidden);
 		if (!entries.isEmpty()) {
-			return addEntries(info.src, dir.entryList(), dest);
+			return addEntries(info.src, entries, dest);
 		}
 		else {
 			m_entryList.append(info);
@@ -619,13 +617,13 @@ bool Writer::addEntries(const QString & base, const QStringList & srcList, const
 {
 	bool result = false;
 	QString basePath,destPath;
-	if (base.endsWith('/')) {
+	if (base.isEmpty() || base.endsWith('/')) {
 		basePath = base;
 	}
 	else {
 		basePath = base + "/";
 	}
-	if (destPath.endsWith('/')) {
+	if (dest.isEmpty() || dest.endsWith('/')) {
 		destPath = dest;
 	}
 	else {
@@ -633,7 +631,7 @@ bool Writer::addEntries(const QString & base, const QStringList & srcList, const
 	}
 
 	for (auto& src : srcList) {
-		if (addEntry(base + src, dest + src)) {
+		if (addEntry(basePath + src, destPath + src)) {
 			result = true;
 		}
 	}
@@ -650,21 +648,24 @@ bool Writer::archive(const QString & dest, ArchiveType type)
 
 	archive_entry* entry;
 	for (auto& info : m_entryList) {
-		if (info.type != EN_FILE && info.type != EN_DIR) continue;
+		QFileInfo fileInfo(info.src);
+		if (!fileInfo.isFile() && !fileInfo.isDir()) continue;
 
 		entry = archive_entry_new();
 		archive_entry_set_pathname(entry, info.path.toLocal8Bit());
-		archive_entry_set_size(entry, info.size); // Note 3
-		if (info.type == EN_DIR) {
+		if (fileInfo.isDir()) {
 			archive_entry_set_filetype(entry, AE_IFDIR);
 		}
-		else if (info.type == EN_FILE) {
+		else if (fileInfo.isFile()) {
 			archive_entry_set_filetype(entry, AE_IFREG);
 			archive_entry_set_perm(entry, 0644);
+			archive_entry_set_size(entry, fileInfo.size());
+			archive_entry_set_birthtime(entry, fileInfo.birthTime().toSecsSinceEpoch(), 0);
+			archive_entry_set_mtime(entry, fileInfo.lastModified().toSecsSinceEpoch(), 0);
 		}
-		archive_write_header(arInfo.ar, entry);
+		int r = archive_write_header(arInfo.ar, entry);
 
-		if (info.size > 0) {
+		if (fileInfo.isFile() && fileInfo.size() > 0) {
 			QFile file(info.src);
 			if (file.open(QFile::ReadOnly)) {
 				qint64 length = 0;

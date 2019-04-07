@@ -42,14 +42,14 @@ TeCmdCopyTo::~TeCmdCopyTo()
 }
 
 /**
-* 選択中ファイルを指定フォルダにコピーする。
+* Copy selected files to target directory
 */
 bool TeCmdCopyTo::execute(TeViewStore* p_store)
 {
 	TeFileFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr) {
-		//コピー対象確定
+		//get selected files
 		QAbstractItemView* p_itemView = nullptr;
 		if (p_folder->tree()->hasFocus()) {
 			p_itemView = p_folder->tree();
@@ -62,7 +62,7 @@ bool TeCmdCopyTo::execute(TeViewStore* p_store)
 		QStringList paths;
 
 		if (p_itemView->selectionModel()->hasSelection()) {
-			//選択済コンテンツを対象とする。
+			//target selected files.
 			QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
 			for (const QModelIndex& index : indexList)
 			{
@@ -72,14 +72,14 @@ bool TeCmdCopyTo::execute(TeViewStore* p_store)
 			}
 		}
 		else {
-			//未選択時はカレントターゲットを対象とする。
+			//no files selected. so use current file.
 			if (p_itemView->currentIndex().isValid()) {
 				paths.append(model->filePath(p_itemView->currentIndex()));
 			}
 		}
 
 		if (!paths.isEmpty()) {
-			//コピー先フォルダ確定
+			//get distination folder.
 			TeFilePathDialog dlg(p_store->mainWindow());
 			dlg.setCurrentPath(p_folder->currentPath());
 			dlg.setWindowTitle(TeFilePathDialog::tr("Copy to"));

@@ -141,7 +141,6 @@ bool copyFiles(const QStringList & files, const QString & path)
 	hr = CoCreateInstance(CLSID_FileOperation, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pfo));
 
 	if (SUCCEEDED(hr)) {
-		//IFileOperationの挙動を決める
 		//hr = pfo->SetOperationFlags(FOF_NO_UI);
 		if (SUCCEEDED(hr)) {
 			IShellItem *psiTo = NULL;

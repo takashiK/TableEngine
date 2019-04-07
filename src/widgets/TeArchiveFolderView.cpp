@@ -146,7 +146,7 @@ void TeArchiveFolderView::setRootPath(const QString & path)
 {
 	clear();
 	QString filePath;
-	if (path.isNull()) {
+	if (path.isEmpty()) {
 		//Archive Write Mode
 	}
 	else if (path.startsWith(URI_WRITE)) {
@@ -163,7 +163,7 @@ void TeArchiveFolderView::setRootPath(const QString & path)
 		filePath = path;
 	}
 
-	if (!filePath.isNull()) {
+	if (!filePath.isEmpty()) {
 		setArchive(filePath);
 	}
 }
@@ -238,7 +238,7 @@ bool TeArchiveFolderView::setArchive(const QString & path)
 bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 {
 	clear();
-	if (p_archive == nullptr || p_archive->path().isNull()) {
+	if (p_archive == nullptr || p_archive->path().isEmpty()) {
 		return false;
 	}
 
@@ -561,7 +561,7 @@ void TeArchiveFolderView::buildArchiveEntry(TeArchive::Writer * writer, QStandar
 		if (rootItem->child(i, COL_TYPE)->data().toInt() == TeArchive::EN_FILE) {
 			QString dstPath = indexToPath(item->index());
 			QString srcPath = item->data().toString();
-			if (!dstPath.isNull() && !srcPath.isNull()) {
+			if (!dstPath.isEmpty() && !srcPath.isEmpty()) {
 				writer->addEntry(srcPath, dstPath);
 			}
 		}

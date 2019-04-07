@@ -36,8 +36,10 @@ public:
 
 protected:
 	/**
-	 * 実処理関数 execute()実行後も非同期処理を継続する場合はfalseを返す。
-	 * 非同期処理終了時はfinished()を読んでインスタンス破棄を依頼すること。
+	 * Main Processing Function: execute() need return false if it is continuous proceeding.
+	 * this type command is called "Asynchronized Command".
+	 * When finish asynchronized command then you should call finished().
+	 * if "finished()" is called then Dispatcher delete class instance of asynchronized command.
 	 */
 	virtual bool execute(TeViewStore* p_store ) = 0;
 	void finished();

@@ -64,7 +64,7 @@ bool TeCmdFolderCreate::execute(TeViewStore * p_store)
 			path = p_folder->currentPath();
 		}
 
-		if (!path.isNull()) {
+		if (!path.isEmpty()) {
 			//カレントターゲットを対象とする。
 			QInputDialog dlg(p_store->mainWindow());
 			dlg.setLabelText(QInputDialog::tr("Enter Folder name."));

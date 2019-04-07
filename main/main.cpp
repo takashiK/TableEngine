@@ -36,34 +36,33 @@ int main(int argc, char *argv[])
 	QApplication::setOrganizationName("TableWare");
 
 	QApplication a(argc, argv);
-	//翻訳ファイルロード
+	//Load translation file.
 	QTranslator myappTranslator;
 	myappTranslator.load("tableengine_" + QLocale::system().name());
 	a.installTranslator(&myappTranslator);
 
-	//設定ファイル出力設定
+	//setup setting folder and load settings.
 	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QApplication::applicationDirPath());
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 	TeOptionSetting::storeDefaultSettings();
 	TeKeySetting::storeDefaultSettings();
 	TeMenuSetting::storeDefaultSettings();
 	
-	//COM用イニシャライズ
+	//initialize com thread. it use for windows shell.
 	threadInitialize();
 
-	//コマンドディスパッチャー準備
+	//setup dispatcher for command.
 	TeDispatcher dispatcher;
 	dispatcher.setFactory(TeCommandFactory::factory());
 
-	//View生成
+	//create main window
 	TeViewStore store;
 	store.initialize();
 	store.setDispatcher(&dispatcher); //ViewをDispatcherに接続
 	store.show();
 
-	//ViewをDispatcher登録
 	dispatcher.setViewStore(&store);
 
-	//イベントループ開始
+	//start event loop.
 	return a.exec();
 }

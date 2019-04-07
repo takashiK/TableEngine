@@ -22,7 +22,8 @@
 #include <QObject>
 #include <QString>
 #include <QDateTime>
-#include <QFile>
+
+class QFileInfo;
 
 namespace TeArchive {
 
@@ -73,7 +74,7 @@ public:
 	Reader(const QString& path, QObject *parent = Q_NULLPTR);
 	virtual ~Reader();
 
-	void setCallback( bool(*overwrite)(QFile*) );
+	void setCallback( bool(*overwrite)(QFileInfo*) );
 	bool open( const QString& path);
 	void release();
 
@@ -105,7 +106,7 @@ public:
 
 private:
 	QString m_path;
-	bool(*overwrite_check)(QFile* ofile);
+	bool(*overwrite_check)(QFileInfo*);
 };
 
 class Writer :
@@ -120,9 +121,10 @@ public:
 	void clear();
 
 	bool addEntry(const QString& src, const QString& dest);
-	bool addEntries(const QString& base, const QStringList& srcList, const QString& dest);
+	bool addEntries(const QString& base, const QStringList& srcList, const QString& dest=QString());
 
 	bool archive(const QString& dest, ArchiveType type);
+
 private:
 	QList<FileInfo> m_entryList;
 	bool m_sortFlag;

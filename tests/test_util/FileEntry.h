@@ -30,6 +30,7 @@ public:
 	FileEntry(FileEntry* parent, const QString& name, qint64 size, const QDateTime& lastModified, const QString& src)
 		: QObject(parent)
 	{
+		this->type = TeArchive::EN_FILE;
 		this->path = name; this->size = size; this->lastModifyed = lastModified; this->src = src;
 	}
 };

@@ -45,14 +45,13 @@ TeCmdDelete::~TeCmdDelete()
 }
 
 /**
-* 選択中ファイルを指定フォルダに移動する。
+* Delete selected files.
 */
 bool TeCmdDelete::execute(TeViewStore* p_store)
 {
 	TeFileFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr) {
-		//移動対象確定
 		QAbstractItemView* p_itemView = nullptr;
 		if (p_folder->tree()->hasFocus()) {
 			p_itemView = p_folder->tree();
@@ -65,7 +64,7 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 		QStringList paths;
 
 		if (p_itemView->selectionModel()->hasSelection()) {
-			//選択済コンテンツを対象とする。
+			//target selected files.
 			QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
 			for (const QModelIndex& index : indexList)
 			{
@@ -75,14 +74,14 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 			}
 		}
 		else {
-			//未選択時はカレントターゲットを対象とする。
+			//no files selected. so use current file.
 			if (p_itemView->currentIndex().isValid()) {
 				paths.append(model->filePath(p_itemView->currentIndex()));
 			}
 		}
 
 		if (!paths.isEmpty()) {
-			//対象を削除
+			//delete target files.
 			deleteItems(p_store, paths);
 		}
 	}
@@ -92,7 +91,6 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 
 void TeCmdDelete::deleteItems(TeViewStore* p_store, const QStringList & list)
 {
-	//指定ディレクトリが存在しない場合作成するか問い合わせる。
 	QDir dir;
 
 	bool bSuccess = true;
