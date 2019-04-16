@@ -21,7 +21,7 @@
 ****************************************************************************/
 #include "TeTreeWidget.h"
 
-#include <QDragEnterEvent>;
+#include <QDragEnterEvent>
 
 TeTreeWidget::TeTreeWidget(QWidget *parent)
 	: QTreeWidget(parent)

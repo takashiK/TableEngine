@@ -27,27 +27,116 @@
 #include <QDir>
 #include <algorithm>
 
+/*!
+	\namespace TeArchive
+	\inmodule utility
+	\brief This namespace provide operation classes for archive.
+
+	This namespace provide operation classes for archive.
+	These classes are depend on libarchive and provide it's functionarity.
+
+	\list
+	\li Example for extract from archive.
+		\code
+			TeArchive::reader reader;
+			reader.open("archive.zip");
+			reader.extractAll("destination_path");
+			reader.close();
+		\endcode
+	\li Example for create archive.
+		\code
+			TeArchive::writer writer;
+			writer.addentry("target","path_in_archive");
+			writer.archive("archive.zip",TeArchive::AR_ZIP);
+		\endcode
+	\endlist
+
+ */
+
+/*!
+	 \enum TeArchive::ArchiveType
+	 \inmodule utility
+	 \brief Type of archive format.
+
+	\value AR_NONE
+		Can't detect any type.
+	\value AR_ZIP
+		zip format.
+	\value AR_7ZIP
+		7zip format.
+	\value AR_TAR
+		kind of tar format.
+	\value AR_TAR_GZIP
+		kind of tar format with gzip compression.
+	\value AR_TAR_BZIP2
+		kind of tar format with bzip2 compression.
+ */
+ 
+/*!
+	\class TeArchive::FileInfo
+	\inmodule utility
+	\brief File entry information class for archive entry.
+*/
+
+
+/*!
+	\enum TeArchive::EntryType
+
+	\value EN_NONE
+		Null entry type.
+	\value EN_FILE
+		File entry.
+	\value EN_DIR
+		Directory entry.
+	\value EN_PARENT
+		Special directory entry that target to parent directory.
+*/
+
 namespace TeArchive{
 namespace {
 
-	struct QtArchiveStatus
+	/*!
+		\internal 
+
+		Resource data for utility functions for libarchive.
+		this class is sent to utility functions through client_data parameter.
+		this class is setup by helper funtions open_read_archive() and open_write_archive().
+		don't touch member variable directory.
+	*/
+	class QtArchiveResource
 	{
+	public:
+		QtArchiveResource() { buffer = new char[buffer_size]; }
+		~QtArchiveResource() { delete[] buffer; }
 		QFile file;
 		static const int buffer_size = 1024 * 128;
-		char  buffer[buffer_size];
+		char* buffer;
 	};
 
-	struct QtArchiveInfo
+	/*!
+		\internal 
+
+		This class is information object for libarchive.
+		helper functions access to libarchive object through this class.
+		don't touch member variable directory.
+	 */
+	class QtArchiveInfo
 	{
+	public:
 		QtArchiveInfo() : ar(Q_NULLPTR), entry(Q_NULLPTR){}
 		struct archive *ar;
 		struct archive_entry *entry;
-		QtArchiveStatus st;
+		QtArchiveResource res;
 	};
 
+	/*!
+		\internal 
+
+		Provide operation for "open file for read" to libarchive.
+	 */
 	extern "C" int qt_read_open_callback(struct archive *a, void *client_data)
 	{
-		QtArchiveStatus * qas = static_cast<QtArchiveStatus*>(client_data);
+		QtArchiveResource * qas = static_cast<QtArchiveResource*>(client_data);
 		int result = ARCHIVE_OK;
 
 		if (!qas->file.exists()) {
@@ -61,17 +150,27 @@ namespace {
 		return result;
 	}
 
+	/*!
+		\internal
+
+		Provide operation for "close file" to libarchive.
+	 */
 	extern "C" int qt_close_callback(struct archive *a, void *client_data)
 	{
-		QtArchiveStatus * qas = static_cast<QtArchiveStatus*>(client_data);
+		QtArchiveResource * qas = static_cast<QtArchiveResource*>(client_data);
 
 		qas->file.close();
 		return ARCHIVE_OK;
 	}
 
+	/*!
+		\internal
+
+		Provide operation for "sequencial read data of file" to libarchive.
+	 */
 	extern "C" la_ssize_t qt_read_callback(struct archive *a, void *client_data, const void **buffer)
 	{
-		QtArchiveStatus * qas = static_cast<QtArchiveStatus*>(client_data);
+		QtArchiveResource * qas = static_cast<QtArchiveResource*>(client_data);
 		la_ssize_t result = 0;
 		*buffer = nullptr;
 
@@ -96,9 +195,14 @@ namespace {
 		return result;
 	}
 
+	/*!
+		\internal
+
+		Provide operation for "skip data of file" to libarchive.
+	 */
 	extern "C" la_int64_t qt_skip_callback(struct archive *a, void *client_data, la_int64_t request)
 	{
-		QtArchiveStatus * qas = static_cast<QtArchiveStatus*>(client_data);
+		QtArchiveResource * qas = static_cast<QtArchiveResource*>(client_data);
 		la_int64_t result = 0;
 
 		if (request < 0) {
@@ -115,9 +219,14 @@ namespace {
 		return result;
 	}
 
+	/*!
+		\internal
+
+		Provide operation for "seek position of file" to libarchive.
+	 */
 	extern "C" la_int64_t qt_seek_callback(struct archive *a, void *client_data, la_int64_t offset, int whence)
 	{
-		QtArchiveStatus * qas = static_cast<QtArchiveStatus*>(client_data);
+		QtArchiveResource * qas = static_cast<QtArchiveResource*>(client_data);
 		la_int64_t result = 0;
 
 		qint64 size = qas->file.size();
@@ -154,9 +263,14 @@ namespace {
 		return result;
 	}
 
+	/*!
+		\internal
+
+		Provide operation for "open file for write" to libarchive.
+	 */
 	extern "C" int qt_write_open_callback(struct archive *a, void *client_data)
 	{
-		QtArchiveStatus * qas = static_cast<QtArchiveStatus*>(client_data);
+		QtArchiveResource * qas = static_cast<QtArchiveResource*>(client_data);
 		int result = ARCHIVE_OK;
 
 		if (!qas->file.open(QFile::WriteOnly | QFile::Truncate)) {
@@ -166,9 +280,14 @@ namespace {
 		return result;
 	}
 
+	/*!
+		\internal
+
+		Provide operation for "write data to file" to libarchive.
+	 */
 	extern "C"	la_ssize_t	qt_write_callback(struct archive *a, void *client_data, const void *buffer, size_t length)
 	{
-		QtArchiveStatus * qas = static_cast<QtArchiveStatus*>(client_data);
+		QtArchiveResource * qas = static_cast<QtArchiveResource*>(client_data);
 		la_ssize_t result = 0;
 
 		if (!qas->file.isOpen()) {
@@ -189,7 +308,12 @@ namespace {
 		return result;
 	}
 
-	bool open_read_archvie(QtArchiveInfo* arInfo, const QString& path) 
+	/*!
+		\internal
+
+		helper function for "open archive for extract data from archive" by libarchive.
+	 */
+	bool open_read_archive(QtArchiveInfo* arInfo, const QString& path)
 	{
 		arInfo->ar = archive_read_new();
 		archive_read_support_format_all(arInfo->ar);
@@ -197,9 +321,9 @@ namespace {
 
 		archive_read_set_seek_callback(arInfo->ar, qt_seek_callback);
 
-		arInfo->st.file.setFileName(path.toLocal8Bit());
+		arInfo->res.file.setFileName(path.toLocal8Bit());
 
-		int r = archive_read_open2(arInfo->ar, &arInfo->st, qt_read_open_callback, qt_read_callback, qt_skip_callback, qt_close_callback);
+		int r = archive_read_open2(arInfo->ar, &arInfo->res, qt_read_open_callback, qt_read_callback, qt_skip_callback, qt_close_callback);
 		if (r != ARCHIVE_OK) {
 			archive_read_close(arInfo->ar);
 			archive_read_free(arInfo->ar);
@@ -210,6 +334,12 @@ namespace {
 		return true;
 	}
 
+	/*!
+		\internal
+
+		helper function for "close archive".
+		if you open archive by open_read_archive() then you need call this function before destruct QtArchiveInfo. 
+	 */
 	void close_read_archive(QtArchiveInfo* arInfo)
 	{
 		arInfo->entry = Q_NULLPTR;
@@ -220,6 +350,60 @@ namespace {
 		}
 	}
 
+	/*!
+		\internal
+
+		helper function for "check archive format".
+		this function need call after archive_read_next_header().
+		because this function use result of archive_read_next_header().
+	 */
+	ArchiveType check_format(QtArchiveInfo* arInfo) {
+		ArchiveType type = AR_NONE;
+		switch (archive_format(arInfo->ar) & ARCHIVE_FORMAT_BASE_MASK) {
+		case ARCHIVE_FORMAT_TAR:
+			switch (archive_compression(arInfo->ar)) {
+			case ARCHIVE_COMPRESSION_NONE:
+				type = AR_TAR;
+				break;
+			case ARCHIVE_COMPRESSION_GZIP:
+				type = AR_TAR_GZIP;
+				break;
+			case ARCHIVE_COMPRESSION_BZIP2:
+				type = AR_TAR_BZIP2;
+				break;
+			default:
+				break;
+			}
+			break;
+		case ARCHIVE_FORMAT_ZIP:
+			type = AR_ZIP;
+			break;
+		case ARCHIVE_FORMAT_7ZIP:
+			type = AR_7ZIP;
+			break;
+		case ARCHIVE_FORMAT_CPIO:
+		case ARCHIVE_FORMAT_SHAR:
+		case ARCHIVE_FORMAT_ISO9660:
+		case ARCHIVE_FORMAT_AR:
+		case ARCHIVE_FORMAT_MTREE:
+		case ARCHIVE_FORMAT_RAW:
+		case ARCHIVE_FORMAT_XAR:
+		case ARCHIVE_FORMAT_LHA:
+		case ARCHIVE_FORMAT_CAB:
+		case ARCHIVE_FORMAT_RAR:
+		case ARCHIVE_FORMAT_WARC:
+		default:
+			break;
+		}
+		return type;
+	}
+
+	/*!
+		\internal
+
+		helper function for "read next FileInfo that inner data of archive".
+		you can call this function afer open_read_archive().
+	 */
 	bool read_next_entry(QtArchiveInfo* arInfo, FileInfo* info) {
 		info->type = EN_NONE;
 		info->size = 0;
@@ -270,6 +454,13 @@ namespace {
 		return false;
 	}
 
+	/*!
+		\internal
+
+		helper function for "copy data that in archive to file".
+		this function copy current entry data to file. so before call this function.
+		you need set target entry by read_next_entry().
+	 */
 	bool copy_data(QtArchiveInfo* arInfo, QFile *ofile)
 	{
 		int r;
@@ -291,6 +482,11 @@ namespace {
 		}
 	}
 
+	/*!
+		\internal
+
+		helper function for "open archive file for create archive data" by libarchive
+	 */
 	bool open_write_archvie(QtArchiveInfo* arInfo, const QString& path, ArchiveType type)
 	{
 		arInfo->ar = archive_write_new();
@@ -303,6 +499,9 @@ namespace {
 			archive_write_set_format_7zip(arInfo->ar);
 			archive_write_set_format_option(arInfo->ar, "7zip", "compression", "lzma2");
 			break;
+		case AR_TAR:
+			archive_write_set_format_gnutar(arInfo->ar);
+			break;
 		case AR_TAR_GZIP:
 			archive_write_set_format_gnutar(arInfo->ar);
 			archive_write_set_compression_gzip(arInfo->ar);
@@ -313,9 +512,9 @@ namespace {
 			break;
 		}
 
-		arInfo->st.file.setFileName(path.toLocal8Bit());
+		arInfo->res.file.setFileName(path.toLocal8Bit());
 
-		int r = archive_write_open(arInfo->ar, &arInfo->st, qt_write_open_callback, qt_write_callback, qt_close_callback);
+		int r = archive_write_open(arInfo->ar, &arInfo->res, qt_write_open_callback, qt_write_callback, qt_close_callback);
 		if (r != ARCHIVE_OK) {
 			archive_write_close(arInfo->ar);
 			archive_write_free(arInfo->ar);
@@ -326,6 +525,12 @@ namespace {
 		return true;
 	}
 
+	/*!
+		\internal
+
+		helper function for "close archive".
+		if you open archive by open_write_archive() then you need call this function before destruct QtArchiveInfo.
+	 */
 	void close_write_archive(QtArchiveInfo* arInfo)
 	{
 		arInfo->entry = Q_NULLPTR;
@@ -337,53 +542,109 @@ namespace {
 	}
 }
 
-Reader::Reader(QObject *parent)
-	: QObject(parent)
+/*!
+	\class TeArchive::Reader
+	\inmodule utility
+	\brief Helper class for extract data from archvie.
+	
+	This is helper class for extract data from archive used by libarchive.
+	This class currentry support .zip .7z .tar .tar.gz .tar.bz files.
+	And and also potentialy support to formats that is supported by libarchive.
+
+	This class auto detect format type of archvie. so you don't need set format type to this class.
+
+	A simple usage is below.
+	\code
+		TeArchive::Reader reader;
+		reader.open("archvie_file");
+		reader.extractAll("destination_path");
+		reader.close();
+	\endcode
+ */
+
+
+Reader::Reader()
 {
 	overwrite_check = Q_NULLPTR;
+	m_type = AR_NONE;
 }
 
-Reader::Reader(const QString & path, QObject * parent)
-	: QObject(parent)
+/*!
+	Constructor of archive reader.
+	it open \a path after construct.
+ */
+Reader::Reader(const QString & path)
 {
 	overwrite_check = Q_NULLPTR;
+	m_type = AR_NONE;
 	open(path);
 }
 
 
 Reader::~Reader()
 {
+	close();
 }
 
+/*!
+	Set callback function that use for confirm "overwrite" when extracted file is already exist.
+
+	Parameter of callback function is QFileInfo of target file. If callback function return true
+	then this file is overwrite by extracted data. If callback function return false then
+	Reader skip exctract relative data.
+	If you want to change extract path. You can use QFileInfo::setFile() with "callback return true".
+ */
 void Reader::setCallback( bool(*overwrite)(QFileInfo*) )
 {
 	overwrite_check = overwrite;
 }
 
+/*!
+	Open archive file.
+	If archive file is not found or Reader can't detect format of archive then this function failed and return false.
+	This function close file, that already opened by this function, before open another file.
+ */
 bool Reader::open(const QString & path)
 {
-	release();
+	bool result = false;
+	close();
 	if (!QFile::exists(path)) {
 		return false;
 	}
 
 	QtArchiveInfo arInfo;
 
-	if (!open_read_archvie(&arInfo, path)) {
+	if (!open_read_archive(&arInfo, path)) {
 		return false;
 	}
 
-	close_read_archive(&arInfo);
-	m_path = path;
+	if (ARCHIVE_OK == archive_read_next_header(arInfo.ar, &arInfo.entry)) {
+		m_type = check_format(&arInfo);
+		if (m_type != AR_NONE) {
+			result = true;
+			m_path = path;
+		}
+	}
 
-	return true;
+	close_read_archive(&arInfo);
+
+	return result;
 }
 
-void Reader::release()
+/*!
+	close archive file if it is already opened.
+ */
+void Reader::close()
 {
+	m_type = AR_NONE;
 	m_path.clear();
 }
 
+/*!
+	Extact all of data in archive to \a destPath.
+	If any file success to extract then this function return true.
+	but If all of data failed to extract then this function return false.
+ */
 bool Reader::extractAll(const QString & destPath)
 {
 	FileInfo info;
@@ -394,7 +655,7 @@ bool Reader::extractAll(const QString & destPath)
 	
 	QtArchiveInfo arInfo;
 
-	if (!open_read_archvie(&arInfo, m_path)) {
+	if (!open_read_archive(&arInfo, m_path)) {
 		return false;
 	}
 
@@ -436,6 +697,12 @@ bool Reader::extractAll(const QString & destPath)
 	return true;
 }
 
+/*!
+	Extract selected data of archive to \a destPath.
+	\a base is target path in archive. \a entries is list of file or directories path in archive
+	that is relative from \a base.
+	If you set directory in entries then thats children are also selected. 
+ */
 bool Reader::extract(const QString & destPath, const QString & base, const QStringList & entries)
 {
 	FileInfo info;
@@ -446,7 +713,7 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 
 	QtArchiveInfo arInfo;
 
-	if (!open_read_archvie(&arInfo, m_path)) {
+	if (!open_read_archive(&arInfo, m_path)) {
 		return false;
 	}
 
@@ -501,23 +768,42 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 	return true;
 }
 
+/*!
+	Return the type of archive format.
+ */
+ArchiveType Reader::type()
+{
+	return m_type;
+}
+
+/*!
+	Return the iterator. It use for check entry in archive and point to begin of archvie entry.
+ */
 Reader::const_iterator Reader::begin()
 {
 	return const_iterator(this);
 }
 
+/*!
+	Return the iterator. It point to end of archive entry.
+ */
 Reader::const_iterator Reader::end()
 {
 	return const_iterator();
 }
 
+/*!
+	constructor of iterator that use for check entry in archive.
+	\a ar is target class for information.
+ */
 Reader::const_iterator::const_iterator(Reader * ar)
 {
+	data = nullptr;
 	if (!ar->m_path.isEmpty()) {
 		QtArchiveInfo* arInfo = new QtArchiveInfo;
 		data = arInfo;
 
-		open_read_archvie(arInfo, ar->m_path);
+		open_read_archive(arInfo, ar->m_path);
 		if (!read_next_entry(arInfo, &info)) {
 			close_read_archive(arInfo);
 			delete arInfo;
@@ -526,6 +812,10 @@ Reader::const_iterator::const_iterator(Reader * ar)
 	}
 }
 
+/*!
+	copy constructor of iterator that use for check entry in archive.
+	it copy from \a o.
+ */
 Reader::const_iterator::const_iterator(const_iterator && o)
 {
 	data = o.data;
@@ -562,8 +852,23 @@ Reader::const_iterator& Reader::const_iterator::operator++()
 	return *this;
 }
 
-Writer::Writer(QObject *parent)
-	: QObject(parent)
+/*!
+	\class TeArchive::Writer
+	\inmodule utility
+	\brief Helper class for create archvie from files.
+
+	This is helper class for create archive from files used by libarchive.
+	This class currentry support .zip .7z .tar .tar.gz .tar.bz files.
+	And and also potentialy support to formats that is supported by libarchive.
+
+	A simple usage for zip file is below.
+	\code
+		TeArchive::Writer writer;
+		writer.addEntry("path_of_files","");
+		writer.archive("name_of_archive_file",TeArchvie::AR_ZIP);
+	\endcode
+ */
+Writer::Writer()
 {
 	m_sortFlag = true;
 }
@@ -573,11 +878,26 @@ Writer::~Writer()
 {
 }
 
+/*!
+	Clear entries.
+ */
 void Writer::clear()
 {
 	m_entryList.clear();
 }
 
+/*!
+	Count of entries. usually this function return different count to number of call addEntry() and count of entries in addEntries().
+	Because this count is include children of directory.
+ */
+int Writer::count()
+{
+	return m_entryList.size();
+}
+
+/*!
+	Add file or directory entry to \a dest that is path in archive.
+ */
 bool Writer::addEntry(const QString & src, const QString& dest)
 {
 	FileInfo info;
@@ -614,6 +934,10 @@ bool Writer::addEntry(const QString & src, const QString& dest)
 	return true;
 }
 
+/*!
+	Add multi files or directories to \a dest that is path in archive.
+	\a base is base path of srcList. and srcList point to target files or directories by relative to \a base.
+ */
 bool Writer::addEntries(const QString & base, const QStringList & srcList, const QString & dest)
 {
 	bool result = false;
@@ -640,6 +964,10 @@ bool Writer::addEntries(const QString & base, const QStringList & srcList, const
 	return result;
 }
 
+/*!
+	Create archive file by added entries.
+	You can select archive format by \a type parameter.
+ */
 bool Writer::archive(const QString & dest, ArchiveType type)
 {
 	QtArchiveInfo arInfo;
@@ -670,8 +998,8 @@ bool Writer::archive(const QString & dest, ArchiveType type)
 			QFile file(info.src);
 			if (file.open(QFile::ReadOnly)) {
 				qint64 length = 0;
-				while ((length = file.read(arInfo.st.buffer, arInfo.st.buffer_size))>0) {
-					archive_write_data(arInfo.ar, arInfo.st.buffer, length);
+				while ((length = file.read(arInfo.res.buffer, arInfo.res.buffer_size))>0) {
+					archive_write_data(arInfo.ar, arInfo.res.buffer, length);
 				}
 			}
 			file.close();

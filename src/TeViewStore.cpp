@@ -48,6 +48,7 @@ TeViewStore::TeViewStore(QObject *parent)
 	mp_tab[TAB_LEFT] = nullptr;
 	mp_tab[TAB_RIGHT] = nullptr;
 	mp_currentFolderView = nullptr;
+	mp_split = nullptr;
 }
 
 TeViewStore::~TeViewStore()
@@ -344,6 +345,7 @@ void TeViewStore::deleteFolderView(TeFileFolderView * view)
 	int index = tabIndex(view);
 
 	mp_currentFolderView = nullptr;
+
 	delete view;
 
 	//Tabの登録コンテンツがない場合、右tabを左に寄せる

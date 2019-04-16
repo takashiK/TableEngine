@@ -35,7 +35,8 @@ enum EntryType {
 	EN_PARENT,
 };
 
-struct FileInfo {
+class FileInfo {
+public:
 	FileInfo() :type(EN_NONE), size(0) {}
 	bool operator==(const FileInfo& info) const Q_DECL_NOTHROW { return path == info.path;  }
 	bool operator!=(const FileInfo& info) const Q_DECL_NOTHROW  { return !(*this == info); }
@@ -59,8 +60,10 @@ struct FileInfo {
 };
 
 enum ArchiveType {
+	AR_NONE,
 	AR_ZIP,
 	AR_7ZIP,
+	AR_TAR,
 	AR_TAR_GZIP,
 	AR_TAR_BZIP2,
 };
@@ -71,18 +74,20 @@ class Reader :
 	Q_OBJECT
 
 public:
-	Reader(QObject *parent = Q_NULLPTR);
-	Reader(const QString& path, QObject *parent = Q_NULLPTR);
+	Reader();
+	Reader(const QString& path);
 	virtual ~Reader();
 
 	void setCallback( bool(*overwrite)(QFileInfo*) );
 	bool open( const QString& path);
-	void release();
+	void close();
 
 	const QString& path() { return m_path; }
 
 	bool extractAll(const QString& destPath);
 	bool extract( const QString& destPath, const QString& base, const QStringList& entries);
+
+	ArchiveType type();
 
 public:
 	class const_iterator {
@@ -107,6 +112,7 @@ public:
 
 private:
 	QString m_path;
+	ArchiveType m_type;
 	bool(*overwrite_check)(QFileInfo*);
 };
 
@@ -116,10 +122,11 @@ class Writer :
 	Q_OBJECT
 
 public:
-	Writer(QObject *parent = Q_NULLPTR);
+	Writer();
 	virtual ~Writer();
 
 	void clear();
+	int count();
 
 	bool addEntry(const QString& src, const QString& dest);
 	bool addEntries(const QString& base, const QStringList& srcList, const QString& dest=QString());

@@ -20,6 +20,16 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+
+/*
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
 #include <gmock/gmock.h>
 
 #include <widgets/TeArchiveFolderView.h>

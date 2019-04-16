@@ -49,7 +49,7 @@
  *          - directory children that hidden and system types.
  *      - variation of condition
  *          - add entry that already added. (for same type)
- *          - add entry that already added. (for same type)
+ *          - add entry that already added. (for different type)
  *          - add directory that have children.
  *          - add directory that don't have children.
  *    - bool addEntries(const QString& base, const QStringList& srcList, const QString& dest=QString());
@@ -94,21 +94,23 @@
  *          - directory
  *          - normal file
  *          - empty file
- *    - void release();
+ *    - ArchiveType type();
+ *       - variation of archive type
+ *    - void close();
  *       - operation order
  *          - after open.
  *          - before open.
- *          - call release twice.
+ *          - call close twice.
  *    - const QString& path()
  *       - operation order
  *          - before open
  *          - after open
- *          - after release
+ *          - after close
  *    - bool extractAll(const QString& destPath);
  *       - operation order
  *          - before open
  *          - after open
- *          - after release
+ *          - after close
  *       - variation of open
  *       - path variation of included files
  *          - valid data
@@ -151,14 +153,16 @@ bool checkArchive(const QStringList& expect, const QStringList& setup, TeArchive
 	TeArchive::Reader reader;
 
 	writer.addEntries("debug/test", setup, "");
-	writer.archive("debug/test.zip", type);
+	EXPECT_TRUE(writer.archive("debug/test.zip", type));
 
-	reader.open("debug/test.zip");
+	EXPECT_TRUE(reader.open("debug/test.zip"));
+
+	EXPECT_EQ(type, reader.type());
 
 	QDir dir;
 	dir.mkpath("debug/test2");
 	reader.extractAll("debug/test2");
-	reader.release();
+	reader.close();
 
 	bool r1 = compareFileTree("debug/test", "debug/test2", true);
 	bool r2 = compareFileTree(&entries, "debug/test2", true);
@@ -167,7 +171,7 @@ bool checkArchive(const QStringList& expect, const QStringList& setup, TeArchive
 	cleanFileTree("debug/test2");
 	QFile::remove("debug/test.zip");
 
-	return r1 && r2;
+	return (r1 && r2);
 }
 
 TEST(tst_TeArchive, archive_flatfile_zip)
@@ -179,6 +183,9 @@ TEST(tst_TeArchive, archive_flatfile_zip)
 	list.append("file4.txt");
 	
 	checkArchive(list, list, TeArchive::AR_ZIP);
+	checkArchive(list, list, TeArchive::AR_7ZIP);
+	checkArchive(list, list, TeArchive::AR_TAR_GZIP);
+	checkArchive(list, list, TeArchive::AR_TAR_BZIP2);
 }
 
 TEST(tst_TeArchive, archive_rankfile_zip)
@@ -188,6 +195,214 @@ TEST(tst_TeArchive, archive_rankfile_zip)
 	list.append("dir3/dir3_2/file3_2_1.txt");
 	list.append("dir1/file1_2.txt");
 	list.append("dir1/file1_1.txt");
+	list.append("dir2");
 
 	checkArchive(list, list, TeArchive::AR_ZIP);
+	checkArchive(list, list, TeArchive::AR_7ZIP);
+	checkArchive(list, list, TeArchive::AR_TAR_GZIP);
+	checkArchive(list, list, TeArchive::AR_TAR_BZIP2);
+}
+
+TEST(tst_TeArchive, archive_write_invalid_entry)
+{
+	cleanFileTree("debug/test");
+	QStringList list;
+	list.append("file1.txt");
+	createFileTree("debug/test", list);
+
+	TeArchive::Writer writer;
+
+	EXPECT_FALSE(writer.addEntry(QString(), ""));
+	EXPECT_FALSE(writer.addEntry("",""));
+	EXPECT_FALSE(writer.addEntry("not_exist_file", ""));
+
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", ".."));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", "..."));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", "/test"));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", "test/../.."));
+
+	EXPECT_TRUE(writer.addEntry("debug/test/file1.txt", "file1.txt"));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", "file1.txt"));
+	EXPECT_FALSE(writer.addEntry("debug/test", "file1.txt"));
+#if 0
+	//Invalid Path string in windows.
+	//checker not support yet.
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", ":"));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", "*"));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", "?"));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", "\""));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", "|"));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", "<"));
+	EXPECT_FALSE(writer.addEntry("debug/test/file1.txt", ">"));
+#endif
+
+	QStringList badlist;
+	badlist.append("not_exist_file1");
+	badlist.append("not_exist_file2");
+	EXPECT_FALSE(writer.addEntries("debug/test",badlist,"multi"));
+
+	badlist.append("file1.txt");
+	int count = writer.count();
+	EXPECT_TRUE(writer.addEntries("debug/test", badlist, "multi"));
+	EXPECT_EQ(count + 1, writer.count());
+
+
+	cleanFileTree("debug/test");
+}
+
+TEST(tst_TeArchive, archive_write_valid_entry)
+{
+	cleanFileTree("debug/test");
+	QStringList list;
+	list.append("file1.txt");
+	list.append("file2.txt");
+	list.append("file3.txt");
+	createFileTree("debug/test", list);
+
+	TeArchive::Writer writer;
+	EXPECT_TRUE(writer.addEntry("debug/test/file1.txt", "test1/test/.."));
+	EXPECT_TRUE(writer.addEntry("debug/test/file1.txt", "test2/test/..."));
+	EXPECT_TRUE(writer.addEntry("debug/test/file1.txt", "test3/../test/../file3"));
+	EXPECT_TRUE(writer.addEntry("debug/test/file1.txt", "test4//test"));
+	EXPECT_TRUE(writer.addEntry("debug/test", "test7"));
+
+	writer.clear();
+	EXPECT_EQ(0, writer.count());
+	writer.clear();
+	EXPECT_EQ(0, writer.count());
+
+	cleanFileTree("debug/test");
+}
+
+namespace {
+
+	bool noCallCheck(QFileInfo* info)
+	{
+		ADD_FAILURE();
+		return false;
+	}
+
+	bool unAccept(QFileInfo* info)
+	{
+		return false;
+	}
+
+	bool overwrite(QFileInfo* info)
+	{
+		return true;
+	}
+
+	bool rename(QFileInfo* info)
+	{
+		info->setFile(info->filePath() + "_");
+		return true;
+	}
+
+}
+
+TEST(tst_TeArchive, archive_readCallback)
+{
+	cleanFileTree("debug/test");
+	cleanFileTree("debug/test2");
+	QFile::remove("debug/test.zip");
+
+	QFile file;
+	QStringList list;
+	list.append("dir1/dir1_1/dir1_1_1/file1_1_1_1.txt");
+	list.append("dir3/dir3_2/file3_2_1.txt");
+	list.append("dir1/file1_2.txt");
+	list.append("dir1/file1_1.txt");
+	list.append("dir2");
+	createFileTree("debug/test", list);
+
+	TeArchive::Writer writer;
+	writer.addEntry("debug/test", "");
+	writer.archive("debug/test.zip", TeArchive::AR_ZIP);
+
+	TeArchive::Reader reader;
+	reader.open("debug/test.zip");
+	EXPECT_EQ("debug/test.zip", reader.path());
+
+	//normal 
+	reader.setCallback(noCallCheck);
+	reader.extractAll("debug/test2");
+	EXPECT_TRUE(compareFileTree("debug/test", "debug/test2", true));
+
+	//unaccept overwrite
+	file.setFileName("debug/test/dir1/dir1_1/dir1_1_1/file1_1_1_1.txt");
+	file.open(QFile::WriteOnly | QFile::Truncate);
+	file.write("test");
+	file.close();
+
+	file.setFileName("debug/test2/dir1/dir1_1/dir1_1_1/file1_1_1_1.txt");
+	file.open(QFile::WriteOnly | QFile::Truncate);
+	file.write("test");
+	file.close();
+
+	reader.setCallback(unAccept);
+	reader.extractAll("debug/test2");
+	EXPECT_TRUE(compareFileTree("debug/test", "debug/test2", true));
+
+	//overwrite
+	createFileTree("debug/test", list);
+
+	file.setFileName("debug/test2/dir1/dir1_1/dir1_1_1/file1_1_1_1.txt");
+	file.open(QFile::WriteOnly|QFile::Truncate);
+	file.write("test");
+	file.close();
+	file.setFileName("debug/test2/dir1/file1_1.txt");
+	file.open(QFile::WriteOnly | QFile::Truncate);
+	file.write("test");
+	file.close();
+	file.setFileName("debug/test2/dir1/file1_2.txt");
+	file.open(QFile::WriteOnly | QFile::Truncate);
+	file.write("test");
+	file.close();
+
+	reader.setCallback(overwrite);
+	reader.extractAll("debug/test2");
+	EXPECT_TRUE(compareFileTree("debug/test", "debug/test2", true));
+
+	//changefilename
+	QFile::copy("debug/test/" + list[0], "debug/test/" + list[0] + "_");
+	QFile::copy("debug/test/" + list[1], "debug/test/" + list[1] + "_");
+	QFile::copy("debug/test/" + list[2], "debug/test/" + list[2] + "_");
+	QFile::copy("debug/test/" + list[3], "debug/test/" + list[3] + "_");
+
+	reader.setCallback(rename);
+	reader.extractAll("debug/test2");
+	EXPECT_TRUE(compareFileTree("debug/test", "debug/test2", true));
+
+	cleanFileTree("debug/test");
+	cleanFileTree("debug/test2");
+	QFile::remove("debug/test.zip");
+}
+
+TEST(tst_TeArchive, archive_read_partial)
+{
+	cleanFileTree("debug/test");
+	cleanFileTree("debug/test2");
+	QFile::remove("debug/test.zip");
+
+	QFile file;
+	QStringList list;
+	list.append("dir1/dir1_1/dir1_1_1/file1_1_1_1.txt");
+	list.append("dir3/dir3_2/file3_2_1.txt");
+	list.append("dir1/file1_2.txt");
+	list.append("dir1/file1_1.txt");
+	list.append("dir2");
+	createFileTree("debug/test", list);
+
+	TeArchive::Writer writer;
+	writer.addEntry("debug/test", "");
+	writer.archive("debug/test.zip", TeArchive::AR_ZIP);
+
+	TeArchive::Reader reader;
+	reader.open("debug/test.zip");
+	reader.extract("debug/test2", "", list);
+	EXPECT_TRUE(compareFileTree("debug/test", "debug/test2", true));
+
+	cleanFileTree("debug/test");
+	cleanFileTree("debug/test2");
+	QFile::remove("debug/test.zip");
 }

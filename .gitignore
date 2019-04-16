@@ -58,3 +58,4 @@ src/GeneratedFiles/*
 tests/debug/*
 tests/release/*
 tests/GeneratedFiles/*
+doc/html/*
