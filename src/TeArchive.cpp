@@ -29,68 +29,27 @@
 
 /*!
 	\namespace TeArchive
-	\inmodule utility
+	\ingroup utility
 	\brief This namespace provide operation classes for archive.
 
 	This namespace provide operation classes for archive.
 	These classes are depend on libarchive and provide it's functionarity.
 
-	\list
 	\li Example for extract from archive.
 		\code
-			TeArchive::reader reader;
+			TeArchive::Reader reader;
 			reader.open("archive.zip");
 			reader.extractAll("destination_path");
 			reader.close();
 		\endcode
 	\li Example for create archive.
 		\code
-			TeArchive::writer writer;
-			writer.addentry("target","path_in_archive");
+			TeArchive::Writer writer;
+			writer.addEntry("target","path_in_archive");
 			writer.archive("archive.zip",TeArchive::AR_ZIP);
 		\endcode
-	\endlist
 
  */
-
-/*!
-	 \enum TeArchive::ArchiveType
-	 \inmodule utility
-	 \brief Type of archive format.
-
-	\value AR_NONE
-		Can't detect any type.
-	\value AR_ZIP
-		zip format.
-	\value AR_7ZIP
-		7zip format.
-	\value AR_TAR
-		kind of tar format.
-	\value AR_TAR_GZIP
-		kind of tar format with gzip compression.
-	\value AR_TAR_BZIP2
-		kind of tar format with bzip2 compression.
- */
- 
-/*!
-	\class TeArchive::FileInfo
-	\inmodule utility
-	\brief File entry information class for archive entry.
-*/
-
-
-/*!
-	\enum TeArchive::EntryType
-
-	\value EN_NONE
-		Null entry type.
-	\value EN_FILE
-		File entry.
-	\value EN_DIR
-		Directory entry.
-	\value EN_PARENT
-		Special directory entry that target to parent directory.
-*/
 
 namespace TeArchive{
 namespace {
@@ -544,7 +503,7 @@ namespace {
 
 /*!
 	\class TeArchive::Reader
-	\inmodule utility
+	\ingroup utility
 	\brief Helper class for extract data from archvie.
 	
 	This is helper class for extract data from archive used by libarchive.
@@ -854,7 +813,7 @@ Reader::const_iterator& Reader::const_iterator::operator++()
 
 /*!
 	\class TeArchive::Writer
-	\inmodule utility
+	\ingroup utility
 	\brief Helper class for create archvie from files.
 
 	This is helper class for create archive from files used by libarchive.

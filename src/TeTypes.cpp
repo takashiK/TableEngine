@@ -21,6 +21,14 @@
 ****************************************************************************/
 #include "TeTypes.h"
 
+/*!
+	\defgroup main main
+	\defgroup utility utility
+	\defgroup commands commands
+	\defgroup platform platform
+	\defgroup widgets widgets
+	\defgroup dialogs dialogs
+ */
 
 
 TeTypes::TeTypes()

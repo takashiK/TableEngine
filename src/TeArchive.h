@@ -28,13 +28,15 @@ class QFileInfo;
 
 namespace TeArchive {
 
+//! Archive entry type descripter.
 enum EntryType {
-	EN_NONE,
-	EN_FILE,
-	EN_DIR,
-	EN_PARENT,
+	EN_NONE,	//!< Undefined type
+	EN_FILE,	//!< File type
+	EN_DIR,		//!< Directory type
+	EN_PARENT,	//!< Parent directory type
 };
 
+//! Archive entry descripter.
 class FileInfo {
 public:
 	FileInfo() :type(EN_NONE), size(0) {}
@@ -52,20 +54,21 @@ public:
 	bool operator<=(const QString& rpath) const Q_DECL_NOTHROW { return path <= rpath; }
 	bool operator>=(const QString& rpath) const Q_DECL_NOTHROW { return path >= rpath; }
 
-	EntryType type;
-	QString   path;
-	QString   src;
-	qint64    size;
-	QDateTime lastModifyed;
+	EntryType type;			//!< Entry type descripter.
+	QString   path;			//!< Path in archive.
+	QString   src;			//!< Source path of entry.
+	qint64    size;			//!< File size.
+	QDateTime lastModifyed;	//!< File last modification time.
 };
 
+//! Archive type descripter.
 enum ArchiveType {
-	AR_NONE,
-	AR_ZIP,
-	AR_7ZIP,
-	AR_TAR,
-	AR_TAR_GZIP,
-	AR_TAR_BZIP2,
+	AR_NONE,		//!< Unkown file.
+	AR_ZIP,			//!< Zip file
+	AR_7ZIP,		//!< 7 zip file
+	AR_TAR,			//!< Tar archive.
+	AR_TAR_GZIP,	//!< Tar archive with gzip compress.
+	AR_TAR_BZIP2,	//!< Tar archive with bzip2 compress.
 };
 
 class Reader :

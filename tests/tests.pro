@@ -26,11 +26,15 @@ HEADERS += $$files(commands/*.h,true)
 HEADERS += $$files(dialogs/*.h,true)
 HEADERS += $$files(platform/*.h)
 HEADERS += $$files(widgets/*.h,true)
+HEADERS += $$files(test_mock/*.h,true)
+HEADERS += $$files(test_util/*.h,true)
 
 SOURCES += $$files(*.cpp)
 SOURCES += $$files(commands/*.cpp,true)
 SOURCES += $$files(dialogs/*.cpp,true)
 SOURCES += $$files(widgets/*.cpp,true)
+SOURCES += $$files(test_mock/*.cpp,true)
+SOURCES += $$files(test_util/*.cpp,true)
 
 include(../src/lib.pri)
 
