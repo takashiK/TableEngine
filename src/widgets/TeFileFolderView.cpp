@@ -69,12 +69,12 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	mp_listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
-	//デフォルトパスの設定
+	//set default path
 	setRootPath(QDir::rootPath());
 
-	//ディレクトリ変更時の同期動作設定
+	//connect action that work when selected path is changed.
 	connect(mp_treeView->selectionModel(), &QItemSelectionModel::currentChanged, 
-		[this](const QModelIndex &current, const QModelIndex &previous)
+		[this](const QModelIndex &current, const QModelIndex &/*previous*/)
 		{ setCurrentPath(mp_treeModel->filePath(current)); });
 
 	connect(mp_listView, &QListView::activated, 
@@ -83,11 +83,11 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 			setCurrentPath(mp_listModel->filePath(index));
 		}
 		else {
-			//ダブルクリック時のファイルを開く操作
+			//file open by double click.
 			openFile(mp_listModel->filePath(index));
 		}});
 
-	//Windows版コンテキストメニュー設定
+	//set platform native context menu.
 	connect(mp_treeView, &QTreeView::customContextMenuRequested,
 		[this](const QPoint& pos)
 		{ showContextMenu(mp_treeView,pos); });
@@ -150,12 +150,12 @@ void TeFileFolderView::setRootPath(const QString & path)
 {
 	QString rpath = rootPath();
 	if (rootPath() != path) {
-		//TreeViewのルートを設定
+		//Set root path to treeview.
 		QModelIndex index = mp_treeModel->index(path);
 		tree()->setVisualRootIndex(index);
 		tree()->setCurrentIndex(index);
 
-		//ListViewのルートをTreeViewのルートに設定
+		//Set target path of listview to same as treeview.
 		list()->setRootIndex(mp_listModel->setRootPath(path));
 
 		rpath = rootPath();
@@ -169,7 +169,7 @@ QString TeFileFolderView::rootPath()
 
 void TeFileFolderView::setCurrentPath(const QString & path)
 {
-	//指定されたカレントパスを設定
+	//Set current path to listview. and current index to treeview.
 	QModelIndex index = mp_treeModel->index(path);
 	if (tree()->currentIndex() != index) {
 		tree()->clearSelection();

@@ -137,7 +137,17 @@
 #include <QStringList>
 #include <QDebug>
 #include <QDir>
+#include <QThread>
 
+/*!
+	Check "archive" and "extraction". check method is below.
+	
+	1) Create file tree by \a setup list to debug/test directory.
+	2) Archive file tree of 1) by TeArchive::Writer. its archive type decide by \a type.
+	3) Extract from archive file to debug/test2 directory by TeArchive::Reader.
+	4) Compair debug/test and debug/test2.
+	5) Confirm debug/test2 to \q expect.
+ */
 bool checkArchive(const QStringList& expect, const QStringList& setup, TeArchive::ArchiveType type)
 {
 	cleanFileTree("debug/test");
@@ -174,6 +184,9 @@ bool checkArchive(const QStringList& expect, const QStringList& setup, TeArchive
 	return (r1 && r2);
 }
 
+/*!
+	Check archive with flat file list.
+*/
 TEST(tst_TeArchive, archive_flatfile_zip)
 {
 	QStringList list;
@@ -188,6 +201,9 @@ TEST(tst_TeArchive, archive_flatfile_zip)
 	checkArchive(list, list, TeArchive::AR_TAR_BZIP2);
 }
 
+/*!
+	Check archive files with directories.
+*/
 TEST(tst_TeArchive, archive_rankfile_zip)
 {
 	QStringList list;
@@ -203,6 +219,9 @@ TEST(tst_TeArchive, archive_rankfile_zip)
 	checkArchive(list, list, TeArchive::AR_TAR_BZIP2);
 }
 
+/*!
+	Check excption invalid entries.
+*/
 TEST(tst_TeArchive, archive_write_invalid_entry)
 {
 	cleanFileTree("debug/test");
@@ -250,6 +269,9 @@ TEST(tst_TeArchive, archive_write_invalid_entry)
 	cleanFileTree("debug/test");
 }
 
+/*!
+	Check unusual but acceptable entries.
+*/
 TEST(tst_TeArchive, archive_write_valid_entry)
 {
 	cleanFileTree("debug/test");
@@ -300,6 +322,13 @@ namespace {
 
 }
 
+/*!
+	Check variation of callback function.
+	case 1 : no collision so it is not call callback function.
+	case 2 : occur collision but unaccept all of cases.
+	case 3 : occur collision and overwrite all of cases.
+	case 4 : occur collision and rename it.
+*/
 TEST(tst_TeArchive, archive_readCallback)
 {
 	cleanFileTree("debug/test");
@@ -378,13 +407,15 @@ TEST(tst_TeArchive, archive_readCallback)
 	QFile::remove("debug/test.zip");
 }
 
+/*!
+	check partial entry extraction.
+*/
 TEST(tst_TeArchive, archive_read_partial)
 {
 	cleanFileTree("debug/test");
 	cleanFileTree("debug/test2");
 	QFile::remove("debug/test.zip");
 
-	QFile file;
 	QStringList list;
 	list.append("dir1/dir1_1/dir1_1_1/file1_1_1_1.txt");
 	list.append("dir3/dir3_2/file3_2_1.txt");
@@ -405,4 +436,22 @@ TEST(tst_TeArchive, archive_read_partial)
 	cleanFileTree("debug/test");
 	cleanFileTree("debug/test2");
 	QFile::remove("debug/test.zip");
+}
+
+/*!
+	progress bar test.
+*/
+TEST(tst_TeArchive, archive_progress)
+{
+	QStringList list;
+	list.append("file1.txt");
+	list.append("file2.txt");
+	list.append("file3.txt");
+	list.append("file4.txt");
+	createFileTree("debug/test", list);
+
+	QThread thread;
+	TeArchive::Writer writer;
+
+
 }

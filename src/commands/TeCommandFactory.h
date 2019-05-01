@@ -33,7 +33,7 @@ class TeCommandFactory : QObject
 	Q_OBJECT
 
 protected:
-	TeCommandFactory(QObject* parent=Q_NULLPTR);
+	TeCommandFactory();
 	~TeCommandFactory();
 
 public:

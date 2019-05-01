@@ -36,7 +36,7 @@ TeCmdSelectToggle::~TeCmdSelectToggle()
 }
 
 /**
-* カレントのTeFileListView上での選択状態を反転する。
+* Toggle entries selection.
 */
 bool TeCmdSelectToggle::execute(TeViewStore* p_store)
 {

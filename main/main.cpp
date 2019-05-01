@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	//create main window
 	TeViewStore store;
 	store.initialize();
-	store.setDispatcher(&dispatcher); //ViewをDispatcherに接続
+	store.setDispatcher(&dispatcher);
 	store.show();
 
 	dispatcher.setViewStore(&store);

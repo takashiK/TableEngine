@@ -40,16 +40,17 @@ TeCmdFolderCreate::~TeCmdFolderCreate()
 {
 }
 
+/*!
+	Create folder. rule of create point is below.
+	Target to TreeView : Create folder under current index in treeview.
+	Target to not treeview : Create folder in listview.
+ */
 bool TeCmdFolderCreate::execute(TeViewStore * p_store)
 {
-	// treeView時はtreeViewのカレントインデックス以下にフォルダを作成
-	// treeViewにフォーカスがない場合は、ListViewをターゲットとしてフォルダを作成
-	// ターゲットが存在しない場合はなにもやらない。
 
 	TeFileFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr) {
-		//処理対象ビュー確定
 		QString path;
 
 		if (p_folder->tree()->hasFocus()) {
@@ -66,7 +67,6 @@ bool TeCmdFolderCreate::execute(TeViewStore * p_store)
 		}
 
 		if (!path.isEmpty()) {
-			//カレントターゲットを対象とする。
 			QInputDialog dlg(p_store->mainWindow());
 			dlg.setLabelText(QInputDialog::tr("Enter Folder name."));
 			if (dlg.exec() == QInputDialog::Accepted) {

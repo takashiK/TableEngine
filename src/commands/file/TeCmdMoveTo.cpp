@@ -46,14 +46,13 @@ TeCmdMoveTo::~TeCmdMoveTo()
 }
 
 /**
-* 選択中ファイルを指定フォルダに移動する。
+* Move selected entry to folder.
 */
 bool TeCmdMoveTo::execute(TeViewStore* p_store)
 {
 	TeFileFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr) {
-		//移動対象確定
 		QAbstractItemView* p_itemView = nullptr;
 		if (p_folder->tree()->hasFocus()) {
 			p_itemView = p_folder->tree();
@@ -66,7 +65,7 @@ bool TeCmdMoveTo::execute(TeViewStore* p_store)
 		QStringList paths;
 
 		if (p_itemView->selectionModel()->hasSelection()) {
-			//選択済コンテンツを対象とする。
+			//target to selected entries.
 			QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
 			for(const QModelIndex& index : indexList)
 			{
@@ -76,14 +75,14 @@ bool TeCmdMoveTo::execute(TeViewStore* p_store)
 			}
 		}
 		else {
-			//未選択時はカレントターゲットを対象とする。
+			//if entry is not selected then target to current.
 			if (p_itemView->currentIndex().isValid()) {
 				paths.append(model->filePath(p_itemView->currentIndex()));
 			}
 		}
 
 		if (!paths.isEmpty()) {
-			//移動先フォルダ確定
+			//select folder.
 			TeFilePathDialog dlg(p_store->mainWindow());
 			dlg.setCurrentPath(p_folder->currentPath());
 			dlg.setWindowTitle(TeFilePathDialog::tr("Move to"));
@@ -106,7 +105,6 @@ bool TeCmdMoveTo::execute(TeViewStore* p_store)
 
 void TeCmdMoveTo::moveItems(TeViewStore* p_store, const QStringList & list, const QString & path)
 {
-	//指定ディレクトリが存在しない場合作成するか問い合わせる。
 	QDir dir;
 
 	bool bSuccess = true;

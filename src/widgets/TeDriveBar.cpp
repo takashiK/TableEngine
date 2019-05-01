@@ -36,7 +36,6 @@ TeDriveBar::TeDriveBar(QWidget *parent)
 
 	QFileIconProvider provider;
 
-	//検出されたドライブを登録する。
 	QFileInfoList drives = QDir::drives();
 	for (QFileInfoList::const_iterator itrDrive = drives.cbegin(); itrDrive != drives.cend(); ++itrDrive) {
 		QAction* act = new QAction(provider.icon(*itrDrive), itrDrive->path().left(1));
@@ -46,7 +45,7 @@ TeDriveBar::TeDriveBar(QWidget *parent)
 		connect(act, &QAction::triggered, [this,act](bool checked) { selectDrive(act,checked); });
 	}
 
-	//テスト用
+	//For test
 	QFileInfo info(u8"C:/Qt");
 	QAction* act = new QAction(provider.icon(info), info.fileName());
 	act->setCheckable(true);
@@ -91,8 +90,7 @@ void TeDriveBar::selectDrive(QAction * act, bool checked)
 		}
 	}
 	else if (act == mp_current ) {
-		//選択対象のOff方向のChangeは存在しない。
-		//カレントは常にcheckedのため、checked=trueは処理しない。
+		//if action is "Release check" then rechecked
 		if (!checked) {
 			act->setChecked(true);
 		}
@@ -100,11 +98,11 @@ void TeDriveBar::selectDrive(QAction * act, bool checked)
 	else {
 		QStorageInfo info(act->data().toString());
 		if (!info.isReady()) {
-			//ドライブが無効の場合は選択させない
+			//if drive is not ready then force canceled.
 			act->setChecked(false);
 		}
 		else {
-			//ドライブが有効な場合は、他のドライブのチェックを外す。
+			//if checked drive is ready then other drive release check.
 			for (QAction* action : actions()) {
 				if (action != act) {
 					action->setChecked(false);
@@ -112,7 +110,7 @@ void TeDriveBar::selectDrive(QAction * act, bool checked)
 			}
 			mp_current = act;
 
-			//変更先パスをemitする。
+			//emit new drive.
 			QString path = mp_current->data().toString();
 			emit changeDrive(mp_current->data().toString());
 		}

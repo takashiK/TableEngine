@@ -62,7 +62,7 @@ static void changeKeyTree(int key, QCheckBox* ctrl, QCheckBox* shift, QTreeWidge
 		tree->setCurrentIndex(tree->model()->index(0, 0, tree->model()->index(2, 0)));
 	}
 	else {
-		//不具合とりあえず全部チェック外しておく
+		//exceptive case.
 		ctrl->setCheckState(Qt::Unchecked);
 		shift->setCheckState(Qt::Unchecked);
 		tree->setRootIndex(tree->model()->index(0, 0));
@@ -87,7 +87,7 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 	mp_list->addTopLevelItems(createKeyTreeItem());
 	mp_list->setRootIndex(mp_list->model()->index(0, 0));
 
-	connect(mp_list, &QTreeWidget::itemActivated, [](QTreeWidgetItem* item, int col) {
+	connect(mp_list, &QTreeWidget::itemActivated, [](QTreeWidgetItem* item, int /*col*/) {
 		item->setData(1, Qt::DisplayRole, QVariant());
 		item->setData(1, Qt::DecorationRole, QVariant()); 
 		item->setData(2, Qt::DisplayRole, TeTypes::CMDID_NONE);
@@ -101,8 +101,8 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 	cbox->addWidget(shiftCheck);
 	vbox->addLayout(cbox);
 
-	connect(ctrlCheck, &QCheckBox::stateChanged, [this,ctrlCheck, shiftCheck](int state) { changeKeyTree(Qt::CTRL, ctrlCheck, shiftCheck, mp_list);	});
-	connect(shiftCheck, &QCheckBox::stateChanged, [this,ctrlCheck, shiftCheck](int state) { changeKeyTree(Qt::SHIFT, ctrlCheck, shiftCheck, mp_list);	});
+	connect(ctrlCheck, &QCheckBox::stateChanged, [this,ctrlCheck, shiftCheck](int /*state*/) { changeKeyTree(Qt::CTRL, ctrlCheck, shiftCheck, mp_list);	});
+	connect(shiftCheck, &QCheckBox::stateChanged, [this,ctrlCheck, shiftCheck](int /*state*/) { changeKeyTree(Qt::SHIFT, ctrlCheck, shiftCheck, mp_list);	});
 
 	hbox->addLayout(vbox);
 
@@ -116,7 +116,7 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 
 	cmd->addTopLevelItems(createCmdTreeItem());
 
-	connect(cmd, &QTreeWidget::itemActivated, [this](QTreeWidgetItem* item, int col) {
+	connect(cmd, &QTreeWidget::itemActivated, [this](QTreeWidgetItem* item, int /*col*/) {
 		QTreeWidgetItem* cur = mp_list->currentItem();
 		if (cur != Q_NULLPTR && (item->columnCount() == 3)) {
 			cur->setData(1, Qt::DisplayRole, item->data(0, Qt::DisplayRole));
@@ -128,7 +128,7 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 	hbox->addWidget(cmd);
 	layout->addLayout(hbox);
 
-	//OK Cancelボタン登録
+	//Register OK and Cancel.
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 	buttonBox->setCenterButtons(true);
 	connect(buttonBox, &QDialogButtonBox::accepted, this, &TeKeySetting::accept);

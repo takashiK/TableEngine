@@ -34,13 +34,13 @@
 TeFilePathDialog::TeFilePathDialog(QWidget *parent)
 	: QDialog(parent)
 {
-	//Helpボタン削除
+	//Except Help button
 	Qt::WindowFlags flags = windowFlags();
 	setWindowFlags(flags & ~Qt::WindowContextHelpButtonHint);
 
 	QVBoxLayout *layout = new QVBoxLayout();
 
-	//FilePath指定用 CommboBox
+	//CommboBox for File path.
 	mp_combo = new QComboBox();
 	mp_combo->setEditable(true);
 	mp_combo->setMinimumWidth(300);
@@ -60,7 +60,7 @@ TeFilePathDialog::TeFilePathDialog(QWidget *parent)
 	layout->addWidget(label);
 	layout->setAlignment(label, Qt::AlignHCenter);
 
-	//OK Cancelボタン登録
+	//Register OK and Cancel.
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 	buttonBox->setCenterButtons(true);
 	connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
@@ -107,7 +107,7 @@ bool TeFilePathDialog::eventFilter(QObject * obj, QEvent * event)
 	if (obj == mp_combo) {
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-			//Shift+Enterによるフォルダ選択ツリー表示
+			//Support show folder tree selection when Shift+Enter are pushed.
 			if ((keyEvent->modifiers() == Qt::ShiftModifier) && (keyEvent->key() == Qt::Key_Return)) {
 				TeSelectPathDialog dlg(this);
 				dlg.setWindowTitle(tr("Select Path"));

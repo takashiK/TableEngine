@@ -44,6 +44,7 @@ TeViewStore::TeViewStore(QObject *parent)
 	: QObject(parent)
 {
 	mp_dispatcher = nullptr;
+	mp_driveBar = nullptr;
 	mp_mainWindow = nullptr;
 	mp_tab[TAB_LEFT] = nullptr;
 	mp_tab[TAB_RIGHT] = nullptr;
@@ -70,7 +71,6 @@ void TeViewStore::initialize()
 {
 	//Main window
 	mp_mainWindow = new TeMainWindow;
-	TeFileListView*   list = new TeFileListView;
 
 	//Drive bar
 	mp_driveBar = new TeDriveBar("Drive Bar");
@@ -111,14 +111,14 @@ void TeViewStore::initialize()
 	connect(mp_tab[TAB_LEFT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[TAB_LEFT]->widget(index))); });
 	connect(mp_tab[TAB_RIGHT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[TAB_RIGHT]->widget(index))); });
 
-	//設定情報復帰
+	//load settings
 	loadMenu();
 	loadSetting();
 	loadStatus();
 }
 
 /*!
- * メニュー項目を設定ファイルから読みだして構築する。
+ * Store menu item from settings.
  */
 void TeViewStore::loadMenu()
 {
@@ -131,30 +131,30 @@ void TeViewStore::loadMenu()
 	//Edit
 	menu = mp_mainWindow->menuBar()->addMenu(tr("&Edit"));
 	QAction* action = new QAction(QIcon(":/TableEngine/selectAll.png"), tr("Select &All"));
-	connect(action, &QAction::triggered, [this](bool checked) { emit requestCommand(TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL, TeTypes::WT_NONE, nullptr, nullptr); });
+	connect(action, &QAction::triggered, [this](bool /*checked*/) { emit requestCommand(TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL, TeTypes::WT_NONE, nullptr, nullptr); });
 	menu->addAction(action);
 
 	action = new QAction(QIcon(":/TableEngine/selectToggle.png"), tr("&Toggle"));
-	connect(action, &QAction::triggered, [this](bool checked) { emit requestCommand(TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE, TeTypes::WT_NONE, nullptr, nullptr); });
+	connect(action, &QAction::triggered, [this](bool /*checked*/) { emit requestCommand(TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE, TeTypes::WT_NONE, nullptr, nullptr); });
 	menu->addAction(action);
 
 	//Setting
 	menu = mp_mainWindow->menuBar()->addMenu(tr("&Setting"));
 	action = new QAction(QIcon(":/TableEngine/settings.png"), tr("&Option"));
-	connect(action, &QAction::triggered, [this](bool checked) {emit requestCommand(TeTypes::CMDID_SYSTEM_SETTING_OPTION, TeTypes::WT_NONE, nullptr, nullptr); });
+	connect(action, &QAction::triggered, [this](bool /*checked*/) {emit requestCommand(TeTypes::CMDID_SYSTEM_SETTING_OPTION, TeTypes::WT_NONE, nullptr, nullptr); });
 	menu->addAction(action);
 
 	action = new QAction(QIcon(":/TableEngine/keyboard.png"), tr("&Key"));
-	connect(action, &QAction::triggered, [this](bool checked) {emit requestCommand(TeTypes::CMDID_SYSTEM_SETTING_KEY, TeTypes::WT_NONE, nullptr, nullptr); });
+	connect(action, &QAction::triggered, [this](bool /*checked*/) {emit requestCommand(TeTypes::CMDID_SYSTEM_SETTING_KEY, TeTypes::WT_NONE, nullptr, nullptr); });
 	menu->addAction(action);
 
 	action = new QAction(QIcon(":/TableEngine/menu.png"), tr("&Menu"));
-	connect(action, &QAction::triggered, [this](bool checked) {emit requestCommand(TeTypes::CMDID_SYSTEM_SETTING_MENU, TeTypes::WT_NONE, nullptr, nullptr); });
+	connect(action, &QAction::triggered, [this](bool /*checked*/) {emit requestCommand(TeTypes::CMDID_SYSTEM_SETTING_MENU, TeTypes::WT_NONE, nullptr, nullptr); });
 	menu->addAction(action);
 }
 
 /*!
- * アプリケーションの設定情報を設定ファイルから読み込む。
+	Store Application settings
  */
 void TeViewStore::loadSetting()
 {
@@ -166,7 +166,7 @@ void TeViewStore::loadKeySetting()
 }
 
 /*!
- * アプリケーションの実行状態を設定ファイルから復帰させる。
+	Store application status.
  */
 void TeViewStore::loadStatus()
 {
@@ -208,7 +208,7 @@ int TeViewStore::currentTabIndex()
 {
 	int currentIndex = 0; 
 
-	//カレントFolderView特定にtreeを使う
+	//If FolderView is current then treeview that child of FolderView is set to left part of split.
 	QWidget* tree = mp_split->widget(0);
 
 	if (tree->inherits("TeFileTreeView")) {
@@ -240,7 +240,6 @@ QList<TeFileFolderView*> TeViewStore::getFolderView(int place)
 
 	if (place < TAB_MAX) {
 		if (place < 0) {
-			//負の場合は全Tabからかき集める。
 			for (int i = 0; i < TAB_MAX; i++) {
 				for (int index = 0; index < mp_tab[i]->count(); index++) {
 					list.append(qobject_cast<TeFileFolderView*>(mp_tab[i]->widget(index)));
@@ -265,7 +264,7 @@ TeFileFolderView * TeViewStore::currentFolderView()
 void TeViewStore::setCurrentFolderView(TeFileFolderView * view)
 {
 	if (view == nullptr) return;
-	//TeFileFolderView / ListViewへのフォーカス設定
+	//Focus setting to TeFileFolderView / ListView
 	if (!view->list()->hasFocus()) {
 		view->list()->setFocus();
 	}
@@ -273,7 +272,7 @@ void TeViewStore::setCurrentFolderView(TeFileFolderView * view)
 	mp_currentFolderView = view;
 	int place = tabIndex(view);
 
-	//TabWidgetのカレント変更
+	//Change current of TabWidget
 	int index = mp_tab[place]->indexOf(view);
 	if (index >= 0) {
 		if (mp_tab[place]->currentIndex() != index) {
@@ -281,19 +280,19 @@ void TeViewStore::setCurrentFolderView(TeFileFolderView * view)
 		}
 	}
 
-	//TreeViewの変更 (LEFTのみTreeと連動)
+	//Change TreeView if it is member of TAB_LEFT.
 	if (place == TAB_LEFT) {
 		TeFileTreeView* tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
 		if (tree != view->tree()) {
 			if (tree == Q_NULLPTR) {
-				//新規挿入
-				//QTab::addTab()から直接connect / currentChanged経由でsetCurrentFolderView()が発行されるため、
-				//updateGeometory呼ばれずここにくる。最初のgeometory計算をするため明示的に呼んでおく。
+				//Insert New Item
+				//In this section directry excute after call QTab::addTab(). because it emit currentChanged and currentChanged call setCurrentFolderView().
+				//So we need call updategeometory() before call any geometoric function.
 				mp_tab[place]->updateGeometry();
 				mp_split->insertWidget(0, view->tree());
 			}
 			else {
-				//カレント変更
+				//change current
 				disconnect(mp_driveBar, &TeDriveBar::changeDrive, tree->folderView(), &TeFolderView::setRootPath);
 				mp_split->replaceWidget(0, view->tree());
 				view->tree()->setHidden(false);
@@ -308,11 +307,10 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	if (place >= TAB_MAX) place = TAB_MAX - 1;
 
 	if (place < 0) {
-		//placeが負の場合はcurrentTabに追加する。
 		place = currentTabIndex();
 	}
 	else {
-		//対象よりも若いTabがNullなら番号をずらす。
+		//correct null tab.
 		for (int i = place; i >0; i--) {
 			if (mp_tab[i - 1]->count() > 0) {
 				break;
@@ -330,7 +328,7 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	mp_tab[place]->setHidden(false);
 
 	if (currentFolderView() == nullptr) {
-		//Current FolderView が登録されていない場合は登録する。
+		//Regist Current FolderView If it is not register yet.
 		setCurrentFolderView(folderView);
 	}
 
@@ -348,13 +346,12 @@ void TeViewStore::deleteFolderView(TeFileFolderView * view)
 
 	delete view;
 
-	//Tabの登録コンテンツがない場合、右tabを左に寄せる
-	//Widgetは親を1つしか持てないため、別Tabに移動すると元のTabからは自動的に削除されるため
-	//先頭アイテムにのみを対象してcount=0まで処理する。
+	//If Left Tab are empty then Right Tab entries move to Left Tab.
 	if (mp_tab[TAB_LEFT]->count() == 0) {
 		int currentIndex = mp_tab[TAB_RIGHT]->currentIndex();
-		int count = mp_tab[TAB_RIGHT]->count();
 		while (mp_tab[TAB_RIGHT]->count()) {
+			//Widget has only one parent. so widget that child of Right tab set to Left. that mean is widget move Right to Left.
+			//after all of Right tab children set to Left then Right tab's children are vanished. so this while loop can exist.
 			QString tip = mp_tab[TAB_RIGHT]->tabToolTip(0);
 			int index = mp_tab[TAB_LEFT]->addTab(mp_tab[TAB_RIGHT]->widget(0), mp_tab[TAB_RIGHT]->tabIcon(0), mp_tab[TAB_RIGHT]->tabText(0));
 			mp_tab[TAB_LEFT]->setTabToolTip(index, tip);
@@ -364,19 +361,17 @@ void TeViewStore::deleteFolderView(TeFileFolderView * view)
 
 		mp_tab[TAB_LEFT]->setCurrentIndex(currentIndex);
 		if (folder != view) {
-			//カレント以外の削除の場合はカレントを元にもどしておく
+			//repair current.
 			setCurrentFolderView(folder);
 		}
 	}
 
-	//カレントが削除された場合の補正
+	//target new current folder if current folder is deleted.
 	if (folder == view) {
 		if (mp_tab[index]->count() > 0) {
-			//同一位置のタブが存在する場合
 			setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[index]->currentWidget()));
 		}
 		else {
-			//タブが存在しない場合
 			setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[TAB_LEFT]->currentWidget()));
 		}
 	}
@@ -386,7 +381,6 @@ void TeViewStore::moveFolderView(TeFileFolderView * view, int place, int positio
 {
 	if (view == nullptr) return;
 	if (place < 0 || TAB_MAX <= place) place = TAB_MAX-1;
-	//対象よりも若いTabがNullなら番号をずらす。
 
 	int orgPlace = tabIndex(view);
 	int orgPosition = mp_tab[orgPlace]->indexOf(view);
@@ -395,9 +389,9 @@ void TeViewStore::moveFolderView(TeFileFolderView * view, int place, int positio
 	QIcon icon = mp_tab[orgPlace]->tabIcon(orgPosition);
 
 	if ((place == orgPlace) && (position == orgPosition)) {
-		//移動不要の場合は最後のカレント変更のみ実施
+		//don't need move.
 	} else{ 
-		//新規ポジションに挿入
+		//insert to new position.
 		if (position < 0) {
 			position = mp_tab[place]->addTab(view, icon,title);
 		}
@@ -408,12 +402,9 @@ void TeViewStore::moveFolderView(TeFileFolderView * view, int place, int positio
 		mp_tab[place]->setHidden(false);
 	}
 
-	//Tabの登録コンテンツがない場合、右tabを左に寄せる
+	//Correct Tab position If Left Tab entry is vanished.
 	if (mp_tab[TAB_LEFT]->count() == 0) {
 		int currentIndex = mp_tab[TAB_RIGHT]->currentIndex();
-		int count = mp_tab[TAB_RIGHT]->count();
-		//Widgetは親を1つしか持てないため、別Tabに移動すると元のTabからは自動的に削除されるため
-		//先頭アイテムにのみを対象してcount=0まで処理する。
 		while (mp_tab[TAB_RIGHT]->count()) {
 			QString tip = mp_tab[TAB_RIGHT]->tabToolTip(0);
 			int index = mp_tab[TAB_LEFT]->addTab(mp_tab[TAB_RIGHT]->widget(0), mp_tab[TAB_RIGHT]->tabIcon(0), mp_tab[TAB_RIGHT]->tabText(0));

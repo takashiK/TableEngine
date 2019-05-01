@@ -46,6 +46,7 @@ public:
 	CreateMode createMode();
 
 	void setTargetPath(const QString& path);
+	QString path();
 
 private:
 	QButtonGroup* mp_createMode;

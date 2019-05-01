@@ -25,6 +25,7 @@
 #include <QDateTime>
 
 class QFileInfo;
+class QFile;
 
 namespace TeArchive {
 
@@ -85,12 +86,46 @@ public:
 	bool open( const QString& path);
 	void close();
 
+	/*!
+		Return target archive filepath.
+	*/
 	const QString& path() { return m_path; }
+	ArchiveType type();
 
+public slots:
 	bool extractAll(const QString& destPath);
 	bool extract( const QString& destPath, const QString& base, const QStringList& entries);
 
-	ArchiveType type();
+signals:
+	/*!
+		Provide a maximum byte counts for extraction from archive.
+		This signal emit after call extractAll() or extract().
+		This value is allways same as archive file size.
+		so it return archive file size when you call extract() with partial entries.
+
+		\param value archive file size  (unit by 1KB).
+	*/
+	void maximumValue(int value);
+	/*!
+		Provide progress value at extraction from archive.
+		This value indidate read bytes from archive file by extraction function.
+		It's not include decompression and write extracted data to file. 
+		so if you use this value for progress then it reach 100% before totally complition for extraction.
+		but its difference is small so convenient for progress.
+
+		\param value readed bytes  (unit by 1KB).
+	*/
+	void valueChanged(int value);
+
+	/*!
+		Provide current extraction file information.
+	*/
+	void currentFileInfoChanged(const FileInfo& info);
+	
+	/*!
+		extraction process is finished;
+	*/
+	void finished();
 
 public:
 	class const_iterator {
@@ -117,6 +152,8 @@ private:
 	QString m_path;
 	ArchiveType m_type;
 	bool(*overwrite_check)(QFileInfo*);
+
+	bool copy_data(void* arPtr, QFile* ofile);
 };
 
 class Writer :
@@ -134,7 +171,37 @@ public:
 	bool addEntry(const QString& src, const QString& dest);
 	bool addEntries(const QString& base, const QStringList& srcList, const QString& dest=QString());
 
+public slots:
 	bool archive(const QString& dest, ArchiveType type);
+
+signals:
+	/*!
+		Provide a summentional byte counts of source files.
+		This signal emit after call archive().
+
+		\param summentional byte counts of source files (unit by 1KB).
+	*/
+	void maximumValue(int value);
+	/*!
+		Provide progress value for archiving.
+		This value indidate read bytes from srouce files by archive().
+		It's not include compression and write data to archive file.
+		so if you use this value for progress then it reach 100% before totally complition for archive.
+		but its difference is small so convenient for progress.
+
+		\param value readed bytes  (unit by 1KB).
+	*/
+	void valueChanged(int value);
+
+	/*!
+		Provide current archving file information.
+	*/
+	void currentFileInfoChanged(const FileInfo& info);
+
+	/*!
+		archive process is finished.
+	*/
+	void finished();
 
 private:
 	QList<FileInfo> m_entryList;

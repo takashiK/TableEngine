@@ -29,6 +29,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QIcon>
+#include <QDir>
 
 TeAskCreationModeDialog::TeAskCreationModeDialog(QWidget *parent)
 	: QDialog(parent)
@@ -96,4 +97,12 @@ TeAskCreationModeDialog::CreateMode TeAskCreationModeDialog::createMode()
 void TeAskCreationModeDialog::setTargetPath(const QString & path)
 {
 	mp_path->setText(path);
+}
+
+QString TeAskCreationModeDialog::path()
+{
+	if (mp_path == nullptr) {
+		return QString();
+	}
+	return QDir::cleanPath(mp_path->text());
 }

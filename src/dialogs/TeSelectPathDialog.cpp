@@ -34,7 +34,7 @@
 TeSelectPathDialog::TeSelectPathDialog(QWidget *parent)
 	: QDialog(parent)
 {
-	//Helpボタン削除
+	//Except Help Button
 	Qt::WindowFlags flags = windowFlags();
 	setWindowFlags(flags & ~Qt::WindowContextHelpButtonHint);
 
@@ -42,14 +42,14 @@ TeSelectPathDialog::TeSelectPathDialog(QWidget *parent)
 	model->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 	model->setRootPath("");
 
-	//パス名記載用EditBox
+	//EditBox for file path
 	QVBoxLayout *layout = new QVBoxLayout();
 	mp_edit = new QLineEdit();
-	//パス名入力とツリーを連動させる。
+	//link path string to current entry of treeview.
 	connect(mp_edit, &QLineEdit::textChanged, [this](const QString& text) {setTargetPath(QDir::fromNativeSeparators(text)); });
 	layout->addWidget(mp_edit);
 
-	//LineEditに文字補完機能
+	//Support path completion.
 	QCompleter* completer = new QCompleter(model);
 	completer->setCompletionMode(QCompleter::InlineCompletion);
 	completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
@@ -57,7 +57,7 @@ TeSelectPathDialog::TeSelectPathDialog(QWidget *parent)
 	mp_edit->setCompleter(completer);
 
 
-	//フォルダツリー
+	//Folder tree
 	model = new QFileSystemModel();
 	model->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 	mp_tree = new TeFileTreeView();
@@ -71,12 +71,12 @@ TeSelectPathDialog::TeSelectPathDialog(QWidget *parent)
 	mp_tree->setAutoScroll(true);
 
 	connect(mp_tree->selectionModel(), &QItemSelectionModel::currentChanged,
-		[this,model](const QModelIndex &current, const QModelIndex &previous)
+		[this,model](const QModelIndex &current, const QModelIndex &/*previous*/)
 	    { setTargetPath(model->filePath(current)); });
 
 	layout->addWidget(mp_tree);
 
-	//OK Cancelボタン登録
+	//Regist OK and Cancel.
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 	buttonBox->setCenterButtons(true);
 	connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);

@@ -78,7 +78,6 @@ void showFileContext(int px, int py, const QString& path)
 
 	int                 nId = 0;
 	HRESULT             hr;
-	POINT               pt;
 	HMENU               hmenuPopup;
 	IContextMenu        *pContextMenu = NULL;
 	IShellFolder        *pShellFolder = NULL;
@@ -146,7 +145,7 @@ bool copyFiles(const QStringList & files, const QString & path)
 		if (SUCCEEDED(hr)) {
 			IShellItem *psiTo = NULL;
 
-			//コピー先パスが指定されていれば採用
+			//select copy path
 			if (!path.isEmpty()) {
 				hr = SHCreateItemFromParsingName(reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(path).utf16()), NULL, IID_PPV_ARGS(&psiTo));
 			}
@@ -157,7 +156,6 @@ bool copyFiles(const QStringList & files, const QString & path)
 					hr = SHCreateItemFromParsingName(reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(from).utf16()), NULL, IID_PPV_ARGS(&psiFrom));
 
 					if (SUCCEEDED(hr)) {
-						//コピー登録して、コピー元開放
 						hr = pfo->CopyItem(psiFrom, psiTo, NULL, NULL);
 						psiFrom->Release();
 					}
@@ -167,7 +165,6 @@ bool copyFiles(const QStringList & files, const QString & path)
 					}
 				}
 
-				//コピー先開放
 				if (NULL != psiTo) {
 					psiTo->Release();
 				}
@@ -179,7 +176,6 @@ bool copyFiles(const QStringList & files, const QString & path)
 
 		}
 
-		// IFileOperation開放
 		pfo->Release();
 	}
 
@@ -191,7 +187,7 @@ bool copyFile(const QString & fromFile, const QString & toFile)
 	HRESULT hr = S_OK;
 	IFileOperation *pfo;
 
-	// ファイルパスとファイル名を分解
+	// split file path and file name.
 	QFileInfo info(toFile);
 	QString path = info.path();
 	QString fileName = info.fileName();
@@ -208,28 +204,23 @@ bool copyFile(const QString & fromFile, const QString & toFile)
 	//
 
 	if (SUCCEEDED(hr)) {
-		//IFileOperationの挙動を決める
 		//hr = pfo->SetOperationFlags(FOF_NO_UI);
 		if (SUCCEEDED(hr)) {
 			IShellItem *psiTo = NULL;
 
-			//コピー先パスが指定されていれば採用
 			if (!path.isEmpty()) {
 				hr = SHCreateItemFromParsingName(reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(path).utf16()), NULL, IID_PPV_ARGS(&psiTo));
 			}
 
 			if (SUCCEEDED(hr)) {
 				IShellItem *psiFrom = NULL;
-				IShellItem *psiFile = NULL;
 				hr = SHCreateItemFromParsingName(reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(fromFile).utf16()), NULL, IID_PPV_ARGS(&psiFrom));
 
 				if (SUCCEEDED(hr)) {
-					//コピー登録して、コピー元開放
 					hr = pfo->CopyItem(psiFrom, psiTo, reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(fileName).utf16()), NULL);
 					psiFrom->Release();
 				}
 
-				//コピー先開放
 				if (NULL != psiTo) {
 					psiTo->Release();
 				}
@@ -241,7 +232,6 @@ bool copyFile(const QString & fromFile, const QString & toFile)
 
 		}
 
-		// IFileOperation開放
 		pfo->Release();
 	}
 	return SUCCEEDED(hr);
@@ -258,12 +248,10 @@ bool moveFiles(const QStringList & files, const QString & path)
 	hr = CoCreateInstance(CLSID_FileOperation, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pfo));
 
 	if (SUCCEEDED(hr)) {
-		//IFileOperationの挙動を決める
 		//hr = pfo->SetOperationFlags(FOF_NO_UI);
 		if (SUCCEEDED(hr)) {
 			IShellItem *psiTo = NULL;
 
-			//移動先パスが指定されていれば採用
 			if (!path.isEmpty()) {
 				hr = SHCreateItemFromParsingName(reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(path).utf16()), NULL, IID_PPV_ARGS(&psiTo));
 			}
@@ -274,7 +262,6 @@ bool moveFiles(const QStringList & files, const QString & path)
 					hr = SHCreateItemFromParsingName(reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(from).utf16()), NULL, IID_PPV_ARGS(&psiFrom));
 
 					if (SUCCEEDED(hr)) {
-						//移動登録して、移動元開放
 						hr = pfo->MoveItem(psiFrom, psiTo, NULL, NULL);
 						psiFrom->Release();
 					}
@@ -284,7 +271,6 @@ bool moveFiles(const QStringList & files, const QString & path)
 					}
 				}
 
-				//移動先開放
 				if (NULL != psiTo) {
 					psiTo->Release();
 				}
@@ -296,7 +282,6 @@ bool moveFiles(const QStringList & files, const QString & path)
 
 		}
 
-		// IFileOperation開放
 		pfo->Release();
 	}
 
@@ -314,7 +299,6 @@ bool deleteFiles(const QStringList & files)
 	hr = CoCreateInstance(CLSID_FileOperation, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pfo));
 
 	if (SUCCEEDED(hr)) {
-		//IFileOperationの挙動を決める
 		//hr = pfo->SetOperationFlags(FOF_NO_UI);
 		if (SUCCEEDED(hr)) {
 			for(const QString& from : files) {
@@ -322,7 +306,6 @@ bool deleteFiles(const QStringList & files)
 				hr = SHCreateItemFromParsingName(reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(from).utf16()), NULL, IID_PPV_ARGS(&psiFrom));
 
 				if (SUCCEEDED(hr)) {
-					//削除登録して、削除ファイルパス開放
 					hr = pfo->DeleteItem(psiFrom, NULL);
 					psiFrom->Release();
 				}
@@ -337,7 +320,6 @@ bool deleteFiles(const QStringList & files)
 			}
 		}
 
-		// IFileOperation開放
 		pfo->Release();
 	}
 

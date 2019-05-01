@@ -55,16 +55,16 @@ void TeDispatcher::setViewStore(TeViewStore * p_store)
 }
 
 /**
- *	EventをCmdMapに従ってCommandに変換し実行する。
+ *	dispatch event to command.
  */
 bool TeDispatcher::dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event)
 {
-	//ListView/TreeView共通Dispatch
+	//For ListView & TreeView
 	if (type == TeTypes::WT_LISTVIEW || type == TeTypes::WT_TREEVIEW) {
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
-			//キーイベントをコマンドに変換して実行を依頼する
+			//change key event to command Id.
 			TeTypes::CmdId cmdId = m_keyCmdMap.value(QPair<int,int>(keyEvent->modifiers(),keyEvent->key()));
 
 			if (cmdId != TeTypes::CMDID_NONE) {
@@ -73,28 +73,26 @@ bool TeDispatcher::dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *even
 		}
 	}
 
-	//Dispatcherに送られるイベントは、すべて処理完了扱いにする。
+	//all events mark "finished"
 	return true;
 }
 
 /**
- * CommandIdに対応したCommandClassを生成し実行する。
+ * execute command by commad Id
  */
 void TeDispatcher::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject * obj, QEvent * event)
 {
-	//Command生成
 	TeCommandBase* cmdBase = mp_factory->createCommand(cmdId);
 
 	if (cmdBase != nullptr) {
 		cmdBase->setDispatcher(this);
 
-		//Source情報設定
 		cmdBase->setSource(type, obj, event);
 
-		//非同期実行用の管理キューに登録
+		//command queuing that use to asynchronus execution.
+		//this queue entry clear when command call requestCommandFinalize that is called by TeCommandBase::finished().
 		m_cmdQueue.push_back(cmdBase);
 
-		//処理実行
 		cmdBase->run(mp_store);
 	}
 }
@@ -106,10 +104,8 @@ void TeDispatcher::requestCommandFinalize(TeCommandBase * cmdBase)
 
 void TeDispatcher::loadKeySetting()
 {
-	//既存キー設定クリア
 	m_keyCmdMap.clear();
 
-	//読み込み対象キーリスト作成
 	QList<int> list;
 	for (uint32_t key = Qt::Key_A; key <= Qt::Key_Z; key++) {
 		list.append(key);
@@ -128,7 +124,6 @@ void TeDispatcher::loadKeySetting()
 	list.append(Qt::Key_Backspace);
 	list.append(Qt::Key_Delete);
 
-	//設定値読み込み
 	QSettings settings;
 	settings.beginGroup(SETTING_KEY);
 	const int modifier = Qt::CTRL | Qt::SHIFT;
@@ -142,12 +137,12 @@ void TeDispatcher::loadKeySetting()
 }
 
 /**
- * 非同期コマンドの後処理(削除)を実施する。
+ * clear asynchronous execution qeuue.
  */
 void TeDispatcher::finishCommand(TeCommandBase* cmdBase)
 {
 	if (cmdBase != nullptr) {
-		//大丈夫だとは思うが一応多重Delete避けを入れておく
+		//
 		if ( m_cmdQueue.removeAll(cmdBase) > 0 ) {
 			delete cmdBase;
 		}

@@ -53,9 +53,9 @@ bool TeFolderView::dispatch(TeTypes::WidgetType type, QObject * obj, QEvent * ev
 	return false;
 }
 
-bool TeFolderView::isDispatchable(TeTypes::WidgetType type, QObject* obj, QEvent *event) const
+bool TeFolderView::isDispatchable(TeTypes::WidgetType /*type*/, QObject* /*obj*/, QEvent *event) const
 {
-	//対象イベント絞り込み
+	//select target event.
 	if (event->type() == QEvent::KeyPress) {
 		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
@@ -116,7 +116,7 @@ bool TeFolderView::isDispatchable(TeTypes::WidgetType type, QObject* obj, QEvent
 			case Qt::Key_Y:
 			case Qt::Key_Z:
 				if (keyEvent->modifiers().testFlag(Qt::ShiftModifier)) {
-					//Shiftキー修飾はファイル検索扱いのため、検知させない。
+					//Use Shift key to file selection.
 					return false;
 				}
 				else {

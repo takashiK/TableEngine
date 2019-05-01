@@ -76,7 +76,7 @@ TeArchiveFolderView::TeArchiveFolderView(QWidget *parent)
 
 	//Synchronize views when current directory changed.
 	connect(mp_treeView->selectionModel(), &QItemSelectionModel::currentChanged,
-		[this](const QModelIndex &current, const QModelIndex &previous)
+		[this](const QModelIndex &current, const QModelIndex &/*previous*/)
 	{ setCurrentPath(indexToPath(current)); });
 
 	connect(mp_listView, &QListView::activated, this, &TeArchiveFolderView::itemActivated);
@@ -573,7 +573,7 @@ void TeArchiveFolderView::buildArchiveEntry(TeArchive::Writer * writer, QStandar
 	}
 }
 
-void TeArchiveFolderView::showContextMenu(const QAbstractItemView * pView, const QPoint & pos) const
+void TeArchiveFolderView::showContextMenu(const QAbstractItemView * /*pView*/, const QPoint & /*pos*/) const
 {
 	
 }

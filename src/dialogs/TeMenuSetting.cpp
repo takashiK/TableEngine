@@ -165,7 +165,6 @@ void TeMenuSetting::storeDefaultMenuSettings(QSettings& settings)
 
 void TeMenuSetting::storeDefaultTreeMenuSettings(QSettings& settings )
 {
-	TeCommandFactory* factory = TeCommandFactory::factory();
 	int index = 0;
 	int indent = 0;
 	QString group = QString("menuGroup01");
@@ -183,7 +182,6 @@ void TeMenuSetting::storeDefaultTreeMenuSettings(QSettings& settings )
 
 void TeMenuSetting::storeDefaultListMenuSettings(QSettings& settings )
 {
-	TeCommandFactory* factory = TeCommandFactory::factory();
 	int index = 0;
 	int indent = 0;
 	QString group = QString("menuGroup02");
@@ -235,7 +233,6 @@ QTreeWidgetItem* TeMenuSetting::createEntryItem(const QString& name, TeTypes::Cm
 void TeMenuSetting::loadSettings(QList<TeTreeWidget*>* p_itemList)
 {
 	QSettings settings;
-	TeCommandFactory* factory = TeCommandFactory::factory();
 
 	settings.beginGroup(SETTING_MENU);
 	for (const auto& group : settings.childGroups()) {
@@ -343,14 +340,14 @@ void TeMenuSetting::contextMenu(TeTreeWidget * tree, QTreeWidgetItem* item)
 		menu.addSeparator();
 		QAction* a_edit = menu.addAction(tr("Edit"));
 		QAction* a_del = menu.addAction(tr("Delete"));
-		connect(a_add, &QAction::triggered, [this,item, tree](bool checked) {QTreeWidgetItem* folder = createFolderItem(); if(folder!=nullptr) item->addChild(folder); });
-		connect(a_sep, &QAction::triggered, [this, item, tree](bool checked) {item->addChild(createSeparatorItem()); });
-		connect(a_edit,&QAction::triggered, [this, item, tree](bool checked) {editEntryName(item); });
-		connect(a_del, &QAction::triggered, [this, item, tree](bool checked) {tree->removeItemWidget(item, 0); delete item; });
+		connect(a_add, &QAction::triggered, [this,item, tree](bool /*checked*/) {QTreeWidgetItem* folder = createFolderItem(); if(folder!=nullptr) item->addChild(folder); });
+		connect(a_sep, &QAction::triggered, [this, item, tree](bool /*checked*/) {item->addChild(createSeparatorItem()); });
+		connect(a_edit,&QAction::triggered, [this, item, tree](bool /*checked*/) {editEntryName(item); });
+		connect(a_del, &QAction::triggered, [this, item, tree](bool /*checked*/) {tree->removeItemWidget(item, 0); delete item; });
 	}
 	else {
-		connect(a_add, &QAction::triggered, [this, item, tree](bool checked) {QTreeWidgetItem* folder = createFolderItem(); if (folder != nullptr) tree->addTopLevelItem(folder); });
-		connect(a_sep, &QAction::triggered, [this, item, tree](bool checked) {tree->addTopLevelItem(createSeparatorItem());  });
+		connect(a_add, &QAction::triggered, [this, item, tree](bool /*checked*/) {QTreeWidgetItem* folder = createFolderItem(); if (folder != nullptr) tree->addTopLevelItem(folder); });
+		connect(a_sep, &QAction::triggered, [this, item, tree](bool /*checked*/) {tree->addTopLevelItem(createSeparatorItem());  });
 	}
 
 	menu.exec(QCursor::pos());

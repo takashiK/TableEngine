@@ -36,7 +36,8 @@ TeCmdSelectAll::~TeCmdSelectAll()
 }
 
 /**
- * カレントのTeFileListView上での全選択/解除を実施する。
+	Toggle select all or not selected.
+	If entry is already selected then entry change to "not select".
  */
 bool TeCmdSelectAll::execute(TeViewStore* p_store)
 {
@@ -46,11 +47,9 @@ bool TeCmdSelectAll::execute(TeViewStore* p_store)
 		TeFileListView* p_list = p_folder->list();
 
 		if (p_list->selectionModel()->hasSelection()) {
-			//選択済みなら、全解除
 			p_list->clearSelection();
 		}
 		else {
-			//なにも選択されていなければ、全選択
 			p_list->selectAll();
 		}
 	}

@@ -38,7 +38,6 @@ void TeFileTreeView::setVisualRootIndex(const QModelIndex & index)
 {
 	QModelIndex rootIndex = index.parent();
 	if (m_rootIndex != index) {
-		//非表示指定していたものを表示設定に戻す。
 		for (int i = 0; i < model()->rowCount(m_rootIndex.parent()); i++) {
 			setRowHidden(i, m_rootIndex.parent(), false);
 		}

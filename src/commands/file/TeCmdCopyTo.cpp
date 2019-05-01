@@ -103,7 +103,6 @@ bool TeCmdCopyTo::execute(TeViewStore* p_store)
 
 void TeCmdCopyTo::copyItems(TeViewStore* p_store, const QStringList & list, const QString & path)
 {
-	//指定ディレクトリが存在しない場合作成するか問い合わせる。
 	QDir dir;
 
 	bool bSuccess = true;
@@ -117,16 +116,17 @@ void TeCmdCopyTo::copyItems(TeViewStore* p_store, const QStringList & list, cons
 			//Rename or CreateFolder
 			TeAskCreationModeDialog dlg(p_store->mainWindow());
 			dlg.setTargetPath(path);
+			QString mpath = dlg.path();
 			if (dlg.exec() == QDialog::Accepted) {
 				if (dlg.createMode() == TeAskCreationModeDialog::MODE_RENAME_FILE) {
-					//リネームコピー実行
-					bSuccess = copyFile(list.at(0), path);
+					//copy to modified path.
+					bSuccess = copyFile(list.at(0), mpath);
 				}
 				else {
-					//新規フォルダ作成してからコピー
-					bSuccess = dir.mkpath(path);
+					//create new directory and copy to it.
+					bSuccess = dir.mkpath(mpath);
 					if (bSuccess) {
-						bSuccess = copyFiles(list, path);
+						bSuccess = copyFiles(list, mpath);
 					}
 				}
 			}

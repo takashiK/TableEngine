@@ -24,6 +24,11 @@
 #include <QApplication>
 #include <QKeyEvent>
 
+/*!
+	\class TeFileListView
+	\breif 
+ */
+
 TeFileListView::TeFileListView(QWidget *parent)
 	: QListView(parent)
 {
@@ -44,22 +49,23 @@ void TeFileListView::setFolderView(TeFolderView * view)
 	mp_folderView = view;
 }
 
-/**
- * キー押下時の振舞いを決める
+/*!
+	add keyaction.
+	If space key is pressed then current index is selected and move cursor to next entry.
+	i.e. this function provide only move to next entry acton (this action not change selection). 
+	     selection feature is implemented by selectionCommand().
  */
 void TeFileListView::keyPressEvent(QKeyEvent *event)
 {
 	QListView::keyPressEvent(event);
 
 	QPersistentModelIndex newCurrent, current;
-	Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
 	if (event) {
 		switch (event->type()) {
 		case QEvent::KeyPress: {
-			modifiers = static_cast<const QKeyEvent*>(event)->modifiers();
 			switch (static_cast<const QKeyEvent*>(event)->key()) {
 			case Qt::Key_Space:
-				//スペースキー押下後にカーソルを次のアイテムに移動させる
+				//select by space key.
 				current = currentIndex();
 				newCurrent = model()->index(current.row() + 1, current.column(), rootIndex());
 				if (newCurrent.isValid()) {
@@ -74,15 +80,15 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 	}
 }
 
-/**
- * イベントに対する選択状態の変化パターンを記述する関数
+/*!
+	config selection patten for events.
  */
 QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QModelIndex &index, const QEvent *event) const
 {
 	if (selectionMode() == QListView::ExtendedSelection) {
 		Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
 		if (event == nullptr) {
-			//setCurrentIndexで Clear & Selectが発動しないようにする。
+			//Suspend clear & select when setCurrentIndex()
 			return QItemSelectionModel::NoUpdate;
 		}else{
 			switch (event->type()) {
@@ -92,7 +98,7 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
 				const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
 				const bool controlKeyPressed = modifiers & Qt::ControlModifier;
 				if (!shiftKeyPressed && !controlKeyPressed) {
-					//マウスクリックによる選択動作をさせない (Spaceキーでのトグル動作と相性が悪いため)
+					//except single click selection.
 					return QItemSelectionModel::NoUpdate;
 				}
 				break;
@@ -107,14 +113,15 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
 				case Qt::Key_End:
 				case Qt::Key_PageUp:
 				case Qt::Key_PageDown:
-					//移動キー押下時に選択が解除されるのを防ぐ
+					//except release selection when cursor is moved.
 					return QItemSelectionModel::NoUpdate;
 				case Qt::Key_Space:
+					//change selection by space key.
 					return QItemSelectionModel::Toggle;
 				}
 			}
 			default:
-				//デフォルトはQtの規定動作とする。
+				//Action of other cases are same as Qt Default.
 				return QListView::selectionCommand(index, event);
 			}
 		}

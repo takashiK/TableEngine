@@ -40,7 +40,7 @@
 #include "setting/TeCmdKeySetting.h"
 #include "setting/TeCmdMenuSetting.h"
 
-TeCommandFactory::TeCommandFactory(QObject* parent)
+TeCommandFactory::TeCommandFactory()
 {
 #define CMD_ENTRY(cmdId,cmdClass,name,description,icon)  m_commands[cmdId] = new TeCommandInfo<cmdClass>(cmdId, name, description, icon)
 
@@ -97,8 +97,6 @@ QList<TeCommandInfoBase*> TeCommandFactory::commandGroup(TeTypes::CmdId groupId)
 	QList<TeCommandInfoBase*> group;
 
 	for (auto itr = m_commands.begin(); itr != m_commands.end(); ++itr) {
-		auto key = itr.key();
-		auto val = itr.value();
 		if ( (itr.key() & TeTypes::CMDID_MASK_TYPE) == groupId) {
 			group.append(itr.value());
 		}

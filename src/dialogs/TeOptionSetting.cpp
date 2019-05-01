@@ -121,7 +121,7 @@ QWidget * TeOptionSetting::createPageStartup()
 	connect(edit, &QLineEdit::textChanged, [this](const QString& text) {m_option[SETTING_STARTUP_InitialFolder] = text; });
 	editLayout->addWidget(edit);
 	QPushButton* button = new QPushButton(tr("Find"));
-	connect(button, &QPushButton::clicked, [edit,this](bool checked) 
+	connect(button, &QPushButton::clicked, [edit,this](bool /*checked*/) 
 	{
 		TeSelectPathDialog dlg(this); 
 		dlg.setTargetPath(edit->text());
