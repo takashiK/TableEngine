@@ -1,3 +1,24 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 Takashi Kuwabara.
+** Contact: laffile@gmail.com
+**
+** This file is part of the Table Engine.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 #include "TeDriveBar.h"
 
 #include <QFileIconProvider>
@@ -15,7 +36,6 @@ TeDriveBar::TeDriveBar(QWidget *parent)
 
 	QFileIconProvider provider;
 
-	//検出されたドライブを登録する。
 	QFileInfoList drives = QDir::drives();
 	for (QFileInfoList::const_iterator itrDrive = drives.cbegin(); itrDrive != drives.cend(); ++itrDrive) {
 		QAction* act = new QAction(provider.icon(*itrDrive), itrDrive->path().left(1));
@@ -25,7 +45,7 @@ TeDriveBar::TeDriveBar(QWidget *parent)
 		connect(act, &QAction::triggered, [this,act](bool checked) { selectDrive(act,checked); });
 	}
 
-	//テスト用
+	//For test
 	QFileInfo info(u8"C:/Qt");
 	QAction* act = new QAction(provider.icon(info), info.fileName());
 	act->setCheckable(true);
@@ -70,8 +90,7 @@ void TeDriveBar::selectDrive(QAction * act, bool checked)
 		}
 	}
 	else if (act == mp_current ) {
-		//選択対象のOff方向のChangeは存在しない。
-		//カレントは常にcheckedのため、checked=trueは処理しない。
+		//if action is "Release check" then rechecked
 		if (!checked) {
 			act->setChecked(true);
 		}
@@ -79,11 +98,11 @@ void TeDriveBar::selectDrive(QAction * act, bool checked)
 	else {
 		QStorageInfo info(act->data().toString());
 		if (!info.isReady()) {
-			//ドライブが無効の場合は選択させない
+			//if drive is not ready then force canceled.
 			act->setChecked(false);
 		}
 		else {
-			//ドライブが有効な場合は、他のドライブのチェックを外す。
+			//if checked drive is ready then other drive release check.
 			for (QAction* action : actions()) {
 				if (action != act) {
 					action->setChecked(false);
@@ -91,7 +110,7 @@ void TeDriveBar::selectDrive(QAction * act, bool checked)
 			}
 			mp_current = act;
 
-			//変更先パスをemitする。
+			//emit new drive.
 			QString path = mp_current->data().toString();
 			emit changeDrive(mp_current->data().toString());
 		}

@@ -34,3 +34,21 @@ QMAKE_TARGET_COMPANY = Personal
 QMAKE_TARGET_PRODUCT = Table Engine
 QMAKE_TARGET_DESCRIPTION = A File Explorer
 QMAKE_TARGET_COPYRIGHT = (C) 2019 Takashi Kuwabara
+
+RC_ICONS = Resources/app_icon/table_engine.ico
+
+win32-msvc {
+    CONFIG(debug, debug|release){
+        COPYDIR = debug
+    }else{
+        COPYDIR = release
+    }
+
+    COPYFILES = $${DLL_FILES}
+    COPYFILES ~= s,/,\\,g
+    COPYDIR   ~= s,/,\\,g
+
+    for(FILE,COPYFILES){
+        QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${COPYDIR}$$escape_expand(\n\t))
+    }
+}

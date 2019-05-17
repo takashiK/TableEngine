@@ -40,6 +40,7 @@
 *.rc
 *.manifest
 *.ilk
+*.aps
 
 # qmake project
 .qmake.stash
@@ -49,8 +50,12 @@ target_wrapper.bat
 .vs/*
 main/debug/*
 main/release/*
-packages/*
+main/GeneratedFiles/*
+support_package/*
 src/debug/*
 src/release/*
+src/GeneratedFiles/*
 tests/debug/*
 tests/release/*
+tests/GeneratedFiles/*
+doc/html/*

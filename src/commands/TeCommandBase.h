@@ -1,3 +1,24 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 Takashi Kuwabara.
+** Contact: laffile@gmail.com
+**
+** This file is part of the Table Engine.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 #pragma once
 #include <QObject>
 #include "TeTypes.h"
@@ -16,8 +37,10 @@ public:
 
 protected:
 	/**
-	 * 実処理関数 execute()実行後も非同期処理を継続する場合はfalseを返す。
-	 * 非同期処理終了時はfinished()を読んでインスタンス破棄を依頼すること。
+	 * Main Processing Function: execute() need return false if it is continuous proceeding.
+	 * this type command is called "Asynchronized Command".
+	 * When finish asynchronized command then you should call finished().
+	 * if "finished()" is called then Dispatcher delete class instance of asynchronized command.
 	 */
 	virtual bool execute(TeViewStore* p_store ) = 0;
 	void finished();

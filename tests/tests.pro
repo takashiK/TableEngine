@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-CONFIG = console testcase qt debug_and_release
+CONFIG += console testcase
 TARGET = tst_tengine
 QT += testlib
 
@@ -26,22 +26,39 @@ HEADERS += $$files(commands/*.h,true)
 HEADERS += $$files(dialogs/*.h,true)
 HEADERS += $$files(platform/*.h)
 HEADERS += $$files(widgets/*.h,true)
+HEADERS += $$files(main/*.h,true)
+HEADERS += $$files(test_mock/*.h,true)
+HEADERS += $$files(test_util/*.h,true)
 
 SOURCES += $$files(*.cpp)
 SOURCES += $$files(commands/*.cpp,true)
 SOURCES += $$files(dialogs/*.cpp,true)
 SOURCES += $$files(widgets/*.cpp,true)
+SOURCES += $$files(main/*.cpp,true)
+SOURCES += $$files(test_mock/*.cpp,true)
+SOURCES += $$files(test_util/*.cpp,true)
+
+include(../src/lib.pri)
 
 win32-msvc {
     HEADERS += $$files(platform/windows/*.h,true)
     SOURCES += $$files(platform/windows/*.cpp,true)
-    INCLUDEPATH += ../packages/googletest/include
+    INCLUDEPATH += ../support_package/include
     QMAKE_CFLAGS += /MP
     QMAKE_CXXFLAGS += /MP
-    QMAKE_LFLAGS_DEBUG += ../packages/googletest/debug/gmockd.lib
-    QMAKE_LFLAGS_RELEASE += ../packages/googletest/release/gmock.lib
-}
-CONFIG(debug_and_release):message(Release build!) #will print
-CONFIG(debug, debug|release):message(Debug build!) #no print
+    CONFIG(debug, debug|release){
+        LIBS += ../support_package/debug/gmockd.lib
+        COPYDIR = debug
+    }else{
+        LIBS += ../support_package/release/gmock.lib
+        COPYDIR = release
+    }
 
-include(../src/lib.pri)
+    COPYFILES = $${DLL_FILES}
+    COPYFILES ~= s,/,\\,g
+    COPYDIR   ~= s,/,\\,g
+
+    for(FILE,COPYFILES){
+        QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${COPYDIR}$$escape_expand(\n\t))
+    }
+}

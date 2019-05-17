@@ -1,3 +1,24 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 Takashi Kuwabara.
+** Contact: laffile@gmail.com
+**
+** This file is part of the Table Engine.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 #include "TeTypes.h"
 #include "TeSettings.h"
 #include "TeMenuSetting.h"
@@ -38,8 +59,8 @@ TeMenuSetting::TeMenuSetting(QWidget *parent)
 		combo->addItem(m_itemList[i]->windowTitle(), i);
 		vbox->addWidget(m_itemList[i]);
 		m_itemList[i]->setBuddy(cmd);
+		m_itemList[i]->setHidden(i!=0);
 	}
-	m_itemList[0]->setHidden(false);
 	connect(combo, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
 		for (int i = 0; i < m_itemList.size(); i++) {
 			if (i == index) {
@@ -144,7 +165,6 @@ void TeMenuSetting::storeDefaultMenuSettings(QSettings& settings)
 
 void TeMenuSetting::storeDefaultTreeMenuSettings(QSettings& settings )
 {
-	TeCommandFactory* factory = TeCommandFactory::factory();
 	int index = 0;
 	int indent = 0;
 	QString group = QString("menuGroup01");
@@ -162,7 +182,6 @@ void TeMenuSetting::storeDefaultTreeMenuSettings(QSettings& settings )
 
 void TeMenuSetting::storeDefaultListMenuSettings(QSettings& settings )
 {
-	TeCommandFactory* factory = TeCommandFactory::factory();
 	int index = 0;
 	int indent = 0;
 	QString group = QString("menuGroup02");
@@ -214,7 +233,6 @@ QTreeWidgetItem* TeMenuSetting::createEntryItem(const QString& name, TeTypes::Cm
 void TeMenuSetting::loadSettings(QList<TeTreeWidget*>* p_itemList)
 {
 	QSettings settings;
-	TeCommandFactory* factory = TeCommandFactory::factory();
 
 	settings.beginGroup(SETTING_MENU);
 	for (const auto& group : settings.childGroups()) {
@@ -322,14 +340,14 @@ void TeMenuSetting::contextMenu(TeTreeWidget * tree, QTreeWidgetItem* item)
 		menu.addSeparator();
 		QAction* a_edit = menu.addAction(tr("Edit"));
 		QAction* a_del = menu.addAction(tr("Delete"));
-		connect(a_add, &QAction::triggered, [this,item, tree](bool checked) {QTreeWidgetItem* folder = createFolderItem(); if(folder!=nullptr) item->addChild(folder); });
-		connect(a_sep, &QAction::triggered, [this, item, tree](bool checked) {item->addChild(createSeparatorItem()); });
-		connect(a_edit,&QAction::triggered, [this, item, tree](bool checked) {editEntryName(item); });
-		connect(a_del, &QAction::triggered, [this, item, tree](bool checked) {tree->removeItemWidget(item, 0); delete item; });
+		connect(a_add, &QAction::triggered, [this,item, tree](bool /*checked*/) {QTreeWidgetItem* folder = createFolderItem(); if(folder!=nullptr) item->addChild(folder); });
+		connect(a_sep, &QAction::triggered, [this, item, tree](bool /*checked*/) {item->addChild(createSeparatorItem()); });
+		connect(a_edit,&QAction::triggered, [this, item, tree](bool /*checked*/) {editEntryName(item); });
+		connect(a_del, &QAction::triggered, [this, item, tree](bool /*checked*/) {tree->removeItemWidget(item, 0); delete item; });
 	}
 	else {
-		connect(a_add, &QAction::triggered, [this, item, tree](bool checked) {QTreeWidgetItem* folder = createFolderItem(); if (folder != nullptr) tree->addTopLevelItem(folder); });
-		connect(a_sep, &QAction::triggered, [this, item, tree](bool checked) {tree->addTopLevelItem(createSeparatorItem());  });
+		connect(a_add, &QAction::triggered, [this, item, tree](bool /*checked*/) {QTreeWidgetItem* folder = createFolderItem(); if (folder != nullptr) tree->addTopLevelItem(folder); });
+		connect(a_sep, &QAction::triggered, [this, item, tree](bool /*checked*/) {tree->addTopLevelItem(createSeparatorItem());  });
 	}
 
 	menu.exec(QCursor::pos());
@@ -360,7 +378,6 @@ TeTreeWidget * TeMenuSetting::createNewMenu(const QString & name)
 	tree->setDragDropMode(QTreeWidget::DragDrop);
 	tree->setDefaultDropAction(Qt::MoveAction);
 	tree->setContextMenuPolicy(Qt::CustomContextMenu);
-	tree->setHidden(true);
 	tree->setRootIndex(tree->model()->index(0, 0));
 
 	connect(tree, &TeTreeWidget::customContextMenuRequested,

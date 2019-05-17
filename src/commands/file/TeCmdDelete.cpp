@@ -1,3 +1,24 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 Takashi Kuwabara.
+** Contact: laffile@gmail.com
+**
+** This file is part of the Table Engine.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 #include "TeCmdDelete.h"
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
@@ -25,14 +46,13 @@ TeCmdDelete::~TeCmdDelete()
 }
 
 /**
-* 選択中ファイルを指定フォルダに移動する。
+* Delete selected files.
 */
 bool TeCmdDelete::execute(TeViewStore* p_store)
 {
 	TeFileFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr) {
-		//移動対象確定
 		QAbstractItemView* p_itemView = nullptr;
 		if (p_folder->tree()->hasFocus()) {
 			p_itemView = p_folder->tree();
@@ -45,7 +65,7 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 		QStringList paths;
 
 		if (p_itemView->selectionModel()->hasSelection()) {
-			//選択済コンテンツを対象とする。
+			//target selected files.
 			QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
 			for (const QModelIndex& index : indexList)
 			{
@@ -55,14 +75,14 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 			}
 		}
 		else {
-			//未選択時はカレントターゲットを対象とする。
+			//no files selected. so use current file.
 			if (p_itemView->currentIndex().isValid()) {
 				paths.append(model->filePath(p_itemView->currentIndex()));
 			}
 		}
 
 		if (!paths.isEmpty()) {
-			//対象を削除
+			//delete target files.
 			deleteItems(p_store, paths);
 		}
 	}
@@ -72,7 +92,6 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 
 void TeCmdDelete::deleteItems(TeViewStore* p_store, const QStringList & list)
 {
-	//指定ディレクトリが存在しない場合作成するか問い合わせる。
 	QDir dir;
 
 	bool bSuccess = true;

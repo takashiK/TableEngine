@@ -1,3 +1,24 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 Takashi Kuwabara.
+** Contact: laffile@gmail.com
+**
+** This file is part of the Table Engine.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 #include "TeKeySetting.h"
 #include "TeTypes.h"
 #include "TeSettings.h"
@@ -41,7 +62,7 @@ static void changeKeyTree(int key, QCheckBox* ctrl, QCheckBox* shift, QTreeWidge
 		tree->setCurrentIndex(tree->model()->index(0, 0, tree->model()->index(2, 0)));
 	}
 	else {
-		//不具合とりあえず全部チェック外しておく
+		//exceptive case.
 		ctrl->setCheckState(Qt::Unchecked);
 		shift->setCheckState(Qt::Unchecked);
 		tree->setRootIndex(tree->model()->index(0, 0));
@@ -66,7 +87,7 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 	mp_list->addTopLevelItems(createKeyTreeItem());
 	mp_list->setRootIndex(mp_list->model()->index(0, 0));
 
-	connect(mp_list, &QTreeWidget::itemActivated, [](QTreeWidgetItem* item, int col) {
+	connect(mp_list, &QTreeWidget::itemActivated, [](QTreeWidgetItem* item, int /*col*/) {
 		item->setData(1, Qt::DisplayRole, QVariant());
 		item->setData(1, Qt::DecorationRole, QVariant()); 
 		item->setData(2, Qt::DisplayRole, TeTypes::CMDID_NONE);
@@ -80,8 +101,8 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 	cbox->addWidget(shiftCheck);
 	vbox->addLayout(cbox);
 
-	connect(ctrlCheck, &QCheckBox::stateChanged, [this,ctrlCheck, shiftCheck](int state) { changeKeyTree(Qt::CTRL, ctrlCheck, shiftCheck, mp_list);	});
-	connect(shiftCheck, &QCheckBox::stateChanged, [this,ctrlCheck, shiftCheck](int state) { changeKeyTree(Qt::SHIFT, ctrlCheck, shiftCheck, mp_list);	});
+	connect(ctrlCheck, &QCheckBox::stateChanged, [this,ctrlCheck, shiftCheck](int /*state*/) { changeKeyTree(Qt::CTRL, ctrlCheck, shiftCheck, mp_list);	});
+	connect(shiftCheck, &QCheckBox::stateChanged, [this,ctrlCheck, shiftCheck](int /*state*/) { changeKeyTree(Qt::SHIFT, ctrlCheck, shiftCheck, mp_list);	});
 
 	hbox->addLayout(vbox);
 
@@ -95,7 +116,7 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 
 	cmd->addTopLevelItems(createCmdTreeItem());
 
-	connect(cmd, &QTreeWidget::itemActivated, [this](QTreeWidgetItem* item, int col) {
+	connect(cmd, &QTreeWidget::itemActivated, [this](QTreeWidgetItem* item, int /*col*/) {
 		QTreeWidgetItem* cur = mp_list->currentItem();
 		if (cur != Q_NULLPTR && (item->columnCount() == 3)) {
 			cur->setData(1, Qt::DisplayRole, item->data(0, Qt::DisplayRole));
@@ -107,7 +128,7 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 	hbox->addWidget(cmd);
 	layout->addLayout(hbox);
 
-	//OK Cancelボタン登録
+	//Register OK and Cancel.
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 	buttonBox->setCenterButtons(true);
 	connect(buttonBox, &QDialogButtonBox::accepted, this, &TeKeySetting::accept);

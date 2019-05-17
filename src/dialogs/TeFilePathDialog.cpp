@@ -1,3 +1,24 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 Takashi Kuwabara.
+** Contact: laffile@gmail.com
+**
+** This file is part of the Table Engine.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 #include "TeFilePathDialog.h"
 #include "TeSelectPathDialog.h"
 
@@ -13,13 +34,13 @@
 TeFilePathDialog::TeFilePathDialog(QWidget *parent)
 	: QDialog(parent)
 {
-	//Helpボタン削除
+	//Except Help button
 	Qt::WindowFlags flags = windowFlags();
 	setWindowFlags(flags & ~Qt::WindowContextHelpButtonHint);
 
 	QVBoxLayout *layout = new QVBoxLayout();
 
-	//FilePath指定用 CommboBox
+	//CommboBox for File path.
 	mp_combo = new QComboBox();
 	mp_combo->setEditable(true);
 	mp_combo->setMinimumWidth(300);
@@ -39,7 +60,7 @@ TeFilePathDialog::TeFilePathDialog(QWidget *parent)
 	layout->addWidget(label);
 	layout->setAlignment(label, Qt::AlignHCenter);
 
-	//OK Cancelボタン登録
+	//Register OK and Cancel.
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 	buttonBox->setCenterButtons(true);
 	connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
@@ -86,7 +107,7 @@ bool TeFilePathDialog::eventFilter(QObject * obj, QEvent * event)
 	if (obj == mp_combo) {
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-			//Shift+Enterによるフォルダ選択ツリー表示
+			//Support show folder tree selection when Shift+Enter are pushed.
 			if ((keyEvent->modifiers() == Qt::ShiftModifier) && (keyEvent->key() == Qt::Key_Return)) {
 				TeSelectPathDialog dlg(this);
 				dlg.setWindowTitle(tr("Select Path"));
