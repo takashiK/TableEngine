@@ -22,15 +22,26 @@
 ****************************************************************************/
 #include <gtest/gtest.h>
 #include <algorithm>
+#include <random>
+#include <cstdint>
 
 #include "TestFileCreator.h"
 #include "FileEntry.h"
 #include <QDir>
 #include <QRegExp>
 
-void createFileTree(const QString & base, const QStringList & paths)
+/*!
+	Create file tree to \a dest by \a paths.
+	Default file include path string data.
+	If you set positive value to \a extend_mbytes then files append extra extend random data.
+
+	\param dest          Destination  path.
+	\param paths         list of file tree entry.
+	\param extend_mbytes extended data size (MB unit).
+*/
+void createFileTree(const QString & dest, const QStringList & paths, int extend_mbytes)
 {
-	QDir dir(base);
+	QDir dir(dest);
 	dir.mkpath(".");
 
 	QRegExp rootDir = QRegExp("^/+");
@@ -51,6 +62,18 @@ void createFileTree(const QString & base, const QStringList & paths)
 			file.open(QFile::WriteOnly | QFile::Truncate);
 			QByteArray data = path.toLocal8Bit();
 			file.write(data);
+			if (extend_mbytes > 0) {
+				QByteArray extend;
+				std::mt19937_64 ran(qHash(path));
+				std::uint64_t value;
+				for (int i = 0; i < 128*1024; i++) {
+					value = ran();
+					extend.append(reinterpret_cast<char*>(&value),8);
+				}
+				for (int i = 0; i < extend_mbytes; i++) {
+					file.write(extend);
+				}
+			}
 			file.close();
 		}
 		else {
@@ -60,12 +83,29 @@ void createFileTree(const QString & base, const QStringList & paths)
 	}
 }
 
-void cleanFileTree(const QString & base)
+/*!
+	remove file tree.
+
+	\param remove target path.
+*/
+void cleanFileTree(const QString & path)
 {
-	QDir dir(base);
+	QDir dir(path);
 	dir.removeRecursively();
 }
 
+/*!
+	Compare files src to dst.
+	Comparition property is below.
+	\li file size
+	\li internal data if binComp is true.
+
+	\param src src file
+	\param dst dst file
+	\param binComp If this flag true then process binary compare.
+
+	\return return true if src and dst are same file.
+*/
 bool compareFileInfo(const QFileInfo& src, const QFileInfo& dst, bool binComp)
 {
 	bool result = true;
@@ -93,6 +133,9 @@ bool compareFileInfo(const QFileInfo& src, const QFileInfo& dst, bool binComp)
 	return result;
 }
 
+/*!
+	Compare file tree 
+*/
 bool compareFileTree(const QString & src, const QString & dst, bool binComp)
 {
 	bool result = true;

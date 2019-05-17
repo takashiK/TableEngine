@@ -26,8 +26,8 @@
 #include <QDateTime>
 class FileEntry;
 
-void createFileTree(const QString& base, const QStringList& paths);
-void cleanFileTree(const QString& base);
+void createFileTree(const QString& dest, const QStringList& paths, int extend_mbytes =0);
+void cleanFileTree(const QString& path);
 bool compareFileTree(const QString& src, const QString& dst, bool binComp);
 void expectEntries(FileEntry* root, const QStringList& paths, const QDateTime& date = QDateTime(), bool noDotDot = false);
 bool compareFileTree(const FileEntry* srcRoot, const QString& dst, bool binComp);

@@ -559,6 +559,7 @@ Reader::Reader()
 {
 	overwrite_check = Q_NULLPTR;
 	m_type = AR_NONE;
+	m_cancel = false;
 }
 
 /*!
@@ -569,6 +570,7 @@ Reader::Reader(const QString & path)
 {
 	overwrite_check = Q_NULLPTR;
 	m_type = AR_NONE;
+	m_cancel = false;
 	open(path);
 }
 
@@ -632,6 +634,16 @@ void Reader::close()
 	m_path.clear();
 }
 
+void Reader::cancel()
+{
+	m_cancel = true;
+}
+
+void Reader::clearCancel()
+{
+	m_cancel = false;
+}
+
 /*!
 	Extact all of data in archive to \a destPath.
 	If any file success to extract then this function return true.
@@ -658,6 +670,11 @@ bool Reader::extractAll(const QString & destPath)
 
 	emit maximumValue(static_cast<int>( (srcInfo.size()-1)/1024+1));
 
+	if (m_cancel) {
+		emit finished();
+		return false;
+	}
+
 	if (!open_read_archive(&arInfo, m_path)) {
 		emit finished();
 		return false;
@@ -673,6 +690,8 @@ bool Reader::extractAll(const QString & destPath)
 
 	QDir dir;
 	while (read_next_entry(&arInfo, &info)) {
+
+		if (m_cancel) break;
 
 		emit currentFileInfoChanged(info);
 		emit valueChanged(archive_read_bytes(&arInfo));
@@ -700,6 +719,9 @@ bool Reader::extractAll(const QString & destPath)
 			copy_data(&arInfo, &ofile);
 
 			ofile.close();
+			if (m_cancel) {
+				ofile.remove();
+			}
 		}
 	}
 
@@ -728,8 +750,15 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 		return false;
 	}
 
-	QtArchiveInfo arInfo;
+	QFileInfo srcInfo(m_path);
+	if (!srcInfo.isReadable()) {
+		emit finished();
+		return false;
+	}
 
+	emit maximumValue(static_cast<int>((srcInfo.size() - 1) / 1024 + 1));
+
+	QtArchiveInfo arInfo;
 	if (!open_read_archive(&arInfo, m_path)) {
 		emit finished();
 		return false;
@@ -745,6 +774,11 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 
 	QDir dir;
 	while (read_next_entry(&arInfo, &info)) {
+		if (m_cancel) break;
+
+		emit currentFileInfoChanged(info);
+		emit valueChanged(archive_read_bytes(&arInfo));
+
 		if (info.type == EN_DIR || info.type == EN_FILE) {
 			if (!info.path.startsWith(base)) {
 				continue;
@@ -779,6 +813,9 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 			copy_data(&arInfo, &ofile);
 
 			ofile.close();
+			if (m_cancel) {
+				ofile.remove();
+			}
 		}
 	}
 
@@ -806,6 +843,8 @@ bool Reader::copy_data(void* arPtr, QFile* ofile)
 	QtArchiveInfo* arInfo = static_cast<QtArchiveInfo*>(arPtr);
 
 	for (;;) {
+		if (m_cancel) break;
+
 		r = archive_read_data_block(arInfo->ar, &buff, &size, &offset);
 		if (r == ARCHIVE_EOF)
 			return true;
@@ -869,7 +908,7 @@ Reader::const_iterator::const_iterator(Reader * ar)
 	copy constructor of iterator that use for check entry in archive.
 	it copy from \a o.
  */
-Reader::const_iterator::const_iterator(const_iterator && o)
+Reader::const_iterator::const_iterator(const_iterator && o) noexcept
 {
 	data = o.data;
 	info = o.info;
@@ -923,7 +962,8 @@ Reader::const_iterator& Reader::const_iterator::operator++()
  */
 Writer::Writer()
 {
-	m_sortFlag = true;
+	m_totalBytes = 0;
+	m_cancel = false;
 }
 
 
@@ -936,6 +976,8 @@ Writer::~Writer()
  */
 void Writer::clear()
 {
+	m_totalBytes = 0;
+	m_cancel = false;
 	m_entryList.clear();
 }
 
@@ -946,6 +988,16 @@ void Writer::clear()
 int Writer::count()
 {
 	return m_entryList.size();
+}
+
+void Writer::cancel()
+{
+	m_cancel = true;
+}
+
+void Writer::clearCancel()
+{
+	m_cancel = false;
 }
 
 /*!
@@ -982,11 +1034,11 @@ bool Writer::addEntry(const QString & src, const QString& dest)
 		info.type = EN_FILE;
 		info.size = fileInfo.size();
 		m_entryList.append(info);
+		m_totalBytes += info.size;
 	}
 	else {
 		return false;
 	}
-	m_sortFlag = false;
 	return true;
 }
 
@@ -1033,15 +1085,29 @@ bool Writer::addEntries(const QString & base, const QStringList & srcList, const
  */
 bool Writer::archive(const QString & dest, ArchiveType type)
 {
-	QtArchiveInfo arInfo;
-	if (!open_write_archvie(&arInfo, dest, type)) {
+	emit maximumValue((m_totalBytes - 1) / 1024 + 1);
+
+	if (m_cancel) {
+		emit finished();
 		return false;
 	}
 
+	QtArchiveInfo arInfo;
+	if (!open_write_archvie(&arInfo, dest, type)) {
+		emit finished();
+		return false;
+	}
+
+	qint64 total = 0;
 	archive_entry* entry;
+
 	for (auto& info : m_entryList) {
+		if (m_cancel) break;
+
 		QFileInfo fileInfo(info.src);
 		if (!fileInfo.isFile() && !fileInfo.isDir()) continue;
+
+		emit currentFileInfoChanged(info);
 
 		entry = archive_entry_new();
 		archive_entry_set_pathname(entry, info.path.toLocal8Bit());
@@ -1064,6 +1130,8 @@ bool Writer::archive(const QString & dest, ArchiveType type)
 				qint64 length = 0;
 				while ((length = file.read(arInfo.res.buffer, arInfo.res.buffer_size))>0) {
 					archive_write_data(arInfo.ar, arInfo.res.buffer, length);
+					total += length;
+					emit valueChanged((total-1)/1024+1);
 				}
 			}
 			file.close();
@@ -1073,6 +1141,8 @@ bool Writer::archive(const QString & dest, ArchiveType type)
 	}
 
 	close_write_archive(&arInfo);
+	emit finished();
+
 	return true;
 }
 

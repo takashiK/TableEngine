@@ -133,12 +133,14 @@
 #include <TeArchive.h>
 #include <test_util/TestFileCreator.h>
 #include <test_util/FileEntry.h>
+#include <test_util/ProgressTracker.h>
 
 #include <QStringList>
 #include <QDebug>
 #include <QDir>
 #include <QThread>
 
+#if 0
 /*!
 	Check "archive" and "extraction". check method is below.
 	
@@ -438,20 +440,92 @@ TEST(tst_TeArchive, archive_read_partial)
 	QFile::remove("debug/test.zip");
 }
 
+#endif
+
 /*!
 	progress bar test.
 */
 TEST(tst_TeArchive, archive_progress)
 {
+	cleanFileTree("debug/test");
+	cleanFileTree("debug/test2");
+	QFile::remove("debug/test.zip");
+
 	QStringList list;
 	list.append("file1.txt");
 	list.append("file2.txt");
 	list.append("file3.txt");
 	list.append("file4.txt");
-	createFileTree("debug/test", list);
+	createFileTree("debug/test", list, 1);
+
+	TeArchive::Writer writer;
+	writer.addEntry("debug/test", "");
+
+	QThread wthread;
+	writer.moveToThread(&wthread);
+	wthread.start();
+
+	QThread rcvThread;
+	ProgressTracker wtracker;
+	ProgressTracker* pwTracker = &wtracker;
+	ProgressTracker tracker;
+	ProgressTracker* pTracker = &tracker;
+	tracker.moveToThread(&rcvThread);
+	rcvThread.start();
+
+	QObject::connect(&writer, &TeArchive::Writer::maximumValue, &wtracker, &ProgressTracker::setMaxValue);
+	QObject::connect(&writer, &TeArchive::Writer::valueChanged, &wtracker, &ProgressTracker::setProgress);
+	QObject::connect(&writer, &TeArchive::Writer::currentFileInfoChanged, [pwTracker](const TeArchive::FileInfo & info) {pwTracker->setText(info.path); });
+
+	writer.archive("debug/test.zip", TeArchive::AR_ZIP);
+
+	wthread.quit();
+	wthread.wait();
+
+	//Check Progress values
+	EXPECT_LE(list.size() *1024,wtracker.maxvalue);
+	EXPECT_LE(list.size(), wtracker.count);
+	EXPECT_EQ(wtracker.maxvalue, wtracker.progress);
+	EXPECT_EQ(list.size(), wtracker.strList.size());
+	if (list.size() == wtracker.strList.size()) {
+		for (int i = 0; i < wtracker.strList.size(); i++) {
+			EXPECT_EQ(list[i].toStdString(), wtracker.strList[i].toStdString());
+		}
+	}
+
+	TeArchive::Reader reader;
+	reader.open("debug/test.zip");
 
 	QThread thread;
-	TeArchive::Writer writer;
+	reader.moveToThread(&thread);
+	thread.start();
 
+	QObject::connect(&reader, &TeArchive::Reader::maximumValue, &tracker, &ProgressTracker::setMaxValue);
+	QObject::connect(&reader, &TeArchive::Reader::valueChanged, &tracker, &ProgressTracker::setProgress);
+	QObject::connect(&reader, &TeArchive::Reader::currentFileInfoChanged, [pTracker](const TeArchive::FileInfo & info) {pTracker->setText(info.path); });
 
+	QMetaObject::invokeMethod(&reader, "extractAll", Qt::QueuedConnection, Q_ARG(QString, "debug/test2"));
+	//wait dispatch event.
+	QThread::msleep(100);
+
+	thread.quit();
+	thread.wait();
+	rcvThread.quit();
+	rcvThread.wait();
+
+	EXPECT_LE(100, tracker.maxvalue);
+	EXPECT_LE(list.size(), tracker.count);
+	EXPECT_GE(tracker.maxvalue, tracker.progress);
+	EXPECT_EQ(list.size(), tracker.strList.size());
+	if (list.size() == tracker.strList.size()) {
+		for (int i = 0; i < tracker.strList.size(); i++) {
+			EXPECT_EQ(list[i].toStdString(), tracker.strList[i].toStdString());
+		}
+	}
+
+	EXPECT_TRUE(compareFileTree("debug/test", "debug/test2", true));
+
+	cleanFileTree("debug/test");
+	cleanFileTree("debug/test2");
+	QFile::remove("debug/test.zip");
 }

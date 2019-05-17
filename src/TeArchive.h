@@ -86,6 +86,9 @@ public:
 	bool open( const QString& path);
 	void close();
 
+	void cancel();
+	void clearCancel();
+
 	/*!
 		Return target archive filepath.
 	*/
@@ -109,9 +112,9 @@ signals:
 	/*!
 		Provide progress value at extraction from archive.
 		This value indidate read bytes from archive file by extraction function.
-		It's not include decompression and write extracted data to file. 
-		so if you use this value for progress then it reach 100% before totally complition for extraction.
-		but its difference is small so convenient for progress.
+		this values has limitation below.
+		\li It's not include decompression and write extracted data to file. 
+		\li It's not reach to maximubValue. Remaining value is approximately 10KB.
 
 		\param value readed bytes  (unit by 1KB).
 	*/
@@ -132,7 +135,7 @@ public:
 	public:
 		const_iterator() : data(Q_NULLPTR) {}
 		const_iterator(Reader* ar);
-		const_iterator(const_iterator &&o);
+		const_iterator(const_iterator &&o) noexcept;
 		~const_iterator();
 		const FileInfo &operator*() const { return info; }
 		const FileInfo *operator->() const { return &info; }
@@ -151,6 +154,7 @@ public:
 private:
 	QString m_path;
 	ArchiveType m_type;
+	bool m_cancel;
 	bool(*overwrite_check)(QFileInfo*);
 
 	bool copy_data(void* arPtr, QFile* ofile);
@@ -167,6 +171,8 @@ public:
 
 	void clear();
 	int count();
+	void cancel();
+	void clearCancel();
 
 	bool addEntry(const QString& src, const QString& dest);
 	bool addEntries(const QString& base, const QStringList& srcList, const QString& dest=QString());
@@ -205,6 +211,7 @@ signals:
 
 private:
 	QList<FileInfo> m_entryList;
-	bool m_sortFlag;
+	qint64 m_totalBytes;
+	bool m_cancel;
 };
 }
