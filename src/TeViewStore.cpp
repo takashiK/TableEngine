@@ -344,6 +344,7 @@ void TeViewStore::deleteFolderView(TeFileFolderView * view)
 
 	mp_currentFolderView = nullptr;
 
+	bool isCurrentDelete = (folder == view);
 	delete view;
 
 	//If Left Tab are empty then Right Tab entries move to Left Tab.
@@ -360,14 +361,14 @@ void TeViewStore::deleteFolderView(TeFileFolderView * view)
 		mp_tab[TAB_RIGHT]->setHidden(true);
 
 		mp_tab[TAB_LEFT]->setCurrentIndex(currentIndex);
-		if (folder != view) {
+		if (!isCurrentDelete) {
 			//repair current.
 			setCurrentFolderView(folder);
 		}
 	}
 
 	//target new current folder if current folder is deleted.
-	if (folder == view) {
+	if (isCurrentDelete) {
 		if (mp_tab[index]->count() > 0) {
 			setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[index]->currentWidget()));
 		}

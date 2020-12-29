@@ -92,14 +92,26 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
 			return QItemSelectionModel::NoUpdate;
 		}else{
 			switch (event->type()) {
-			case QEvent::MouseButtonRelease:
+			case QEvent::MouseButtonRelease: {
+				modifiers = static_cast<const QMouseEvent*>(event)->modifiers();
+				const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
+				const bool controlKeyPressed = modifiers & Qt::ControlModifier;
+				if (!shiftKeyPressed && !controlKeyPressed) {
+					return QItemSelectionModel::NoUpdate;
+				}
+				break;
+			}
 			case QEvent::MouseButtonPress: {
 				modifiers = static_cast<const QMouseEvent*>(event)->modifiers();
 				const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
 				const bool controlKeyPressed = modifiers & Qt::ControlModifier;
 				if (!shiftKeyPressed && !controlKeyPressed) {
-					//except single click selection.
-					return QItemSelectionModel::NoUpdate;
+					if (selectionModel()->isSelected(index)) {
+						return QItemSelectionModel::NoUpdate;
+					}
+					else {
+						return QItemSelectionModel::Clear;
+					}
 				}
 				break;
 			}

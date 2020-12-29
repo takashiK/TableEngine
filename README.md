@@ -37,7 +37,7 @@ This software is developping yet. so it not working now.
 
 ## Licence
 
-This software is released under the GPLv3 License, see LICENCE.
+This software is released under the GPLv2 License, see LICENCE.
 
 ## Authors
 
