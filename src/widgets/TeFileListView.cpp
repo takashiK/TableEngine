@@ -1,28 +1,28 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 Takashi Kuwabara.
+** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
 **
-** This file is part of the Table Engine.
+**  This program is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 2 of the License, or
+**  (at your option) any later version.
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
+**  This program is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
 **
-** $QT_END_LICENSE$
+**  You should have received a copy of the GNU General Public License
+**  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
+
 #include "TeFileListView.h"
 
 #include <QApplication>
 #include <QKeyEvent>
+#include <qdebug.h>
 
 /*!
 	\class TeFileListView
@@ -83,8 +83,12 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 /*!
 	config selection patten for events.
  */
-QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QModelIndex &index, const QEvent *event) const
+QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QModelIndex& index, const QEvent* event) const
 {
+	static bool m_tmpSelect = false;
+	bool tmpSelect = m_tmpSelect;
+	m_tmpSelect = false;
+
 	if (selectionMode() == QListView::ExtendedSelection) {
 		Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
 		if (event == nullptr) {
@@ -93,19 +97,19 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
 		}else{
 			switch (event->type()) {
 			case QEvent::MouseButtonRelease: {
-				modifiers = static_cast<const QMouseEvent*>(event)->modifiers();
+				Qt::MouseButton mousebutton = static_cast<const QMouseEvent*>(event)->button();
 				const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
 				const bool controlKeyPressed = modifiers & Qt::ControlModifier;
-				if (!shiftKeyPressed && !controlKeyPressed) {
+				if (!shiftKeyPressed && !controlKeyPressed && (mousebutton != Qt::MidButton)) {
 					return QItemSelectionModel::NoUpdate;
 				}
 				break;
 			}
 			case QEvent::MouseButtonPress: {
-				modifiers = static_cast<const QMouseEvent*>(event)->modifiers();
+				Qt::MouseButton mousebutton = static_cast<const QMouseEvent*>(event)->button();
 				const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
 				const bool controlKeyPressed = modifiers & Qt::ControlModifier;
-				if (!shiftKeyPressed && !controlKeyPressed) {
+				if (!shiftKeyPressed && !controlKeyPressed && (mousebutton != Qt::MidButton)) {
 					if (selectionModel()->isSelected(index)) {
 						return QItemSelectionModel::NoUpdate;
 					}

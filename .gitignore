@@ -48,13 +48,16 @@ target_wrapper.bat
 
 # uncommitable folder
 .vs/*
+main/x64/*
 main/debug/*
 main/release/*
 main/GeneratedFiles/*
 support_package/*
+src/x64/*
 src/debug/*
 src/release/*
 src/GeneratedFiles/*
+tests/x64/*
 tests/debug/*
 tests/release/*
 tests/GeneratedFiles/*

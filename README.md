@@ -9,8 +9,8 @@ I'm user of FD at MS-DOS and 卓駆☆ at Windows. but both are not compatible o
 
 ## Dependency
 
-* Qt ( greater than 5.12 )
-* Microsoft Visual C++ 2017
+* Qt ( greater than 5.15.2 )
+* Microsoft Visual C++ 2019
 * google mock ( for unit test only )
 
 ## Folder tree

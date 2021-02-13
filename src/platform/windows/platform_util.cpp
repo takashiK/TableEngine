@@ -1,24 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 Takashi Kuwabara.
+** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
 **
-** This file is part of the Table Engine.
+**  This program is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 2 of the License, or
+**  (at your option) any later version.
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
+**  This program is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
 **
-** $QT_END_LICENSE$
+**  You should have received a copy of the GNU General Public License
+**  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
+
 #include "platform/platform_util.h"
 
 #include <QMap>
@@ -52,7 +51,7 @@ void showFileContext(int px, int py, const QString& path)
 	static QString cname;
 	if (cname.isEmpty()) {
 		cname = u8"TableEngineWindowsContext";
-		WNDCLASSEX wc;
+		WNDCLASSEX wc = { 0};
 		wc.cbSize = sizeof(WNDCLASSEX);
 		wc.style = 0;
 		wc.lpfnWndProc = WindowProc;
@@ -68,61 +67,64 @@ void showFileContext(int px, int py, const QString& path)
 		RegisterClassEx(&wc);
 	}
 
-	HWND hwnd = CreateWindowEx(0, reinterpret_cast<LPCWSTR>(cname.utf16()),
-		L"ContextWindow", WS_OVERLAPPED,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		HWND_MESSAGE, NULL, static_cast<HINSTANCE>(GetModuleHandle(0)), NULL);
-
 	PIDLIST_ABSOLUTE pidlAbsolute = ILCreateFromPath(reinterpret_cast<LPCWSTR>(rpath.utf16()));
 
-	int                 nId = 0;
-	HRESULT             hr;
-	HMENU               hmenuPopup;
-	IContextMenu        *pContextMenu = NULL;
-	IShellFolder        *pShellFolder = NULL;
-	PITEMID_CHILD       pidlChild;
+	if (pidlAbsolute != NULL) {
+		int                 nId = 0;
+		HRESULT             hr;
+		HMENU               hmenuPopup;
+		IContextMenu* pContextMenu = NULL;
+		IShellFolder* pShellFolder = NULL;
+		PITEMID_CHILD       pidlChild;
 
-	SHBindToParent(pidlAbsolute, IID_PPV_ARGS(&pShellFolder), NULL);
-	pidlChild = ILFindLastID(pidlAbsolute);
+		HWND hwnd = CreateWindowEx(0, reinterpret_cast<LPCWSTR>(cname.utf16()),
+			L"ContextWindow", WS_OVERLAPPED,
+			CW_USEDEFAULT, CW_USEDEFAULT,
+			CW_USEDEFAULT, CW_USEDEFAULT,
+			HWND_MESSAGE, NULL, static_cast<HINSTANCE>(GetModuleHandle(0)), NULL);
 
-	hr = pShellFolder->GetUIObjectOf(NULL, 1, (LPCITEMIDLIST *)&pidlChild, IID_IContextMenu, NULL, (void **)&pContextMenu);
-	IContextMenu2 *pContextMenu2 = NULL;
-	if (hr == S_OK) {
-		hr = pContextMenu->QueryInterface(IID_PPV_ARGS(&pContextMenu2));
-		pContextMenu->Release();
-		g_context.insert(hwnd, pContextMenu2);
+		SHBindToParent(pidlAbsolute, IID_PPV_ARGS(&pShellFolder), NULL);
+		pidlChild = ILFindLastID(pidlAbsolute);
+
+		hr = pShellFolder->GetUIObjectOf(NULL, 1, (LPCITEMIDLIST*)&pidlChild, IID_IContextMenu, NULL, (void**)&pContextMenu);
+		IContextMenu2* pContextMenu2 = NULL;
+		if (hr == S_OK) {
+			hr = pContextMenu->QueryInterface(IID_PPV_ARGS(&pContextMenu2));
+			pContextMenu->Release();
+			g_context.insert(hwnd, pContextMenu2);
+		}
+
+		if (hr == S_OK) {
+			hmenuPopup = CreatePopupMenu();
+			pContextMenu2->QueryContextMenu(hmenuPopup, 0, 1, 0x7fff, CMF_NORMAL);
+
+			nId = TrackPopupMenu(hmenuPopup, TPM_RETURNCMD, px, py, 0, hwnd, NULL);
+		}
+
+		if (nId != 0) {
+			CMINVOKECOMMANDINFO ici = { 0 };
+			ici.cbSize = sizeof(CMINVOKECOMMANDINFO);
+			ici.fMask = 0;
+			ici.hwnd = hwnd;
+			ici.lpVerb = (LPCSTR)MAKEINTRESOURCE(nId - 1);
+			ici.lpParameters = NULL;
+			ici.lpDirectory = NULL;
+			ici.nShow = SW_SHOW;
+
+			hr = pContextMenu2->InvokeCommand(&ici);
+		}
+
+		if (pContextMenu2 != NULL) {
+			g_context.erase(g_context.find(hwnd));
+			pContextMenu2->Release();
+			pContextMenu2 = NULL;
+		}
+		if (pShellFolder != NULL)pShellFolder->Release();
+
+		DestroyWindow(hwnd);
 	}
-
-	if (hr == S_OK) {
-		hmenuPopup = CreatePopupMenu();
-		pContextMenu2->QueryContextMenu(hmenuPopup, 0, 1, 0x7fff, CMF_NORMAL);
-
-		nId = TrackPopupMenu(hmenuPopup, TPM_RETURNCMD, px, py, 0, hwnd, NULL);
-	}
-
-	if (nId != 0) {
-		CMINVOKECOMMANDINFO ici;
-		ici.cbSize = sizeof(CMINVOKECOMMANDINFO);
-		ici.fMask = 0;
-		ici.hwnd = hwnd;
-		ici.lpVerb = (LPCSTR)MAKEINTRESOURCE(nId - 1);
-		ici.lpParameters = NULL;
-		ici.lpDirectory = NULL;
-		ici.nShow = SW_SHOW;
-
-		hr = pContextMenu2->InvokeCommand(&ici);
-	}
-
-	if (pContextMenu2 != NULL) {
-		g_context.erase(g_context.find(hwnd));
-		pContextMenu2->Release();
-		pContextMenu2 = NULL;
-	}
-	if (pShellFolder != NULL)pShellFolder->Release();
-
-	DestroyWindow(hwnd);
 	ILFree(pidlAbsolute);
+
 }
 
 void openFile(const QString& path)

@@ -1,24 +1,23 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 Takashi Kuwabara.
+** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
 **
-** This file is part of the Table Engine.
+**  This program is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 2 of the License, or
+**  (at your option) any later version.
 **
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 2.0 or (at your option) the GNU General
-** Public license version 3 or any later version approved by the KDE Free
-** Qt Foundation. The licenses are as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-2.0.html and
-** https://www.gnu.org/licenses/gpl-3.0.html.
+**  This program is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
 **
-** $QT_END_LICENSE$
+**  You should have received a copy of the GNU General Public License
+**  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
+
 #include "TeFileFolderView.h"
 #include "TeFileTreeView.h"
 #include "TeFileListView.h"
@@ -96,6 +95,10 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 		[this](const QPoint& pos)
 	{ showContextMenu(mp_listView, pos); });
 
+	//Enable Drag & Drop
+	mp_listView->setDragDropMode(QListView::DragDrop);
+
+	//Install TeDispatcher.
 	mp_treeEvent = new TeEventFilter();
 	mp_treeEvent->setType(TeTypes::WT_TREEVIEW);
 	mp_treeEvent->setDispatcher(this);
@@ -139,9 +142,18 @@ void TeFileFolderView::showContextMenu(const QAbstractItemView * pView, const QP
 	if (pView != nullptr) {
 		QPersistentModelIndex index = pView->indexAt(pos);
 		if (index.isValid() && index == pView->currentIndex()) {
+			//ContextMenu for the item
 			QFileSystemModel* fmodel = qobject_cast<QFileSystemModel*>(pView->model());
 			QPoint gpos = pView->mapToGlobal(pos);
 			::showFileContext(gpos.x(), gpos.y(), fmodel->filePath(index));
+		}
+		else if(pView == mp_treeView){
+			//ContextMenu at no selected for treeView
+
+		}
+		else if (pView == mp_listView) {
+			//ContextMenu at no selected for listView
+
 		}
 	}
 }

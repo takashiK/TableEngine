@@ -18,19 +18,17 @@
 **
 ****************************************************************************/
 
-#pragma once
+#include "TeCmdTemplate.h"
 
-#include <QObject>
-#include <TeArchive.h>
+TeCmdTemplate::TeCmdTemplate()
+{
+}
 
-class FileEntry : public QObject, public TeArchive::FileInfo {
-	Q_OBJECT
-public:
-	FileEntry(FileEntry* parent, const QString& name) : QObject(parent) { path = name; type = TeArchive::EN_DIR; }
-	FileEntry(FileEntry* parent, const QString& name, qint64 size, const QDateTime& lastModified, const QString& src)
-		: QObject(parent)
-	{
-		this->type = TeArchive::EN_FILE;
-		this->path = name; this->size = size; this->lastModifyed = lastModified; this->src = src;
-	}
-};
+TeCmdTemplate::~TeCmdTemplate()
+{
+}
+
+bool TeCmdTemplate::execute(TeViewStore* p_store)
+{
+	return true;
+}
