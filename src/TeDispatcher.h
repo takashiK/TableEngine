@@ -40,6 +40,7 @@ public:
 	virtual ~TeDispatcher();
 
 	void setFactory(const TeCommandFactory* p_factory);
+
 	void setViewStore(TeViewStore* p_store);
 
 	void loadKeySetting();

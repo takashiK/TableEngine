@@ -28,6 +28,11 @@ TeCmdTemplate::~TeCmdTemplate()
 {
 }
 
+bool TeCmdTemplate::isAvailable()
+{
+	return true;
+}
+
 bool TeCmdTemplate::execute(TeViewStore* p_store)
 {
 	return true;

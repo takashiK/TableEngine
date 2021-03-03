@@ -26,6 +26,7 @@ class TeCmdDelete :
 public:
 	TeCmdDelete();
 	virtual ~TeCmdDelete();
+	static bool isAvailable();
 
 protected:
 	virtual bool execute(TeViewStore* p_store);

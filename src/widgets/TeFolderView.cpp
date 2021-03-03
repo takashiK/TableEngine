@@ -33,6 +33,9 @@ TeFolderView::TeFolderView(QWidget *parent)
 	: QWidget(parent)
 {
 	mp_dispatcher = Q_NULLPTR;
+
+	connect(this, &TeFolderView::requestCommand,
+		[this](TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event) { execCommand(cmdId,type,obj,event); });
 }
 
 TeFolderView::~TeFolderView()
@@ -50,6 +53,13 @@ bool TeFolderView::dispatch(TeTypes::WidgetType type, QObject * obj, QEvent * ev
 		return mp_dispatcher->dispatch(type, obj, event);
 	}
 	return false;
+}
+
+void TeFolderView::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event)
+{
+	if (mp_dispatcher != nullptr) {
+		mp_dispatcher->execCommand(cmdId, type, obj, event);
+	}
 }
 
 bool TeFolderView::isDispatchable(TeTypes::WidgetType /*type*/, QObject* /*obj*/, QEvent *event) const

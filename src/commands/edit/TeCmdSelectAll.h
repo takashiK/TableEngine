@@ -26,6 +26,7 @@ class TeCmdSelectAll :
 public:
 	TeCmdSelectAll();
 	virtual ~TeCmdSelectAll();
+	static bool isAvailable();
 
 protected:
 	virtual bool execute(TeViewStore* p_store);

@@ -26,6 +26,7 @@ class TeCmdCopyTo :
 public:
 	TeCmdCopyTo();
 	virtual ~TeCmdCopyTo();
+	static bool isAvailable();
 
 protected:
 	virtual bool execute(TeViewStore* p_store);

@@ -26,6 +26,8 @@ class TeCmdFolderCreate :
 public:
 	TeCmdFolderCreate();
 	virtual ~TeCmdFolderCreate();
+	static bool isAvailable();
+
 protected:
 	virtual bool execute(TeViewStore* p_store);
 };

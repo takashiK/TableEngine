@@ -37,6 +37,11 @@ TeCmdFolderOpenUnder::~TeCmdFolderOpenUnder()
 {
 }
 
+bool TeCmdFolderOpenUnder::isAvailable()
+{
+	return true;
+}
+
 bool TeCmdFolderOpenUnder::execute(TeViewStore * p_store)
 {
 	TeFileFolderView* p_folder = p_store->currentFolderView();

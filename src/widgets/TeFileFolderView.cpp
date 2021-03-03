@@ -23,12 +23,19 @@
 #include "TeFileListView.h"
 #include "TeEventFilter.h"
 #include "platform/platform_util.h"
+#include "TeSettings.h"
+#include "commands/TeCommandFactory.h"
+#include "commands/TeCommandInfo.h"
 
 #include <QLayout>
 #include <QFileSystemModel>
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QStorageInfo>
+#include <QMenu>
+#include <QSettings>
+#include <QStack>
+#include <QDebug>
 
 TeFileFolderView::TeFileFolderView(QWidget *parent)
 	: TeFolderView(parent)
@@ -67,6 +74,8 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	mp_listView->setResizeMode(QListView::Adjust);
 	mp_listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
+	mp_listView->setSpacing(2);
+	mp_listView->setSelectionRectVisible(true);
 
 	//set default path
 	setRootPath(QDir::rootPath());
@@ -137,25 +146,78 @@ TeFileListView * TeFileFolderView::list()
 	return mp_listView;
 }
 
-void TeFileFolderView::showContextMenu(const QAbstractItemView * pView, const QPoint & pos) const
+void TeFileFolderView::showContextMenu(const QAbstractItemView * pView, const QPoint & pos)
 {
 	if (pView != nullptr) {
+		QPoint gpos = pView->mapToGlobal(pos);
 		QPersistentModelIndex index = pView->indexAt(pos);
 		if (index.isValid() && index == pView->currentIndex()) {
 			//ContextMenu for the item
 			QFileSystemModel* fmodel = qobject_cast<QFileSystemModel*>(pView->model());
-			QPoint gpos = pView->mapToGlobal(pos);
 			::showFileContext(gpos.x(), gpos.y(), fmodel->filePath(index));
 		}
 		else if(pView == mp_treeView){
 			//ContextMenu at no selected for treeView
+			showUserContextMenu(SETTING_TREEPOPUP_GROUP, gpos);
 
 		}
 		else if (pView == mp_listView) {
 			//ContextMenu at no selected for listView
+			showUserContextMenu(SETTING_LISTPOPUP_GROUP, gpos);
 
 		}
 	}
+}
+
+void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint& pos)
+{
+	// update menu
+	QSettings settings;
+	TeCommandFactory* p_factory = TeCommandFactory::factory();
+
+	QMenu menu;
+
+	settings.beginGroup(SETTING_MENU);
+	settings.beginGroup(menuName);
+	QStack<QMenu*> menus;
+	menus.push(&menu);
+
+	for (const auto& key : settings.childKeys()) {
+		QStringList values = settings.value(key).toString().split(',');
+		int indent = values[0].toInt();
+		TeTypes::CmdId cmdId = static_cast<TeTypes::CmdId>(values[2].toInt());
+		QString name = values[1];
+
+		if (indent < 0) {
+			qDebug() << "Setting File Error: Invalid menu indent.";
+			continue;
+		}
+
+		while (indent+1 < menus.count()) {
+			menus.pop();
+		}
+
+		if (cmdId == TeTypes::CMDID_SPECIAL_FOLDER) {
+			//Create Sub menu folder
+			menus.push(menus.top()->addMenu(name));
+		}
+		else if (cmdId == TeTypes::CMDID_SPECIAL_SEPARATOR) {
+			//add Separator
+			menus.top()->addSeparator();
+		}
+		else {
+			//Create Menu Item
+			TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
+			QAction* action = new QAction(p_info->icon(), p_info->name());
+			action->setEnabled(p_info->isAvailable());
+			connect(action, &QAction::triggered, [this, cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
+			menus.top()->addAction(action);
+		}
+	}
+	settings.endGroup();
+	settings.endGroup();
+
+	menu.exec(pos);
 }
 
 void TeFileFolderView::setRootPath(const QString & path)

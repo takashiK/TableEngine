@@ -18,30 +18,54 @@
 **
 ****************************************************************************/
 
-#include "TeCmdMenuSetting.h"
+#include "TeCmdPaste.h"
+#include "platform/platform_util.h"
 #include "TeViewStore.h"
-#include "dialogs/TeMenuSetting.h"
+#include "widgets/TeFileFolderView.h"
 
+#include <QGuiApplication>
+#include <QClipboard>
+#include <QMimeData>
+#include <QList>
+#include <QUrl>
 
-TeCmdMenuSetting::TeCmdMenuSetting()
+TeCmdPaste::TeCmdPaste()
 {
 }
 
-
-TeCmdMenuSetting::~TeCmdMenuSetting()
+TeCmdPaste::~TeCmdPaste()
 {
 }
 
-bool TeCmdMenuSetting::isAvailable()
+bool TeCmdPaste::isAvailable()
 {
 	return true;
 }
 
-bool TeCmdMenuSetting::execute(TeViewStore * p_store)
+bool TeCmdPaste::execute(TeViewStore* p_store)
 {
-	TeMenuSetting dlg(p_store->mainWindow());
-	if (dlg.exec() == QDialog::Accepted) {
-		p_store->loadMenu();
+	QString dstPath = p_store->currentFolderView()->currentPath();
+
+	const QClipboard* clipboard = QGuiApplication::clipboard();
+	const QMimeData* mime = clipboard->mimeData();
+
+	if (mime != nullptr && mime->hasUrls() && !dstPath.isEmpty()) {
+		QList<QUrl> urls = mime->urls();
+		QStringList paths;
+		for (auto& url : urls) {
+			if (url.isLocalFile()) {
+				paths.append(url.toLocalFile());
+			}
+		}
+
+		if (!paths.isEmpty()) {
+			if (isMoveAction(mime)) {
+				moveFiles(paths, dstPath);
+			}
+			else {
+				copyFiles(paths, dstPath);
+			}
+		}
 	}
 	return true;
 }

@@ -33,6 +33,7 @@ TeFileListView::TeFileListView(QWidget *parent)
 	: QListView(parent)
 {
 	mp_folderView = nullptr;
+	m_clearAndSelect_by_press = false;
 }
 
 TeFileListView::~TeFileListView()
@@ -57,27 +58,60 @@ void TeFileListView::setFolderView(TeFolderView * view)
  */
 void TeFileListView::keyPressEvent(QKeyEvent *event)
 {
+	switch (event->key()) {
+	case Qt::Key_Control:
+	case Qt::Key_Shift:
+	case Qt::Key_Alt:
+		break;
+	default:
+		selectionModel()->select(m_preesedIndex, QItemSelectionModel::Deselect);
+		break;
+	}
+
 	QListView::keyPressEvent(event);
+
+	switch (event->key()) {
+	case Qt::Key_Control:
+	case Qt::Key_Shift:
+	case Qt::Key_Alt:
+		break;
+	default:
+		m_preesedIndex = QModelIndex();
+		break;
+	}
 
 	QPersistentModelIndex newCurrent, current;
 	if (event) {
-		switch (event->type()) {
-		case QEvent::KeyPress: {
-			switch (static_cast<const QKeyEvent*>(event)->key()) {
-			case Qt::Key_Space:
-				//select by space key.
-				current = currentIndex();
-				newCurrent = model()->index(current.row() + 1, current.column(), rootIndex());
-				if (newCurrent.isValid()) {
-					selectionModel()->setCurrentIndex(newCurrent, QItemSelectionModel::NoUpdate);
-				}
+		switch (event->key()) {
+		case Qt::Key_Space:
+			//select by space key.
+			current = currentIndex();
+			newCurrent = model()->index(current.row() + 1, current.column(), rootIndex());
+			if (newCurrent.isValid()) {
+				selectionModel()->setCurrentIndex(newCurrent, QItemSelectionModel::NoUpdate);
 			}
 			break;
-		}
 		default:
 			break;
 		}
 	}
+}
+
+void TeFileListView::mousePressEvent(QMouseEvent* event)
+{
+	QPoint pos = event->pos();
+	QModelIndex index = indexAt(pos);
+	QItemSelectionModel::SelectionFlags flags = selectionCommand(index, event);
+	if (flags.testFlag(QItemSelectionModel::ClearAndSelect)) {
+		m_preesedIndex = index;
+	}
+	else if(index == m_preesedIndex && flags.testFlag(QItemSelectionModel::NoUpdate)){
+		//no more action
+	}
+	else {
+		m_preesedIndex = QModelIndex();
+	}
+	QListView::mousePressEvent(event);
 }
 
 /*!
@@ -85,10 +119,6 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
  */
 QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QModelIndex& index, const QEvent* event) const
 {
-	static bool m_tmpSelect = false;
-	bool tmpSelect = m_tmpSelect;
-	m_tmpSelect = false;
-
 	if (selectionMode() == QListView::ExtendedSelection) {
 		Qt::KeyboardModifiers modifiers = QApplication::keyboardModifiers();
 		if (event == nullptr) {
@@ -96,29 +126,6 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
 			return QItemSelectionModel::NoUpdate;
 		}else{
 			switch (event->type()) {
-			case QEvent::MouseButtonRelease: {
-				Qt::MouseButton mousebutton = static_cast<const QMouseEvent*>(event)->button();
-				const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
-				const bool controlKeyPressed = modifiers & Qt::ControlModifier;
-				if (!shiftKeyPressed && !controlKeyPressed && (mousebutton != Qt::MidButton)) {
-					return QItemSelectionModel::NoUpdate;
-				}
-				break;
-			}
-			case QEvent::MouseButtonPress: {
-				Qt::MouseButton mousebutton = static_cast<const QMouseEvent*>(event)->button();
-				const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
-				const bool controlKeyPressed = modifiers & Qt::ControlModifier;
-				if (!shiftKeyPressed && !controlKeyPressed && (mousebutton != Qt::MidButton)) {
-					if (selectionModel()->isSelected(index)) {
-						return QItemSelectionModel::NoUpdate;
-					}
-					else {
-						return QItemSelectionModel::Clear;
-					}
-				}
-				break;
-			}
 			case QEvent::KeyPress: {
 				switch (static_cast<const QKeyEvent*>(event)->key()) {
 				case Qt::Key_Down:

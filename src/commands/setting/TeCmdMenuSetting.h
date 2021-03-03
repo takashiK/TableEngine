@@ -26,6 +26,7 @@ class TeCmdMenuSetting :
 public:
 	TeCmdMenuSetting();
 	virtual ~TeCmdMenuSetting();
+	static bool isAvailable();
 
 protected:
 	virtual bool execute(TeViewStore* p_store);

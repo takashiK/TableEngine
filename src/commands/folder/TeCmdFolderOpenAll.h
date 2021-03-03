@@ -27,6 +27,8 @@ class TeCmdFolderOpenAll :
 public:
 	TeCmdFolderOpenAll();
 	virtual ~TeCmdFolderOpenAll();
+	static bool isAvailable();
+
 protected:
 	virtual bool execute(TeViewStore* p_store);
 };

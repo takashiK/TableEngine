@@ -34,6 +34,11 @@ TeCmdFolderCloseUnder::~TeCmdFolderCloseUnder()
 {
 }
 
+bool TeCmdFolderCloseUnder::isAvailable()
+{
+	return true;
+}
+
 bool TeCmdFolderCloseUnder::execute(TeViewStore * p_store)
 {
 	TeFileFolderView* p_folder = p_store->currentFolderView();

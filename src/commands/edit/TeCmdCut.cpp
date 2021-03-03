@@ -18,30 +18,52 @@
 **
 ****************************************************************************/
 
-#include "TeCmdMenuSetting.h"
+#include "TeCmdCut.h"
 #include "TeViewStore.h"
-#include "dialogs/TeMenuSetting.h"
+#include "TeUtils.h"
+#include "platform/platform_util.h"
 
+#include <QAbstractItemView>
+#include <QFileSystemModel>
+#include <QURL>
+#include <QList>
 
-TeCmdMenuSetting::TeCmdMenuSetting()
+#include <QMimeData>
+#include <QGuiApplication>
+#include <QClipboard>
+
+TeCmdCut::TeCmdCut()
 {
 }
 
-
-TeCmdMenuSetting::~TeCmdMenuSetting()
+TeCmdCut::~TeCmdCut()
 {
 }
 
-bool TeCmdMenuSetting::isAvailable()
+bool TeCmdCut::isAvailable()
 {
 	return true;
 }
 
-bool TeCmdMenuSetting::execute(TeViewStore * p_store)
+bool TeCmdCut::execute(TeViewStore* p_store)
 {
-	TeMenuSetting dlg(p_store->mainWindow());
-	if (dlg.exec() == QDialog::Accepted) {
-		p_store->loadMenu();
+	QStringList paths;
+
+	if (getSelectedItemList(p_store, &paths)) {
+		QList<QUrl> urls;
+		for (auto& path : paths) {
+			urls.append(QUrl::fromLocalFile(path));
+		}
+		QMimeData* mime = new QMimeData();
+		mime->setUrls(urls);
+
+		setMoveAction(mime);
+
+		//after call setMimeData. MimeData's owner is changed to QClipboard.
+		//so can't delete MimeData instance.
+		QClipboard* clipboard = QGuiApplication::clipboard();
+		clipboard->setMimeData(mime);
 	}
+
 	return true;
 }

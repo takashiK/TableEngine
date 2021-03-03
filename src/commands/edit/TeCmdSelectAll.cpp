@@ -34,6 +34,11 @@ TeCmdSelectAll::~TeCmdSelectAll()
 {
 }
 
+bool TeCmdSelectAll::isAvailable()
+{
+	return true;
+}
+
 /**
 	Toggle select all or not selected.
 	If entry is already selected then entry change to "not select".

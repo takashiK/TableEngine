@@ -26,6 +26,7 @@ class TeCmdKeySetting :
 public:
 	TeCmdKeySetting();
 	virtual ~TeCmdKeySetting();
+	static bool isAvailable();
 
 protected:
 	virtual bool execute(TeViewStore* p_store);

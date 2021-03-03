@@ -21,8 +21,7 @@
 #include "TeCmdMoveTo.h"
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
-#include "widgets/TeFileListView.h"
-#include "widgets/TeFileTreeView.h"
+#include "TeUtils.h"
 #include "dialogs/TeFilePathDialog.h"
 #include "dialogs/TeAskCreationModeDialog.h"
 #include "platform/platform_util.h"
@@ -44,6 +43,11 @@ TeCmdMoveTo::~TeCmdMoveTo()
 {
 }
 
+bool TeCmdMoveTo::isAvailable()
+{
+	return true;
+}
+
 /**
 * Move selected entry to folder.
 */
@@ -52,35 +56,9 @@ bool TeCmdMoveTo::execute(TeViewStore* p_store)
 	TeFileFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr) {
-		QAbstractItemView* p_itemView = nullptr;
-		if (p_folder->tree()->hasFocus()) {
-			p_itemView = p_folder->tree();
-		}
-		else {
-			p_itemView = p_folder->list();
-		}
-
-		QFileSystemModel* model = qobject_cast<QFileSystemModel*>(p_itemView->model());
 		QStringList paths;
 
-		if (p_itemView->selectionModel()->hasSelection()) {
-			//target to selected entries.
-			QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
-			for(const QModelIndex& index : indexList)
-			{
-				if (index.column() == 0) {
-					paths.append(model->filePath(index));
-				}
-			}
-		}
-		else {
-			//if entry is not selected then target to current.
-			if (p_itemView->currentIndex().isValid()) {
-				paths.append(model->filePath(p_itemView->currentIndex()));
-			}
-		}
-
-		if (!paths.isEmpty()) {
+		if (getSelectedItemList(p_store, &paths)) {
 			//select folder.
 			TeFilePathDialog dlg(p_store->mainWindow());
 			dlg.setCurrentPath(p_folder->currentPath());

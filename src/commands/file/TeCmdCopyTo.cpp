@@ -20,9 +20,8 @@
 
 #include "TeCmdCopyTo.h"
 #include "TeViewStore.h"
+#include "TeUtils.h"
 #include "widgets/TeFileFolderView.h"
-#include "widgets/TeFileListView.h"
-#include "widgets/TeFileTreeView.h"
 #include "dialogs/TeFilePathDialog.h"
 #include "dialogs/TeAskCreationModeDialog.h"
 #include "platform/platform_util.h"
@@ -41,6 +40,11 @@ TeCmdCopyTo::~TeCmdCopyTo()
 {
 }
 
+bool TeCmdCopyTo::isAvailable()
+{
+	return true;
+}
+
 /**
 * Copy selected files to target directory
 */
@@ -49,36 +53,10 @@ bool TeCmdCopyTo::execute(TeViewStore* p_store)
 	TeFileFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr) {
-		//get selected files
-		QAbstractItemView* p_itemView = nullptr;
-		if (p_folder->tree()->hasFocus()) {
-			p_itemView = p_folder->tree();
-		}
-		else {
-			p_itemView = p_folder->list();
-		}
 
-		QFileSystemModel* model = qobject_cast<QFileSystemModel*>(p_itemView->model());
 		QStringList paths;
 
-		if (p_itemView->selectionModel()->hasSelection()) {
-			//target selected files.
-			QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
-			for (const QModelIndex& index : indexList)
-			{
-				if (index.column() == 0) {
-					paths.append(model->filePath(index));
-				}
-			}
-		}
-		else {
-			//no files selected. so use current file.
-			if (p_itemView->currentIndex().isValid()) {
-				paths.append(model->filePath(p_itemView->currentIndex()));
-			}
-		}
-
-		if (!paths.isEmpty()) {
+		if (getSelectedItemList(p_store, &paths)) {
 			//get distination folder.
 			TeFilePathDialog dlg(p_store->mainWindow());
 			dlg.setCurrentPath(p_folder->currentPath());

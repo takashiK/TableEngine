@@ -26,6 +26,7 @@ class TeCmdSelectToggle :
 public:
 	TeCmdSelectToggle();
 	virtual ~TeCmdSelectToggle();
+	static bool isAvailable();
 
 protected:
 	virtual bool execute(TeViewStore* p_store);

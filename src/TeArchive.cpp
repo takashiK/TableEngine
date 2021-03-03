@@ -857,6 +857,7 @@ bool Reader::copy_data(void* arPtr, QFile* ofile)
 		
 		emit valueChanged(archive_read_bytes(arInfo));
 	}
+	return false;
 }
 
 /*!

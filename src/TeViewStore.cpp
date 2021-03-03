@@ -25,6 +25,9 @@
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeDriveBar.h"
 #include "TeDispatcher.h"
+#include "TeSettings.h"
+#include "commands/TeCommandFactory.h"
+#include "commands/TeCommandInfo.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -38,6 +41,8 @@
 #include <QHBoxLayout>
 #include <QSizePolicy>
 #include <QSettings>
+#include <QStack>
+#include <QDebug>
 
 TeViewStore::TeViewStore(QObject *parent)
 	: QObject(parent)
@@ -110,6 +115,10 @@ void TeViewStore::initialize()
 	connect(mp_tab[TAB_LEFT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[TAB_LEFT]->widget(index))); });
 	connect(mp_tab[TAB_RIGHT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[TAB_RIGHT]->widget(index))); });
 
+	//setup command bridge
+	connect(this, &TeViewStore::requestCommand,
+		[this](TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event) { execCommand(cmdId, type, obj, event); });
+
 	//load settings
 	loadMenu();
 	loadSetting();
@@ -121,35 +130,78 @@ void TeViewStore::initialize()
  */
 void TeViewStore::loadMenu()
 {
-	//Menu
+	// clear menu
+	mp_mainWindow->menuBar()->clear();
 
-	//File
-	QMenu *menu = mp_mainWindow->menuBar()->addMenu(tr("&File"));
-	menu->addAction(new QAction(tr("&New")));
+	// update menu
+	QSettings settings;
+	TeCommandFactory* p_factory = TeCommandFactory::factory();
 
-	//Edit
-	menu = mp_mainWindow->menuBar()->addMenu(tr("&Edit"));
-	QAction* action = new QAction(QIcon(":/TableEngine/selectAll.png"), tr("Select &All"));
-	connect(action, &QAction::triggered, [this](bool /*checked*/) { emit requestCommand(TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL, TeTypes::WT_NONE, nullptr, nullptr); });
-	menu->addAction(action);
+	settings.beginGroup(SETTING_MENU);
+	settings.beginGroup(SETTING_MENUBAR_GROUP);
+	QStack<QMenu*> menus;
+	for (const auto& key : settings.childKeys()) {
+		QStringList values = settings.value(key).toString().split(',');
+		int indent = values[0].toInt();
+		TeTypes::CmdId cmdId = static_cast<TeTypes::CmdId>(values[2].toInt());
+		QString name = values[1];
 
-	action = new QAction(QIcon(":/TableEngine/selectToggle.png"), tr("&Toggle"));
-	connect(action, &QAction::triggered, [this](bool /*checked*/) { emit requestCommand(TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE, TeTypes::WT_NONE, nullptr, nullptr); });
-	menu->addAction(action);
+		if (indent < 0) {
+			qDebug() << "Setting File Error: Invalid menu indent.";
+			continue;
+		}
 
-	//Setting
-	menu = mp_mainWindow->menuBar()->addMenu(tr("&Setting"));
-	action = new QAction(QIcon(":/TableEngine/settings.png"), tr("&Option"));
-	connect(action, &QAction::triggered, [this](bool /*checked*/) {emit requestCommand(TeTypes::CMDID_SYSTEM_SETTING_OPTION, TeTypes::WT_NONE, nullptr, nullptr); });
-	menu->addAction(action);
+		while (indent < menus.count()) {
+			menus.pop();
+		}
 
-	action = new QAction(QIcon(":/TableEngine/keyboard.png"), tr("&Key"));
-	connect(action, &QAction::triggered, [this](bool /*checked*/) {emit requestCommand(TeTypes::CMDID_SYSTEM_SETTING_KEY, TeTypes::WT_NONE, nullptr, nullptr); });
-	menu->addAction(action);
+		if (cmdId == TeTypes::CMDID_SPECIAL_FOLDER) {
+			//Create Menu Folder
+			if (menus.isEmpty()) {
+				//Create Top menu folder
+				menus.push( mp_mainWindow->menuBar()->addMenu(name) );
+			}
+			else {
+				//Create Sub menu folder
+				menus.push( menus.top()->addMenu(name) );
+			}
+		}
+		else if (cmdId == TeTypes::CMDID_SPECIAL_SEPARATOR) {
+			//add Separator
+			if (menus.isEmpty()) {
+				qDebug() << "Setting File Error: Menu item can't append top level menu.";
+			}
+			else {
+				menus.top()->addSeparator();
+			}
+		}
+		else {
+			//Create Menu Item
+			if (menus.isEmpty()) {
+				qDebug() << "Setting File Error: Menu item can't append top level menu.";
+			}
+			else {
+				TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
+				QAction* action = new QAction(p_info->icon(), p_info->name() );
+				connect(action, &QAction::triggered, [this,cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
+				menus.top()->addAction(action);
+			}
+		}
+	}
+	settings.endGroup();
+	settings.endGroup();
 
-	action = new QAction(QIcon(":/TableEngine/menu.png"), tr("&Menu"));
-	connect(action, &QAction::triggered, [this](bool /*checked*/) {emit requestCommand(TeTypes::CMDID_SYSTEM_SETTING_MENU, TeTypes::WT_NONE, nullptr, nullptr); });
-	menu->addAction(action);
+	QList<QPair<QString, TeTypes::CmdId>>  list = TeCommandFactory::static_groupList();
+
+
+	for (const auto& groupItem : list) {
+		QMenu* menu = mp_mainWindow->menuBar()->addMenu(groupItem.first);
+		for (const auto& item : p_factory->commandGroup(groupItem.second)) {
+			QAction* action = new QAction(item->icon(), item->name());
+			connect(action, &QAction::triggered, [this, item](bool /*checked*/) { emit requestCommand(item->cmdId(), TeTypes::WT_NONE, nullptr, nullptr); });
+			menu->addAction(action);
+		}
+	}
 }
 
 /*!
@@ -185,9 +237,7 @@ void TeViewStore::show()
 
 void TeViewStore::setDispatcher(TeDispatcher * p_dispatcher)
 {
-	if (mp_dispatcher) disconnect();
 	mp_dispatcher = p_dispatcher;
-	connect(this, &TeViewStore::requestCommand, p_dispatcher, &TeDispatcher::execCommand);
 }
 
 bool TeViewStore::dispatch(TeTypes::WidgetType type, QObject * obj, QEvent * event)
@@ -196,6 +246,13 @@ bool TeViewStore::dispatch(TeTypes::WidgetType type, QObject * obj, QEvent * eve
 		return true;
 	}
 	return false;
+}
+
+void TeViewStore::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event)
+{
+	if (mp_dispatcher != nullptr) {
+		mp_dispatcher->execCommand(cmdId, type, obj, event);
+	}
 }
 
 QWidget * TeViewStore::mainWindow()

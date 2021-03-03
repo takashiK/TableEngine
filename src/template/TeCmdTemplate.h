@@ -28,6 +28,8 @@ public:
 	TeCmdTemplate();
 	virtual ~TeCmdTemplate();
 
+	static bool isAvailable();
+
 protected:
 	virtual bool execute(TeViewStore* p_store);
 };

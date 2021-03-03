@@ -38,11 +38,15 @@ public:
 
 	virtual void setDispatcher(TeDispatchable* p_dispatcher);
 	virtual bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event);
+	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
 
 	virtual void setRootPath(const QString& path) = 0;
 	virtual QString rootPath() =0;
 	virtual void setCurrentPath(const QString& path) =0;
 	virtual QString currentPath() =0;
+
+signals:
+	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
 
 protected:
 	bool isDispatchable(TeTypes::WidgetType type, QObject* obj, QEvent *event) const;

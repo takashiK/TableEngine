@@ -36,9 +36,13 @@ public:
 	void setFolderView(TeFolderView* view);
 
 protected:
-	virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex &index,	const QEvent *event = Q_NULLPTR) const;
 	virtual void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
+	virtual void mousePressEvent(QMouseEvent* event);
+	virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event = Q_NULLPTR) const;
 
 private:
 	TeFolderView* mp_folderView;
+	bool m_clearAndSelect_by_press;
+
+	QModelIndex m_preesedIndex;
 };

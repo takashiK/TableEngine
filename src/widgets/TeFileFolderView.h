@@ -49,8 +49,8 @@ public:
 	virtual QString currentPath();
 
 protected:
-	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos) const;
-
+	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos);
+	void showUserContextMenu(const QString& menuName, const QPoint& pos);
 private:
 	TeFileTreeView* mp_treeView;
 	TeFileListView* mp_listView;

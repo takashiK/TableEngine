@@ -18,30 +18,17 @@
 **
 ****************************************************************************/
 
-#include "TeCmdMenuSetting.h"
-#include "TeViewStore.h"
-#include "dialogs/TeMenuSetting.h"
+#pragma once
 
-
-TeCmdMenuSetting::TeCmdMenuSetting()
+#include "commands/TeCommandBase.h"
+class TeCmdCut :
+    public TeCommandBase
 {
-}
+public:
+	TeCmdCut();
+	virtual ~TeCmdCut();
+	static bool isAvailable();
+protected:
+	virtual bool execute(TeViewStore* p_store);
+};
 
-
-TeCmdMenuSetting::~TeCmdMenuSetting()
-{
-}
-
-bool TeCmdMenuSetting::isAvailable()
-{
-	return true;
-}
-
-bool TeCmdMenuSetting::execute(TeViewStore * p_store)
-{
-	TeMenuSetting dlg(p_store->mainWindow());
-	if (dlg.exec() == QDialog::Accepted) {
-		p_store->loadMenu();
-	}
-	return true;
-}

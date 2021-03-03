@@ -48,11 +48,11 @@ TeMenuSetting::TeMenuSetting(QWidget *parent)
 	QHBoxLayout*  hbox = new QHBoxLayout();
 
 	QVBoxLayout* vbox = new QVBoxLayout();
+	QComboBox* combo = new QComboBox();
+	QTreeWidget* cmd = new QTreeWidget();
 
 	loadSettings(&m_itemList);
 
-	QComboBox* combo = new QComboBox();
-	QTreeWidget* cmd = new QTreeWidget();
 	vbox->addWidget(combo);
 	for (int i = 0; i < m_itemList.count(); i++) {
 		combo->addItem(m_itemList[i]->windowTitle(), i);
@@ -145,10 +145,12 @@ void specialEntry(QSettings& settings, int index, int indent, TeTypes::CmdId cmd
 
 void TeMenuSetting::storeDefaultMenuSettings(QSettings& settings)
 {
-	QList<QPair<QString, TeTypes::CmdId>>  list = TeCommandFactory::groupList();
 	TeCommandFactory* factory = TeCommandFactory::factory();
 	int index = 0;
 	int indent = 0;
+
+	QList<QPair<QString, TeTypes::CmdId>>  list = TeCommandFactory::custom_groupList();
+
 
 	QString group = QString("menuGroup00");
 	defaultEntry(settings, group, tr("Menu Bar"));
@@ -187,8 +189,9 @@ void TeMenuSetting::storeDefaultListMenuSettings(QSettings& settings )
 	defaultEntry(settings, group, tr("Popup menu on ListView"));
 
 	settings.beginGroup(group);
-	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FOLDER_OPEN_UNDER);
-	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FOLDER_CLOSE_UNDER);
+	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_EDIT_CUT);
+	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_EDIT_COPY);
+	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_EDIT_PASTE);
 	specialEntry(settings, index++, indent, TeTypes::CMDID_SPECIAL_SEPARATOR, "---");
 	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FOLDER_CREATE_FOLDER);
 	settings.endGroup();

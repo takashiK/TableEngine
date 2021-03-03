@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/TableEngine">
+    <qresource prefix="/TableEngine" lang="copy.png">
         <file alias="selectAll.png">Resources/icon/iconmonstr-selection-13-64.png</file>
         <file alias="selectToggle.png">Resources/icon/iconmonstr-selection-15-64.png</file>
         <file alias="question.png">Resources/icon/iconmonstr-help-6-64.png</file>
@@ -11,8 +11,8 @@
         <file alias="moveTo.png">Resources/icon/iconmonstr-copy-14-64.png</file>
         <file alias="trash.png">Resources/icon/iconmonstr-trash-can-2-64.png</file>
         <file alias="menu.png">Resources/icon/iconmonstr-menu-2-64.png</file>
-        <file alias="collapse.png">Resources/icon/iconmonstr-copy-7-64.png</file>
-        <file alias="expand.png">Resources/icon/iconmonstr-share-11-64.png</file>
+        <file alias="collapse.png">Resources/icon/iconmonstr-log-out-2-64.png</file>
+        <file alias="expand.png">Resources/icon/iconmonstr-log-out-8-64.png</file>
         <file alias="expandFollow.png">Resources/icon/iconmonstr-share-11-64_double.png</file>
         <file alias="archive.png">Resources/icon/iconmonstr-shipping-box-8-64.png</file>
         <file alias="newFolder.png">Resources/icon/iconmonstr-folder-4-64.png</file>
@@ -20,5 +20,8 @@
         <file alias="expandAll.png">Resources/icon/iconmonstr-inbox-6-64.png</file>
         <file alias="extract.png">Resources/icon/iconmonstr-shipping-box-9-64.png</file>
         <file alias="archiveBox.png">Resources/icon/iconmonstr-shipping-box-2-64.png</file>
+        <file alias="copy.png">Resources/icon/iconmonstr-copy-9-64.png</file>
+        <file alias="paste.png">Resources/icon/iconmonstr-clipboard-2-64.png</file>
+        <file alias="cut.png">Resources/icon/iconmonstr-cut-4-64.png</file>
     </qresource>
 </RCC>

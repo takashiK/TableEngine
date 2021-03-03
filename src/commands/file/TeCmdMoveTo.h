@@ -26,6 +26,7 @@ class TeCmdMoveTo :
 public:
 	TeCmdMoveTo();
 	virtual ~TeCmdMoveTo();
+	static bool isAvailable();
 
 protected:
 	virtual bool execute(TeViewStore* p_store);

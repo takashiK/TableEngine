@@ -32,6 +32,11 @@ TeCmdKeySetting::~TeCmdKeySetting()
 {
 }
 
+bool TeCmdKeySetting::isAvailable()
+{
+	return true;
+}
+
 bool TeCmdKeySetting::execute(TeViewStore * p_store)
 {
 	TeKeySetting dlg(p_store->mainWindow());

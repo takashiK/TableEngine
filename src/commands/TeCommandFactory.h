@@ -22,7 +22,7 @@
 
 #include "TeTypes.h"
 #include <QList>
-#include <QHash>
+#include <QMap>
 
 class TeCommandBase;
 class TeCommandInfoBase;
@@ -39,11 +39,13 @@ public:
 	static TeCommandFactory* factory();
 
 	static QList<QPair<QString,TeTypes::CmdId>> groupList();
+	static QList<QPair<QString, TeTypes::CmdId>> custom_groupList();
+	static QList<QPair<QString, TeTypes::CmdId>> static_groupList();
 	QList<TeCommandInfoBase*> commandGroup(TeTypes::CmdId groupId);
 	TeCommandInfoBase* commandInfo(TeTypes::CmdId cmdId);
 	TeCommandBase* createCommand(TeTypes::CmdId cmdId) const;
 
 private:
-	QHash<TeTypes::CmdId, TeCommandInfoBase*> m_commands;
+	QMap<TeTypes::CmdId, TeCommandInfoBase*> m_commands;
 };
 

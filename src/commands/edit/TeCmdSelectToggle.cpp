@@ -34,6 +34,11 @@ TeCmdSelectToggle::~TeCmdSelectToggle()
 {
 }
 
+bool TeCmdSelectToggle::isAvailable()
+{
+	return true;
+}
+
 /**
 * Toggle entries selection.
 */

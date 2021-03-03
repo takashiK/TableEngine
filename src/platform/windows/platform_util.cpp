@@ -28,7 +28,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <Shobjidl.h>
-
+#include <QMimeData>
 
 static QMap<HWND, IContextMenu2*> g_context;
 
@@ -326,6 +326,35 @@ bool deleteFiles(const QStringList & files)
 	}
 
 	return SUCCEEDED(hr);
+}
+
+bool isMoveAction(const QMimeData* mime)
+{
+	if (mime->hasFormat("application/x-qt-windows-mime;value=\"Preferred DropEffect\"")) {
+		const QByteArray array = mime->data("application/x-qt-windows-mime;value=\"Preferred DropEffect\"");
+		return (array.at(0) == 2);
+	}
+
+	if (mime->hasFormat("Preferred DropEffect")) {
+		const QByteArray array = mime->data("Preferred DropEffect");
+		return (array.at(0) == 2);
+	}
+
+	return false;
+}
+
+void setMoveAction(QMimeData* mime)
+{
+	QByteArray data(4, 0);
+	data[0] = 2;
+	mime->setData("Preferred DropEffect", data);
+}
+
+void setCopyAction(QMimeData* mime)
+{
+	QByteArray data(4, 0);
+	data[0] = 5;
+	mime->setData("Preferred DropEffect", data);
 }
 
 bool threadInitialize()

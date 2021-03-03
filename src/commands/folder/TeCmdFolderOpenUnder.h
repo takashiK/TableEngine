@@ -28,6 +28,8 @@ class TeCmdFolderOpenUnder :
 public:
 	TeCmdFolderOpenUnder();
 	virtual ~TeCmdFolderOpenUnder();
+	static bool isAvailable();
+
 protected:
 	virtual bool execute(TeViewStore* p_store);
 	void openUnder(TeFileTreeView* p_tree, const QModelIndex& index);

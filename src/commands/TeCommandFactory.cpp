@@ -50,9 +50,9 @@ TeCommandFactory::TeCommandFactory()
 	CMD_ENTRY(TeTypes::CMDID_SYSTEM_FILE_MOVE_TO, TeCmdMoveTo, tr("&Move To"), tr("Move selected files to other folder."), QIcon(":/TableEngine/moveTo.png"));
 	CMD_ENTRY(TeTypes::CMDID_SYSTEM_FILE_DELETE, TeCmdDelete, tr("&Delete"), tr("Delete selected files."), QIcon(":TableEngine/trash.png"));
 
-	CMD_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_CUT, TeCmdCut, tr("Cut (&T)"), tr("Select all files."), QIcon(":/TableEngine/selectAll.png"));
-	CMD_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_COPY, TeCmdCopy, tr("Copy (&C)"), tr("Select all files."), QIcon(":/TableEngine/selectAll.png"));
-	CMD_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_PASTE, TeCmdPaste, tr("Paste (&P)"), tr("Select all files."), QIcon(":/TableEngine/selectAll.png"));
+	CMD_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_CUT, TeCmdCut, tr("Cut"), tr("Select all files."), QIcon(":/TableEngine/cut.png"));
+	CMD_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_COPY, TeCmdCopy, tr("Copy"), tr("Select all files."), QIcon(":/TableEngine/copy.png"));
+	CMD_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_PASTE, TeCmdPaste, tr("Paste"), tr("Select all files."), QIcon(":/TableEngine/paste.png"));
 	CMD_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL, TeCmdSelectAll, tr("Select &All"), tr("Select all files."), QIcon(":/TableEngine/selectAll.png"));
 	CMD_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE, TeCmdSelectToggle, tr("&Toggle"), tr("Toggle selection."), QIcon(":/TableEngine/selectToggle.png"));
 
@@ -93,6 +93,29 @@ QList<QPair<QString, TeTypes::CmdId>> TeCommandFactory::groupList()
 		{ tr("&Setting"), TeTypes::CMDID_SYSTEM_SETTING },
 		{ tr("&Help"), TeTypes::CMDID_SYSTEM_HELP },
 		{ tr("&User"), TeTypes::CMDID_USER },
+	};
+	return list;
+}
+
+QList<QPair<QString, TeTypes::CmdId>> TeCommandFactory::custom_groupList()
+{
+	QList<QPair<QString, TeTypes::CmdId>> list = {
+		{ tr("&File"), TeTypes::CMDID_SYSTEM_FILE },
+		{ tr("&Edit"), TeTypes::CMDID_SYSTEM_EDIT },
+		{ tr("&Folder"), TeTypes::CMDID_SYSTEM_FOLDER },
+		{ tr("&View"), TeTypes::CMDID_SYSTEM_VIEW },
+		{ tr("&Tool"), TeTypes::CMDID_SYSTEM_TOOL },
+		{ tr("&Window"), TeTypes::CMDID_SYSTEM_WINDOW },
+		{ tr("&User"), TeTypes::CMDID_USER },
+	};
+	return list;
+}
+
+QList<QPair<QString, TeTypes::CmdId>> TeCommandFactory::static_groupList()
+{
+	QList<QPair<QString, TeTypes::CmdId>> list = {
+		{ tr("&Setting"), TeTypes::CMDID_SYSTEM_SETTING },
+		{ tr("&Help"), TeTypes::CMDID_SYSTEM_HELP },
 	};
 	return list;
 }

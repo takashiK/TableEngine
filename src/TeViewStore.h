@@ -57,6 +57,7 @@ public:
 
 	void setDispatcher(TeDispatcher* p_dispatcher);
 	bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event);
+	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
 
 	virtual QWidget*  mainWindow();
 

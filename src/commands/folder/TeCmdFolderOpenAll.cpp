@@ -35,6 +35,11 @@ TeCmdFolderOpenAll::~TeCmdFolderOpenAll()
 {
 }
 
+bool TeCmdFolderOpenAll::isAvailable()
+{
+	return true;
+}
+
 bool TeCmdFolderOpenAll::execute(TeViewStore * p_store)
 {
 	TeFileFolderView* p_folder = p_store->currentFolderView();

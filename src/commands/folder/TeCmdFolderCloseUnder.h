@@ -26,6 +26,8 @@ class TeCmdFolderCloseUnder :
 public:
 	TeCmdFolderCloseUnder();
 	virtual ~TeCmdFolderCloseUnder();
+	static bool isAvailable();
+
 protected:
 	virtual bool execute(TeViewStore* p_store);
 };

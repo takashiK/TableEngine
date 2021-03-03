@@ -32,6 +32,11 @@ TeCmdOption::~TeCmdOption()
 {
 }
 
+bool TeCmdOption::isAvailable()
+{
+	return true;
+}
+
 bool TeCmdOption::execute(TeViewStore * p_store)
 {
 	TeOptionSetting dlg(p_store->mainWindow());

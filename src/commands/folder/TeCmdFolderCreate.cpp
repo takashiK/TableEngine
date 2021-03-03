@@ -39,6 +39,11 @@ TeCmdFolderCreate::~TeCmdFolderCreate()
 {
 }
 
+bool TeCmdFolderCreate::isAvailable()
+{
+	return true;
+}
+
 /*!
 	Create folder. rule of create point is below.
 	Target to TreeView : Create folder under current index in treeview.

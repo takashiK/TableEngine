@@ -34,6 +34,7 @@ public:
 
 	void setCommandInfo(TeTypes::CmdId cmdId, const QString& name, const QString& description, const QIcon& icon);
 
+	virtual bool isAvailable() const = 0;
 	virtual TeCommandBase* createCommand() const = 0;
 	TeTypes::CmdId cmdId() const { return m_cmdId; }
 	QString name() const { return m_name; }
@@ -54,5 +55,6 @@ public:
 		: TeCommandInfoBase(type, name, description, icon) {}
 	virtual ~TeCommandInfo() {}
 
+	virtual bool isAvailable() const { return T::isAvailable(); }
 	virtual TeCommandBase* createCommand() const { return new T; }
 };
