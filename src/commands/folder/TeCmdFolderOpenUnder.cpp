@@ -49,8 +49,8 @@ bool TeCmdFolderOpenUnder::execute(TeViewStore * p_store)
 	if (p_folder != nullptr) {
 		TeFileTreeView* p_tree = p_folder->tree();
 		if (p_tree->currentIndex().isValid()) {
-			p_tree->expand(p_tree->currentIndex());
-			if(p_tree->model()->hasChildren(p_tree->currentIndex()))
+//			p_tree->expand(p_tree->currentIndex());
+//			if(p_tree->model()->hasChildren(p_tree->currentIndex()))
 				openUnder(p_tree, p_tree->currentIndex());
 		}
 	}
