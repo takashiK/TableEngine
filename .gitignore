@@ -63,3 +63,9 @@ tests/release/*
 tests/GeneratedFiles/*
 doc/html/*
 .vscode/*
+/viewer_document/debug
+/viewer_document/release
+/viewer_picture/debug
+/viewer_picture/release
+/viewer_tests/debug
+/viewer_tests/release
