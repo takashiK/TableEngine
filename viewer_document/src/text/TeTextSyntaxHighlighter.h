@@ -3,13 +3,13 @@
 #include <QSyntaxHighlighter>
 #include <QRegularExpression>
 
-class TeSyntaxHighlighter :
+class TeTextSyntaxHighlighter :
     public QSyntaxHighlighter
 {
     Q_OBJECT
 
 public:
-    TeSyntaxHighlighter(QTextDocument* parent = 0);
+    TeTextSyntaxHighlighter(QTextDocument* parent = 0);
 
 protected:
     void highlightBlock(const QString& text) override;

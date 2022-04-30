@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Text Highlight Schema",
+  "description": "Schema for Text Syntax highligher class",
+  "definitions": {
+    "style":{
+      "bold": {"type": "boolean"},
+      "italic":{"type": "boolean"},
+      "underline":{"type": "boolean"},
+      "color":{
+        "description": "#RRGGBB",
+        "type": "string",
+        "pattern": "^#[0-9a-fA-F]{6}$"
+      },
+      "bgcolor":{
+        "description": "#RRGGBB",
+        "type": "string",
+        "pattern": "^#[0-9a-fA-F]{6}$"
+      }
+    }
+  },
+  "type": "object",
+  "required": [],
+  "properties": {
+    "keywords":{
+      "type": "array",
+      "items":{
+        "description": "rule for keywords.",
+        "type": "object",
+        "properties":{
+          "style": {"$ref": "#/definitions/style"},
+          "keywords":{
+            "type": "array",
+            "items": {"type": "string", "maxLength": 30}
+          }
+        }
+      }
+    },
+    "regexes":{
+      "type": "array",
+      "items":{
+        "description": "rule for regex.",
+        "type": "object",
+        "properties":{
+          "style": {"$ref": "#/definitions/style"},
+          "regex": {"type": "string", "maxLength": 200}
+        }
+      }
+    },
+    "regions":{
+      "type": "array",
+      "items":{
+        "description": "rule for Region.",
+        "type": "object",
+        "properties":{
+          "style": {"$ref": "#/definitions/style"},
+          "startRegex": {"type": "string", "maxLength": 200},
+          "endRegex": {"type": "string", "maxLength": 200}
+        }
+      }
+    }
+  }
+}

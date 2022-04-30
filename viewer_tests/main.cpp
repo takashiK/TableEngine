@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 #if 1
 	TeDocViewer view;
 	
+	view.open("main.cpp");
 	view.show();
 
 	return a.exec();

@@ -3,7 +3,7 @@
 #include <QMainWindow>
 
 class TeDocumentView;
-class TeSyntaxHighlighter;
+class TeTextSyntaxHighlighter;
 
 class TeDocViewer :
     public QMainWindow
@@ -12,12 +12,13 @@ class TeDocViewer :
 
 public:
     TeDocViewer(QWidget* parent = 0);
+    void open(QString filepath);
 
 private:
-    void setupEditor();
+    void setupViewer();
 
     TeDocumentView* mp_view;
-    TeSyntaxHighlighter* mp_highlighter;
+    TeTextSyntaxHighlighter* mp_highlighter;
 
 };
 

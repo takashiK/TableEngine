@@ -1,18 +1,25 @@
 #include "TeDocViewer.h"
 
-#include "view/TeTextView.h"
-#include "view/TeSyntaxHighlighter.h"
+#include "text/TeTextView.h"
+#include "text/TeTextSyntaxHighlighter.h"
 
 TeDocViewer::TeDocViewer(QWidget* parent)
     : QMainWindow(parent)
 {
-    setupEditor();
+    setupViewer();
 
     setCentralWidget(mp_view);
     setWindowTitle(tr("Syntax Highlighter"));
 }
 
-void TeDocViewer::setupEditor()
+void TeDocViewer::open(QString filepath)
+{
+    QFile file(filepath);
+    if (file.open(QFile::ReadOnly | QFile::Text))
+        mp_view->setPlainText(file.readAll());
+}
+
+void TeDocViewer::setupViewer()
 {
     QFont font;
     font.setFamily("Courier");
@@ -21,11 +28,8 @@ void TeDocViewer::setupEditor()
 
     mp_view = new TeTextView();
     mp_view->setFont(font);
+    mp_view->setReadOnly(true);
 
-    mp_highlighter = new TeSyntaxHighlighter(mp_view->document());
-
-    QFile file("mainwindow.h");
-    if (file.open(QFile::ReadOnly | QFile::Text))
-        mp_view->setPlainText(file.readAll());
+    mp_highlighter = new TeTextSyntaxHighlighter(mp_view->document());
 }
 

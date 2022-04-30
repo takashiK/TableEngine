@@ -1,14 +1,13 @@
-#include "TeSyntaxHighlighter.h"
+#include "TeTextSyntaxHighlighter.h"
 
 #include <QDebug>
 
 #if 0
     Highlight patterns
-    - condition                : ifdef / elsif / else / endif pattern.  ** not support. because it need analyze header chain **
-    - multi line commnet       : /* */start pattern to end pattern. not nested.
-    - single line comment      : // start pattern to end of line.
-    - single string literal    : " " start and end bracket are same pattern.
-    - keyword : same as matched keyword region.
+    - multi line commnet       : /* */start pattern to end pattern. not nested. (Prioritical nest support)
+    - single line comment      : // start pattern to end of line.  (Regx Base/overwrite)
+    - single string literal    : " " start and end bracket are same pattern. (Regx Base/overwrite)
+    - keyword : same as matched keyword region. (Regx Base/overwrite)
 
 
 
@@ -16,7 +15,7 @@
 
 static const int region_mask    = 0x0000FFFF;
 
-TeSyntaxHighlighter::TeSyntaxHighlighter(QTextDocument* parent)
+TeTextSyntaxHighlighter::TeTextSyntaxHighlighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent)
 {
     HighlightingRule rule;
@@ -42,42 +41,36 @@ TeSyntaxHighlighter::TeSyntaxHighlighter(QTextDocument* parent)
         keywordRules.append(rule);
     }
 
-    QTextCharFormat classFormat;
-    classFormat.setFontWeight(QFont::Bold);
-    classFormat.setForeground(Qt::darkMagenta);
-    rule.pattern = QRegularExpression(QStringLiteral("\\bQ[A-Za-z]+\\b"));
-    rule.format = classFormat;
+    QTextCharFormat functionFormat;
+    functionFormat.setFontItalic(true);
+    functionFormat.setForeground(Qt::blue);
+    rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+ *(?=\\()"));
+    rule.format = functionFormat;
     keywordRules.append(rule);
 
     QTextCharFormat quotationFormat;
-    quotationFormat.setForeground(Qt::darkGreen);
+    quotationFormat.setForeground(Qt::darkRed);
     rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
     rule.format = quotationFormat;
     keywordRules.append(rule);
 
-    QTextCharFormat functionFormat;
-    functionFormat.setFontItalic(true);
-    functionFormat.setForeground(Qt::blue);
-    rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
-    rule.format = functionFormat;
-    keywordRules.append(rule);
-
     QTextCharFormat singleLineCommentFormat;
-    singleLineCommentFormat.setForeground(Qt::red);
+    singleLineCommentFormat.setForeground(Qt::darkGreen);
     rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
     rule.format = singleLineCommentFormat;
     keywordRules.append(rule);
 
     QTextCharFormat multiLineCommentFormat;
     RegionHighlightRule regionRule;
-    multiLineCommentFormat.setForeground(Qt::red);
+    multiLineCommentFormat.setForeground(Qt::darkGreen);
 
     regionRule.start_pattern = QRegularExpression(QStringLiteral("/\\*"));
     regionRule.end_pattern = QRegularExpression(QStringLiteral("\\*/"));
+    regionRule.format = multiLineCommentFormat;
     regionRules.append(regionRule);
 }
 
-void TeSyntaxHighlighter::highlightBlock(const QString& text)
+void TeTextSyntaxHighlighter::highlightBlock(const QString& text)
 {
     qDebug() << text << "\n";
 

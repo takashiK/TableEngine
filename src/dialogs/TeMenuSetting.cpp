@@ -54,12 +54,15 @@ TeMenuSetting::TeMenuSetting(QWidget *parent)
 	loadSettings(&m_itemList);
 
 	vbox->addWidget(combo);
+
 	for (int i = 0; i < m_itemList.count(); i++) {
 		combo->addItem(m_itemList[i]->windowTitle(), i);
 		vbox->addWidget(m_itemList[i]);
 		m_itemList[i]->setBuddy(cmd);
-		m_itemList[i]->setHidden(i!=0);
+		if(i!=0)
+			m_itemList[i]->setHidden(true);
 	}
+
 	connect(combo, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
 		for (int i = 0; i < m_itemList.size(); i++) {
 			if (i == index) {
