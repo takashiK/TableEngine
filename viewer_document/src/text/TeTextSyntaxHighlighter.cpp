@@ -74,12 +74,21 @@ void TeTextSyntaxHighlighter::highlightBlock(const QString& text)
 {
     qDebug() << text << "\n";
 
-    // regex pattern base format
-    for (const HighlightingRule& rule : qAsConst(keywordRules)) {
-        QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
+    // keywords
+    for (const auto& syntax : m_syntax.regex_keywords()) {
+        QRegularExpressionMatchIterator matchIterator = syntax.regex.globalMatch(text);
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
-            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+            setFormat(match.capturedStart(), match.capturedLength(), syntax.format);
+        }
+    }
+
+    // regex
+    for (const auto& syntax : m_syntax.regexes()) {
+        QRegularExpressionMatchIterator matchIterator = syntax.regex.globalMatch(text);
+        while (matchIterator.hasNext()) {
+            QRegularExpressionMatch match = matchIterator.next();
+            setFormat(match.capturedStart(), match.capturedLength(), syntax.format);
         }
     }
 
@@ -87,24 +96,45 @@ void TeTextSyntaxHighlighter::highlightBlock(const QString& text)
     setCurrentBlockState(0);
 
     // comment block detector
-    int priority = 0;
     int startIndex = 0;
-    if ((previousBlockState() & region_mask) == 0)
-        startIndex = text.indexOf(regionRules[priority].start_pattern);
-
-    while (startIndex >= 0) {
-        QRegularExpressionMatch match = regionRules[priority].end_pattern.match(text, startIndex);
-        int endIndex = match.capturedStart();
-        int commentLength = 0;
-        if (endIndex == -1) {
-            setCurrentBlockState(1);
-            commentLength = text.length() - startIndex;
+    int previous = previousBlockState();
+    while (1) {
+        int current = m_syntax.regions().length();
+        for (; current > previous; current--) {
+            QRegularExpressionMatch match = m_syntax.regions().at(current - 1).startRegex.match(text, startIndex);
+            if (match.hasMatch()) {
+                startIndex = match.capturedStart();
+                break;
+            }
+        }
+        if (current > 0) {
+            // found multiline start
+            const auto& region = m_syntax.regions().at(current - 1);
+            QRegularExpressionMatch match = region.endRegex.match(text, startIndex);
+            int commentLength = 0;
+            if (match.hasMatch()) {
+                // end of current multi line state.
+                previous = 0;
+                int endIndex = match.capturedStart();
+                commentLength = endIndex - startIndex
+                    + match.capturedLength();
+                setFormat(startIndex, commentLength, region.format);
+                // continue search muliti line statement after endIndex.
+                startIndex = endIndex;
+            }
+            else {
+                //couldn't found end statemate for current sate.
+                setCurrentBlockState(current);
+                commentLength = text.length() - startIndex;
+                setFormat(startIndex, commentLength, region.format);
+                break;
+            }
         }
         else {
-            commentLength = endIndex - startIndex
-                + match.capturedLength();
+            // no more multi line statement.
+            setCurrentBlockState(0);
+            break;
         }
-        setFormat(startIndex, commentLength, regionRules[priority].format);
-        startIndex = text.indexOf(regionRules[priority].start_pattern, startIndex + commentLength);
     }
+
 }

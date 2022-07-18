@@ -14,11 +14,16 @@ public:
     TeDocViewer(QWidget* parent = 0);
     void open(QString filepath);
 
+protected:
+    void textViewMode();
+    void richViewMode();
+
 private:
     void setupViewer();
+    void setupMenu();
 
-    TeDocumentView* mp_view;
-    TeTextSyntaxHighlighter* mp_highlighter;
+    TeDocumentView* mp_textView;
+    TeTextSyntaxHighlighter* mp_textHighlighter;
 
 };
 

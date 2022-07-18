@@ -5,10 +5,8 @@
 #include <QTextCharFormat>
 #include <QRegularExpression>
 
-class TeTextSyntax :
-    public QObject
+class TeTextSyntax
 {
-	Q_OBJECT
 	
 public:
 	struct SyntaxKeywords
@@ -34,14 +32,15 @@ public:
 	TeTextSyntax();
 	virtual ~TeTextSyntax();
 
-	void load(QString path);
-	void save(QString path);
+	bool load(QString path);
+	bool save(QString path);
 
 	void clear();
 
-	const QList<SyntaxKeywords>* keywords() { return &m_keywords; }
-	const QList<SyntaxRegex>* regexes() { return &m_regexes; }
-	const QList<SyntaxRegion>* regions() { return &m_regions; }
+	const QList<SyntaxKeywords>& keywords() { return m_keywords; }
+	const QList<SyntaxRegex>& regex_keywords() { if (m_update_keywords) update_keywords(); return m_keywordRegexes; };
+	const QList<SyntaxRegex>& regexes() { return m_regexes; }
+	const QList<SyntaxRegion>& regions() { return m_regions; }
 
 	int addSyntaxKeywords(const SyntaxKeywords& keyword);
 	int addSyntaxRegex(const SyntaxRegex& regex);
@@ -52,7 +51,11 @@ public:
 	bool removeSyntaxRegion(int index);
 
 private:
+	void update_keywords();
+
 	QList<SyntaxKeywords> m_keywords;
+	bool m_update_keywords;
+	QList<SyntaxRegex> m_keywordRegexes;
 	QList<SyntaxRegex> m_regexes;
 	QList<SyntaxRegion> m_regions;
 };

@@ -30,7 +30,7 @@
         "type": "object",
         "properties":{
           "style": {"$ref": "#/definitions/style"},
-          "keywords":{
+          "list":{
             "type": "array",
             "items": {"type": "string", "maxLength": 30}
           }
