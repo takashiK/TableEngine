@@ -69,3 +69,5 @@ doc/html/*
 /viewer_picture/release
 /viewer_tests/debug
 /viewer_tests/release
+/viewer_tests/cpp_highlight.json
+/viewer_tests/cpp_highlight2.json

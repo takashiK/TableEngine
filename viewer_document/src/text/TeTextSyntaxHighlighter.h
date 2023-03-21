@@ -19,19 +19,5 @@ protected:
 
 private:
     TeTextSyntax m_syntax;
-
-    struct HighlightingRule
-    {
-        QRegularExpression pattern;
-        QTextCharFormat format;
-    };
-    struct RegionHighlightRule
-    {
-        QRegularExpression start_pattern;
-        QRegularExpression end_pattern;
-        QTextCharFormat format;
-    };
-    QVector<HighlightingRule> keywordRules;
-    QVector<RegionHighlightRule> regionRules;
 };
 

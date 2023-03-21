@@ -1,4 +1,5 @@
 #include "TeTextSyntaxHighlighter.h"
+#include "TeTextSyntaxLoader.h"
 
 #include <QDebug>
 
@@ -18,61 +19,56 @@ static const int region_mask    = 0x0000FFFF;
 TeTextSyntaxHighlighter::TeTextSyntaxHighlighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent)
 {
-    HighlightingRule rule;
-    QTextCharFormat keywordFormat;
+    TeTextSyntax::SyntaxKeywords keywordSyntax;
+    
 
-    keywordFormat.setForeground(Qt::darkBlue);
-    keywordFormat.setFontWeight(QFont::Bold);
-    const QString keywordPatterns[] = {
-        QStringLiteral("\\bchar\\b"), QStringLiteral("\\bclass\\b"), QStringLiteral("\\bconst\\b"),
-        QStringLiteral("\\bdouble\\b"), QStringLiteral("\\benum\\b"), QStringLiteral("\\bexplicit\\b"),
-        QStringLiteral("\\bfriend\\b"), QStringLiteral("\\binline\\b"), QStringLiteral("\\bint\\b"),
-        QStringLiteral("\\blong\\b"), QStringLiteral("\\bnamespace\\b"), QStringLiteral("\\boperator\\b"),
-        QStringLiteral("\\bprivate\\b"), QStringLiteral("\\bprotected\\b"), QStringLiteral("\\bpublic\\b"),
-        QStringLiteral("\\bshort\\b"), QStringLiteral("\\bsignals\\b"), QStringLiteral("\\bsigned\\b"),
-        QStringLiteral("\\bslots\\b"), QStringLiteral("\\bstatic\\b"), QStringLiteral("\\bstruct\\b"),
-        QStringLiteral("\\btemplate\\b"), QStringLiteral("\\btypedef\\b"), QStringLiteral("\\btypename\\b"),
-        QStringLiteral("\\bunion\\b"), QStringLiteral("\\bunsigned\\b"), QStringLiteral("\\bvirtual\\b"),
-        QStringLiteral("\\bvoid\\b"), QStringLiteral("\\bvolatile\\b"), QStringLiteral("\\bbool\\b")
-    };
-    for (const QString& pattern : keywordPatterns) {
-        rule.pattern = QRegularExpression(pattern);
-        rule.format = keywordFormat;
-        keywordRules.append(rule);
-    }
+    keywordSyntax.format.setForeground(Qt::darkBlue);
+    keywordSyntax.format.setFontWeight(QFont::Bold);
 
-    QTextCharFormat functionFormat;
-    functionFormat.setFontItalic(true);
-    functionFormat.setForeground(Qt::blue);
-    rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+ *(?=\\()"));
-    rule.format = functionFormat;
-    keywordRules.append(rule);
+    keywordSyntax.keywords = QStringList({
+        QStringLiteral("char"), QStringLiteral("class"), QStringLiteral("const"),
+        QStringLiteral("double"), QStringLiteral("enum"), QStringLiteral("explicit"),
+        QStringLiteral("friend"), QStringLiteral("inline"), QStringLiteral("int"),
+        QStringLiteral("long"), QStringLiteral("namespace"), QStringLiteral("operator"),
+        QStringLiteral("private"), QStringLiteral("protected"), QStringLiteral("public"),
+        QStringLiteral("short"), QStringLiteral("signals"), QStringLiteral("signed"),
+        QStringLiteral("slots"), QStringLiteral("static"), QStringLiteral("struct"),
+        QStringLiteral("template"), QStringLiteral("typedef"), QStringLiteral("typename"),
+        QStringLiteral("union"), QStringLiteral("unsigned"), QStringLiteral("virtual"),
+        QStringLiteral("void"), QStringLiteral("volatile"), QStringLiteral("bool")
+    });
+    m_syntax.addSyntaxKeywords(keywordSyntax);
 
-    QTextCharFormat quotationFormat;
-    quotationFormat.setForeground(Qt::darkRed);
-    rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
-    rule.format = quotationFormat;
-    keywordRules.append(rule);
+    TeTextSyntax::SyntaxRegex functionSyntax;
+    functionSyntax.format.setFontItalic(true);
+    functionSyntax.format.setForeground(Qt::blue);
+    functionSyntax.regex = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+ *(?=\\()"));
+    m_syntax.addSyntaxRegex(functionSyntax);
 
-    QTextCharFormat singleLineCommentFormat;
-    singleLineCommentFormat.setForeground(Qt::darkGreen);
-    rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
-    rule.format = singleLineCommentFormat;
-    keywordRules.append(rule);
+    TeTextSyntax::SyntaxRegex quotationSyntax;
+    quotationSyntax.format.setForeground(Qt::darkRed);
+    quotationSyntax.regex = QRegularExpression(QStringLiteral("\".*\"|'.*'"));
+    m_syntax.addSyntaxRegex(quotationSyntax);
 
-    QTextCharFormat multiLineCommentFormat;
-    RegionHighlightRule regionRule;
-    multiLineCommentFormat.setForeground(Qt::darkGreen);
+    TeTextSyntax::SyntaxRegex singleLineSyntax;
+    singleLineSyntax.format.setForeground(Qt::darkGreen);
+    singleLineSyntax.regex = QRegularExpression(QStringLiteral("//[^\n]*"));
+    m_syntax.addSyntaxRegex(singleLineSyntax);
 
-    regionRule.start_pattern = QRegularExpression(QStringLiteral("/\\*"));
-    regionRule.end_pattern = QRegularExpression(QStringLiteral("\\*/"));
-    regionRule.format = multiLineCommentFormat;
-    regionRules.append(regionRule);
+    TeTextSyntax::SyntaxRegion multiLineSyntax;
+    multiLineSyntax.format.setForeground(Qt::darkGreen);
+    multiLineSyntax.startRegex = QRegularExpression(QStringLiteral("/\\*"));
+    multiLineSyntax.endRegex = QRegularExpression(QStringLiteral("\\*/"));
+    m_syntax.addSyntaxRegion(multiLineSyntax);
+
+    TeTextSyntaxLoader::saveSyntax("cpp_highlight.json", m_syntax);
+    TeTextSyntaxLoader::loadSyntax("cpp_highlight.json", &m_syntax);
+    TeTextSyntaxLoader::saveSyntax("cpp_highlight2.json", m_syntax);
 }
 
 void TeTextSyntaxHighlighter::highlightBlock(const QString& text)
 {
-    qDebug() << text << "\n";
+    //qDebug() << text << "\n";
 
     // keywords
     for (const auto& syntax : m_syntax.regex_keywords()) {
@@ -89,6 +85,8 @@ void TeTextSyntaxHighlighter::highlightBlock(const QString& text)
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
             setFormat(match.capturedStart(), match.capturedLength(), syntax.format);
+            
+//            qDebug() << "match:" << syntax.regex.pattern() << "\n";
         }
     }
 
@@ -100,7 +98,7 @@ void TeTextSyntaxHighlighter::highlightBlock(const QString& text)
     int previous = previousBlockState();
     while (1) {
         int current = m_syntax.regions().length();
-        for (; current > previous; current--) {
+        for (; current > 0 && current > previous; current--) {
             QRegularExpressionMatch match = m_syntax.regions().at(current - 1).startRegex.match(text, startIndex);
             if (match.hasMatch()) {
                 startIndex = match.capturedStart();

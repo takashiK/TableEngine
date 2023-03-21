@@ -7,7 +7,6 @@
 
 class TeTextSyntax
 {
-	
 public:
 	struct SyntaxKeywords
 	{
@@ -32,15 +31,12 @@ public:
 	TeTextSyntax();
 	virtual ~TeTextSyntax();
 
-	bool load(QString path);
-	bool save(QString path);
-
 	void clear();
 
-	const QList<SyntaxKeywords>& keywords() { return m_keywords; }
-	const QList<SyntaxRegex>& regex_keywords() { if (m_update_keywords) update_keywords(); return m_keywordRegexes; };
-	const QList<SyntaxRegex>& regexes() { return m_regexes; }
-	const QList<SyntaxRegion>& regions() { return m_regions; }
+	const QList<SyntaxKeywords>& keywords() const { return m_keywords; }
+	const QList<SyntaxRegex>& regex_keywords() { update_keywords(); return m_keywordRegexes; };
+	const QList<SyntaxRegex>& regexes() const { return m_regexes; }
+	const QList<SyntaxRegion>& regions() const { return m_regions; }
 
 	int addSyntaxKeywords(const SyntaxKeywords& keyword);
 	int addSyntaxRegex(const SyntaxRegex& regex);
