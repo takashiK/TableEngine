@@ -19,51 +19,6 @@ static const int region_mask    = 0x0000FFFF;
 TeTextSyntaxHighlighter::TeTextSyntaxHighlighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent)
 {
-    TeTextSyntax::SyntaxKeywords keywordSyntax;
-    
-
-    keywordSyntax.format.setForeground(Qt::darkBlue);
-    keywordSyntax.format.setFontWeight(QFont::Bold);
-
-    keywordSyntax.keywords = QStringList({
-        QStringLiteral("char"), QStringLiteral("class"), QStringLiteral("const"),
-        QStringLiteral("double"), QStringLiteral("enum"), QStringLiteral("explicit"),
-        QStringLiteral("friend"), QStringLiteral("inline"), QStringLiteral("int"),
-        QStringLiteral("long"), QStringLiteral("namespace"), QStringLiteral("operator"),
-        QStringLiteral("private"), QStringLiteral("protected"), QStringLiteral("public"),
-        QStringLiteral("short"), QStringLiteral("signals"), QStringLiteral("signed"),
-        QStringLiteral("slots"), QStringLiteral("static"), QStringLiteral("struct"),
-        QStringLiteral("template"), QStringLiteral("typedef"), QStringLiteral("typename"),
-        QStringLiteral("union"), QStringLiteral("unsigned"), QStringLiteral("virtual"),
-        QStringLiteral("void"), QStringLiteral("volatile"), QStringLiteral("bool")
-    });
-    m_syntax.addSyntaxKeywords(keywordSyntax);
-
-    TeTextSyntax::SyntaxRegex functionSyntax;
-    functionSyntax.format.setFontItalic(true);
-    functionSyntax.format.setForeground(Qt::blue);
-    functionSyntax.regex = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+ *(?=\\()"));
-    m_syntax.addSyntaxRegex(functionSyntax);
-
-    TeTextSyntax::SyntaxRegex quotationSyntax;
-    quotationSyntax.format.setForeground(Qt::darkRed);
-    quotationSyntax.regex = QRegularExpression(QStringLiteral("\".*\"|'.*'"));
-    m_syntax.addSyntaxRegex(quotationSyntax);
-
-    TeTextSyntax::SyntaxRegex singleLineSyntax;
-    singleLineSyntax.format.setForeground(Qt::darkGreen);
-    singleLineSyntax.regex = QRegularExpression(QStringLiteral("//[^\n]*"));
-    m_syntax.addSyntaxRegex(singleLineSyntax);
-
-    TeTextSyntax::SyntaxRegion multiLineSyntax;
-    multiLineSyntax.format.setForeground(Qt::darkGreen);
-    multiLineSyntax.startRegex = QRegularExpression(QStringLiteral("/\\*"));
-    multiLineSyntax.endRegex = QRegularExpression(QStringLiteral("\\*/"));
-    m_syntax.addSyntaxRegion(multiLineSyntax);
-
-    TeTextSyntaxLoader::saveSyntax("cpp_highlight.json", m_syntax);
-    TeTextSyntaxLoader::loadSyntax("cpp_highlight.json", &m_syntax);
-    TeTextSyntaxLoader::saveSyntax("cpp_highlight2.json", m_syntax);
 }
 
 void TeTextSyntaxHighlighter::highlightBlock(const QString& text)
