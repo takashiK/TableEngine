@@ -23,5 +23,6 @@
         <file alias="copy.png">Resources/icon/iconmonstr-copy-9-64.png</file>
         <file alias="paste.png">Resources/icon/iconmonstr-clipboard-2-64.png</file>
         <file alias="cut.png">Resources/icon/iconmonstr-cut-4-64.png</file>
+        <file alias="view.png">Resources/icon/iconmonstr-file-38-64.png</file>
     </qresource>
 </RCC>

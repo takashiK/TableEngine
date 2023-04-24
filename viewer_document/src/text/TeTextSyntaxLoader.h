@@ -1,9 +1,8 @@
 #pragma once
-#include <qobject.h>
+
 #include "TeTextSyntax.h"
 
-class TeTextSyntaxLoader :
-    public QObject
+class TeTextSyntaxLoader
 {
 public:
     TeTextSyntaxLoader();
@@ -21,12 +20,12 @@ public:
     int addEntry(const QString& title, const TeTextSyntax& syntax, bool overwrite=false);
     int delEntry(const QString& title);
 
-    const TeTextSyntax& entry(const QString& title);
-    const QStringList& titles();
+    TeTextSyntax entry(const QString& title);
+    QStringList titles();
 
     int addRelation(const QString& suffix, const QString& title, bool overwrite=false);
     int delRelation(const QString& suffix);
-    const TeTextSyntax& relatedEntry(const QString& suffix);
+    TeTextSyntax relatedEntry(const QString& suffix);
     const QMap<QString, QString>& relations();
 
 private:

@@ -47,6 +47,7 @@
 target_wrapper.bat
 
 # uncommitable folder
+build/*
 .vs/*
 main/x64/*
 main/debug/*
@@ -65,6 +66,8 @@ doc/html/*
 .vscode/*
 /viewer_document/debug
 /viewer_document/release
+/viewer_binary/debug
+/viewer_binary/release
 /viewer_picture/debug
 /viewer_picture/release
 /viewer_tests/debug

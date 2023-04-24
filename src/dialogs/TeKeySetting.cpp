@@ -163,9 +163,17 @@ void TeKeySetting::updateSettings()
 	}
 }
 
-void TeKeySetting::storeDefaultSettings()
+void TeKeySetting::storeDefaultSettings(bool force)
 {
 	QSettings settings;
+
+	if (settings.contains(SETTING_KEY)) {
+		if (!force) {
+			return;
+		}
+		settings.remove(SETTING_KEY);
+	}
+
 	settings.beginGroup(SETTING_KEY);
 
 #define SETTING( key, default_value)  settings.setValue( QKeySequence(key).toString().replace("+", "_") , settings.value( QKeySequence(key).toString().replace("+", "_") , default_value ))
@@ -177,6 +185,8 @@ void TeKeySetting::storeDefaultSettings()
 	SETTING(Qt::Key_A, TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL);
 	SETTING(Qt::Key_Z, TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE);
 
+	SETTING(Qt::Key_V, TeTypes::CMDID_SYSTEM_VIEW_VIEW_FILE);
+
 #undef SETTING	
 	settings.endGroup();
 }
@@ -186,16 +196,16 @@ QList<QTreeWidgetItem*> TeKeySetting::createKeyTreeItem()
 	QList<int> normal, ctrl, shift;
 	for (uint32_t key = Qt::Key_A; key <= Qt::Key_Z; key++) {
 		normal.append(key);
-		ctrl.append(Qt::CTRL + key);
+		ctrl.append((int)Qt::CTRL + key);
 	}
 	for (uint32_t key = Qt::Key_0; key <= Qt::Key_9; key++) {
 		normal.append(key);
-		ctrl.append(Qt::CTRL + key);
+		ctrl.append((int)Qt::CTRL + key);
 	}
 	for (uint32_t key = Qt::Key_F1; key <= Qt::Key_F12; key++) {
 		normal.append(key);
-		ctrl.append(Qt::CTRL + key);
-		shift.append(Qt::SHIFT + key);
+		ctrl.append((int)Qt::CTRL + key);
+		shift.append((int)Qt::SHIFT + key);
 	}
 	normal.append(Qt::Key_Escape);
 	normal.append(Qt::Key_Backspace);

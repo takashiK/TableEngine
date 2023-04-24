@@ -28,6 +28,8 @@
 #include "TeSettings.h"
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
+#include "TeCloseEventEmitter.h"
+
 
 #include <QMenu>
 #include <QMenuBar>
@@ -54,6 +56,7 @@ TeViewStore::TeViewStore(QObject *parent)
 	mp_tab[TAB_RIGHT] = nullptr;
 	mp_currentFolderView = nullptr;
 	mp_split = nullptr;
+	mp_closeEventEmitter = nullptr;
 }
 
 TeViewStore::~TeViewStore()
@@ -69,6 +72,12 @@ TeViewStore::~TeViewStore()
 	if (mp_tab[TAB_LEFT]) delete mp_tab[TAB_LEFT];
 	if (mp_tab[TAB_RIGHT]) delete mp_tab[TAB_RIGHT];
 	if (mp_mainWindow) delete mp_mainWindow;
+
+	for (auto widget : m_floatingWidgets) {
+		delete widget;
+	}
+	m_floatingWidgets.clear();
+	delete mp_closeEventEmitter;
 }
 
 void TeViewStore::initialize()
@@ -96,7 +105,7 @@ void TeViewStore::initialize()
 	mp_tab[TAB_RIGHT]->setHidden(true);
 
 	QHBoxLayout *hbox = new QHBoxLayout();
-	hbox->setMargin(0);
+	hbox->setContentsMargins(0, 0, 0, 0);
 	hbox->addWidget(mp_tab[TAB_LEFT]);
 	hbox->addWidget(mp_tab[TAB_RIGHT]);
 
@@ -118,6 +127,10 @@ void TeViewStore::initialize()
 	//setup command bridge
 	connect(this, &TeViewStore::requestCommand,
 		[this](TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event) { execCommand(cmdId, type, obj, event); });
+
+	//setup closeEventEmitter
+	mp_closeEventEmitter = new TeCloseEventEmitter();
+	connect(mp_closeEventEmitter, &TeCloseEventEmitter::closeEvent, this, &TeViewStore::floatingWidgetClosed, Qt::QueuedConnection);
 
 	//load settings
 	loadMenu();
@@ -473,4 +486,20 @@ void TeViewStore::moveFolderView(TeFileFolderView * view, int place, int positio
 		mp_tab[TAB_LEFT]->setCurrentIndex(currentIndex);
 	}
 	setCurrentFolderView(view);
+}
+
+void TeViewStore::registerFloatingWidget(QWidget* widget)
+{
+	if (!m_floatingWidgets.contains(widget)) {
+		m_floatingWidgets.append(widget);
+		mp_closeEventEmitter->oneShotRegister(widget);
+	}
+}
+
+void TeViewStore::floatingWidgetClosed(QWidget* widget)
+{
+	if (m_floatingWidgets.contains(widget)) {
+		m_floatingWidgets.removeAll(widget);
+		delete widget;
+	}
 }

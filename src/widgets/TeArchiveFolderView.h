@@ -22,6 +22,7 @@
 
 #include "TeFolderView.h"
 #include <QModelIndex>
+#include <QStringList>
 
 class TeEventFilter;
 class QAbstractItemView;
@@ -76,9 +77,8 @@ protected:
 	void internalAddDirEntry(const QString& path);
 	QString indexToPath(const QModelIndex &index);
 	QStandardItem* findPath(QStandardItem* root, const QString& path);
-	QStandardItem* mkpath(const QFileIconProvider& iconProvider, QStandardItem* root, const QVector<QStringRef>& paths, bool bParentEntry);
+	QStandardItem* mkpath(const QFileIconProvider& iconProvider, QStandardItem* root, const QStringList& paths, bool bParentEntry);
 	QStandardItem* findChild(const QStandardItem* parent, const QString& name);
-	QStandardItem* findChild(const QStandardItem* parent, const QStringRef& name);
 	QList<QStandardItem*> createRootEntry();
 	QList<QStandardItem*> createParentEntry();
 	QList<QStandardItem*> createDirEntry(const QFileIconProvider& iconProvider, const QString& name);

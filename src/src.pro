@@ -38,6 +38,8 @@ SOURCES += $$files(commands/*.cpp,true)
 SOURCES += $$files(dialogs/*.cpp,true)
 SOURCES += $$files(widgets/*.cpp,true)
 
+include(../viewer_document/lib.pri)
+
 win32-msvc {
     HEADERS += $$files(platform/windows/*.h,true)
     SOURCES += $$files(platform/windows/*.cpp,true)

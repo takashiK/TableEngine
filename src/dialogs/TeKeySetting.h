@@ -37,7 +37,7 @@ public:
 	virtual ~TeKeySetting();
 
 	void updateSettings();
-	static void storeDefaultSettings();
+	static void storeDefaultSettings(bool force=false);
 
 public slots:
 	void accept();

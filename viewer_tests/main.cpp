@@ -39,12 +39,18 @@ int main(int argc, char *argv[])
 
 	QSettings settings;
 	settings.setValue(SETTING_TEXT_HIGHLIGHT_SCHEMA,"../viewer_document/schema/text_highlight_schema.json");
+	settings.setValue(SETTING_TEXT_HIGHLIGHT_FOLDER, QApplication::applicationDirPath() + "/../highlight");
+	settings.setValue(SETTING_CONTAINER_FOLDER, QApplication::applicationDirPath() + "/../container");
 
+	const QStringList default_codecList = { "UTF-8", "EUC-JP", "Shift_JIS", "ISO-2022-JP" };
+	settings.setValue(SETTING_TEXT_CODECS, default_codecList);
+
+	QString str = QApplication::applicationDirPath() + "/../highlight";
 
 #if 1
 	TeDocViewer view;
 	
-	view.open("sample/sample.cpp");
+	view.open("sample/sample.md");
 	view.show();
 
 	return a.exec();

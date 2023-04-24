@@ -1,0 +1,72 @@
+{
+    "keywords": [
+        {
+            "list": [
+                "char",
+                "class",
+                "const",
+                "double",
+                "enum",
+                "explicit",
+                "friend",
+                "inline",
+                "int",
+                "long",
+                "namespace",
+                "operator",
+                "private",
+                "protected",
+                "public",
+                "short",
+                "signals",
+                "signed",
+                "slots",
+                "static",
+                "struct",
+                "template",
+                "typedef",
+                "typename",
+                "union",
+                "unsigned",
+                "virtual",
+                "void",
+                "volatile",
+                "bool"
+            ],
+            "style": {
+                "bold": true,
+                "color": "#000080"
+            }
+        }
+    ],
+    "regexes": [
+        {
+            "regex": "\\b[A-Za-z0-9_]+ *(?=\\()",
+            "style": {
+                "color": "#0000ff",
+                "italic": true
+            }
+        },
+        {
+            "regex": "\".*\"|'.*'",
+            "style": {
+                "color": "#800000"
+            }
+        },
+        {
+            "regex": "//[^\n]*",
+            "style": {
+                "color": "#008000"
+            }
+        }
+    ],
+    "regions": [
+        {
+            "endRegex": "\\*/",
+            "startRegex": "/\\*",
+            "style": {
+                "color": "#008000"
+            }
+        }
+    ]
+}

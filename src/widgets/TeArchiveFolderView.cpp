@@ -101,7 +101,7 @@ TeArchiveFolderView::TeArchiveFolderView(QWidget *parent)
 
 
 	QHBoxLayout* layout = new QHBoxLayout();
-	layout->setMargin(0);
+	layout->setContentsMargins(0,0,0,0);
 	setLayout(layout);
 	layout->addWidget(mp_listView);
 }
@@ -305,7 +305,7 @@ void TeArchiveFolderView::internalAddEntry(const QString & path, qint64 size, co
 	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
 	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
 
-	QVector<QStringRef> paths = QDir::cleanPath(path).splitRef('/');
+	QStringList paths = QDir::cleanPath(path).split('/');
 
 	QFileIconProvider iconProvider;
 
@@ -313,7 +313,7 @@ void TeArchiveFolderView::internalAddEntry(const QString & path, qint64 size, co
 	QStandardItem* list = mkpath(iconProvider,list_model->item(0),paths,true);
 
 	if (list != nullptr && findChild(list, paths.last()) == nullptr) {
-		list->appendRow(createFileEntry(iconProvider, paths.last().toString(), size, lastModified, src));
+		list->appendRow(createFileEntry(iconProvider, paths.last(), size, lastModified, src));
 	}
 }
 
@@ -338,7 +338,7 @@ void TeArchiveFolderView::internalAddDirEntry(const QString & path)
 	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
 	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
 
-	QVector<QStringRef> paths = destPath.splitRef('/');
+	QStringList paths = destPath.split('/');
 
 	QFileIconProvider iconProvider;
 	mkpath(iconProvider, tree_model->item(0), paths,false);
@@ -365,7 +365,7 @@ QString TeArchiveFolderView::indexToPath(const QModelIndex & index)
 QStandardItem * TeArchiveFolderView::findPath(QStandardItem* root, const QString & path)
 {
 	QStandardItem* entry = root;
-	QVector<QStringRef> paths = path.splitRef('/');
+	QStringList paths = path.split('/');
 
 	for (int i = 0; i < paths.count(); i++) {
 		entry = findChild(entry, paths[i]);
@@ -377,7 +377,7 @@ QStandardItem * TeArchiveFolderView::findPath(QStandardItem* root, const QString
 	return entry;
 }
 
-QStandardItem * TeArchiveFolderView::mkpath(const QFileIconProvider & iconProvider, QStandardItem * root, const QVector<QStringRef>& paths, bool bParentEntry)
+QStandardItem * TeArchiveFolderView::mkpath(const QFileIconProvider & iconProvider, QStandardItem * root, const QStringList& paths, bool bParentEntry)
 {
 	QStandardItem* parent = root;
 	for (int i = 0; i < paths.count() - 1; i++) {
@@ -386,7 +386,7 @@ QStandardItem * TeArchiveFolderView::mkpath(const QFileIconProvider & iconProvid
 			parent = child;
 		}
 		else{
-			QList<QStandardItem*> entries = createDirEntry(iconProvider, paths[i].toString());
+			QList<QStandardItem*> entries = createDirEntry(iconProvider, paths[i]);
 			parent->appendRow(entries);
 			parent = entries[0];
 			if (bParentEntry == true) {
@@ -399,20 +399,6 @@ QStandardItem * TeArchiveFolderView::mkpath(const QFileIconProvider & iconProvid
 }
 
 QStandardItem * TeArchiveFolderView::findChild(const QStandardItem * parent, const QString & name)
-{
-	if (parent == nullptr) return nullptr;
-
-	QStandardItem* child = nullptr;
-	for (int row = 0; row < parent->rowCount(); row++) {
-		if (parent->child(row)->text() == name) {
-			child = parent->child(row);
-			break;
-		}
-	}
-	return child;
-}
-
-QStandardItem * TeArchiveFolderView::findChild(const QStandardItem * parent, const QStringRef & name)
 {
 	if (parent == nullptr) return nullptr;
 
@@ -534,7 +520,7 @@ QList<QStandardItem*> TeArchiveFolderView::createFileEntry(const QFileIconProvid
 	int index = name.lastIndexOf('.');
 	if (index >= 0 && index+1 < name.count()) {
 		//: %1 is a file name suffix, for example txt
-		entry = new QStandardItem(QApplication::translate("QFileDialog", "%1 File").arg(name.midRef(index+1)));
+		entry = new QStandardItem(QApplication::translate("QFileDialog", "%1 File").arg(name.mid(index+1)));
 	}
 	else {
 		entry = new QStandardItem(QApplication::translate("QFileDialog", "File"));
@@ -545,7 +531,7 @@ QList<QStandardItem*> TeArchiveFolderView::createFileEntry(const QFileIconProvid
 	entries.append(entry);
 
 	// lastModified Date
-	entry = new QStandardItem(lastModified.toString(Qt::SystemLocaleDate));
+	entry = new QStandardItem(lastModified.toString(Qt::ISODate));
 	entry->setData(lastModified);
 	entry->setEditable(false);
 	entries.append(entry);

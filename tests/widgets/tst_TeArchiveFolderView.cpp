@@ -39,6 +39,7 @@
 #include <QStandardItem>
 #include <QStandardItemModel>
 #include <QDebug>
+#include <QTime>
 
 QString modelPath(const QStandardItem* item) 
 {
@@ -188,7 +189,7 @@ TEST(tst_TeArchiveFolderView, addFileEntry_normal)
 	paths.append("dir3/dir3_2/dir3_2_1");
 	paths.append("dir3/dir3_2/dir3_2_2");
 
-	QDateTime date(QDateTime(QDate(2019, 3, 31)));
+	QDateTime date(QDate(2019, 3, 31),QTime(0,0));
 
 	FileEntry entries(nullptr, "root");
 	expectEntries(&entries, paths, date);
@@ -228,7 +229,7 @@ TEST(tst_TeArchiveFolderView, addFileEntry_shuffle)
 	paths.append("dir1/dir1_1/dir1_1_1");
 	paths.append("dir3/dir3_2/dir3_2_2");
 
-	QDateTime date(QDateTime(QDate(2019, 3, 31)));
+	QDateTime date(QDate(2019, 3, 31),QTime(0,0));
 
 	FileEntry entries(nullptr, "root");
 	expectEntries(&entries, paths, date);
@@ -257,7 +258,7 @@ TEST(tst_TeArchiveFolderView, addFileEntry_skipAdd)
 	paths.append("dir1/file1_2.txt");
 	paths.append("dir1/file1_1.txt");
 
-	QDateTime date(QDateTime(QDate(2019, 3, 31)));
+	QDateTime date(QDate(2019, 3, 31),QTime(0,0));
 
 	FileEntry entries(nullptr, "root");
 	expectEntries(&entries, paths, date);

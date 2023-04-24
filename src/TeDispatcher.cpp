@@ -92,7 +92,8 @@ void TeDispatcher::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, Q
 		//this queue entry clear when command call requestCommandFinalize that is called by TeCommandBase::finished().
 		m_cmdQueue.push_back(cmdBase);
 
-		cmdBase->run(mp_store);
+		if(m_cmdQueue.size() == 1)
+			cmdBase->run(mp_store);
 	}
 }
 
@@ -108,16 +109,16 @@ void TeDispatcher::loadKeySetting()
 	QList<int> list;
 	for (uint32_t key = Qt::Key_A; key <= Qt::Key_Z; key++) {
 		list.append(key);
-		list.append(Qt::CTRL + key);
+		list.append((int)Qt::CTRL + key);
 	}
 	for (uint32_t key = Qt::Key_0; key <= Qt::Key_9; key++) {
 		list.append(key);
-		list.append(Qt::CTRL + key);
+		list.append((int)Qt::CTRL + key);
 	}
 	for (uint32_t key = Qt::Key_F1; key <= Qt::Key_F12; key++) {
 		list.append(key);
-		list.append(Qt::CTRL + key);
-		list.append(Qt::SHIFT + key);
+		list.append((int)Qt::CTRL + key);
+		list.append((int)Qt::SHIFT + key);
 	}
 	list.append(Qt::Key_Escape);
 	list.append(Qt::Key_Backspace);
@@ -141,9 +142,11 @@ void TeDispatcher::loadKeySetting()
 void TeDispatcher::finishCommand(TeCommandBase* cmdBase)
 {
 	if (cmdBase != nullptr) {
-		//
 		if ( m_cmdQueue.removeAll(cmdBase) > 0 ) {
 			delete cmdBase;
+		}
+		if (m_cmdQueue.size() > 0) {
+			m_cmdQueue[0]->run(mp_store);
 		}
 	}
 }

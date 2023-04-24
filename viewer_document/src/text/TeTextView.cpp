@@ -25,16 +25,42 @@ private:
     TeTextView* textView;
 };
 
-TeTextView::TeTextView(QWidget* parent) : TeDocumentView(parent)
+TeTextView::TeTextView(QWidget* parent) : QPlainTextEdit(parent)
 {
     mp_lineNumberArea = new TeLineNumberArea(this);
+    m_lineNumberVisible = true;
+    m_tabStop = 4;
+    setTabStopWidth(m_tabStop);
 
     connect(this, &TeTextView::blockCountChanged, this, &TeTextView::updateLineNumberAreaWidth);
     connect(this, &TeTextView::updateRequest, this, &TeTextView::updateLineNumberArea);
     connect(this, &TeTextView::cursorPositionChanged, this, &TeTextView::highlightCurrentLine);
 
-    updateLineNumberAreaWidth(0);
+    updateLineNumberAreaWidth();
     highlightCurrentLine();
+}
+
+bool TeTextView::isLineNumberVisible() const
+{
+    return m_lineNumberVisible;
+}
+
+void TeTextView::setLineNumberVisible(bool visible)
+{
+    m_lineNumberVisible = visible;
+	updateLineNumberAreaWidth();
+}
+
+int TeTextView::tabStopWidth() const
+{
+    return m_tabStop;
+}
+
+void TeTextView::setTabStopWidth(int tabStop)
+{
+    m_tabStop = tabStop;
+	setTabStopDistance(fontMetrics().horizontalAdvance(QLatin1Char('9')) * m_tabStop);
+	emit tabStopWidthChanged(m_tabStop);
 }
 
 int TeTextView::lineNumberAreaWidth()
@@ -51,9 +77,14 @@ int TeTextView::lineNumberAreaWidth()
     return space;
 }
 
-void TeTextView::updateLineNumberAreaWidth(int /* newBlockCount */)
+void TeTextView::updateLineNumberAreaWidth()
 {
-    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+    if (isLineNumberVisible()) {
+        setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+    }
+    else {
+        setViewportMargins(0, 0, 0, 0);
+    }
 }
 
 void TeTextView::updateLineNumberArea(const QRect& rect, int dy)
@@ -64,7 +95,7 @@ void TeTextView::updateLineNumberArea(const QRect& rect, int dy)
         mp_lineNumberArea->update(0, rect.y(), mp_lineNumberArea->width(), rect.height());
 
     if (rect.contains(viewport()->rect()))
-        updateLineNumberAreaWidth(0);
+        updateLineNumberAreaWidth();
 }
 
 void TeTextView::resizeEvent(QResizeEvent* e)
@@ -96,26 +127,28 @@ void TeTextView::highlightCurrentLine()
 
 void TeTextView::lineNumberAreaPaintEvent(QPaintEvent* event)
 {
-    QPainter painter(mp_lineNumberArea);
-    painter.fillRect(event->rect(), Qt::lightGray);
+    if (isLineNumberVisible()) {
+        QPainter painter(mp_lineNumberArea);
+        painter.fillRect(event->rect(), Qt::lightGray);
 
-    QTextBlock block = firstVisibleBlock();
-    int blockNumber = block.blockNumber();
-    int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
-    int bottom = top + qRound(blockBoundingRect(block).height());
+        QTextBlock block = firstVisibleBlock();
+        int blockNumber = block.blockNumber();
+        int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
+        int bottom = top + qRound(blockBoundingRect(block).height());
 
-    while (block.isValid() && top <= event->rect().bottom()) {
-        if (block.isVisible() && bottom >= event->rect().top()) {
-            QString number = QString::number(blockNumber + 1);
-            painter.setPen(Qt::black);
-            painter.drawText(0, top, mp_lineNumberArea->width(), fontMetrics().height(),
-                Qt::AlignRight, number);
+        while (block.isValid() && top <= event->rect().bottom()) {
+            if (block.isVisible() && bottom >= event->rect().top()) {
+                QString number = QString::number(blockNumber + 1);
+                painter.setPen(Qt::black);
+                painter.drawText(0, top, mp_lineNumberArea->width(), fontMetrics().height(),
+                    Qt::AlignRight, number);
+            }
+
+            block = block.next();
+            top = bottom;
+            bottom = top + qRound(blockBoundingRect(block).height());
+            ++blockNumber;
         }
-
-        block = block.next();
-        top = bottom;
-        bottom = top + qRound(blockBoundingRect(block).height());
-        ++blockNumber;
     }
 }
 

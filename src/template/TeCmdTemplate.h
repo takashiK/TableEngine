@@ -28,9 +28,14 @@ public:
 	TeCmdTemplate();
 	virtual ~TeCmdTemplate();
 
+	// Check if this command can process when item is not selected.
 	static bool isAvailable();
 
 protected:
+	// Execute command.
+	// return
+	//   true  : command is finished. after execute, this command is deleted.
+	//   false : command is still processing. after finish. you must call finish() to delete this command.
 	virtual bool execute(TeViewStore* p_store);
 };
 

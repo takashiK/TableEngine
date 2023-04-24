@@ -7,6 +7,12 @@
 #endif
 
 SETTING_STR(SETTING_TEXT_HIGHLIGHT_SCHEMA, "document_viewer/text_highlight_schema");
+SETTING_STR(SETTING_TEXT_HIGHLIGHT_DEFAULT, "document_viewer/text_highlight_default");
 SETTING_STR(SETTING_TEXT_HIGHLIGHT_FOLDER, "document_viewer/text_highlight_folder");
+
+SETTING_STR(SETTING_MARKDOWN_DEFAULT, "document_viewer/markdown_default");
+SETTING_STR(SETTING_CONTAINER_FOLDER, "document_viewer/markdown_folder");
+
+SETTING_STR(SETTING_TEXT_CODECS, "document_viewer/text_codecs");
 
 #undef SETTING_STR

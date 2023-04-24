@@ -7,5 +7,8 @@ class TeTextSyntaxDialog :
 {
 	Q_OBJECT
 
+public:
+	TeTextSyntaxDialog(QWidget *parent);
+	virtual ~TeTextSyntaxDialog();
 };
 

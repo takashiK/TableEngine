@@ -28,6 +28,7 @@ SOURCES += main.cpp
 RESOURCES += TableEngine.qrc
 
 include(../src/lib.pri)
+include(../viewer_document/lib.pri)
 
 VERSION = 0.0.1
 QMAKE_TARGET_COMPANY = Personal
@@ -39,16 +40,25 @@ RC_ICONS = Resources/app_icon/table_engine.ico
 
 win32-msvc {
     CONFIG(debug, debug|release){
-        COPYDIR = debug
+        COPYTODIR = debug
     }else{
-        COPYDIR = release
+        COPYTODIR = release
     }
 
     COPYFILES = $${DLL_FILES}
     COPYFILES ~= s,/,\\,g
-    COPYDIR   ~= s,/,\\,g
+    COPYTODIR ~= s,/,\\,g
 
     for(FILE,COPYFILES){
-        QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${COPYDIR}$$escape_expand(\n\t))
+        QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${COPYTODIR}$$escape_expand(\n\t))
     }
+
+    COPYDIRS = Resources/container Resources/highlight
+
+    for(DIR,COPYDIRS){
+        DIRNAME = $${DIR}
+        DIRNAME ~= s,.+/,,g
+        DIR ~= s,/,\\,g
+		QMAKE_POST_LINK +=$$quote(cmd /c xcopy /e /i /y $${DIR} $${COPYTODIR}\\$${DIRNAME}$$escape_expand(\n\t))
+	}
 }

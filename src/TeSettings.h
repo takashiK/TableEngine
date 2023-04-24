@@ -34,6 +34,8 @@ namespace TeSettings {
 #define SETTING_STR( name , str) extern const char* name
 #endif
 
+SETTING_STR(SETTING_STARTUP, "startup");
+
 SETTING_STR(SETTING_STARTUP_MultiInstance , "startup/multi_instance" );
 SETTING_STR(SETTING_STARTUP_InitialFolderMode, "startup/initial_folder_mode");
 SETTING_STR(SETTING_STARTUP_InitialFolder, "startup/initial_folder");

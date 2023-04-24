@@ -103,7 +103,17 @@ TeMenuSetting::TeMenuSetting(QWidget *parent)
 			settings.endGroup();
 			settings.remove(QString("menuGroup0%1").arg(combo->currentIndex()));
 			settings.endGroup();
-			storeDefaultSettings();
+			switch (combo->currentIndex()) {
+			case 0:
+				storeDefaultMenuSettings(settings);
+				break;
+			case 1:
+				storeDefaultTreeMenuSettings(settings);
+				break;
+			case 2:
+				storeDefaultListMenuSettings(settings);
+				break;
+			}
 			QDialog::accept();
 		}
 	});
@@ -117,9 +127,16 @@ TeMenuSetting::~TeMenuSetting()
 
 }
 
-void TeMenuSetting::storeDefaultSettings()
+void TeMenuSetting::storeDefaultSettings(bool force)
 {
 	QSettings settings;
+	if (settings.contains(SETTING_MENU)) {
+		if (!force) {
+			return;
+		}
+		settings.remove(SETTING_MENU);
+	}
+
 	settings.beginGroup(SETTING_MENU);
 	if (!settings.contains("menuGroup00"))
 		storeDefaultMenuSettings(settings);

@@ -42,10 +42,10 @@ win32-msvc {
     QMAKE_CFLAGS += /MP
     QMAKE_CXXFLAGS += /MP
     CONFIG(debug, debug|release){
-        LIBS += ../support_package/debug/gmockd.lib
+        LIBS += ../support_package/debug/gmockd.lib  ../support_package/debug/libmagic.lib
         COPYDIR = debug
     }else{
-        LIBS += ../support_package/release/gmock.lib
+        LIBS += ../support_package/release/gmock.lib  ../support_package/release/libmagic.lib
         COPYDIR = release
     }
 

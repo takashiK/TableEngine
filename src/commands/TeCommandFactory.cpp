@@ -38,6 +38,8 @@
 #include "folder/TeCmdFolderOpenOne.h"
 #include "folder/TeCmdFolderOpenUnder.h"
 
+#include "view/TeCmdViewFile.h"
+
 #include "setting/TeCmdOption.h"
 #include "setting/TeCmdKeySetting.h"
 #include "setting/TeCmdMenuSetting.h"
@@ -63,6 +65,8 @@ TeCommandFactory::TeCommandFactory()
 	CMD_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CLOSE_ALL, TeCmdFolderCloseAll, tr("&Collapse All"), tr("Collapse all Folders."), QIcon(":/TableEngine/collapseAll.png"));
 	CMD_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CREATE_FOLDER, TeCmdFolderCreate, tr("&New Folder"), tr("Create new folder."), QIcon(":/TableEngine/newFolder.png"));
 	
+	CMD_ENTRY(TeTypes::CMDID_SYSTEM_VIEW_VIEW_FILE, TeCmdViewFile, tr("View File"), tr("View file."), QIcon(":/TableEngine/view.png"));
+
 	CMD_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_OPTION, TeCmdOption, tr("&Option"), tr("General options."), QIcon(":/TableEngine/settings.png"));
 	CMD_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_KEY, TeCmdKeySetting, tr("&Key"), tr("Customize key oparations."), QIcon(":/TableEngine/keyboard.png"));
 	CMD_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_MENU, TeCmdMenuSetting, tr("&Menu"), tr("Customize Menu item."), QIcon(":/TableEngine/menu.png"));

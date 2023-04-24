@@ -4,7 +4,7 @@
 
 TEMPLATE = lib
 CONFIG += staticlib
-QT += core gui widgets
+QT += core gui widgets webenginewidgets webchannel core5compat
 
 CONFIG(debug, debug|release){
     TARGET = viewer_documentd
@@ -30,13 +30,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 HEADERS += $$files(include/*.h,true)
 HEADERS += $$files(src/*.h,true)
 HEADERS += $$files(src/text/*.h,true)
+HEADERS += $$files(src/markup/*.h,true)
 
 SOURCES += $$files(src/*.cpp)
 SOURCES += $$files(src/text/*.cpp)
+SOURCES += $$files(src/markup/*.cpp)
 
 win32-msvc {
     INCLUDEPATH += ../support_package/include
 
     QMAKE_CFLAGS += /MP
     QMAKE_CXXFLAGS += /MP
+
+    LIBS = icu.lib
 }

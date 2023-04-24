@@ -30,7 +30,7 @@
 #include <QMimeData>
 #include <QGuiApplication>
 #include <QClipboard>
-
+#include <QStringList>
 
 
 TeCmdCopy::TeCmdCopy()

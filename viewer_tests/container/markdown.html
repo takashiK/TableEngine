@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!--
+    <link rel="stylesheet" type="text/css" href="3rdparty/markdown.css">
+    -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@3.0.1/github-markdown.min.css">
+    <link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/github.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="qrc:/qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+    <article class="markdown-body">
+        <div id="placeholder"></div>
+    </article>
+    <script>
+  'use strict';
+
+  var placeholder = document.getElementById('placeholder');
+
+  var updateText = function(text) {
+
+      var renderer = new marked.Renderer();
+      marked.setOptions({
+          renderer: renderer,
+          highlight: function (code, lang) {
+              const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+              return hljs.highlight(code, { language }).value;
+          },
+          langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
+          pedantic: false,
+          gfm: true,
+          breaks: false,
+          sanitize: false,
+          smartypants: false,
+          xhtml: false
+      });
+
+      placeholder.innerHTML = marked.parse(text);
+  }
+
+  new QWebChannel(qt.webChannelTransport,
+    function(channel) {
+      var content = channel.objects.document;
+      updateText(content.content);
+    }
+  );
+    </script>
+</body>
+</html>

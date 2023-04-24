@@ -120,7 +120,7 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 
 
 	QHBoxLayout* layout = new QHBoxLayout();
-	layout->setMargin(0);
+	layout->setContentsMargins(0,0,0,0);
 	setLayout(layout);
 	layout->addWidget(mp_listView);
 }

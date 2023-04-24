@@ -447,7 +447,7 @@ namespace {
 
 			if (archive_entry_mtime_is_set(arInfo->entry)) {
 				time_t mtime = archive_entry_mtime(arInfo->entry);
-				info->lastModifyed.setTime_t(mtime);
+				info->lastModifyed.setSecsSinceEpoch(mtime);
 			}
 			return true;
 		}
@@ -784,7 +784,7 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 			}
 			bool found = false;
 			for (auto&& entry : entries) {
-				if (info.path.midRef(base.size()).startsWith(entry)) {
+				if (info.path.mid(base.size()).startsWith(entry)) {
 					found = true; break;
 				}
 			}

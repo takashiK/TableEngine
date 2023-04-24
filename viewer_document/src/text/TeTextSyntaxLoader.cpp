@@ -15,6 +15,8 @@
 #include <valijson/validator.hpp>
 
 namespace {
+    const QString relationPath = "text_suffix.relation";
+
     QBrush makeBrush(const QJsonValue& color) {
         QString colorStr = color.toString();
 
@@ -112,14 +114,14 @@ bool TeTextSyntaxLoader::loadAll()
     }
 
     //Load relations
-    if (dir.exists("text_suffix.relation")) {
+    if (dir.exists(relationPath)) {
         QJsonValue jsonDoc;
-        if (!valijson::utils::loadDocument(dir.filePath("text_suffix.relation").toStdString(), jsonDoc)) {
+        if (!valijson::utils::loadDocument(dir.filePath(relationPath).toStdString(), jsonDoc)) {
             // Failed to load target document
             return false;
         }
 
-        QJsonObject relations = jsonDoc["suffix_relation"].toObject();
+        QJsonObject relations = jsonDoc["relation"].toObject();
         for (auto itr = relations.begin(); itr != relations.end(); ++itr) {
             addRelation(itr.key(), itr.value().toString(), true);
         }
@@ -149,12 +151,12 @@ bool TeTextSyntaxLoader::saveAll()
     //save syntaxes
     for (auto itr = m_syntaxes.begin(); itr != m_syntaxes.end(); ++itr) {
         if (itr.value().isUpdate) {
-            saveSyntax(path + itr.key() + ".highlight", itr.value().textSyntax);
+            saveSyntax(path + "/" + itr.key() + ".highlight", itr.value().textSyntax);
         }
     }
 
     //save relations
-    QFile file(dir.filePath("text_suffix.relation"));
+    QFile file(dir.filePath(relationPath));
     if (file.open(QIODevice::WriteOnly)) {
 
         QJsonObject relations;
@@ -346,7 +348,7 @@ int TeTextSyntaxLoader::delEntry(const QString& title)
 	return m_syntaxes.count();
 }
 
-const TeTextSyntax& TeTextSyntaxLoader::entry(const QString& title)
+TeTextSyntax TeTextSyntaxLoader::entry(const QString& title)
 {
 	auto itr = m_syntaxes.find(title);
 	if (itr != m_syntaxes.end()) {
@@ -355,7 +357,7 @@ const TeTextSyntax& TeTextSyntaxLoader::entry(const QString& title)
 	return TeTextSyntax();
 }
 
-const QStringList& TeTextSyntaxLoader::titles()
+QStringList TeTextSyntaxLoader::titles()
 {
 	return m_syntaxes.keys();
 }
@@ -384,7 +386,7 @@ int TeTextSyntaxLoader::delRelation(const QString& suffix)
 	return m_relations.count();
 }
 
-const TeTextSyntax& TeTextSyntaxLoader::relatedEntry(const QString& suffix)
+TeTextSyntax TeTextSyntaxLoader::relatedEntry(const QString& suffix)
 {
     auto itr = m_relations.find(suffix);
     if (itr != m_relations.end()) {
@@ -397,6 +399,7 @@ const TeTextSyntax& TeTextSyntaxLoader::relatedEntry(const QString& suffix)
             m_relations.erase(itr);
         }
     }
+
 	return TeTextSyntax();
 }
 

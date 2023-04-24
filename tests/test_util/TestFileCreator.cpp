@@ -26,7 +26,7 @@
 #include "TestFileCreator.h"
 #include "FileEntry.h"
 #include <QDir>
-#include <QRegExp>
+#include <QRegularExpression>
 
 /*!
 	Create file tree to \a dest by \a paths.
@@ -42,7 +42,7 @@ void createFileTree(const QString & dest, const QStringList & paths, int extend_
 	QDir dir(dest);
 	dir.mkpath(".");
 
-	QRegExp rootDir = QRegExp("^/+");
+	QRegularExpression  rootDir = QRegularExpression("^/+");
 
 
 	for (auto path : paths) {

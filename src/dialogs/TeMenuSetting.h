@@ -35,7 +35,7 @@ public:
 	TeMenuSetting(QWidget *parent);
 	virtual ~TeMenuSetting();
 
-	static void storeDefaultSettings();
+	static void storeDefaultSettings(bool force=false );
 
 public slots:
 	void accept();
@@ -51,7 +51,7 @@ protected:
 	void contextMenu(TeTreeWidget* tree, QTreeWidgetItem* item);
 	void editEntryName(QTreeWidgetItem* item);
 	TeTreeWidget* createNewMenu(const QString& name);
-	QTreeWidgetItem* TeMenuSetting::createEntryItem(const QString& name, TeTypes::CmdId cmdId);
+	QTreeWidgetItem* createEntryItem(const QString& name, TeTypes::CmdId cmdId);
 	QTreeWidgetItem* createFolderItem();
 	QTreeWidgetItem* createSeparatorItem();
 	QList<QTreeWidgetItem*> createCmdTreeItem();

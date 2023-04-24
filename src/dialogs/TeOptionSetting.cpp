@@ -73,9 +73,15 @@ void TeOptionSetting::updateSettings()
 	}
 }
 
-void TeOptionSetting::storeDefaultSettings()
+void TeOptionSetting::storeDefaultSettings(bool force)
 {
 	QSettings settings;
+	if (settings.contains(SETTING_STARTUP)) {
+		if (!force) {
+			return;
+		}
+		settings.remove(SETTING_STARTUP);
+	}
 
 #define SETTING( str, default_value)  settings.setValue( str , settings.value( str , default_value ))
 

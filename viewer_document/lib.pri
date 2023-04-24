@@ -1,11 +1,7 @@
-INCLUDEPATH += $${PWD}/include
-DEPENDPATH += $${PWD}/include
-QT += core gui widgets
+INCLUDEPATH += $${PWD}/src
 
+QT += core gui widgets webenginewidgets webchannel core5compat
 
-CONFIG(testcase){
-    INCLUDEPATH += $${PWD}/src
-}
 
 win32-msvc {
     INCLUDEPATH += ../support_package/include
@@ -14,5 +10,5 @@ win32-msvc {
     }else{
         LIBS += $$shadowed($${PWD})/release/viewer_document.lib
     }
-
+    LIBS += icu.lib
 }

@@ -2,7 +2,6 @@
 
 class TeViewStore;
 
-class QStringList;
-class QSettings;
+#include <QStringList>
 
 bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths);

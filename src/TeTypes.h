@@ -85,6 +85,8 @@ public:
 		CMDID_SYSTEM_FOLDER_FIND,                         // find files
 
 		CMDID_SYSTEM_VIEW    = CMDID_SYSTEM + 0x4000,     // Menu item : View
+		CMDID_SYSTEM_VIEW_VIEW_FILE,					  // #View file
+		CMDID_SYSTEM_VIEW_VIEW_BINARY,					  // #View binary
 
 
 		CMDID_SYSTEM_TOOL    = CMDID_SYSTEM + 0x5000,     // Menu item : Tool
