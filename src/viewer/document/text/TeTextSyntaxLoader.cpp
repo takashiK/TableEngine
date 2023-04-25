@@ -1,4 +1,7 @@
 #include "TeTextSyntaxLoader.h"
+
+#include "viewer/document/TeDocumentSettings.h"
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFile>
@@ -6,7 +9,6 @@
 #include <QApplication>
 
 #include <QSettings>
-#include <TeDocumentSettings.h>
 
 #include <valijson/adapters/qtjson_adapter.hpp>
 #include <valijson/utils/qtjson_utils.hpp>

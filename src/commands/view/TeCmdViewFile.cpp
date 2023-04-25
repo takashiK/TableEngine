@@ -1,8 +1,11 @@
 #include "TeCmdViewFile.h"
 
-#include "TeDocViewer.h"
+#include "viewer/document/TeDocViewer.h"
 #include "TeUtils.h"
 #include "TeViewStore.h"
+
+#include <QMessageBox>
+
 
 TeCmdViewFile::TeCmdViewFile()
 {
@@ -25,13 +28,20 @@ bool TeCmdViewFile::execute(TeViewStore* p_store)
 
 	if (getSelectedItemList(p_store, &paths)) {
 		for (auto& path : paths) {
-			TeDocViewer* docViewer = new TeDocViewer();
-			if (docViewer->open(path)) {
-				p_store->registerFloatingWidget(docViewer);
-				docViewer->show();
+			TeFileType type = getFileType(path);
+			if (type == TE_FILE_TEXT){
+					TeDocViewer* docViewer = new TeDocViewer();
+				if (docViewer->open(path)) {
+					p_store->registerFloatingWidget(docViewer);
+					docViewer->show();
+				}
+				else {
+					delete docViewer;
+				}
 			}
 			else {
-				delete docViewer;
+				// show message dialog box.
+				QMessageBox::warning(p_store->mainWindow(), "Unsupported file", path);
 			}
 		}
 	}

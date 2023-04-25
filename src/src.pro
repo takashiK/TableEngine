@@ -4,7 +4,7 @@
 
 TEMPLATE = lib
 CONFIG += staticlib
-QT += core gui widgets
+QT += core gui widgets webenginecore webenginewidgets webchannel core5compat
 
 CONFIG(debug, debug|release){
     TARGET = tengined
@@ -29,16 +29,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # Input
 HEADERS += $$files(*.h)
 HEADERS += $$files(commands/*.h,true)
+HEADERS += $$files(viewer/document/*.h,true)
+HEADERS += $$files(viewer/picture/*.h,true)
+HEADERS += $$files(viewer/binary/*.h,true)
 HEADERS += $$files(dialogs/*.h,true)
 HEADERS += $$files(platform/*.h)
 HEADERS += $$files(widgets/*.h,true)
 
 SOURCES += $$files(*.cpp)
 SOURCES += $$files(commands/*.cpp,true)
+SOURCES += $$files(viewer/document/*.cpp,true)
+SOURCES += $$files(viewer/picture/*.cpp,true)
+SOURCES += $$files(viewer/binary/*.cpp,true)
 SOURCES += $$files(dialogs/*.cpp,true)
 SOURCES += $$files(widgets/*.cpp,true)
-
-include(../viewer_document/lib.pri)
 
 win32-msvc {
     HEADERS += $$files(platform/windows/*.h,true)

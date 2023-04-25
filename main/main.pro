@@ -28,7 +28,6 @@ SOURCES += main.cpp
 RESOURCES += TableEngine.qrc
 
 include(../src/lib.pri)
-include(../viewer_document/lib.pri)
 
 VERSION = 0.0.1
 QMAKE_TARGET_COMPANY = Personal

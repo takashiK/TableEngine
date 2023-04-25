@@ -1,5 +1,5 @@
 #include "TeMarkupLoader.h"
-#include "TeDocumentSettings.h"
+#include "viewer/document/TeDocumentSettings.h"
 
 #include <QSettings>
 #include <QDir>

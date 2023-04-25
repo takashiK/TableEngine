@@ -12,8 +12,6 @@ win32-msvc{
 }
 
 
-INCLUDEPATH += .
-
 # The following define makes your compiler warn you if you use any
 # feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -34,8 +32,7 @@ SOURCES += $$files(*.cpp)
 SOURCES += $$files(document/*.cpp,true)
 SOURCES += $$files(picture/*.cpp,true)
 
-include(../viewer_document/lib.pri)
-#include(../viewer_picture/lib.pri)
+include(../src/lib.pri)
 
 win32-msvc {
     INCLUDEPATH += ../support_package/include

@@ -39,7 +39,6 @@ SOURCES += $$files(test_mock/*.cpp,true)
 SOURCES += $$files(test_util/*.cpp,true)
 
 include(../src/lib.pri)
-include(../viewer_document/lib.pri)
 
 win32-msvc {
     HEADERS += $$files(platform/windows/*.h,true)

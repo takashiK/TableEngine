@@ -18,13 +18,15 @@
 **
 ****************************************************************************/
 
+#include "viewer/document/TeDocumentSettings.h"
+#include "viewer/document/TeDocViewer.h"
+#include "viewer/picture/TeImageViewer.h"
+
 #include <QApplication>
 #include <QSettings>
-#include <TeDocumentSettings.h>
 
 #include <gmock/gmock.h>
 
-#include <TeDocViewer.h>
 
 int main(int argc, char *argv[])
 {
@@ -48,13 +50,18 @@ int main(int argc, char *argv[])
 	QString str = QApplication::applicationDirPath() + "/../highlight";
 
 #if 1
+	TeImageViewer view;
+	view.open("sample/sample.png");
+	view.show();
+	return a.exec();
+#else
 	TeDocViewer view;
 	
 	view.open("sample/sample.md");
 	view.show();
 
 	return a.exec();
-#else
+
 	return RUN_ALL_TESTS();
 #endif
 }
