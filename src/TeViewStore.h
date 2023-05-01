@@ -26,7 +26,7 @@
 
 class TeMainWindow;
 class TeFileFolderView;
-class TeCloseEventEmitter;
+class TeEventEmitter;
 class QTabWidget;
 class TeDispatcher;
 class QMainWindow;
@@ -77,7 +77,7 @@ public:
 	void registerFloatingWidget(QWidget* widget);
 
 public slots:
-	void floatingWidgetClosed(QWidget* widget);
+	void floatingWidgetClosed(QWidget* widget, QEvent* event);
 
 signals:
 	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
@@ -90,6 +90,6 @@ private:
 	TeFileFolderView* mp_currentFolderView;
 
 	TeDispatcher* mp_dispatcher;
-	TeCloseEventEmitter* mp_closeEventEmitter;
+	TeEventEmitter* mp_closeEventEmitter;
 	QList<QWidget*> m_floatingWidgets;
 };

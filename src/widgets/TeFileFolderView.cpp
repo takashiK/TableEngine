@@ -72,7 +72,7 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	mp_listView->setViewMode(QListView::ListMode);
 	mp_listView->setWrapping(true);
 	mp_listView->setResizeMode(QListView::Adjust);
-	mp_listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	mp_listView->setSelectionMode(QAbstractItemView::NoSelection);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
 	mp_listView->setSpacing(2);
 	mp_listView->setSelectionRectVisible(true);
@@ -222,7 +222,6 @@ void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint
 
 void TeFileFolderView::setRootPath(const QString & path)
 {
-	QString rpath = rootPath();
 	if (rootPath() != path) {
 		//Set root path to treeview.
 		QModelIndex index = mp_treeModel->index(path);
@@ -230,9 +229,10 @@ void TeFileFolderView::setRootPath(const QString & path)
 		tree()->setCurrentIndex(index);
 
 		//Set target path of listview to same as treeview.
-		list()->setRootIndex(mp_listModel->setRootPath(path));
-
-		rpath = rootPath();
+		list()->clearSelection();
+		list()->setCurrentIndex(QModelIndex());
+		QModelIndex rootIndex = mp_listModel->setRootPath(path);
+		list()->setRootIndex(rootIndex);
 	}
 }
 
@@ -250,10 +250,21 @@ void TeFileFolderView::setCurrentPath(const QString & path)
 		tree()->setCurrentIndex(index);
 	}
 
+	QModelIndex prevIndex = list()->rootIndex();
+	QString prevPath = mp_listModel->filePath(list()->rootIndex());
 	index = mp_listModel->index(path);
 	if (list()->rootIndex() != index) {
 		list()->clearSelection();
-		list()->setRootIndex(mp_listModel->setRootPath(path));
+		list()->setCurrentIndex(QModelIndex());
+		QModelIndex rootIndex = mp_listModel->setRootPath(path);
+		list()->setRootIndex(rootIndex);
+
+		if (prevPath == mp_listModel->filePath(index.parent())) {
+			list()->setCurrentIndex(prevIndex);
+		}
+		else {
+			list()->setCurrentIndex(mp_listModel->index(prevPath));
+		}
 	}
 }
 

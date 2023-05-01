@@ -20,10 +20,15 @@
 
 #include "viewer/document/TeDocumentSettings.h"
 #include "viewer/document/TeDocViewer.h"
-#include "viewer/picture/TeImageViewer.h"
+#include "viewer/picture/TePictureViewer.h"
 
 #include <QApplication>
 #include <QSettings>
+
+#include <QMainWindow>
+#include <QMenuBar>
+#include <QMenu>
+
 
 #include <gmock/gmock.h>
 
@@ -40,7 +45,7 @@ int main(int argc, char *argv[])
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 
 	QSettings settings;
-	settings.setValue(SETTING_TEXT_HIGHLIGHT_SCHEMA,"../viewer_document/schema/text_highlight_schema.json");
+	settings.setValue(SETTING_TEXT_HIGHLIGHT_SCHEMA,"viewer/document/schema/text_highlight_schema.json");
 	settings.setValue(SETTING_TEXT_HIGHLIGHT_FOLDER, QApplication::applicationDirPath() + "/../highlight");
 	settings.setValue(SETTING_CONTAINER_FOLDER, QApplication::applicationDirPath() + "/../container");
 
@@ -50,17 +55,23 @@ int main(int argc, char *argv[])
 	QString str = QApplication::applicationDirPath() + "/../highlight";
 
 #if 1
-	TeImageViewer view;
-	view.open("sample/sample.png");
+	TePictureViewer view;
+	//view.open("sample/sample.png");
+	view.open("sample/DSC00155.jpg");
+	//view.open("../main/Resources/icon/iconmonstr-clipboard-2-64.png");
+	//view.open("C:/Users/laffi/Pictures/2019紅葉/DSC00089.jpg");
 	view.show();
 	return a.exec();
-#else
+#endif
+#if 0
 	TeDocViewer view;
 	
 	view.open("sample/sample.md");
 	view.show();
 
 	return a.exec();
+#endif
+#if 0
 
 	return RUN_ALL_TESTS();
 #endif

@@ -8,5 +8,7 @@ public:
 	TeThumbnailProvider();
 	virtual ~TeThumbnailProvider();
 	virtual QIcon icon(const QFileInfo& info) const override;
+
+	static QAbstractFileIconProvider* iconProvider();
 };
 

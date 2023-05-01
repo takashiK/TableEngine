@@ -82,9 +82,9 @@ bool TeFolderView::isDispatchable(TeTypes::WidgetType /*type*/, QObject* /*obj*/
 			case Qt::Key_F10:
 			case Qt::Key_F11:
 			case Qt::Key_F12:
-			case Qt::Key_Enter:
 			case Qt::Key_Backspace:
 			case Qt::Key_Delete:
+			case Qt::Key_Tab:
 				return true;
 
 			case Qt::Key_0:

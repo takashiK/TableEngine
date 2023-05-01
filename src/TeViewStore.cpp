@@ -28,7 +28,7 @@
 #include "TeSettings.h"
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
-#include "TeCloseEventEmitter.h"
+#include "TeEventEmitter.h"
 
 
 #include <QMenu>
@@ -129,8 +129,9 @@ void TeViewStore::initialize()
 		[this](TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event) { execCommand(cmdId, type, obj, event); });
 
 	//setup closeEventEmitter
-	mp_closeEventEmitter = new TeCloseEventEmitter();
-	connect(mp_closeEventEmitter, &TeCloseEventEmitter::closeEvent, this, &TeViewStore::floatingWidgetClosed, Qt::QueuedConnection);
+	mp_closeEventEmitter = new TeEventEmitter();
+	mp_closeEventEmitter->addEventType(QEvent::Close);
+	connect(mp_closeEventEmitter, &TeEventEmitter::emitEvent, this, &TeViewStore::floatingWidgetClosed, Qt::QueuedConnection);
 
 	//load settings
 	loadMenu();
@@ -367,6 +368,7 @@ void TeViewStore::setCurrentFolderView(TeFileFolderView * view)
 				view->tree()->setHidden(false);
 			}
 			connect(mp_driveBar, &TeDriveBar::changeDrive, view, &TeFolderView::setRootPath);
+			tree = view->tree();
 		}
 	}
 }
@@ -395,6 +397,9 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	int index = mp_tab[place]->addTab(folderView, icon, dir.isRoot() ? dir.path() : dir.dirName());
 	mp_tab[place]->setTabToolTip(index, dir.absolutePath());
 	mp_tab[place]->setHidden(false);
+
+	folderView->list()->setFocusPolicy(Qt::ClickFocus);
+	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
 	if (currentFolderView() == nullptr) {
 		//Regist Current FolderView If it is not register yet.
@@ -492,11 +497,11 @@ void TeViewStore::registerFloatingWidget(QWidget* widget)
 {
 	if (!m_floatingWidgets.contains(widget)) {
 		m_floatingWidgets.append(widget);
-		mp_closeEventEmitter->oneShotRegister(widget);
+		mp_closeEventEmitter->addOneShotEmiter(widget);
 	}
 }
 
-void TeViewStore::floatingWidgetClosed(QWidget* widget)
+void TeViewStore::floatingWidgetClosed(QWidget* widget, QEvent* event)
 {
 	if (m_floatingWidgets.contains(widget)) {
 		m_floatingWidgets.removeAll(widget);

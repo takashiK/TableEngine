@@ -342,7 +342,8 @@ void TeDocViewer::setupMenu()
 
     /////////////////////
     // Mode
-    menu = menuBar()->addMenu(tr("&Mode"));
+
+    menu = menuBar()->addMenu(tr("&File"));
 
     action = new QAction( tr("&Text"));
     connect(action, &QAction::triggered, [this](bool /*checked*/) {textViewMode(); });
@@ -353,6 +354,13 @@ void TeDocViewer::setupMenu()
     connect(action, &QAction::triggered, [this](bool /*checked*/) {markupMode(); });
     action->setShortcut(QKeySequence(tr("Ctrl+M")));
     menu->addAction(action);
+
+    menu->addSeparator();
+
+    action = menu->addAction(tr("&Exit"));
+    action->setShortcuts({ QKeySequence(Qt::Key_Escape) });
+    connect(action, &QAction::triggered, this, &TeDocViewer::close);
+
 
     /////////////////////
     // Search

@@ -21,14 +21,41 @@
 #include "platform/platform_util.h"
 
 #include <QMap>
-
-#include <Windows.h>
-#include <commctrl.h>
-#include <Shlobj.h>
 #include <QDir>
 #include <QFileInfo>
 #include <Shobjidl.h>
 #include <QMimeData>
+#include <QImage>
+
+#include <commoncontrols.h>
+#include <Windows.h>
+#include <commctrl.h>
+#include <Shlobj.h>
+#include <Shlwapi.h>
+#include <shellapi.h>
+#include <thumbcache.h>
+#include <GdiPlus.h>
+
+//////////////////////////////////////////////////////////////
+//
+// Initialize and uninitialize platform system
+//
+bool threadInitialize()
+{
+	return SUCCEEDED(CoInitialize(NULL));
+}
+
+void threadUninitialize()
+{
+	CoUninitialize();
+}
+
+
+//////////////////////////////////////////////////////////
+//
+// File action
+//
+
 
 static QMap<HWND, IContextMenu2*> g_context;
 
@@ -328,6 +355,101 @@ bool deleteFiles(const QStringList & files)
 	return SUCCEEDED(hr);
 }
 
+
+QPixmap getThumbnail(const QString& path, const QSize& size)
+{
+	UINT nSize = qMax(size.width(), size.height());
+	IShellItem* psi;
+	HRESULT hr = SHCreateItemFromParsingName(reinterpret_cast<PCWSTR>(QDir::toNativeSeparators(path).utf16()), NULL, IID_PPV_ARGS(&psi));
+	if (SUCCEEDED(hr))
+	{
+		IThumbnailProvider* pThumbProvider;
+		hr = psi->BindToHandler(NULL, BHID_ThumbnailHandler, IID_PPV_ARGS(&pThumbProvider));
+		if (SUCCEEDED(hr))
+		{
+			WTS_ALPHATYPE wtsAlpha;
+			HBITMAP hBitmap;
+			hr = pThumbProvider->GetThumbnail(nSize, &hBitmap, &wtsAlpha);
+			if (SUCCEEDED(hr))
+			{
+				QImage image = QImage::fromHBITMAP(hBitmap);
+				if (wtsAlpha == WTSAT_ARGB) {
+					image.reinterpretAsFormat(QImage::Format_ARGB32);
+				}
+				QPixmap pixmap = QPixmap::fromImage(image);
+				DeleteObject(hBitmap);
+
+				return pixmap;
+			}
+			pThumbProvider->Release();
+		}
+		psi->Release();
+	}
+
+	return QPixmap();
+}
+
+
+QPixmap getFileIcon(const QString& path, const QSize& size)
+{
+	int iconSize = qMax(size.width(), size.height());
+	int iconType = SHIL_JUMBO;
+	if (iconSize <= 16) {
+		iconType = SHIL_SMALL;
+	}
+	else if(iconSize <= 32){
+		iconType = SHIL_LARGE;
+	}
+	else if (iconSize <= 48) {
+		iconType = SHIL_EXTRALARGE;
+	}
+
+	IImageList* piml;
+	HRESULT hr = SHGetImageList(iconType, IID_IImageList, reinterpret_cast<void**>(&piml));
+
+	if (FAILED(hr))
+	{
+		return QPixmap();
+	}
+
+	SHFILEINFO shfi;
+	ZeroMemory(&shfi, sizeof(SHFILEINFO));
+	DWORD_PTR res = SHGetFileInfo(
+		reinterpret_cast<const WCHAR*>(QDir::toNativeSeparators(path).utf16()), 0,
+		&shfi, sizeof(SHFILEINFO),
+		SHGFI_USEFILEATTRIBUTES | SHGFI_SYSICONINDEX);
+
+	if (res == 0)
+	{
+		piml->Release();
+		return QPixmap();
+	}
+
+	HICON hIcon;
+	hr = piml->GetIcon(shfi.iIcon, ILD_TRANSPARENT, &hIcon);
+
+	if (FAILED(hr))
+	{
+		piml->Release();
+		return QPixmap();
+	}
+
+	QPixmap pixmap = QPixmap::fromImage(QImage::fromHICON(hIcon));
+	DestroyIcon(hIcon);
+	piml->Release();
+
+	QSize pixSize = pixmap.size().expandedTo(size);
+
+	return pixmap.scaled(pixSize);
+}
+
+
+
+//////////////////////////////////////////////////////////
+//
+// Clipboard
+//
+
 bool isMoveAction(const QMimeData* mime)
 {
 	if (mime->hasFormat("application/x-qt-windows-mime;value=\"Preferred DropEffect\"")) {
@@ -355,14 +477,4 @@ void setCopyAction(QMimeData* mime)
 	QByteArray data(4, 0);
 	data[0] = 5;
 	mime->setData("Preferred DropEffect", data);
-}
-
-bool threadInitialize()
-{
-	return SUCCEEDED(CoInitialize(NULL));
-}
-
-void threadUninitialize()
-{
-	CoUninitialize();
 }

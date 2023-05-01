@@ -1,6 +1,8 @@
 #include "TeCmdViewFile.h"
 
 #include "viewer/document/TeDocViewer.h"
+#include "viewer/picture/TePictureViewer.h"
+#include "viewer/binary/TeBinaryViewer.h"
 #include "TeUtils.h"
 #include "TeViewStore.h"
 
@@ -39,9 +41,29 @@ bool TeCmdViewFile::execute(TeViewStore* p_store)
 					delete docViewer;
 				}
 			}
+			else if (type == TE_FILE_IMAGE) {
+				TePictureViewer* pictureViewer = new TePictureViewer();
+				if (pictureViewer->open(path)) {
+					p_store->registerFloatingWidget(pictureViewer);
+					pictureViewer->show();
+				}
+				else {
+					delete pictureViewer;
+				}
+			}
 			else {
 				// show message dialog box.
-				QMessageBox::warning(p_store->mainWindow(), "Unsupported file", path);
+				int result = QMessageBox::warning(p_store->mainWindow(), "Unsupported file.\n open in hex viewer?", path, QMessageBox::Ok,QMessageBox::Cancel);
+				if (result == QMessageBox::Ok) {
+					TeBinaryViewer* binaryViewer = new TeBinaryViewer();
+					if (binaryViewer->open(path)) {
+						p_store->registerFloatingWidget(binaryViewer);
+						binaryViewer->show();
+					}
+					else {
+						delete binaryViewer;
+					}
+				}
 			}
 		}
 	}

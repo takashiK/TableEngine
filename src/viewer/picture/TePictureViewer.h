@@ -1,16 +1,19 @@
 #pragma once
 
-#include <QMainwindow>
+#include "TeEventEmitter.h"
+
+#include <QMainWindow>
+#include <QModelIndex>
 
 class QGraphicsView;
+class QGraphicsPixmapItem;
 class QListView;
 class QFileSystemModel;
-class QDockWidget;
-class QGraphicsPixmapItem;
 
-class TeImageViewer  : public QMainWindow
+class TePictureViewer  : public QMainWindow
 {
 	Q_OBJECT
+
 public:
 	enum Strech {
 		StrechNone,
@@ -19,24 +22,29 @@ public:
 	};
 
 public:
-	TeImageViewer(QWidget *parent= nullptr);
-	virtual ~TeImageViewer();
+	TePictureViewer(QWidget *parent=0);
+	~TePictureViewer();
 
 	bool open(const QString& path);
 
 	Strech strechMode() const;
 	QPair<int, Qt::SortOrder> sortOrder() const;
-	
+
+signals:
+	void strechChanged(Strech mode);
 
 public slots:
 	void nextImage();
 	void prevImage();
-	void showImageList();
+	void showImageList(bool flag);
 	void setStrechMode(Strech mode);
 	void setSortOrder(int column, Qt::SortOrder order);
 
+protected slots:
+	void updateView(const QModelIndex& index = QModelIndex());
+
 protected:
-	void updateView();
+	void setupMenu();
 
 private:
 	QGraphicsView* mp_graphics;
@@ -47,4 +55,6 @@ private:
 	Strech m_strechMode;
 	int m_sortColumn;
 	Qt::SortOrder m_sortOrder;
+	QModelIndex m_imageIndex;
+	TeEventEmitter* mp_emitter;
 };

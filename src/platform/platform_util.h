@@ -20,22 +20,26 @@
 
 #pragma once
 #include <QString>
+#include <QPixmap>
+#include <QSize>
 
 class QMimeData;
 
+//Initialize and uninitialize platform system
+extern bool threadInitialize();
+extern void threadUninitialize();
 
+//File action
 extern void showFileContext( int px, int py, const QString& path);
 extern void openFile(const QString& path);
 extern bool copyFiles(const QStringList& files, const QString& path);
 extern bool copyFile(const QString& fromFile, const QString& toFile);
 extern bool moveFiles(const QStringList& files, const QString& path);
 extern bool deleteFiles(const QStringList& files);
-
+extern QPixmap getThumbnail(const QString& path, const QSize& size);
+extern QPixmap getFileIcon(const QString& path, const QSize& size);
 
 //clipboard action
 extern bool isMoveAction(const QMimeData* mime);
 extern void setMoveAction(QMimeData* mime);
 extern void setCopyAction(QMimeData* mime);
-
-extern bool threadInitialize();
-extern void threadUninitialize();
