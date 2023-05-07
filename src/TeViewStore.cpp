@@ -501,7 +501,7 @@ void TeViewStore::registerFloatingWidget(QWidget* widget)
 	}
 }
 
-void TeViewStore::floatingWidgetClosed(QWidget* widget, QEvent* event)
+void TeViewStore::floatingWidgetClosed(QWidget* widget, QEvent* )
 {
 	if (m_floatingWidgets.contains(widget)) {
 		m_floatingWidgets.removeAll(widget);

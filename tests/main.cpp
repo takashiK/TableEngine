@@ -33,31 +33,5 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 	a.setAttribute(Qt::AA_Use96Dpi, true);
 
-#if 0
-	QWidget* widget = new QWidget;
-	QHBoxLayout* layout = new QHBoxLayout;
-	TeArchiveFolderView* view = new TeArchiveFolderView;
-	view->addDirEntry("test/test1");
-	view->addDirEntry("test/test2");
-	view->addDirEntry("test/test3");
-	view->addEntry("test/file1.zip", 10000, QDateTime(), "test");
-	view->addEntry("test/file2.7", 1000000000, QDateTime(), "test");
-	view->addEntry("test/test2/file3.", 10, QDateTime(), "test");
-	//view->tree()->setHeaderHidden(false);
-	view->setRootPath("C:/Projects/vs2015/QtArchiveTest/QtArchiveTest/docs.zip");
-	view->tree()->expandAll();
-//	view->setCurrentPath("test/test2");
-
-	layout->addWidget(view);
-	layout->insertWidget(0,view->tree());
-	widget->setLayout(layout);
-	widget->show();
-
-	a.exec();
-
-	delete view;
-	delete widget;
-	return 0;
-#endif
 	return RUN_ALL_TESTS();
 }

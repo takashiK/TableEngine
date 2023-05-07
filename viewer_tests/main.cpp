@@ -30,6 +30,9 @@
 #include <QMenu>
 
 
+#include <QListView>
+#include <QFileSystemModel>
+
 #include <gmock/gmock.h>
 
 
@@ -54,7 +57,21 @@ int main(int argc, char *argv[])
 
 	QString str = QApplication::applicationDirPath() + "/../highlight";
 
-#if 1
+	QFileSystemModel model;
+	QModelIndex rootIndex = model.setRootPath("C:/");
+	QListView view;
+	view.setModel(&model);
+	view.setRootIndex(rootIndex);
+	view.setSelectionMode(QAbstractItemView::ExtendedSelection);
+	view.setDragDropMode(QAbstractItemView::DragOnly);
+	view.setWrapping(true);
+	view.setViewMode(QListView::IconMode);
+	view.setSelectionRectVisible(false);
+	view.show();
+
+	return a.exec();
+
+#if 0
 	TePictureViewer view;
 	//view.open("sample/sample.png");
 	view.open("sample/DSC00155.jpg");

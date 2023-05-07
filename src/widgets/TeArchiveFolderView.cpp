@@ -67,7 +67,7 @@ TeArchiveFolderView::TeArchiveFolderView(QWidget *parent)
 	mp_listView->setViewMode(QListView::ListMode);
 	mp_listView->setWrapping(true);
 	mp_listView->setResizeMode(QListView::Adjust);
-	mp_listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	mp_listView->setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	//Initialize as write mode.

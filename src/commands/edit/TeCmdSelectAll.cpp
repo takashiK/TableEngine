@@ -49,12 +49,22 @@ bool TeCmdSelectAll::execute(TeViewStore* p_store)
 
 	if (p_folder != nullptr) {
 		TeFileListView* p_list = p_folder->list();
+		QAbstractItemModel* model = p_list->model();
+		QModelIndex root = p_list->rootIndex();
 
+		QModelIndex startIndex = model->index(0, 0, root);
+		QModelIndex endIndex = model->index(model->rowCount(root) - 1, model->columnCount(root) - 1, root);
+
+		QItemSelection selection(startIndex, endIndex);
 		if (p_list->selectionModel()->hasSelection()) {
-			p_list->clearSelection();
+			p_list->selectionModel()->select(selection, QItemSelectionModel::Clear);
 		}
 		else {
-			p_list->selectAll();
+			p_list->selectionModel()->select(selection, QItemSelectionModel::Select);
+		}
+
+		if (".." == model->data(startIndex).toString()) {
+			p_list->selectionModel()->select(startIndex, QItemSelectionModel::Deselect);
 		}
 	}
 

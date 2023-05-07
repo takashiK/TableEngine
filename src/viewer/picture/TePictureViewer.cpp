@@ -38,7 +38,7 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	mp_emitter->addEmitter(mp_graphics->viewport());
 	mp_emitter->addEventType(QEvent::Resize);
 	mp_emitter->addEventType(QEvent::LayoutRequest);
-	connect(mp_emitter, &TeEventEmitter::emitEvent, [this](QWidget* widget, QEvent* event) {updateView();});
+	connect(mp_emitter, &TeEventEmitter::emitEvent, [this](QWidget* , QEvent* ) {updateView();});
 
 	setCentralWidget(mp_graphics);
 

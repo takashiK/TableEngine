@@ -72,7 +72,7 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	mp_listView->setViewMode(QListView::ListMode);
 	mp_listView->setWrapping(true);
 	mp_listView->setResizeMode(QListView::Adjust);
-	mp_listView->setSelectionMode(QAbstractItemView::NoSelection);
+	mp_listView->setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
 	mp_listView->setSpacing(2);
 	mp_listView->setSelectionRectVisible(true);
@@ -103,6 +103,13 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	connect(mp_listView, &QListView::customContextMenuRequested,
 		[this](const QPoint& pos)
 	{ showContextMenu(mp_listView, pos); });
+
+	//SetCurrentIndex to ListView if its currentIndex is invalid when listModel is updated.
+	connect(mp_listModel, &QFileSystemModel::directoryLoaded,
+				[this](const QString& )
+		{ if (mp_listView->currentIndex().isValid() == false) {
+			mp_listView->setCurrentIndex(mp_listModel->index(0,0,mp_listView->rootIndex()));
+		}});
 
 	//Enable Drag & Drop
 	mp_listView->setDragDropMode(QListView::DragDrop);
@@ -233,6 +240,12 @@ void TeFileFolderView::setRootPath(const QString & path)
 		list()->setCurrentIndex(QModelIndex());
 		QModelIndex rootIndex = mp_listModel->setRootPath(path);
 		list()->setRootIndex(rootIndex);
+
+		QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
+		if (curIndex.isValid())
+			list()->setCurrentIndex(curIndex);
+		//invalid case : setCurrentIndex at directoryLoaded event.
+
 	}
 }
 
@@ -259,11 +272,14 @@ void TeFileFolderView::setCurrentPath(const QString & path)
 		QModelIndex rootIndex = mp_listModel->setRootPath(path);
 		list()->setRootIndex(rootIndex);
 
-		if (prevPath == mp_listModel->filePath(index.parent())) {
-			list()->setCurrentIndex(prevIndex);
+		if(path == mp_listModel->filePath(prevIndex.parent())){
+			list()->setCurrentIndex(mp_listModel->index(prevPath));
 		}
 		else {
-			list()->setCurrentIndex(mp_listModel->index(prevPath));
+			QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
+			if (curIndex.isValid())
+				list()->setCurrentIndex(curIndex);
+			//invalid case : setCurrentIndex at directoryLoaded event.
 		}
 	}
 }

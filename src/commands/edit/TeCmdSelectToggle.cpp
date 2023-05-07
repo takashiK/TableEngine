@@ -56,6 +56,10 @@ bool TeCmdSelectToggle::execute(TeViewStore* p_store)
 
 		QItemSelection selection(startIndex, endIndex);
 		p_list->selectionModel()->select(selection, QItemSelectionModel::Toggle);
+
+		if (".." == model->data(startIndex).toString()) {
+			p_list->selectionModel()->select(startIndex, QItemSelectionModel::Deselect);
+		}
 	}
 
 	return true;

@@ -39,6 +39,14 @@ public:
 	};
 	Q_ENUM(WidgetType)
 
+	enum SelectionMode {
+		SELECTION_NONE,
+		SELECTION_EXPLORER,
+		SELECTION_TABLE_ENGINE
+	};
+
+	Q_ENUM(SelectionMode)
+
 	enum CmdId {
 		CMDID_NONE,
 		CMDID_SYSTEM         = 0x00000000,

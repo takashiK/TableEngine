@@ -48,6 +48,8 @@ public:
 	virtual void setCurrentPath(const QString& path);
 	virtual QString currentPath();
 
+
+
 protected:
 	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos);
 	void showUserContextMenu(const QString& menuName, const QPoint& pos);

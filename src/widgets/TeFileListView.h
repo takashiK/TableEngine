@@ -21,12 +21,16 @@
 #pragma once
 
 #include <QListView>
+#include "TeTypes.h"
 
+class QRubberBand;
 class TeFolderView;
 
 class TeFileListView : public QListView
 {
 	Q_OBJECT
+
+public:
 
 public:
 	TeFileListView(QWidget *parent = Q_NULLPTR);
@@ -35,14 +39,24 @@ public:
 	virtual TeFolderView* folderView();
 	void setFolderView(TeFolderView* view);
 
+	void setSelectionMode(TeTypes::SelectionMode mode);
+	TeTypes::SelectionMode selectionMode() const;
+	virtual QRect visualRect(const QModelIndex& index) const override;
+
 protected:
 	virtual void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
 	virtual void mousePressEvent(QMouseEvent* event);
+	virtual void mouseMoveEvent(QMouseEvent* event);
+	virtual void mouseReleaseEvent(QMouseEvent* event);
 	virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event = Q_NULLPTR) const;
 
 private:
 	TeFolderView* mp_folderView;
 	bool m_clearAndSelect_by_press;
 
-	QModelIndex m_preesedIndex;
+	QModelIndex m_pressedIndex;
+	QPoint m_pressedPos;
+	QRubberBand* mp_rubberBand;
+
+	TeTypes::SelectionMode m_selectionMode;
 };
