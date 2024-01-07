@@ -24,5 +24,11 @@
         <file alias="paste.png">Resources/icon/iconmonstr-clipboard-2-64.png</file>
         <file alias="cut.png">Resources/icon/iconmonstr-cut-4-64.png</file>
         <file alias="view.png">Resources/icon/iconmonstr-file-38-64.png</file>
+        <file alias="binary.png">Resources/icon/iconmonstr-file-37-64.png</file>
+        <file alias="command.png">Resources/icon/iconmonstr-terminal-lined-64.png</file>
+        <file alias="exit.png">Resources/icon/iconmonstr-x-mark-square-multiple-filled-64.png</file>
+        <file alias="properties.png">Resources/icon/iconmonstr-task-list-square-lined-64.png</file>
+        <file alias="changeRoot.png">Resources/icon/iconmonstr-database-17-64.png</file>
+        <file alias="openFile.png">Resources/icon/iconmonstr-share-8-64.png</file>
     </qresource>
 </RCC>

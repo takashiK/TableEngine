@@ -31,10 +31,10 @@ public:
 		int());
 	MOCK_METHOD1(tabIndex,
 		int(TeFileFolderView* view));
-	MOCK_METHOD1(getFolderView,
-		QList<TeFileFolderView*>(int));
+	MOCK_METHOD1(getFolderViews,
+		QList<TeFolderView*>(int));
 	MOCK_METHOD0(currentFolderView,
-		TeFileFolderView*());
+		TeFolderView*());
 	MOCK_METHOD1(setCurrentFolderView,
 		void(TeFileFolderView* view));
 	MOCK_METHOD2(createFolderView,

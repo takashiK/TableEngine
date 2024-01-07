@@ -21,14 +21,23 @@
 #pragma once
 
 #include <QDialog>
+#include <QList>
+
 class QComboBox;
+class QCheckBox;
 
 class TeFilePathDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	TeFilePathDialog(QWidget *parent = nullptr);
+	enum Mode {
+		FileMode,
+		FolderMode,
+	};
+
+public:
+	TeFilePathDialog(QWidget *parent = nullptr, const QStringList& extraFlags=QStringList());
 	virtual  ~TeFilePathDialog();
 
 	void setCurrentPath(const QString& path);
@@ -37,12 +46,17 @@ public:
 	void setTargetPath(const QString& path);
 	QString targetPath();
 
+	void setExtraFlag(int index, bool flag);
+	bool getExtraFlag(int index);
+
 //	void addWidget(QWidget *widget, int stretch = 0, Qt::Alignment alignment = Qt::Alignment());
 
 protected:
 	virtual bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+	Mode       m_mode;
 	QComboBox* mp_combo;
+	QList<QCheckBox*> m_extraFlags;
 	QString    m_currentPath;
 };

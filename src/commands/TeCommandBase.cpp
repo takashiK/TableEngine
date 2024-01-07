@@ -28,13 +28,16 @@ TeCommandBase::TeCommandBase()
 	mb_isFinished = false;
 
 	m_srcType = TeTypes::WT_NONE;
-	mp_srcObj = nullptr;
 	mp_srcEvent = nullptr;
 }
 
 
 TeCommandBase::~TeCommandBase()
 {
+	if (mp_srcEvent != nullptr) {
+		delete mp_srcEvent;
+		mp_srcEvent = nullptr;
+	}
 }
 
 void TeCommandBase::setDispatcher(TeDispatcher * p_dispatcher)
@@ -42,11 +45,13 @@ void TeCommandBase::setDispatcher(TeDispatcher * p_dispatcher)
 	mp_dispatcher = p_dispatcher;
 }
 
-void TeCommandBase::setSource(TeTypes::WidgetType type, QObject * obj, QEvent * event)
+void TeCommandBase::setSource(TeTypes::WidgetType type, QEvent * event, const TeCmdParam* p_cmdParam)
 {
 	m_srcType = type;
-	mp_srcObj = obj;
-	mp_srcEvent = event;
+	if(p_cmdParam)
+		m_cmdParam = *p_cmdParam;
+	if(event)
+		mp_srcEvent = event->clone();
 }
 
 void TeCommandBase::run(TeViewStore* p_store)
@@ -64,17 +69,17 @@ void TeCommandBase::finished()
 	}
 }
 
-TeTypes::WidgetType TeCommandBase::srcType()
+TeTypes::WidgetType TeCommandBase::srcType() const
 {
 	return m_srcType;
 }
 
-QObject * TeCommandBase::srcObj()
+const TeCmdParam * TeCommandBase::cmdParam() const
 {
-	return mp_srcObj;
+	return &m_cmdParam;
 }
 
-QEvent * TeCommandBase::srcEvent()
+const QEvent * TeCommandBase::srcEvent() const
 {
 	return mp_srcEvent;
 }

@@ -36,7 +36,8 @@ public:
 	{
 	}
 
-	virtual bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event) = 0;
-	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event) = 0;
+	virtual TeTypes::WidgetType getType() const = 0;
+	virtual bool dispatch(TeTypes::WidgetType type, QEvent *event) = 0;
+	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param) = 0;
 };
 

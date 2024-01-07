@@ -74,6 +74,12 @@ TeDocViewer::~TeDocViewer()
 
 bool TeDocViewer::open(const QString& filepath)
 {
+    QFileInfo info = QFileInfo(filepath);
+    if (!info.exists() || !info.isFile())
+    {
+        return false;
+    }
+
     if (mp_document->load(filepath)) {
         if (centralWidget() == mp_webView) {
             markupMode();

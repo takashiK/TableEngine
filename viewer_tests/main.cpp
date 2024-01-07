@@ -38,6 +38,27 @@
 
 int main(int argc, char *argv[])
 {
+	QApplication a(argc, argv);
+
+	QFileSystemModel model;
+	QModelIndex rootIndex = model.setRootPath("C:/");
+  
+
+	QListView view;
+	view.setModel(&model);
+	view.setRootIndex(rootIndex);
+	view.setSelectionMode(QAbstractItemView::ExtendedSelection);
+	view.setWrapping(true);
+	view.setSelectionRectVisible(true);
+	view.show();
+
+	return a.exec();
+
+#if 0
+
+
+
+
 	::testing::InitGoogleMock(&argc, argv);
 
 	QApplication::setOrganizationName("TableWare");
@@ -70,6 +91,7 @@ int main(int argc, char *argv[])
 	view.show();
 
 	return a.exec();
+#endif // 0
 
 #if 0
 	TePictureViewer view;

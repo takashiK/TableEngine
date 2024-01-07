@@ -1,5 +1,7 @@
 #include "TeBinaryViewer.h"
 
+#include <QFileInfo>
+
 #include <qhexview.h>
 #include <document/buffer/qmemorybuffer.h>
 
@@ -20,6 +22,12 @@ TeBinaryViewer::~TeBinaryViewer()
 
 bool TeBinaryViewer::open(const QString& path)
 {
+	QFileInfo info = QFileInfo(path);
+	if (!info.exists() || !info.isFile())
+	{
+		return false;
+	}
+
 	mp_hexDocument = QHexDocument::fromFile<QMemoryBuffer>(path);
 	if (mp_hexDocument)
 	{

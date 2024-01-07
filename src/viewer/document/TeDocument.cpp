@@ -1,53 +1,10 @@
 #include "TeDocument.h"
 #include "TeDocumentSettings.h"
+#include "TeUtils.h"
 
 #include <QFile>
 #include <QTextCodec>
 #include <QSettings>
-
-#include <icu.h>
-
-namespace {
-
-/*!
-*  \brief Detect text codec from data uing ICU
-*  \param data Data to detect
-*  \param codecList List of codec names to detect
-*  \return The name of the codec
-*/
-QString detectTextCodec(const QByteArray& data, const QStringList& codecList) {
-	const char* const kDefaultCodec = "UTF-8";
-
-	UErrorCode status = U_ZERO_ERROR;
-	UCharsetDetector* detector = ucsdet_open(&status);
-	if (U_FAILURE(status)) {
-		return QString(kDefaultCodec);
-	}
-	ucsdet_setText(detector, data.constData(), data.size(), &status);
-	if (U_FAILURE(status)) {
-		ucsdet_close(detector);
-		return QString(kDefaultCodec);
-	}
-
-	int count = 0;
-	const UCharsetMatch** matchs = ucsdet_detectAll(detector, &count, &status);
-	for (int i = 0; i < count; i++) {
-		const char* name = ucsdet_getName(matchs[i], &status);
-		if (U_FAILURE(status)) {
-			ucsdet_close(detector);
-			return QString(kDefaultCodec);
-		}
-		if (codecList.contains(name)) {
-			ucsdet_close(detector);
-			return QString::fromUtf8(name);
-		}
-	}
-
-	ucsdet_close(detector);
-	return QString(kDefaultCodec);
-}
-} // namespace
-
 
 TeDocument::TeDocument(QObject* parent) : QObject(parent)
 {

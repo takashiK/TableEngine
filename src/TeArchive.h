@@ -85,7 +85,6 @@ public:
 	bool open( const QString& path);
 	void close();
 
-	void cancel();
 	void clearCancel();
 
 	/*!
@@ -97,6 +96,7 @@ public:
 public slots:
 	bool extractAll(const QString& destPath);
 	bool extract( const QString& destPath, const QString& base, const QStringList& entries);
+	void cancel();
 
 signals:
 	/*!
@@ -170,7 +170,6 @@ public:
 
 	void clear();
 	int count();
-	void cancel();
 	void clearCancel();
 
 	bool addEntry(const QString& src, const QString& dest);
@@ -178,8 +177,14 @@ public:
 
 public slots:
 	bool archive(const QString& dest, ArchiveType type);
+	void cancel();
 
 signals:
+	/*!
+		Infomation of added File info by addEntry() or addEntries().
+	*/
+	void addedFileInfo(const FileInfo& info);
+
 	/*!
 		Provide a summentional byte counts of source files.
 		This signal emit after call archive().

@@ -23,6 +23,7 @@
 
 #include <QVBoxLayout>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
@@ -30,7 +31,7 @@
 #include <QCompleter>
 #include <QFileSystemModel>
 
-TeFilePathDialog::TeFilePathDialog(QWidget *parent)
+TeFilePathDialog::TeFilePathDialog(QWidget *parent, const QStringList& extraFlags)
 	: QDialog(parent)
 {
 	//Except Help button
@@ -57,6 +58,17 @@ TeFilePathDialog::TeFilePathDialog(QWidget *parent)
 
 	QLabel* label = new QLabel(tr("Shift+Enter: Select path  Up: History  Down: Favorite"));
 	layout->addWidget(label);
+
+	//ExtraFlags
+	QVBoxLayout* extra = new QVBoxLayout();
+	for (int i = 0; i < extraFlags.count(); i++) {
+		QCheckBox* check = new QCheckBox(extraFlags.at(i));
+		m_extraFlags.append(check);
+		extra->addWidget(check);
+	}
+
+	layout->addLayout(extra);
+
 	layout->setAlignment(label, Qt::AlignHCenter);
 
 	//Register OK and Cancel.
@@ -99,6 +111,21 @@ QString TeFilePathDialog::targetPath()
 		QString path = QDir::fromNativeSeparators(mp_combo->currentText());
 		return QDir::cleanPath(dir.absoluteFilePath(path));
 	}
+}
+
+void TeFilePathDialog::setExtraFlag(int index, bool flag)
+{
+	if (index < m_extraFlags.count()) {
+		m_extraFlags[index]->setChecked(flag);
+	}
+}
+
+bool TeFilePathDialog::getExtraFlag(int index)
+{
+	if (index < m_extraFlags.count()) {
+		return m_extraFlags[index]->isChecked();
+	}
+	return false;
 }
 
 bool TeFilePathDialog::eventFilter(QObject * obj, QEvent * event)

@@ -75,13 +75,6 @@ TeTypes::SelectionMode TeFileListView::selectionMode() const
 	return m_selectionMode;
 }
 
-QRect TeFileListView::visualRect(const QModelIndex& index) const
-{
-	QRect rect = QListView::visualRect(index);
-	rect.adjust(spacing(), 0, -spacing(), 0);
-	return rect;
-}
-
 /*!
 	add keyaction.
 	If space key is pressed then current index is selected and move cursor to next entry.
@@ -101,6 +94,11 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 				case Qt::Key_Right:
 					if (event->modifiers() == Qt::ShiftModifier) {
 						if (m_pressedIndex != currentIndex()) {
+							selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::Toggle);
+						}
+					}
+					else {
+						if (m_pressedIndex == currentIndex() && selectionModel()->isSelected(currentIndex()) && selectionModel()->selectedIndexes().count() == 1) {
 							selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::Toggle);
 						}
 					}

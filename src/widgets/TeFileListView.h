@@ -41,7 +41,6 @@ public:
 
 	void setSelectionMode(TeTypes::SelectionMode mode);
 	TeTypes::SelectionMode selectionMode() const;
-	virtual QRect visualRect(const QModelIndex& index) const override;
 
 protected:
 	virtual void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;

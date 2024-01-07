@@ -102,7 +102,6 @@ TeMenuSetting::TeMenuSetting(QWidget *parent)
 			settings.remove("");
 			settings.endGroup();
 			settings.remove(QString("menuGroup0%1").arg(combo->currentIndex()));
-			settings.endGroup();
 			switch (combo->currentIndex()) {
 			case 0:
 				storeDefaultMenuSettings(settings);
@@ -114,6 +113,7 @@ TeMenuSetting::TeMenuSetting(QWidget *parent)
 				storeDefaultListMenuSettings(settings);
 				break;
 			}
+			settings.endGroup();
 			QDialog::accept();
 		}
 	});
@@ -152,10 +152,10 @@ void defaultEntry(QSettings& settings, const QString& key,  const QString& value
 	settings.setValue(key, settings.value(key, value));
 }
 
-void menuEntry(QSettings& settings, int index, int indent, TeTypes::CmdId cmdId)
+void menuEntry(QSettings& settings, int index, int indent, TeTypes::CmdId cmdId, QString name= QString())
 {
-	TeCommandInfoBase*p_info = TeCommandFactory::factory()->commandInfo(cmdId);
-	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, QChar('0')), QString("%1,%2,%3").arg(indent).arg(p_info->name()).arg(p_info->cmdId()));
+	const TeCommandInfoBase*p_info = TeCommandFactory::factory()->commandInfo(cmdId);
+	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, QChar('0')), QString("%1,%2,%3").arg(indent).arg(name.isNull() ?  p_info->name() : name ).arg(p_info->cmdId()));
 }
 
 void specialEntry(QSettings& settings, int index, int indent, TeTypes::CmdId cmdId, const QString& str)
@@ -167,18 +167,21 @@ void TeMenuSetting::storeDefaultMenuSettings(QSettings& settings)
 {
 	TeCommandFactory* factory = TeCommandFactory::factory();
 	int index = 0;
-	int indent = 0;
 
 	QList<QPair<QString, TeTypes::CmdId>>  list = TeCommandFactory::custom_groupList();
-
 
 	QString group = QString("menuGroup00");
 	defaultEntry(settings, group, tr("Menu Bar"));
 	settings.beginGroup(group);
 	for (const auto& groupItem : list) {
-		specialEntry(settings, index++, indent, TeTypes::CMDID_SPECIAL_FOLDER, groupItem.first);
-		for (const auto& item : factory->commandGroup(groupItem.second)) {
-			menuEntry(settings, index++, indent + 1, item->cmdId());
+		specialEntry(settings, index++, 0, TeTypes::CMDID_SPECIAL_FOLDER, groupItem.first);
+		for (const auto& item : factory->menuGroup(groupItem.second)) {
+			if ((item.cmdId & TeTypes::CMDID_MASK_TYPE) == TeTypes::CMDID_SPECIAL) {
+				specialEntry(settings, index++, item.rank, item.cmdId, item.name);
+			}
+			else {
+				menuEntry(settings, index++, item.rank, item.cmdId, item.name);
+			}
 		}
 	}
 	settings.endGroup();
@@ -233,7 +236,7 @@ QTreeWidgetItem* TeMenuSetting::createEntryItem(const QString& name, TeTypes::Cm
 		p_item->setData(MENU_REGISTER, Qt::DisplayRole, name);
 	}
 	else {
-		TeCommandInfoBase* p_info = TeCommandFactory::factory()->commandInfo(cmdId);
+		const TeCommandInfoBase* p_info = TeCommandFactory::factory()->commandInfo(cmdId);
 		if (p_info == nullptr) {
 			p_item->setData(MENU_DISPLAY, Qt::DisplayRole, tr("Invalid Command Id"));
 			p_item->setData(MENU_DISPLAY, Qt::DecorationRole, QIcon(":/TableEngine/warning.png"));
@@ -436,7 +439,7 @@ QList<QTreeWidgetItem*> TeMenuSetting::createCmdTreeItem()
 		QString name = item.first;
 		QTreeWidgetItem* rootItem = createEntryItem(name, TeTypes::CMDID_SPECIAL_FOLDER);
 
-		QList<TeCommandInfoBase*>  cmdList = TeCommandFactory::factory()->commandGroup(item.second);
+		QList<const TeCommandInfoBase*>  cmdList = TeCommandFactory::factory()->commandGroup(item.second);
 		for (const auto& info : cmdList) {
 			QString name = info->name();
 			QTreeWidgetItem* item = createEntryItem(info->name(), info->cmdId());

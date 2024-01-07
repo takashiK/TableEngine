@@ -31,7 +31,7 @@ public:
 	TeCommandBase();
 	virtual ~TeCommandBase();
 	void setDispatcher(TeDispatcher* p_dispatcher);
-	void setSource(TeTypes::WidgetType type, QObject* obj, QEvent *event);
+	void setSource(TeTypes::WidgetType type, QEvent *event, const TeCmdParam* p_cmdParam);
 	void run(TeViewStore* p_store);
 
 protected:
@@ -43,15 +43,15 @@ protected:
 	 */
 	virtual bool execute(TeViewStore* p_store ) = 0;
 	void finished();
-	TeTypes::WidgetType srcType();
-	QObject*            srcObj();
-	QEvent*             srcEvent();
+	TeTypes::WidgetType srcType() const;
+	const TeCmdParam*   cmdParam() const;
+	const QEvent*       srcEvent() const;
 
 private:
 	bool mb_isFinished;
 	TeDispatcher* mp_dispatcher;
 	TeTypes::WidgetType m_srcType;
-	QObject*            mp_srcObj;
+	TeCmdParam          m_cmdParam;
 	QEvent*             mp_srcEvent;
 };
 

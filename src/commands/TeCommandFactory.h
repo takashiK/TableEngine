@@ -23,9 +23,16 @@
 #include "TeTypes.h"
 #include <QList>
 #include <QMap>
+#include <QString>
 
 class TeCommandBase;
 class TeCommandInfoBase;
+
+struct TeMenuSpec {
+	TeTypes::CmdId cmdId;
+	QString        name;
+	int            rank;
+};
 
 class TeCommandFactory : QObject
 {
@@ -41,11 +48,16 @@ public:
 	static QList<QPair<QString,TeTypes::CmdId>> groupList();
 	static QList<QPair<QString, TeTypes::CmdId>> custom_groupList();
 	static QList<QPair<QString, TeTypes::CmdId>> static_groupList();
-	QList<TeCommandInfoBase*> commandGroup(TeTypes::CmdId groupId);
-	TeCommandInfoBase* commandInfo(TeTypes::CmdId cmdId);
+
+	QList<const TeCommandInfoBase*> commandGroup(TeTypes::CmdId groupId) const;
+	QList<TeMenuSpec> menuGroup(TeTypes::CmdId groupId) const;
+
+	const TeCommandInfoBase* commandInfo(TeTypes::CmdId cmdId) const;
 	TeCommandBase* createCommand(TeTypes::CmdId cmdId) const;
 
 private:
 	QMap<TeTypes::CmdId, TeCommandInfoBase*> m_commands;
+	QMap<TeTypes::CmdId, QList<TeMenuSpec>> m_menuSpecs;
+	QMap<TeTypes::CmdId, QList<TeTypes::CmdId>> m_group;
 };
 

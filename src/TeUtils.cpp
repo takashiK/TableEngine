@@ -14,6 +14,8 @@
 #include <QDebug>
 
 #include <magic.h>
+#include <icu.h>
+
 
 namespace {
 	const QSet<const QString> txtSuffixes{ "txt","html","htm","md","h","c","cpp","ini","py","json","ts","js","sh" };
@@ -23,7 +25,7 @@ namespace {
 
 bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths)
 {
-	TeFileFolderView* p_folder = p_store->currentFolderView();
+	TeFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr && p_paths != nullptr) {
 		//get selected files
@@ -37,24 +39,60 @@ bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths)
 
 		QFileSystemModel* model = qobject_cast<QFileSystemModel*>(p_itemView->model());
 
-		if (p_itemView->selectionModel()->hasSelection()) {
-			//target selected files.
-			QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
-			for (const QModelIndex& index : indexList)
-			{
-				if (index.column() == 0) {
-					p_paths->append(model->filePath(index));
+		if (model != nullptr) {
+			if (p_itemView->selectionModel()->hasSelection()) {
+				//target selected files.
+				QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
+				for (const QModelIndex& index : indexList)
+				{
+					if (index.column() == 0) {
+						p_paths->append(model->filePath(index));
+					}
 				}
 			}
-		}
-		else {
-			//no files selected. so use current file.
-			if (p_itemView->currentIndex().isValid()) {
-				p_paths->append(model->filePath(p_itemView->currentIndex()));
+			else {
+				//no files selected. so use current file.
+				if (p_itemView->currentIndex().isValid()) {
+					p_paths->append(model->filePath(p_itemView->currentIndex()));
+				}
 			}
 		}
 	}
 	return (p_paths != nullptr) && !p_paths->isEmpty();
+}
+
+QString getCurrentItem(TeViewStore* p_store)
+{
+	TeFolderView* p_folder = p_store->currentFolderView();
+
+	if (p_folder != nullptr ) {
+		//get selected files
+		QAbstractItemView* p_itemView = nullptr;
+		if (p_folder->tree()->hasFocus()) {
+			p_itemView = p_folder->tree();
+		}
+		else {
+			p_itemView = p_folder->list();
+		}
+
+		QFileSystemModel* model = qobject_cast<QFileSystemModel*>(p_itemView->model());
+
+		if (model != nullptr) {
+			if (p_itemView->currentIndex().isValid()) {
+				return model->filePath(p_itemView->currentIndex());
+			}
+		}
+	}
+	return QString();
+}
+
+QString getCurrentFolder(TeViewStore* p_store)
+{
+	TeFolderView* p_folder = p_store->currentFolderView();
+	if (p_folder != nullptr) {
+		return p_folder->currentPath();
+	}
+	return QString();
 }
 
 /*!
@@ -116,4 +154,43 @@ TeFileType getFileType(const QString& path)
 	}
 
 	return type;
+}
+
+
+/*!
+*  \brief Detect text codec from data uing ICU
+*  \param data Data to detect
+*  \param codecList List of codec names to detect
+*  \return The name of the codec
+*/
+QString detectTextCodec(const QByteArray& data, const QStringList& codecList) {
+	const char* const kDefaultCodec = "UTF-8";
+
+	UErrorCode status = U_ZERO_ERROR;
+	UCharsetDetector* detector = ucsdet_open(&status);
+	if (U_FAILURE(status)) {
+		return QString(kDefaultCodec);
+	}
+	ucsdet_setText(detector, data.constData(), data.size(), &status);
+	if (U_FAILURE(status)) {
+		ucsdet_close(detector);
+		return QString(kDefaultCodec);
+	}
+
+	int count = 0;
+	const UCharsetMatch** matchs = ucsdet_detectAll(detector, &count, &status);
+	for (int i = 0; i < count; i++) {
+		const char* name = ucsdet_getName(matchs[i], &status);
+		if (U_FAILURE(status)) {
+			ucsdet_close(detector);
+			return QString(kDefaultCodec);
+		}
+		if (codecList.contains(name)) {
+			ucsdet_close(detector);
+			return QString::fromUtf8(name);
+		}
+	}
+
+	ucsdet_close(detector);
+	return QString(kDefaultCodec);
 }

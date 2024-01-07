@@ -35,7 +35,7 @@ TeFolderView::TeFolderView(QWidget *parent)
 	mp_dispatcher = Q_NULLPTR;
 
 	connect(this, &TeFolderView::requestCommand,
-		[this](TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event) { execCommand(cmdId,type,obj,event); });
+		[this](TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param) { execCommand(cmdId,type,event,p_param); });
 }
 
 TeFolderView::~TeFolderView()
@@ -47,22 +47,22 @@ void TeFolderView::setDispatcher(TeDispatchable * p_dispatcher)
 	mp_dispatcher = p_dispatcher;
 }
 
-bool TeFolderView::dispatch(TeTypes::WidgetType type, QObject * obj, QEvent * event)
+bool TeFolderView::dispatch(TeTypes::WidgetType type, QEvent * event)
 {
-	if ((mp_dispatcher != nullptr) && isDispatchable(type, obj, event)) {
-		return mp_dispatcher->dispatch(type, obj, event);
+	if ((mp_dispatcher != nullptr) && isDispatchable(type, event)) {
+		return mp_dispatcher->dispatch(type, event);
 	}
 	return false;
 }
 
-void TeFolderView::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event)
+void TeFolderView::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param)
 {
 	if (mp_dispatcher != nullptr) {
-		mp_dispatcher->execCommand(cmdId, type, obj, event);
+		mp_dispatcher->execCommand(cmdId, type, event, p_param);
 	}
 }
 
-bool TeFolderView::isDispatchable(TeTypes::WidgetType /*type*/, QObject* /*obj*/, QEvent *event) const
+bool TeFolderView::isDispatchable(TeTypes::WidgetType /*type*/, QEvent *event) const
 {
 	//select target event.
 	if (event->type() == QEvent::KeyPress) {

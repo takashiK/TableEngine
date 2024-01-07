@@ -13,5 +13,7 @@ enum TeFileType {
 };
 
 bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths);
-
+QString getCurrentItem(TeViewStore* p_store);
+QString getCurrentFolder(TeViewStore* p_store);
 TeFileType getFileType(const QString& path);
+QString detectTextCodec(const QByteArray& data, const QStringList& codecList);

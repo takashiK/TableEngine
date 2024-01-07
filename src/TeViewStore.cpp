@@ -23,11 +23,13 @@
 #include "widgets/TeFileListView.h"
 #include "widgets/TeFileTreeView.h"
 #include "widgets/TeFileFolderView.h"
+#include "widgets/TeArchiveFolderView.h"
 #include "widgets/TeDriveBar.h"
 #include "TeDispatcher.h"
 #include "TeSettings.h"
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
+#include "commands/folder/TeCmdFolderChangeRoot.h"
 #include "TeEventEmitter.h"
 
 
@@ -49,14 +51,15 @@
 TeViewStore::TeViewStore(QObject *parent)
 	: QObject(parent)
 {
+	m_currentTabPlace = TAB_LEFT;
 	mp_dispatcher = nullptr;
 	mp_driveBar = nullptr;
 	mp_mainWindow = nullptr;
 	mp_tab[TAB_LEFT] = nullptr;
 	mp_tab[TAB_RIGHT] = nullptr;
-	mp_currentFolderView = nullptr;
 	mp_split = nullptr;
 	mp_closeEventEmitter = nullptr;
+	mp_focusEventEmitter = nullptr;
 }
 
 TeViewStore::~TeViewStore()
@@ -80,6 +83,11 @@ TeViewStore::~TeViewStore()
 	delete mp_closeEventEmitter;
 }
 
+TeTypes::WidgetType TeViewStore::getType() const
+{
+	return TeTypes::WT_NONE;
+}
+
 void TeViewStore::initialize()
 {
 	//Main window
@@ -88,6 +96,11 @@ void TeViewStore::initialize()
 	//Drive bar
 	mp_driveBar = new TeDriveBar("Drive Bar");
 	mp_mainWindow->addToolBar(mp_driveBar);
+	connect(mp_driveBar, &TeDriveBar::changeDrive, [this](const QString& path) {
+		TeCmdParam param;
+		param.insert(TeCmdFolderChangeRoot::PARAM_ROOT_PATH, path);
+		emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT,TeTypes::WT_DRIVEBAR,nullptr,&param);
+		});
 
 	//Status Bar
 	QLabel *labelR = new QLabel(u8"Right Text");
@@ -99,10 +112,12 @@ void TeViewStore::initialize()
 	mp_tab[TAB_LEFT] = new QTabWidget();
 	mp_tab[TAB_LEFT]->setMovable(true);
 	mp_tab[TAB_LEFT]->setTabBarAutoHide(true);
+	mp_tab[TAB_LEFT]->setTabsClosable(true);
 
 	mp_tab[TAB_RIGHT] = new QTabWidget();
 	mp_tab[TAB_RIGHT]->setMovable(true);
 	mp_tab[TAB_RIGHT]->setHidden(true);
+	mp_tab[TAB_RIGHT]->setTabsClosable(true);
 
 	QHBoxLayout *hbox = new QHBoxLayout();
 	hbox->setContentsMargins(0, 0, 0, 0);
@@ -121,17 +136,25 @@ void TeViewStore::initialize()
 
 	mp_mainWindow->setCentralWidget(mp_split);
 
-	connect(mp_tab[TAB_LEFT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[TAB_LEFT]->widget(index))); });
-	connect(mp_tab[TAB_RIGHT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[TAB_RIGHT]->widget(index))); });
+	connect(mp_tab[TAB_LEFT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFolderView*>(mp_tab[TAB_LEFT]->widget(index))); });
+	connect(mp_tab[TAB_RIGHT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFolderView*>(mp_tab[TAB_RIGHT]->widget(index))); });
+
+	connect(mp_tab[TAB_LEFT], &QTabWidget::tabCloseRequested, [this](int index) { deleteFolderView(qobject_cast<TeFolderView*>(mp_tab[TAB_LEFT]->widget(index)) ); });
+	connect(mp_tab[TAB_RIGHT], &QTabWidget::tabCloseRequested, [this](int index) { deleteFolderView(qobject_cast<TeFolderView*>(mp_tab[TAB_RIGHT]->widget(index)) ); });
 
 	//setup command bridge
 	connect(this, &TeViewStore::requestCommand,
-		[this](TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event) { execCommand(cmdId, type, obj, event); });
+		[this](TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param) { execCommand(cmdId, type, event, p_param); });
 
 	//setup closeEventEmitter
 	mp_closeEventEmitter = new TeEventEmitter();
 	mp_closeEventEmitter->addEventType(QEvent::Close);
 	connect(mp_closeEventEmitter, &TeEventEmitter::emitEvent, this, &TeViewStore::floatingWidgetClosed, Qt::QueuedConnection);
+
+	//setup focusEventEmitter
+	mp_focusEventEmitter = new TeEventEmitter();
+	mp_focusEventEmitter->addEventType(QEvent::FocusIn);
+	connect(mp_focusEventEmitter, &TeEventEmitter::emitEvent, this, &TeViewStore::focusFolderViewChanged, Qt::QueuedConnection);
 
 	//load settings
 	loadMenu();
@@ -195,10 +218,12 @@ void TeViewStore::loadMenu()
 				qDebug() << "Setting File Error: Menu item can't append top level menu.";
 			}
 			else {
-				TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
-				QAction* action = new QAction(p_info->icon(), p_info->name() );
-				connect(action, &QAction::triggered, [this,cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
-				menus.top()->addAction(action);
+				const TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
+				if (p_info) {
+					QAction* action = new QAction(p_info->icon(), p_info->name());
+					connect(action, &QAction::triggered, [this, cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
+					menus.top()->addAction(action);
+				}
 			}
 		}
 	}
@@ -249,29 +274,39 @@ void TeViewStore::show()
 	if (mp_mainWindow) mp_mainWindow->show();
 }
 
+void TeViewStore::close()
+{
+	if (mp_mainWindow) mp_mainWindow->close();
+}
+
 void TeViewStore::setDispatcher(TeDispatcher * p_dispatcher)
 {
 	mp_dispatcher = p_dispatcher;
 }
 
-bool TeViewStore::dispatch(TeTypes::WidgetType type, QObject * obj, QEvent * event)
+bool TeViewStore::dispatch(TeTypes::WidgetType type, QEvent * event)
 {
-	if (mp_dispatcher != nullptr && mp_dispatcher->dispatch(type, obj, event)) {
+	if (mp_dispatcher != nullptr && mp_dispatcher->dispatch(type, event)) {
 		return true;
 	}
 	return false;
 }
 
-void TeViewStore::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event)
+void TeViewStore::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param)
 {
 	if (mp_dispatcher != nullptr) {
-		mp_dispatcher->execCommand(cmdId, type, obj, event);
+		mp_dispatcher->execCommand(cmdId, type, event,p_param);
 	}
 }
 
 QWidget * TeViewStore::mainWindow()
 {
 	return mp_mainWindow;
+}
+
+int TeViewStore::currentTabPlace()
+{
+	return m_currentTabPlace;
 }
 
 int TeViewStore::currentTabIndex()
@@ -293,7 +328,7 @@ int TeViewStore::currentTabIndex()
 	return currentIndex;
 }
 
-int TeViewStore::tabIndex(TeFileFolderView * view)
+int TeViewStore::tabPlace(TeFolderView * view)
 {
 	if(view == nullptr) return -1;
 	for (int i = 0; i < TAB_MAX; i++) {
@@ -304,21 +339,35 @@ int TeViewStore::tabIndex(TeFileFolderView * view)
 	return -1;
 }
 
-QList<TeFileFolderView*> TeViewStore::getFolderView(int place)
+TeFolderView* TeViewStore::getFolderView(int place)
 {
-	QList<TeFileFolderView*> list;
+	TeFolderView* p_folder = nullptr;
+	if (place >= 0 && place < TAB_MAX) {
+		p_folder = qobject_cast<TeFolderView*>(mp_tab[place]->currentWidget());
+	}
+
+	return p_folder;
+}
+
+/**
+ * @brief TeViewStore::getFolderViews
+ * @param place if place < 0 then return all folder views. else return folder views of place.
+ */
+QList<TeFolderView*> TeViewStore::getFolderViews(int place)
+{
+	QList<TeFolderView*> list;
 
 	if (place < TAB_MAX) {
 		if (place < 0) {
 			for (int i = 0; i < TAB_MAX; i++) {
 				for (int index = 0; index < mp_tab[i]->count(); index++) {
-					list.append(qobject_cast<TeFileFolderView*>(mp_tab[i]->widget(index)));
+					list.append(qobject_cast<TeFolderView*>(mp_tab[i]->widget(index)));
 				}
 			}
 		}
 		else {
 			for (int index = 0; index < mp_tab[place]->count(); index++) {
-				list.append(qobject_cast<TeFileFolderView*>(mp_tab[place]->widget(index)));
+				list.append(qobject_cast<TeFolderView*>(mp_tab[place]->widget(index)));
 			}
 		}
 	}
@@ -326,21 +375,22 @@ QList<TeFileFolderView*> TeViewStore::getFolderView(int place)
 	return list;
 }
 
-TeFileFolderView * TeViewStore::currentFolderView()
+TeFolderView * TeViewStore::currentFolderView()
 {
-	return mp_currentFolderView;
+	return getFolderView(currentTabPlace());
 }
 
-void TeViewStore::setCurrentFolderView(TeFileFolderView * view)
+void TeViewStore::setCurrentFolderView(TeFolderView * view)
 {
 	if (view == nullptr) return;
-	//Focus setting to TeFileFolderView / ListView
+
+	//Focus setting to TeFolderView / ListView
 	if (!view->list()->hasFocus()) {
 		view->list()->setFocus();
 	}
 
-	mp_currentFolderView = view;
-	int place = tabIndex(view);
+	int place = tabPlace(view);
+	m_currentTabPlace = place;
 
 	//Change current of TabWidget
 	int index = mp_tab[place]->indexOf(view);
@@ -363,11 +413,9 @@ void TeViewStore::setCurrentFolderView(TeFileFolderView * view)
 			}
 			else {
 				//change current
-				disconnect(mp_driveBar, &TeDriveBar::changeDrive, tree->folderView(), &TeFolderView::setRootPath);
 				mp_split->replaceWidget(0, view->tree());
 				view->tree()->setHidden(false);
 			}
-			connect(mp_driveBar, &TeDriveBar::changeDrive, view, &TeFolderView::setRootPath);
 			tree = view->tree();
 		}
 	}
@@ -375,48 +423,36 @@ void TeViewStore::setCurrentFolderView(TeFileFolderView * view)
 
 TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place)
 {
-	if (place >= TAB_MAX) place = TAB_MAX - 1;
-
-	if (place < 0) {
-		place = currentTabIndex();
-	}
-	else {
-		//correct null tab.
-		for (int i = place; i >0; i--) {
-			if (mp_tab[i - 1]->count() > 0) {
-				break;
-			}
-			place--;
-		}
-	}
-	QDir dir(path);
-	QIcon icon = QFileIconProvider().icon(QFileInfo(path));
 	TeFileFolderView * folderView = new TeFileFolderView;
 	folderView->setDispatcher(this);
 	folderView->setRootPath(path);
-	int index = mp_tab[place]->addTab(folderView, icon, dir.isRoot() ? dir.path() : dir.dirName());
-	mp_tab[place]->setTabToolTip(index, dir.absolutePath());
-	mp_tab[place]->setHidden(false);
-
 	folderView->list()->setFocusPolicy(Qt::ClickFocus);
 	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
-	if (currentFolderView() == nullptr) {
-		//Regist Current FolderView If it is not register yet.
-		setCurrentFolderView(folderView);
-	}
+	addFolderView(folderView, place);
 
 	return folderView;
 }
 
-void TeViewStore::deleteFolderView(TeFileFolderView * view)
+TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, int place)
+{
+	TeArchiveFolderView* folderView = new TeArchiveFolderView;
+	folderView->setDispatcher(this);
+	folderView->setArchive(path);
+	folderView->list()->setFocusPolicy(Qt::ClickFocus);
+	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
+
+	addFolderView(folderView, place);
+
+	return folderView;
+}
+
+void TeViewStore::deleteFolderView(TeFolderView * view)
 {
 	if (view == nullptr) return;
 
-	TeFileFolderView* folder = currentFolderView();
-	int index = tabIndex(view);
-
-	mp_currentFolderView = nullptr;
+	TeFolderView* folder = currentFolderView();
+	int index = tabPlace(view);
 
 	bool isCurrentDelete = (folder == view);
 	delete view;
@@ -441,43 +477,49 @@ void TeViewStore::deleteFolderView(TeFileFolderView * view)
 		}
 	}
 
+	if (mp_tab[TAB_RIGHT]->count() == 0)
+		mp_tab[TAB_RIGHT]->setHidden(true);
+
+	if (!mp_tab[TAB_RIGHT]->isHidden())
+		mp_tab[TAB_LEFT]->setTabBarAutoHide(false);
+
 	//target new current folder if current folder is deleted.
 	if (isCurrentDelete) {
 		if (mp_tab[index]->count() > 0) {
-			setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[index]->currentWidget()));
+			setCurrentFolderView(qobject_cast<TeFolderView*>(mp_tab[index]->currentWidget()));
 		}
 		else {
-			setCurrentFolderView(qobject_cast<TeFileFolderView*>(mp_tab[TAB_LEFT]->currentWidget()));
+			setCurrentFolderView(qobject_cast<TeFolderView*>(mp_tab[TAB_LEFT]->currentWidget()));
 		}
 	}
 }
 
-void TeViewStore::moveFolderView(TeFileFolderView * view, int place, int position)
+void TeViewStore::moveFolderView(TeFolderView * view, int place, int index)
 {
 	if (view == nullptr) return;
 	if (place < 0 || TAB_MAX <= place) place = TAB_MAX-1;
 
-	int orgPlace = tabIndex(view);
-	int orgPosition = mp_tab[orgPlace]->indexOf(view);
-	QString title = mp_tab[orgPlace]->tabText(orgPosition);
-	QString tip = mp_tab[orgPlace]->tabToolTip(orgPosition);
-	QIcon icon = mp_tab[orgPlace]->tabIcon(orgPosition);
+	int orgPlace = tabPlace(view);
+	int orgIndex = mp_tab[orgPlace]->indexOf(view);
+	QString title = mp_tab[orgPlace]->tabText(orgIndex);
+	QString tip = mp_tab[orgPlace]->tabToolTip(orgIndex);
+	QIcon icon = mp_tab[orgPlace]->tabIcon(orgIndex);
 
-	if ((place == orgPlace) && (position == orgPosition)) {
+	if ((place == orgPlace) && (index == orgIndex)) {
 		//don't need move.
 	} else{ 
-		//insert to new position.
-		if (position < 0) {
-			position = mp_tab[place]->addTab(view, icon,title);
+		//insert to new index.
+		if (index < 0) {
+			index = mp_tab[place]->addTab(view, icon,title);
 		}
 		else {
-			position = mp_tab[place]->insertTab(position, view, icon,title);
+			index = mp_tab[place]->insertTab(index, view, icon,title);
 		}
-		mp_tab[place]->setTabToolTip(position, tip);
+		mp_tab[place]->setTabToolTip(index, tip);
 		mp_tab[place]->setHidden(false);
 	}
 
-	//Correct Tab position If Left Tab entry is vanished.
+	//Correct Tab index If Left Tab entry is vanished.
 	if (mp_tab[TAB_LEFT]->count() == 0) {
 		int currentIndex = mp_tab[TAB_RIGHT]->currentIndex();
 		while (mp_tab[TAB_RIGHT]->count()) {
@@ -490,6 +532,13 @@ void TeViewStore::moveFolderView(TeFileFolderView * view, int place, int positio
 
 		mp_tab[TAB_LEFT]->setCurrentIndex(currentIndex);
 	}
+
+	if (mp_tab[TAB_RIGHT]->count() == 0)
+		mp_tab[TAB_RIGHT]->setHidden(true);
+
+	if (!mp_tab[TAB_RIGHT]->isHidden())
+		mp_tab[TAB_LEFT]->setTabBarAutoHide(false);
+
 	setCurrentFolderView(view);
 }
 
@@ -499,6 +548,73 @@ void TeViewStore::registerFloatingWidget(QWidget* widget)
 		m_floatingWidgets.append(widget);
 		mp_closeEventEmitter->addOneShotEmiter(widget);
 	}
+}
+
+void TeViewStore::changeRootPath(const QString& path, bool newView, int place)
+{
+	if (place >= TAB_MAX) return;
+
+	if (place < 1) {
+		place = currentTabIndex();
+	}
+
+	TeFolderView* view = getFolderView(place);
+	if (!view || view->getType() != TeTypes::WT_FOLDERVIEW) {
+		newView = true;
+	}
+
+	if (!newView && view && (view->getType() == TeTypes::WT_FOLDERVIEW)) {
+		int index = mp_tab[place]->currentIndex();
+		QDir dir(path);
+		QIcon icon = QFileIconProvider().icon(QFileInfo(path));
+
+		mp_tab[place]->setTabToolTip(index, path);
+		mp_tab[place]->setTabText(index, dir.isRoot() ? dir.path() : dir.dirName());
+		mp_tab[place]->setTabIcon(index, icon);
+		view->setRootPath(path);
+	}
+	else {
+		createFolderView(path, place);
+	}
+}
+
+void TeViewStore::focusFolderViewChanged(QWidget* widget, QEvent* event)
+{
+	TeFolderView* p_folder = qobject_cast<TeFolderView*>(widget);
+	if (p_folder) {
+		int place = tabPlace(p_folder);
+		if (place != m_currentTabPlace) {
+			setCurrentFolderView(p_folder);
+		}
+	}
+}
+
+void TeViewStore::addFolderView(TeFolderView* folderView, int place)
+{
+	if (place >= TAB_MAX) place = TAB_MAX - 1;
+
+	if (place < 0) {
+		place = currentTabPlace();
+	}
+	else {
+		//correct null tab.
+		for (int i = place; i > 0; i--) {
+			if (mp_tab[i - 1]->count() > 0) {
+				break;
+			}
+			place--;
+		}
+	}
+	QDir dir(folderView->rootPath());
+	QIcon icon = QFileIconProvider().icon(QFileInfo(folderView->rootPath()));
+	int index = mp_tab[place]->addTab(folderView, icon, dir.isRoot() ? dir.path() : dir.dirName());
+	mp_tab[place]->setTabToolTip(index, dir.absolutePath());
+	mp_tab[place]->setHidden(false);
+
+	if(!mp_tab[TAB_RIGHT]->isHidden())
+		mp_tab[TAB_LEFT]->setTabBarAutoHide(false);
+
+	setCurrentFolderView(folderView);
 }
 
 void TeViewStore::floatingWidgetClosed(QWidget* widget, QEvent* )

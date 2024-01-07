@@ -38,6 +38,8 @@ class TeDispatcher : public QObject, public TeDispatchable
 public:
 	TeDispatcher();
 	virtual ~TeDispatcher();
+	virtual TeTypes::WidgetType getType() const;
+
 
 	void setFactory(const TeCommandFactory* p_factory);
 
@@ -45,16 +47,16 @@ public:
 
 	void loadKeySetting();
 
-	virtual bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event);
+	virtual bool dispatch(TeTypes::WidgetType type, QEvent *event);
 	virtual void requestCommandFinalize(TeCommandBase* cmdBase);
 
 signals:
 	void commandFinalize(TeCommandBase* cmdBase);
-	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
+	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_cmdParam);
 
 public slots:
 	void finishCommand(TeCommandBase* cmdBase);
-	void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
+	void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_cmdParam);
 
 private:
 	const TeCommandFactory* mp_factory;

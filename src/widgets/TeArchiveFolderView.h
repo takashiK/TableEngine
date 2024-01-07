@@ -54,6 +54,8 @@ public:
 	TeArchiveFolderView(QWidget *parent = Q_NULLPTR);
 	~TeArchiveFolderView();
 
+	virtual TeTypes::WidgetType getType() const;
+
 	virtual TeFileTreeView* tree();
 	virtual TeFileListView* list();
 

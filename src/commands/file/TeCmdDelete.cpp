@@ -40,9 +40,30 @@ TeCmdDelete::~TeCmdDelete()
 {
 }
 
-bool TeCmdDelete::isAvailable()
+bool TeCmdDelete::isActive( TeViewStore* p_store )
 {
-	return true;
+	return false;
+}
+
+QFlags<TeTypes::CmdType> TeCmdDelete::type()
+{
+	return QFlags<TeTypes::CmdType>(
+		TeTypes::CMD_TRIGGER_NORMAL
+		// TeTypes::CMD_TRIGGER_TOGGLE
+		// TeTypes::CMD_TRIGGER_SELECTION
+
+		| TeTypes::CMD_CATEGORY_TREE
+		| TeTypes::CMD_CATEGORY_LIST
+		| TeTypes::CMD_CATEGORY_NONE
+
+		| TeTypes::CMD_TARGET_FILE
+		| TeTypes::CMD_TARGET_ARCHIVE
+	);
+}
+
+QList<TeMenuParam> TeCmdDelete::menuParam()
+{
+	return QList<TeMenuParam>();
 }
 
 /**

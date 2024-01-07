@@ -154,6 +154,22 @@ void showFileContext(int px, int py, const QString& path)
 
 }
 
+void showFileProperties(const QString& path)
+{
+	QString rpath = QDir::toNativeSeparators(path);
+	SHELLEXECUTEINFO info = { 0 };
+	info.cbSize = sizeof(SHELLEXECUTEINFO);
+	info.fMask = SEE_MASK_INVOKEIDLIST;
+	info.hwnd = NULL;
+	info.lpVerb = L"properties";
+	info.lpFile = reinterpret_cast<LPCWSTR>(rpath.utf16());
+	info.lpParameters = NULL;
+	info.lpDirectory = NULL;
+	info.nShow = SW_SHOW;
+	info.hInstApp = NULL;
+	ShellExecuteEx(&info);
+}
+
 void openFile(const QString& path)
 {
 	ShellExecute(NULL,L"open", reinterpret_cast<LPCWSTR>(path.utf16()), NULL, NULL, SW_SHOWNORMAL);

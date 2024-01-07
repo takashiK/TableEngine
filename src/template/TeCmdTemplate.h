@@ -21,6 +21,12 @@
 #pragma once
 
 #include "commands/TeCommandBase.h"
+
+#include <QList>
+#include <QFlags>
+
+class TeViewStore;
+
 class TeCmdTemplate :
     public TeCommandBase
 {
@@ -29,7 +35,13 @@ public:
 	virtual ~TeCmdTemplate();
 
 	// Check if this command can process when item is not selected.
-	static bool isAvailable();
+	static bool isActive(TeViewStore* p_store);
+
+	// type of command
+	static QFlags<TeTypes::CmdType> type();
+
+	// Parameter list. it use for menu access.
+	static QList<TeMenuParam> menuParam();
 
 protected:
 	// Execute command.

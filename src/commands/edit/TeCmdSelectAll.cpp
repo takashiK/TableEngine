@@ -34,9 +34,30 @@ TeCmdSelectAll::~TeCmdSelectAll()
 {
 }
 
-bool TeCmdSelectAll::isAvailable()
+bool TeCmdSelectAll::isActive( TeViewStore* p_store )
 {
-	return true;
+	return false;
+}
+
+QFlags<TeTypes::CmdType> TeCmdSelectAll::type()
+{
+	return QFlags<TeTypes::CmdType>(
+		TeTypes::CMD_TRIGGER_NORMAL
+		// TeTypes::CMD_TRIGGER_TOGGLE
+		// TeTypes::CMD_TRIGGER_SELECTION
+
+		| TeTypes::CMD_CATEGORY_TREE
+		| TeTypes::CMD_CATEGORY_LIST
+		| TeTypes::CMD_CATEGORY_NONE
+
+		| TeTypes::CMD_TARGET_FILE
+		| TeTypes::CMD_TARGET_ARCHIVE
+	);
+}
+
+QList<TeMenuParam> TeCmdSelectAll::menuParam()
+{
+	return QList<TeMenuParam>();
 }
 
 /**
@@ -45,7 +66,7 @@ bool TeCmdSelectAll::isAvailable()
  */
 bool TeCmdSelectAll::execute(TeViewStore* p_store)
 {
-	TeFileFolderView* p_folder = p_store->currentFolderView();
+	TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
 
 	if (p_folder != nullptr) {
 		TeFileListView* p_list = p_folder->list();

@@ -28,10 +28,32 @@ TeCmdTemplate::~TeCmdTemplate()
 {
 }
 
-bool TeCmdTemplate::isAvailable()
+bool TeCmdTemplate::isActive(TeViewStore* p_store)
 {
-	return true;
+	return false;
 }
+
+QFlags<TeTypes::CmdType> TeCmdTemplate::type()
+{
+	return QFlags<TeTypes::CmdType>(
+		TeTypes::CMD_TRIGGER_NORMAL
+		// TeTypes::CMD_TRIGGER_TOGGLE
+		// TeTypes::CMD_TRIGGER_SELECTION
+
+		| TeTypes::CMD_CATEGORY_TREE
+		| TeTypes::CMD_CATEGORY_LIST
+		| TeTypes::CMD_CATEGORY_NONE
+
+		| TeTypes::CMD_TARGET_FILE
+		| TeTypes::CMD_TARGET_ARCHIVE
+	);
+}
+
+QList<TeMenuParam> TeCmdTemplate::menuParam()
+{
+	return QList<TeMenuParam>();
+}
+
 
 bool TeCmdTemplate::execute(TeViewStore* p_store)
 {

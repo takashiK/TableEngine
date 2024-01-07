@@ -1039,6 +1039,8 @@ bool Writer::addEntry(const QString & src, const QString& dest)
 	else {
 		return false;
 	}
+	emit addedFileInfo(info);
+
 	return true;
 }
 
@@ -1141,7 +1143,13 @@ bool Writer::archive(const QString & dest, ArchiveType type)
 	}
 
 	close_write_archive(&arInfo);
-	emit finished();
+	if (m_cancel) {
+		QFile::remove(dest);
+		return false;
+	}
+	else {
+		emit finished();
+	}
 
 	return true;
 }

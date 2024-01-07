@@ -38,8 +38,9 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 	//Load translation file.
 	QTranslator myappTranslator;
-	myappTranslator.load("tableengine_" + QLocale::system().name());
-	a.installTranslator(&myappTranslator);
+	bool res = myappTranslator.load("tableengine_" + QLocale::system().name());
+	if (res)
+		a.installTranslator(&myappTranslator);
 
 	//setup setting folder and load settings.
 	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QApplication::applicationDirPath());

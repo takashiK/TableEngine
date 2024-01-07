@@ -37,8 +37,8 @@ public:
 	virtual TeFileListView* list() = 0;
 
 	virtual void setDispatcher(TeDispatchable* p_dispatcher);
-	virtual bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event);
-	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
+	virtual bool dispatch(TeTypes::WidgetType type, QEvent *event);
+	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);
 
 	virtual void setRootPath(const QString& path) = 0;
 	virtual QString rootPath() =0;
@@ -46,10 +46,10 @@ public:
 	virtual QString currentPath() =0;
 
 signals:
-	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
+	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);
 
 protected:
-	bool isDispatchable(TeTypes::WidgetType type, QObject* obj, QEvent *event) const;
+	bool isDispatchable(TeTypes::WidgetType type, QEvent *event) const;
 
 private:
 	TeDispatchable* mp_dispatcher;

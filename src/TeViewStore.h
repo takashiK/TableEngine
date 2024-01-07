@@ -25,7 +25,9 @@
 #include "TeDispatcher.h"
 
 class TeMainWindow;
+class TeFolderView;
 class TeFileFolderView;
+class TeArchiveFolderView;
 class TeEventEmitter;
 class QTabWidget;
 class TeDispatcher;
@@ -39,7 +41,7 @@ class TeViewStore : public QObject, public TeDispatchable
 	Q_OBJECT
 
 public:
-	enum TabIndex {
+	enum TabPlace {
 		TAB_LEFT,
 		TAB_RIGHT,
 		TAB_MAX,
@@ -47,9 +49,11 @@ public:
 
 	TeViewStore(QObject *parent = Q_NULLPTR);
 	virtual  ~TeViewStore();
+	virtual TeTypes::WidgetType getType() const;
 
 	void initialize();
 	void show();
+	void close();
 
 	void loadMenu();
 	void loadSetting();
@@ -58,38 +62,51 @@ public:
 	void loadStatus();
 
 	void setDispatcher(TeDispatcher* p_dispatcher);
-	bool dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event);
-	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
+	virtual bool dispatch(TeTypes::WidgetType type, QEvent *event);
+	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);
 
-	virtual QWidget*  mainWindow();
+	QWidget*  mainWindow();
 
-	virtual int currentTabIndex();
-	virtual int tabIndex(TeFileFolderView* view);
-	virtual QList<TeFileFolderView*> getFolderView(int place = -1);
 
-	virtual TeFileFolderView* currentFolderView();
-	virtual void setCurrentFolderView(TeFileFolderView* view);
+	int currentTabPlace();
+	int currentTabIndex();
+	int tabPlace(TeFolderView* view);
+	TeFolderView* getFolderView(int place = -1);
+	QList<TeFolderView*> getFolderViews(int place = -1);
 
-	virtual TeFileFolderView* createFolderView( const QString& path, int place = -1 );
-	virtual void deleteFolderView( TeFileFolderView* view);
-	virtual void moveFolderView( TeFileFolderView* view, int place = 0, int position = -1);
+	TeFolderView* currentFolderView();
+	void setCurrentFolderView(TeFolderView* view);
+
+	TeFileFolderView* createFolderView( const QString& path, int place = -1 );
+	TeArchiveFolderView* createArchiveFolderView(const QString& path, int place = -1);
+
+	void deleteFolderView( TeFolderView* view);
+	void moveFolderView( TeFolderView* view, int place = 0, int position = -1);
+
+	void changeRootPath(const QString& path, bool newView = false, int place = -1);
 
 	void registerFloatingWidget(QWidget* widget);
 
 public slots:
 	void floatingWidgetClosed(QWidget* widget, QEvent* event);
+	void focusFolderViewChanged(QWidget* widget, QEvent* event);
+
+protected:
+	void addFolderView(TeFolderView* folderView, int place = -1);
 
 signals:
-	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject* obj, QEvent* event);
+	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);
 
 private:
 	TeMainWindow*        mp_mainWindow;
 	QTabWidget*          mp_tab[TAB_MAX]; // 0:left 1:right
 	TeDriveBar*  mp_driveBar;
 	QSplitter*     mp_split;
-	TeFileFolderView* mp_currentFolderView;
+
+	int  m_currentTabPlace;
 
 	TeDispatcher* mp_dispatcher;
 	TeEventEmitter* mp_closeEventEmitter;
+	TeEventEmitter* mp_focusEventEmitter;
 	QList<QWidget*> m_floatingWidgets;
 };

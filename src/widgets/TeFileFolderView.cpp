@@ -143,6 +143,11 @@ TeFileFolderView::~TeFileFolderView()
 	delete mp_listEvent;
 }
 
+TeTypes::WidgetType TeFileFolderView::getType() const
+{
+	return TeTypes::WT_FOLDERVIEW;
+}
+
 TeFileTreeView * TeFileFolderView::tree()
 {
 	return mp_treeView;
@@ -214,9 +219,8 @@ void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint
 		}
 		else {
 			//Create Menu Item
-			TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
+			const TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
 			QAction* action = new QAction(p_info->icon(), p_info->name());
-			action->setEnabled(p_info->isAvailable());
 			connect(action, &QAction::triggered, [this, cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
 			menus.top()->addAction(action);
 		}
@@ -229,16 +233,18 @@ void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint
 
 void TeFileFolderView::setRootPath(const QString & path)
 {
-	if (rootPath() != path) {
+	QDir dir;
+	QString absPath = dir.absoluteFilePath(path);
+	if (rootPath() != absPath) {
 		//Set root path to treeview.
-		QModelIndex index = mp_treeModel->index(path);
+		QModelIndex index = mp_treeModel->index(absPath);
 		tree()->setVisualRootIndex(index);
 		tree()->setCurrentIndex(index);
 
 		//Set target path of listview to same as treeview.
 		list()->clearSelection();
 		list()->setCurrentIndex(QModelIndex());
-		QModelIndex rootIndex = mp_listModel->setRootPath(path);
+		QModelIndex rootIndex = mp_listModel->setRootPath(absPath);
 		list()->setRootIndex(rootIndex);
 
 		QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);

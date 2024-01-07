@@ -37,14 +37,35 @@ TeCmdFolderOpenUnder::~TeCmdFolderOpenUnder()
 {
 }
 
-bool TeCmdFolderOpenUnder::isAvailable()
+bool TeCmdFolderOpenUnder::isActive( TeViewStore* p_store )
 {
-	return true;
+	return false;
+}
+
+QFlags<TeTypes::CmdType> TeCmdFolderOpenUnder::type()
+{
+	return QFlags<TeTypes::CmdType>(
+		TeTypes::CMD_TRIGGER_NORMAL
+		// TeTypes::CMD_TRIGGER_TOGGLE
+		// TeTypes::CMD_TRIGGER_SELECTION
+
+		| TeTypes::CMD_CATEGORY_TREE
+		| TeTypes::CMD_CATEGORY_LIST
+		| TeTypes::CMD_CATEGORY_NONE
+
+		| TeTypes::CMD_TARGET_FILE
+		| TeTypes::CMD_TARGET_ARCHIVE
+	);
+}
+
+QList<TeMenuParam> TeCmdFolderOpenUnder::menuParam()
+{
+	return QList<TeMenuParam>();
 }
 
 bool TeCmdFolderOpenUnder::execute(TeViewStore * p_store)
 {
-	TeFileFolderView* p_folder = p_store->currentFolderView();
+	TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
 
 	if (p_folder != nullptr) {
 		TeFileTreeView* p_tree = p_folder->tree();

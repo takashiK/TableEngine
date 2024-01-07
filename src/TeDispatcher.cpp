@@ -33,7 +33,7 @@ TeDispatcher::TeDispatcher()
 	mp_factory = nullptr;
 	mp_store = nullptr;
 	connect(this, SIGNAL(commandFinalize(TeCommandBase*)), this, SLOT(finishCommand(TeCommandBase*)));
-	connect(this, SIGNAL(requestCommand(TeTypes::CmdId, TeTypes::WidgetType, QObject*, QEvent*)), this, SLOT(execCommand(TeTypes::CmdId, TeTypes::WidgetType, QObject*, QEvent*)));
+	connect(this, SIGNAL(requestCommand(TeTypes::CmdId, TeTypes::WidgetType, QEvent*, const TeCmdParam*)), this, SLOT(execCommand(TeTypes::CmdId, TeTypes::WidgetType, QEvent*, const TeCmdParam*)));
 
 	loadKeySetting();
 }
@@ -41,6 +41,11 @@ TeDispatcher::TeDispatcher()
 
 TeDispatcher::~TeDispatcher()
 {
+}
+
+TeTypes::WidgetType TeDispatcher::getType() const
+{
+	return TeTypes::WT_NONE;
 }
 
 void TeDispatcher::setFactory(const TeCommandFactory* p_factory)
@@ -56,7 +61,7 @@ void TeDispatcher::setViewStore(TeViewStore * p_store)
 /**
  *	dispatch event to command.
  */
-bool TeDispatcher::dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *event)
+bool TeDispatcher::dispatch(TeTypes::WidgetType type, QEvent *event)
 {
 	//For ListView & TreeView
 	if (type == TeTypes::WT_LISTVIEW || type == TeTypes::WT_TREEVIEW) {
@@ -67,7 +72,7 @@ bool TeDispatcher::dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *even
 			TeTypes::CmdId cmdId = m_keyCmdMap.value(QPair<int,int>(keyEvent->modifiers(),keyEvent->key()));
 
 			if (cmdId != TeTypes::CMDID_NONE) {
-				emit requestCommand(cmdId,type,obj,event);
+				emit requestCommand(cmdId,type,event,nullptr);
 			}
 		}
 	}
@@ -79,14 +84,14 @@ bool TeDispatcher::dispatch(TeTypes::WidgetType type, QObject* obj, QEvent *even
 /**
  * execute command by commad Id
  */
-void TeDispatcher::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QObject * obj, QEvent * event)
+void TeDispatcher::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent * event, const TeCmdParam* p_cmdParam)
 {
 	TeCommandBase* cmdBase = mp_factory->createCommand(cmdId);
 
 	if (cmdBase != nullptr) {
 		cmdBase->setDispatcher(this);
 
-		cmdBase->setSource(type, obj, event);
+		cmdBase->setSource(type, event, p_cmdParam);
 
 		//command queuing that use to asynchronus execution.
 		//this queue entry clear when command call requestCommandFinalize that is called by TeCommandBase::finished().

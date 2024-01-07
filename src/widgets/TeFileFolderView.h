@@ -40,6 +40,8 @@ public:
 	TeFileFolderView(QWidget *parent = Q_NULLPTR);
 	virtual  ~TeFileFolderView();
 
+	virtual TeTypes::WidgetType getType() const;
+
 	virtual TeFileTreeView* tree();
 	virtual TeFileListView* list();
 
@@ -47,8 +49,6 @@ public:
 	virtual QString rootPath();
 	virtual void setCurrentPath(const QString& path);
 	virtual QString currentPath();
-
-
 
 protected:
 	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos);

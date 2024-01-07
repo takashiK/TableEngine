@@ -185,7 +185,7 @@ void TeKeySetting::storeDefaultSettings(bool force)
 	SETTING(Qt::Key_A, TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL);
 	SETTING(Qt::Key_Z, TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE);
 
-	SETTING(Qt::Key_V, TeTypes::CMDID_SYSTEM_VIEW_VIEW_FILE);
+	SETTING(Qt::Key_V, TeTypes::CMDID_SYSTEM_TOOL_VIEW_FILE);
 
 #undef SETTING	
 	settings.endGroup();
@@ -239,7 +239,7 @@ QList<QTreeWidgetItem*> TeKeySetting::createKeyItem(const QList<int>& list)
 		QKeySequence keySeq(key);
 		item->setData(0, Qt::DisplayRole, QKeySequence(key));
 		TeTypes::CmdId cmdId = static_cast<TeTypes::CmdId>(settings.value(keySeq.toString().replace("+","_")).toInt());
-		TeCommandInfoBase* info = factory->commandInfo(cmdId);
+		const TeCommandInfoBase* info = factory->commandInfo(cmdId);
 		if (info != nullptr) {
 			QString name = info->name();
 			item->setData(1, Qt::DisplayRole, name.replace("&", ""));
@@ -272,7 +272,7 @@ QList<QTreeWidgetItem*> TeKeySetting::createCmdItem(TeTypes::CmdId cmdGroup)
 	QList<QTreeWidgetItem*> items;
 	TeCommandFactory* factory = TeCommandFactory::factory();
 
-	QList<TeCommandInfoBase*>  list = factory->commandGroup(cmdGroup);
+	QList<const TeCommandInfoBase*>  list = factory->commandGroup(cmdGroup);
 	for (auto& info : list) {
 		QString name = info->name();
 		QTreeWidgetItem* item = new QTreeWidgetItem({ name.replace("&",""),info->description() });

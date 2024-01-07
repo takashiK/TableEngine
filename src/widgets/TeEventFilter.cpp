@@ -49,7 +49,7 @@ void TeEventFilter::setDispatcher(TeDispatchable * p_dispatcher)
 
 bool TeEventFilter::eventFilter(QObject *obj, QEvent *event)
 {
-	if (mp_dispatcher != nullptr && mp_dispatcher->dispatch(m_type, obj,event)) {
+	if (mp_dispatcher != nullptr && mp_dispatcher->dispatch(m_type,event)) {
 		return true;
 	}
 	return QObject::eventFilter(obj, event);
