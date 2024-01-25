@@ -20,6 +20,7 @@
 
 #include "TeCmdKeySetting.h"
 #include "TeViewStore.h"
+#include "TeUtils.h"
 #include "dialogs/TeKeySetting.h"
 
 
@@ -34,6 +35,7 @@ TeCmdKeySetting::~TeCmdKeySetting()
 
 bool TeCmdKeySetting::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

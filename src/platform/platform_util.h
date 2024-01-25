@@ -30,7 +30,9 @@ extern bool threadInitialize();
 extern void threadUninitialize();
 
 //File action
+extern bool showFilesContext(int px, int py, const QStringList& paths);
 extern void showFileContext( int px, int py, const QString& path);
+extern void showFilesProperties(const QStringList& paths);
 extern void showFileProperties(const QString& path);
 extern void openFile(const QString& path);
 extern bool copyFiles(const QStringList& files, const QString& path);

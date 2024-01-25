@@ -19,6 +19,12 @@
 ****************************************************************************/
 
 #include "TeCmdRename.h"
+#include "TeViewStore.h"
+#include "TeUtils.h"
+
+#include <QStringList>
+#include <QInputDialog>
+#include <QFileInfo>
 
 TeCmdRename::TeCmdRename()
 {
@@ -28,8 +34,9 @@ TeCmdRename::~TeCmdRename()
 {
 }
 
-bool TeCmdRename::isActive()
+bool TeCmdRename::isActive(TeViewStore* p_store)
 {
+	NOT_USED(p_store);
 	return false;
 }
 
@@ -56,5 +63,19 @@ QList<TeMenuParam> TeCmdRename::menuParam()
 
 bool TeCmdRename::execute(TeViewStore* p_store)
 {
+	QStringList paths;
+	if (getSelectedItemList(p_store, &paths)) {
+		for (const auto& path : paths) {
+			QFileInfo info(path);
+			bool ok;
+			QString newName = QInputDialog::getText(p_store->mainWindow(), QObject::tr("Rename"), QObject::tr("New name"), QLineEdit::Normal,  info.fileName(),&ok);
+			if (newName.isEmpty() || !ok) {
+				return true;
+			}
+			if (info.fileName() != newName) {
+				QFile::rename(path, info.absolutePath() + "/" + newName);
+			}
+		}
+	}
 	return true;
 }

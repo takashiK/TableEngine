@@ -19,6 +19,15 @@
 ****************************************************************************/
 
 #include "TeCmdCombineFile.h"
+#include "TeViewStore.h"
+#include "TeUtils.h"
+#include "dialogs/TeCombineDialog.h"
+
+#include <QStringList>
+#include <QDir>
+#include <QFile>
+#include <QDataStream>
+#include <QMessageBox>
 
 TeCmdCombineFile::TeCmdCombineFile()
 {
@@ -28,8 +37,9 @@ TeCmdCombineFile::~TeCmdCombineFile()
 {
 }
 
-bool TeCmdCombineFile::isActive()
+bool TeCmdCombineFile::isActive(TeViewStore* p_store)
 {
+	NOT_USED(p_store);
 	return false;
 }
 
@@ -56,5 +66,40 @@ QList<TeMenuParam> TeCmdCombineFile::menuParam()
 
 bool TeCmdCombineFile::execute(TeViewStore* p_store)
 {
+	QStringList paths;
+	if (getSelectedItemList(p_store, &paths)) {
+		TeCombineDialog dialog;
+		QString currentFolder = getCurrentFolder(p_store);
+		dialog.setBasePath(currentFolder);
+		dialog.setInputFiles(paths);
+		if (dialog.exec() == QDialog::Accepted) {
+			QStringList inputFiles = dialog.inputFiles();
+			QDir dir(currentFolder);
+			QFile outFile( dir.absoluteFilePath(dialog.outputFile()) );
+			if (outFile.exists()) {
+				//confirm overwrite
+				if (QMessageBox::question(
+					nullptr,
+					QObject::tr("Overwrite"),
+					QObject::tr("File already exists. Overwrite?"),
+					QMessageBox::Yes | QMessageBox::No
+				) != QMessageBox::Yes) {
+					return true;
+				}
+			}
+			//combine files
+			if (outFile.open(QIODevice::WriteOnly | QIODeviceBase::Truncate)) {
+				for (const auto& path : inputFiles) {
+					QFile inputFile( path );
+					if (inputFile.open(QIODevice::ReadOnly)) {
+						while (inputFile.bytesAvailable()) {
+							outFile.write(inputFile.read(16*1024*1024));
+						}
+						inputFile.close();
+					}
+				}
+			}
+		}
+	}
 	return true;
 }

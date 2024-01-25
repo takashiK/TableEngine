@@ -21,12 +21,12 @@
 #pragma once
 
 #include "commands/TeCommandBase.h"
-class TeTeCmdChangeAttribute :
+class TeCmdChangeAttribute :
     public TeCommandBase
 {
 public:
-	TeTeCmdChangeAttribute();
-	virtual ~TeTeCmdChangeAttribute();
+	TeCmdChangeAttribute();
+	virtual ~TeCmdChangeAttribute();
 
 	// Check if this command can process when item is not selected.
 	static bool isActive(TeViewStore* p_store);

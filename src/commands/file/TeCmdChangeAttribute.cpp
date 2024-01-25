@@ -18,22 +18,27 @@
 **
 ****************************************************************************/
 
-#include "TeTeCmdChangeAttribute.h"
+#include "TeCmdChangeAttribute.h"
+#include "TeViewStore.h"
+#include "TeUtils.h"
 
-TeTeCmdChangeAttribute::TeTeCmdChangeAttribute()
+#include <QInputDialog>
+
+TeCmdChangeAttribute::TeCmdChangeAttribute()
 {
 }
 
-TeTeCmdChangeAttribute::~TeTeCmdChangeAttribute()
+TeCmdChangeAttribute::~TeCmdChangeAttribute()
 {
 }
 
-bool TeTeCmdChangeAttribute::isActive()
+bool TeCmdChangeAttribute::isActive(TeViewStore* p_store)
 {
+	NOT_USED(p_store);
 	return false;
 }
 
-QFlags<TeTypes::CmdType> TeTeCmdChangeAttribute::type()
+QFlags<TeTypes::CmdType> TeCmdChangeAttribute::type()
 {
 	return QFlags<TeTypes::CmdType>(
 		TeTypes::CMD_TRIGGER_NORMAL
@@ -49,12 +54,16 @@ QFlags<TeTypes::CmdType> TeTeCmdChangeAttribute::type()
 	);
 }
 
-QList<TeMenuParam> TeTeCmdChangeAttribute::menuParam()
+QList<TeMenuParam> TeCmdChangeAttribute::menuParam()
 {
 	return QList<TeMenuParam>();
 }
 
-bool TeTeCmdChangeAttribute::execute(TeViewStore* p_store)
+bool TeCmdChangeAttribute::execute(TeViewStore* p_store)
 {
+	QStringList paths;
+	if (getSelectedItemList(p_store, &paths)) {
+
+	}
 	return true;
 }

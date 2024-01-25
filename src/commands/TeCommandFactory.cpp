@@ -77,12 +77,12 @@ TeCommandFactory::TeCommandFactory()
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_COPY_TO, TeCmdCopyTo, tr("&Copy To"), tr("Copy selected files to other folder."), QIcon(":/TableEngine/copyTo.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_MOVE_TO, TeCmdMoveTo, tr("&Move To"), tr("Move selected files to other folder."), QIcon(":/TableEngine/moveTo.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_DELETE, TeCmdDelete, tr("&Delete"), tr("Delete selected files."), QIcon(":TableEngine/trash.png"));
-		//MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_RENAME, TeCmdRename, tr("&Rename"), tr("Rename selected files."), QIcon(":TableEngine/rename.png"));
-		//MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_RENAME_MULTI, TeCmdRenameMulti, tr("RenameMulti"), tr("Rename multiple files with filter."), QIcon(":TableEngine/renameMulti.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_RENAME, TeCmdRename, tr("&Rename"), tr("Rename selected files."), QIcon(":TableEngine/rename.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_RENAME_MULTI, TeCmdRenameMulti, tr("RenameMulti"), tr("Rename multiple files with filter."), QIcon(":TableEngine/renameMulti.png"));
 		//MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_CHANGE_ATTRIBUTE, TeCmdChangeAttribute, tr("Attribute"), tr("Change file attribute."), QIcon(":TableEngine/attribute.png"));
 		BEGIN_FOLDER("Divide");
-			//MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_DIVIDE, TeCmdDivde, tr("Divide file"), tr("Divide file."), QIcon(":TableEngine/divide.png"));
-			//MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_COMBINE, TeCmdCombine, tr("Combine files"), tr("Combine files."), QIcon(":TableEngine/combine.png"));
+			MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_DIVIDE, TeCmdDivideFile, tr("Divide file"), tr("Divide file."), QIcon(":TableEngine/divide.png"));
+			MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_COMBINE, TeCmdCombineFile, tr("Combine files"), tr("Combine files."), QIcon(":TableEngine/combine.png"));
 		END_FOLDER();
 		BEGIN_FOLDER("Archive");
 			MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_ARCHIVE, TeCmdArchive, tr("&Archive files"), tr("Archive selected files."), QIcon(":/TableEngine/archiveBox.png"));

@@ -45,6 +45,7 @@ TeCmdMoveTo::~TeCmdMoveTo()
 
 bool TeCmdMoveTo::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

@@ -44,6 +44,7 @@ TeCmdExtract::~TeCmdExtract()
 
 bool TeCmdExtract::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

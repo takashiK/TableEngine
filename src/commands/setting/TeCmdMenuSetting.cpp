@@ -20,6 +20,7 @@
 
 #include "TeCmdMenuSetting.h"
 #include "TeViewStore.h"
+#include "TeUtils.h"
 #include "dialogs/TeMenuSetting.h"
 
 
@@ -34,6 +35,7 @@ TeCmdMenuSetting::~TeCmdMenuSetting()
 
 bool TeCmdMenuSetting::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

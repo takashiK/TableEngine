@@ -36,6 +36,8 @@
 #include <thumbcache.h>
 #include <GdiPlus.h>
 
+#include <vector>
+
 //////////////////////////////////////////////////////////////
 //
 // Initialize and uninitialize platform system
@@ -56,64 +58,63 @@ void threadUninitialize()
 // File action
 //
 
+namespace {
 
-static QMap<HWND, IContextMenu2*> g_context;
+	QMap<HWND, IContextMenu2*> g_context;
+	QString cname;
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	if (uMsg == WM_INITMENUPOPUP) {
-		IContextMenu2* pContextMenu2 = g_context.find(hwnd).value();
-		if (pContextMenu2 != NULL) {
-			pContextMenu2->HandleMenuMsg(uMsg, wParam, lParam);
-			return 0;
+	LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		if (uMsg == WM_INITMENUPOPUP) {
+			IContextMenu2* pContextMenu2 = g_context.find(hwnd).value();
+			if (pContextMenu2 != NULL) {
+				pContextMenu2->HandleMenuMsg(uMsg, wParam, lParam);
+				return 0;
+			}
 		}
-	}
-	return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-
-void showFileContext(int px, int py, const QString& path)
-{
-	QString rpath = QDir::toNativeSeparators(path);
-
-	static QString cname;
-	if (cname.isEmpty()) {
-		cname = u8"TableEngineWindowsContext";
-		WNDCLASSEX wc = { 0};
-		wc.cbSize = sizeof(WNDCLASSEX);
-		wc.style = 0;
-		wc.lpfnWndProc = WindowProc;
-		wc.cbClsExtra = 0;
-		wc.cbWndExtra = 0;
-		wc.hInstance = static_cast<HINSTANCE>(GetModuleHandle(0));
-		wc.hCursor = 0;
-		wc.hbrBackground = 0;
-		wc.hIcon = 0;
-		wc.hIconSm = 0;
-		wc.lpszMenuName = 0;
-		wc.lpszClassName = reinterpret_cast<LPCWSTR>(cname.utf16());
-		RegisterClassEx(&wc);
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 
-	PIDLIST_ABSOLUTE pidlAbsolute = ILCreateFromPath(reinterpret_cast<LPCWSTR>(rpath.utf16()));
+	QString registerContextWndClass()
+	{
+		if (cname.isEmpty()) {
+			cname = u8"TableEngineWindowsContext";
+			WNDCLASSEX wc = { 0 };
+			wc.cbSize = sizeof(WNDCLASSEX);
+			wc.style = 0;
+			wc.lpfnWndProc = WindowProc;
+			wc.cbClsExtra = 0;
+			wc.cbWndExtra = 0;
+			wc.hInstance = static_cast<HINSTANCE>(GetModuleHandle(0));
+			wc.hCursor = 0;
+			wc.hbrBackground = 0;
+			wc.hIcon = 0;
+			wc.hIconSm = 0;
+			wc.lpszMenuName = 0;
+			wc.lpszClassName = reinterpret_cast<LPCWSTR>(cname.utf16());
+			RegisterClassEx(&wc);
+		}
+		return cname;
+	}
 
-	if (pidlAbsolute != NULL) {
+	void popupContextWindows(int px, int py,  PIDLIST_ABSOLUTE parent, LPCITEMIDLIST* pidlChildList, UINT childCount) {
+		//show context menu for multiple files
 		int                 nId = 0;
 		HRESULT             hr;
 		HMENU               hmenuPopup;
 		IContextMenu* pContextMenu = NULL;
 		IShellFolder* pShellFolder = NULL;
-		PITEMID_CHILD       pidlChild;
 
+		QString cname = registerContextWndClass();
 		HWND hwnd = CreateWindowEx(0, reinterpret_cast<LPCWSTR>(cname.utf16()),
 			L"ContextWindow", WS_OVERLAPPED,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			HWND_MESSAGE, NULL, static_cast<HINSTANCE>(GetModuleHandle(0)), NULL);
 
-		SHBindToParent(pidlAbsolute, IID_PPV_ARGS(&pShellFolder), NULL);
-		pidlChild = ILFindLastID(pidlAbsolute);
+		SHBindToParent(parent, IID_PPV_ARGS(&pShellFolder), NULL);
 
-		hr = pShellFolder->GetUIObjectOf(NULL, 1, (LPCITEMIDLIST*)&pidlChild, IID_IContextMenu, NULL, (void**)&pContextMenu);
+		hr = pShellFolder->GetUIObjectOf(NULL, childCount, pidlChildList, IID_IContextMenu, NULL, (void**)&pContextMenu);
 		IContextMenu2* pContextMenu2 = NULL;
 		if (hr == S_OK) {
 			hr = pContextMenu->QueryInterface(IID_PPV_ARGS(&pContextMenu2));
@@ -150,8 +151,98 @@ void showFileContext(int px, int py, const QString& path)
 
 		DestroyWindow(hwnd);
 	}
+}
+
+bool showFilesContext(int px, int py, const QStringList& paths)
+{
+	//get base folder path
+	QFileInfo info (paths[0]);
+	QString baseFolder = info.absolutePath();
+	//check same base
+	for (const auto& path : paths) {
+		QFileInfo info (path);
+		if (info.absolutePath() != baseFolder) {
+			return false;
+		}
+	}
+
+	//make pidl list
+	std::vector<PIDLIST_ABSOLUTE> pidlList(paths.size());
+	std::vector< LPCITEMIDLIST> pidlChildList(paths.size());
+
+	bool isPidlListOK = true;
+	for (int i = 0; i < paths.size(); ++i) {
+		QString rpath = QDir::toNativeSeparators(paths[i]);
+		pidlList[i] = ILCreateFromPath(reinterpret_cast<LPCWSTR>(rpath.utf16()));
+		pidlChildList[i] = ILFindLastID(pidlList[i]);
+		if (pidlList[i] == NULL || pidlChildList[i] == NULL) {
+			isPidlListOK = false;
+			break;
+		}
+	}
+
+	if (isPidlListOK) {
+		//show context menu for multiple files
+		popupContextWindows(px, py, pidlList[0], pidlChildList.data(), paths.size());
+	}
+
+
+	//cleanup
+	for (int i = 0; i < paths.size(); ++i) {
+		if (pidlList[i] != NULL)
+			ILFree(pidlList[i]);
+	}
+
+	return true;
+}
+
+void showFileContext(int px, int py, const QString& path)
+{
+	QString cname = registerContextWndClass();
+
+	QString rpath = QDir::toNativeSeparators(path);
+	PIDLIST_ABSOLUTE pidlAbsolute = ILCreateFromPath(reinterpret_cast<LPCWSTR>(rpath.utf16()));
+	LPCITEMIDLIST   pidlChild = ILFindLastID(pidlAbsolute);
+
+	if (pidlAbsolute != NULL) {
+		popupContextWindows(px, py, pidlAbsolute, &pidlChild, 1);
+	}
 	ILFree(pidlAbsolute);
 
+}
+
+void showFilesProperties(const QStringList& paths)
+{
+	//make pidl list
+	std::vector<PIDLIST_ABSOLUTE> pidlList(paths.size());
+	std::vector< LPCITEMIDLIST> pidlChildList(paths.size());
+
+	bool isPidlListOK = true;
+	for (int i = 0; i < paths.size(); ++i) {
+		QString rpath = QDir::toNativeSeparators(paths[i]);
+		pidlList[i] = ILCreateFromPath(reinterpret_cast<LPCWSTR>(rpath.utf16()));
+		pidlChildList[i] = ILFindLastID(pidlList[i]);
+		if (pidlList[i] == NULL || pidlChildList[i] == NULL) {
+			isPidlListOK = false;
+			break;
+		}
+	}
+
+	PIDLIST_ABSOLUTE parent = ILClone(pidlList[0]);
+	ILRemoveLastID(parent);
+
+	IDataObject* dataObjects;
+	SHCreateDataObject(parent, paths.size(), pidlChildList.data(), NULL, IID_PPV_ARGS(&dataObjects));
+
+	SHMultiFileProperties(dataObjects, 0);
+
+	//cleanup
+	ILFree(parent);
+	dataObjects->Release();
+	for (int i = 0; i < paths.size(); ++i) {
+		if (pidlList[i] != NULL)
+			ILFree(pidlList[i]);
+	}
 }
 
 void showFileProperties(const QString& path)

@@ -43,6 +43,7 @@ TeCmdProperties::~TeCmdProperties()
 
 bool TeCmdProperties::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 
@@ -69,11 +70,9 @@ QList<TeMenuParam> TeCmdProperties::menuParam()
 
 bool TeCmdProperties::execute(TeViewStore* p_store)
 {
-
-	QString path = getCurrentItem(p_store);
-
-	if (!path.isEmpty()) {
-		showFileProperties(path);
+	QStringList paths;
+	if (getSelectedItemList(p_store, &paths)) {
+		showFilesProperties(paths);
 	}
 
 	return true;

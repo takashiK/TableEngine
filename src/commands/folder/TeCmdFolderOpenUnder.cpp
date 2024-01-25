@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdFolderOpenUnder.h"
+#include "TeUtils.h"
 
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
@@ -39,6 +40,7 @@ TeCmdFolderOpenUnder::~TeCmdFolderOpenUnder()
 
 bool TeCmdFolderOpenUnder::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

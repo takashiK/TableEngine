@@ -23,6 +23,7 @@
 #include "dialogs/TeFilePathDialog.h"
 #include "widgets/TeFolderView.h"
 #include "TeViewStore.h"
+#include "TeUtils.h"
 
 #include <QMessageBox>
 #include <QDir>
@@ -43,6 +44,7 @@ TeCmdFolderChangeRoot::~TeCmdFolderChangeRoot()
 
 bool TeCmdFolderChangeRoot::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

@@ -30,6 +30,7 @@ public:
 
 private:
     struct Syntax {
+        Syntax(): isUpdate(false) {}
         bool isUpdate;
         TeTextSyntax textSyntax;
     };

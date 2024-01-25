@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdFolderCloseUnder.h"
+#include "TeUtils.h"
 
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
@@ -36,6 +37,7 @@ TeCmdFolderCloseUnder::~TeCmdFolderCloseUnder()
 
 bool TeCmdFolderCloseUnder::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

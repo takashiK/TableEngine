@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdFolderOpenOne.h"
+#include "TeUtils.h"
 
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
@@ -37,6 +38,7 @@ TeCmdFolderOpenOne::~TeCmdFolderOpenOne()
 
 bool TeCmdFolderOpenOne::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

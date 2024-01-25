@@ -166,7 +166,17 @@ void TeFileFolderView::showContextMenu(const QAbstractItemView * pView, const QP
 		if (index.isValid() && index == pView->currentIndex()) {
 			//ContextMenu for the item
 			QFileSystemModel* fmodel = qobject_cast<QFileSystemModel*>(pView->model());
-			::showFileContext(gpos.x(), gpos.y(), fmodel->filePath(index));
+			QStringList files;
+			if (pView->selectionModel()->hasSelection()) {
+				QModelIndexList list = pView->selectionModel()->selectedIndexes();
+				for (auto& sindex : list) {
+					files.append(fmodel->filePath(sindex));
+				}
+			}
+			else {
+				files.append(fmodel->filePath(index));
+			}
+			::showFilesContext(gpos.x(), gpos.y(), files);
 		}
 		else if(pView == mp_treeView){
 			//ContextMenu at no selected for treeView

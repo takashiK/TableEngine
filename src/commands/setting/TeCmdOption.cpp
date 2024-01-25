@@ -20,6 +20,7 @@
 
 #include "TeCmdOption.h"
 #include "TeViewStore.h"
+#include "TeUtils.h"
 #include "dialogs/TeOptionSetting.h"
 #include <QDialog>
 
@@ -34,6 +35,7 @@ TeCmdOption::~TeCmdOption()
 
 bool TeCmdOption::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

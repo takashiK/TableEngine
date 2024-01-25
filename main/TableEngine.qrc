@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/TableEngine" lang="copy.png">
+    <qresource lang="copy.png" prefix="/TableEngine">
         <file alias="selectAll.png">Resources/icon/iconmonstr-selection-13-64.png</file>
         <file alias="selectToggle.png">Resources/icon/iconmonstr-selection-15-64.png</file>
         <file alias="question.png">Resources/icon/iconmonstr-help-6-64.png</file>
@@ -30,5 +30,9 @@
         <file alias="properties.png">Resources/icon/iconmonstr-task-list-square-lined-64.png</file>
         <file alias="changeRoot.png">Resources/icon/iconmonstr-database-17-64.png</file>
         <file alias="openFile.png">Resources/icon/iconmonstr-share-8-64.png</file>
+        <file alias="divide.png">Resources/icon/iconmonstr-cut-6-64.png</file>
+        <file alias="rename.png">Resources/icon/iconmonstr-pencil-square-lined-64.png</file>
+        <file alias="renameMulti.png">Resources/icon/iconmonstr-pencil-text-lined-64.png</file>
+        <file alias="combine.png">Resources/icon/iconmonstr-zip-12-64.png</file>
     </qresource>
 </RCC>

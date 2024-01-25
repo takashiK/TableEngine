@@ -19,6 +19,13 @@
 ****************************************************************************/
 
 #include "TeCmdRenameMulti.h"
+#include "TeUtils.h"
+#include "TeViewStore.h"
+#include "dialogs/TeRenameMultiDialog.h"
+
+#include <QStringList>
+#include <QFileInfo>
+#include <QFile>
 
 TeCmdRenameMulti::TeCmdRenameMulti()
 {
@@ -28,8 +35,9 @@ TeCmdRenameMulti::~TeCmdRenameMulti()
 {
 }
 
-bool TeCmdRenameMulti::isActive()
+bool TeCmdRenameMulti::isActive(TeViewStore* p_store)
 {
+	NOT_USED(p_store);
 	return false;
 }
 
@@ -56,5 +64,44 @@ QList<TeMenuParam> TeCmdRenameMulti::menuParam()
 
 bool TeCmdRenameMulti::execute(TeViewStore* p_store)
 {
+	QStringList files;
+	if (getSelectedItemList(p_store, &files)) {
+		TeRenameMultiDialog dialog;
+		if (dialog.exec() == QDialog::Accepted) {
+			QString baseName = dialog.baseName();
+			QString extention = dialog.extention();
+			int digits = dialog.digits();
+			int startNum = dialog.startNum();
+			int order = dialog.order();
+
+			//conveert files to fileInfo list
+			QList<QFileInfo> fileInfoList;
+			for (const QString& file : files) {
+				fileInfoList.append(QFileInfo(file));
+			}
+
+			//sort by order
+			if (order == TeRenameMultiDialog::ORDER_FILENAME) {
+				std::sort(fileInfoList.begin(), fileInfoList.end(), [](const QFileInfo& a, const QFileInfo& b) {
+					return a.fileName() < b.fileName();
+				});
+			}
+			else {
+				std::sort(fileInfoList.begin(), fileInfoList.end(), [](const QFileInfo& a, const QFileInfo& b) {
+					return a.birthTime() < b.birthTime();
+				});
+			}
+
+			//rename
+			for (int i = 0; i < files.size(); i++) {
+				QString newName = baseName;
+				newName += QString("%1").arg(startNum + i, digits, 10, QChar('0'));
+				newName += extention;
+				QFile::rename(fileInfoList[i].filePath(), fileInfoList[i].absolutePath() + "/" +  newName);
+			}
+		
+		}
+	}
+
 	return true;
 }

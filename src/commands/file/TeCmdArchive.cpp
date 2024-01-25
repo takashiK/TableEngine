@@ -43,6 +43,7 @@ TeCmdArchive::~TeCmdArchive()
 
 bool TeCmdArchive::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

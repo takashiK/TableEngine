@@ -40,6 +40,7 @@ TeCmdRunCommand::~TeCmdRunCommand()
 
 bool TeCmdRunCommand::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

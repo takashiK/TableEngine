@@ -20,6 +20,7 @@
 
 #include "TeCmdFolderOpenAll.h"
 
+#include "TeUtils.h"
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeFileTreeView.h"
@@ -37,6 +38,7 @@ TeCmdFolderOpenAll::~TeCmdFolderOpenAll()
 
 bool TeCmdFolderOpenAll::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

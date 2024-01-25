@@ -20,6 +20,7 @@
 
 #include "TeCmdExit.h"
 #include "TeViewStore.h"
+#include "TeUtils.h"
 
 TeCmdExit::TeCmdExit()
 {
@@ -31,6 +32,7 @@ TeCmdExit::~TeCmdExit()
 
 bool TeCmdExit::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 
