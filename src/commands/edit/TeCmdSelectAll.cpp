@@ -20,8 +20,9 @@
 
 #include "TeCmdSelectAll.h"
 #include "TeViewStore.h"
-#include "widgets/TeFileFolderView.h"
+#include "widgets/TeFolderView.h"
 #include "widgets/TeFileListView.h"
+#include "TeUtils.h"
 
 #include <QAbstractItemModel>
 
@@ -36,6 +37,7 @@ TeCmdSelectAll::~TeCmdSelectAll()
 
 bool TeCmdSelectAll::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 
@@ -66,7 +68,7 @@ QList<TeMenuParam> TeCmdSelectAll::menuParam()
  */
 bool TeCmdSelectAll::execute(TeViewStore* p_store)
 {
-	TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
+	TeFolderView* p_folder = p_store->currentFolderView();
 
 	if (p_folder != nullptr) {
 		TeFileListView* p_list = p_folder->list();

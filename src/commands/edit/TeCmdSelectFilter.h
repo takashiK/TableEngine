@@ -18,5 +18,36 @@
 **
 ****************************************************************************/
 
-#include "FileEntry.h"
+#pragma once
+
+#include "commands/TeCommandBase.h"
+
+#include <QList>
+#include <QFlags>
+
+class TeViewStore;
+
+class TeCmdSelectFilter :
+    public TeCommandBase
+{
+public:
+	TeCmdSelectFilter();
+	virtual ~TeCmdSelectFilter();
+
+	// Check if this command can process when item is not selected.
+	static bool isActive(TeViewStore* p_store);
+
+	// type of command
+	static QFlags<TeTypes::CmdType> type();
+
+	// Parameter list. it use for menu access.
+	static QList<TeMenuParam> menuParam();
+
+protected:
+	// Execute command.
+	// return
+	//   true  : command is finished. after execute, this command is deleted.
+	//   false : command is still processing. after finish. you must call finish() to delete this command.
+	virtual bool execute(TeViewStore* p_store);
+};
 

@@ -22,10 +22,24 @@
 
 #include <QString>
 #include <QDateTime>
-class FileEntry;
 
-void createFileTree(const QString& dest, const QStringList& paths, int extend_mbytes =0);
+#include "TeFileFinder.h"
+#include "TeFileInfo.h"
+#include <QStandardItem>
+
+void createFileTree(const QString& dest, const QStringList& paths, int extend_mbytes=0);
 void cleanFileTree(const QString& path);
 bool compareFileTree(const QString& src, const QString& dst, bool binComp);
-void expectEntries(FileEntry* root, const QStringList& paths, const QDateTime& date = QDateTime(), bool noDotDot = false);
-bool compareFileTree(const FileEntry* srcRoot, const QString& dst, bool binComp);
+void expectEntries(QStandardItem* root, const QStringList& paths, const QDateTime& date = QDateTime());
+bool compareFileTree(const QStandardItem* srcRoot, const QString& dst, bool binComp);
+
+enum FileInfoUserRole {
+	ROLE_FINFO_TYPE = Qt::UserRole,
+	ROLE_FINFO_PATH,
+	ROLE_FINFO_SIZE,
+	ROLE_FINFO_DATE,
+	ROLE_FINFO_PERM,
+};
+
+void convertToStandardItem(const TeFileInfo& info, QStandardItem* item);
+void convertToFileInfo(const QStandardItem* item, TeFileInfo* info);

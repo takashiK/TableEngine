@@ -129,15 +129,14 @@
 
 #include <TeArchive.h>
 #include <test_util/TestFileCreator.h>
-#include <test_util/FileEntry.h>
 #include <test_util/ProgressTracker.h>
 
 #include <QStringList>
 #include <QDebug>
 #include <QDir>
 #include <QThread>
+#include <QScopedPointer>
 
-#if 0
 /*!
 	Check "archive" and "extraction". check method is below.
 	
@@ -155,8 +154,8 @@ bool checkArchive(const QStringList& expect, const QStringList& setup, TeArchive
 
 	createFileTree("debug/test", expect);
 
-	FileEntry entries(nullptr, "root");
-	expectEntries(&entries, expect, QDateTime(), true);
+	QScopedPointer<QStandardItem> entries( new QStandardItem );
+	expectEntries(entries.data(), expect, QDateTime());
 
 	TeArchive::Writer writer;
 	TeArchive::Reader reader;
@@ -174,7 +173,7 @@ bool checkArchive(const QStringList& expect, const QStringList& setup, TeArchive
 	reader.close();
 
 	bool r1 = compareFileTree("debug/test", "debug/test2", true);
-	bool r2 = compareFileTree(&entries, "debug/test2", true);
+	bool r2 = compareFileTree(entries.data(), "debug/test2", true);
 
 	cleanFileTree("debug/test");
 	cleanFileTree("debug/test2");
@@ -210,7 +209,7 @@ TEST(tst_TeArchive, archive_rankfile_zip)
 	list.append("dir3/dir3_2/file3_2_1.txt");
 	list.append("dir1/file1_2.txt");
 	list.append("dir1/file1_1.txt");
-	list.append("dir2");
+	list.append("dir2/");
 
 	checkArchive(list, list, TeArchive::AR_ZIP);
 	checkArchive(list, list, TeArchive::AR_7ZIP);
@@ -437,8 +436,6 @@ TEST(tst_TeArchive, archive_read_partial)
 	QFile::remove("debug/test.zip");
 }
 
-#endif
-
 /*!
 	progress bar test.
 */
@@ -472,7 +469,7 @@ TEST(tst_TeArchive, archive_progress)
 
 	QObject::connect(&writer, &TeArchive::Writer::maximumValue, &wtracker, &ProgressTracker::setMaxValue);
 	QObject::connect(&writer, &TeArchive::Writer::valueChanged, &wtracker, &ProgressTracker::setProgress);
-	QObject::connect(&writer, &TeArchive::Writer::currentFileInfoChanged, [pwTracker](const TeArchive::FileInfo & info) {pwTracker->setText(info.path); });
+	QObject::connect(&writer, &TeArchive::Writer::currentFileInfoChanged, [pwTracker](const TeFileInfo & info) {pwTracker->setText(info.path); });
 
 	writer.archive("debug/test.zip", TeArchive::AR_ZIP);
 
@@ -499,7 +496,7 @@ TEST(tst_TeArchive, archive_progress)
 
 	QObject::connect(&reader, &TeArchive::Reader::maximumValue, &tracker, &ProgressTracker::setMaxValue);
 	QObject::connect(&reader, &TeArchive::Reader::valueChanged, &tracker, &ProgressTracker::setProgress);
-	QObject::connect(&reader, &TeArchive::Reader::currentFileInfoChanged, [pTracker](const TeArchive::FileInfo & info) {pTracker->setText(info.path); });
+	QObject::connect(&reader, &TeArchive::Reader::currentFileInfoChanged, [pTracker](const TeFileInfo & info) {pTracker->setText(info.path); });
 
 	QMetaObject::invokeMethod(&reader, "extractAll", Qt::QueuedConnection, Q_ARG(QString, "debug/test2"));
 	//wait dispatch event.

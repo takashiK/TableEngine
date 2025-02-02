@@ -2,8 +2,7 @@
 
 #include <QFileInfo>
 
-#include <qhexview.h>
-#include <document/buffer/qmemorybuffer.h>
+#include <QHexView/qhexview.h>
 
 TeBinaryViewer::TeBinaryViewer(QWidget *parent)
 	: QMainWindow(parent)
@@ -28,7 +27,7 @@ bool TeBinaryViewer::open(const QString& path)
 		return false;
 	}
 
-	mp_hexDocument = QHexDocument::fromFile<QMemoryBuffer>(path);
+	mp_hexDocument = QHexDocument::fromFile(path);
 	if (mp_hexDocument)
 	{
 		mp_hexEdit->setDocument(mp_hexDocument);

@@ -23,6 +23,7 @@
 #include "TeEventFilter.h"
 #include "TeFileTreeView.h"
 #include "TeFileListView.h"
+#include "TeArchiveFinder.h"
 
 #include <TeArchive.h>
 
@@ -86,8 +87,8 @@ public:
 	TeStandardFileItem(const QIcon& icon, const QString& text) : QStandardItem(icon, text) {}
 
 	virtual bool operator<(const QStandardItem& other) const {
-		int t = data(Qt::UserRole + 2).toInt();
-		int o = other.data(Qt::UserRole + 2).toInt();
+		int t = data(TeFileInfo::ROLE_TYPE).toInt();
+		int o = other.data(TeFileInfo::ROLE_TYPE).toInt();
 		if (t != o){
 			return t>o;
 		}
@@ -103,8 +104,6 @@ public:
 TeArchiveFolderView::TeArchiveFolderView(QWidget *parent)
 	: TeFolderView(parent)
 {
-	m_mode = MODE_WRITE;
-
 	mp_treeView = new TeFileTreeView;
 	mp_treeView->setFolderView(this);
 	mp_listView = new TeFileListView;
@@ -210,39 +209,42 @@ TeFileListView * TeArchiveFolderView::list()
 
 void TeArchiveFolderView::setRootPath(const QString & path)
 {
-	clear();
-	QString filePath;
-	if (path.isEmpty()) {
-		//Archive Write Mode
-	}
-	else if (path.startsWith(URI_WRITE)) {
-		//Archive Write Mode
-		//export path is decided in "archive" function.
-		//so path is rejected in this function.
-	}
-	else if (path.startsWith(URI_READ)) {
-		//Archive Read from URI
-		filePath = path.mid(URI_READ.size());
-	}
-	else {
-		//Arhive Read from path
-		filePath = path;
-	}
-
-	if (!filePath.isEmpty()) {
-		setArchive(filePath);
-	}
+	setArchive(path);
 }
 
 QString TeArchiveFolderView::rootPath()
 {
-	if (m_mode == MODE_READ) {
-		return m_rootPath;
-	}
-	return QString();
+	return m_rootPath;
 }
 
 void TeArchiveFolderView::setCurrentPath(const QString & path)
+{
+	updatePath(path);
+	m_history.push(TeHistory::PathPair(m_rootPath, path));
+}
+
+QString TeArchiveFolderView::currentPath()
+{
+	return indexToPath(mp_listView->rootIndex());
+}
+
+void TeArchiveFolderView::moveNextPath()
+{
+	TeHistory::PathPair pair = m_history.next();
+	if (pair != TeHistory::PathPair()) {
+		updatePath(pair.second);
+	}
+}
+
+void TeArchiveFolderView::movePrevPath()
+{
+	TeHistory::PathPair pair = m_history.previous();
+	if (pair != TeHistory::PathPair()) {
+		updatePath(pair.second);
+	}
+}
+
+void TeArchiveFolderView::updatePath(const QString& path)
 {
 	QString cur = currentPath();
 	if (currentPath() != path) {
@@ -265,9 +267,17 @@ void TeArchiveFolderView::setCurrentPath(const QString & path)
 	}
 }
 
-QString TeArchiveFolderView::currentPath()
+QStringList TeArchiveFolderView::getPathHistory() const
 {
-	return indexToPath(mp_listView->rootIndex());
+	//usually, this list is used for Goto Folder function.
+	//but in this class, it is used for history of archive folder and it is not compat for QDir.
+	return QStringList();
+}
+
+TeFinder* TeArchiveFolderView::makeFinder()
+{
+	if(m_rootPath.isEmpty()) return nullptr;
+	return new TeArchiveFinder(m_rootPath);
 }
 
 void TeArchiveFolderView::clear()
@@ -279,7 +289,6 @@ void TeArchiveFolderView::clear()
 
 	m_rootPath.clear();
 
-	m_mode = MODE_WRITE;
 	tree_model->appendRow(createRootEntry());
 	list_model->appendRow(createRootEntry());
 
@@ -289,6 +298,8 @@ void TeArchiveFolderView::clear()
 	for (int i = 1; i < mp_treeView->header()->count(); i++) {
 		mp_treeView->header()->setSectionHidden(i, true);
 	}
+
+	m_history.clear();
 }
 
 bool TeArchiveFolderView::setArchive(const QString & path)
@@ -310,8 +321,9 @@ bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 		return false;
 	}
 
-	m_mode = MODE_READ;
 	m_rootPath = p_archive->path();
+	m_history.push(TeHistory::PathPair(m_rootPath, QString()));
+
 	QFileInfo info(m_rootPath);
 
 	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
@@ -322,11 +334,11 @@ bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 
 	for (const auto& entry : *p_archive) {
 		switch (entry.type) {
-		case TeArchive::EN_DIR:
+		case TeFileInfo::EN_DIR:
 			internalAddDirEntry(entry.path);
 			break;
-		case TeArchive::EN_FILE:
-			internalAddEntry(entry.path, entry.size, entry.lastModifyed, entry.src);
+		case TeFileInfo::EN_FILE:
+			internalAddEntry(entry.path, entry.size, entry.lastModified, entry.permissions);
 			break;
 		default:
 			break;
@@ -339,37 +351,7 @@ bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 	return true;
 }
 
-TeArchive::Writer * TeArchiveFolderView::archive()
-{
-	if (m_mode != MODE_WRITE) return nullptr;
-	QStandardItemModel * model = qobject_cast<QStandardItemModel*>(mp_listView->model());
-	if (!model->item(0)->hasChildren()) return nullptr;
-
-	TeArchive::Writer* writer = new TeArchive::Writer();
-
-	buildArchiveEntry(writer, model->item(0));
-
-	return writer;
-}
-
-bool TeArchiveFolderView::archive(const QString & path, TeArchive::ArchiveType type)
-{
-	TeArchive::Writer* writer = archive();
-	if (writer == nullptr) return false;
-
-	bool result = writer->archive(path, type);
-	delete writer;
-
-	return result;
-}
-
-void TeArchiveFolderView::addEntry(const QString & path, qint64 size, const QDateTime & lastModified, const QString& src)
-{
-	if (m_mode != MODE_WRITE) return;
-	internalAddEntry(path, size, lastModified, src);
-}
-
-void TeArchiveFolderView::internalAddEntry(const QString & path, qint64 size, const QDateTime & lastModified, const QString& src)
+void TeArchiveFolderView::internalAddEntry(const QString & path, qint64 size, const QDateTime & lastModified, int permission)
 {
 	if (path.startsWith('/')) return;
 
@@ -384,14 +366,14 @@ void TeArchiveFolderView::internalAddEntry(const QString & path, qint64 size, co
 	QStandardItem* list = mkpath(iconProvider,list_model->item(0),paths,true);
 
 	if (list != nullptr && findChild(list, paths.last()) == nullptr) {
-		list->appendRow(createFileEntry(iconProvider, paths.last(), size, lastModified, src));
+		TeFileInfo info;
+		info.type = TeFileInfo::EN_FILE;
+		info.path = path;
+		info.size = size;
+		info.lastModified = lastModified;
+		info.permissions = permission;
+		list->appendRow(info.exportItem(false));
 	}
-}
-
-void TeArchiveFolderView::addDirEntry(const QString & path)
-{
-	if (m_mode != MODE_WRITE) return;
-	internalAddDirEntry(path);
 }
 
 void TeArchiveFolderView::internalAddDirEntry(const QString & path)
@@ -457,11 +439,25 @@ QStandardItem * TeArchiveFolderView::mkpath(const QFileIconProvider & iconProvid
 			parent = child;
 		}
 		else{
-			QList<QStandardItem*> entries = createDirEntry(iconProvider, paths[i]);
+			QString path = "";
+			for (int j = 0; j < i; j++) {
+				path += paths[j] + "/";
+			}
+			QString parentPath = path.left(path.size() == 0 ? 0 : path.size() - 1);
+			path = path + "/" + paths[i];
+
+			TeFileInfo info;
+			info.type = TeFileInfo::EN_DIR;
+			info.path = path;
+			info.size = 0;
+			info.lastModified = QDateTime();
+			info.permissions = 0x755;
+
+			QList<QStandardItem*> entries = info.exportItem(false);
 			parent->appendRow(entries);
 			parent = entries[0];
 			if (bParentEntry == true) {
-				parent->appendRow(createParentEntry());
+				parent->appendRow(createParentEntry(parentPath));
 			}
 		}
 	}
@@ -489,160 +485,58 @@ QList<QStandardItem*> TeArchiveFolderView::createRootEntry()
 
 	// Entry Name and referenced path.
 	QStandardItem* entry = new TeStandardFileItem(QIcon(":/TableEngine/archiveBox.png"), tr("Archive"));
-	entry->setData(TeArchive::EN_NONE, Qt::UserRole + 2);
+	entry->setData("", TeFileInfo::ROLE_PATH);
+	entry->setData(tr("Archive"), TeFileInfo::ROLE_NAME);
+	entry->setData(0x755, TeFileInfo::ROLE_PERM);
+	entry->setData(TeFileInfo::EN_NONE, TeFileInfo::ROLE_TYPE);
+	entry->setData(0, TeFileInfo::ROLE_SIZE);
+	entry->setData(QDateTime(), TeFileInfo::ROLE_DATE);
 	entry->setEditable(false);
 	entries.append(entry);
 
 	// Size
 	entry = new TeStandardFileItem("");
-	entry->setData(TeArchive::EN_NONE, Qt::UserRole + 2);
-	entry->setEditable(false);
 	entries.append(entry);
 
 	// Type
 	entry = new TeStandardFileItem("");
-	entry->setData(TeArchive::EN_NONE, Qt::UserRole + 2);
-	entry->setData(TeArchive::EN_NONE);
-	entry->setEditable(false);
 	entries.append(entry);
 
 	// lastModified Date
 	entry = new TeStandardFileItem("");
-	entry->setData(TeArchive::EN_NONE, Qt::UserRole + 2);
-	entry->setEditable(false);
 	entries.append(entry);
 
 	return entries;
 }
 
-QList<QStandardItem*> TeArchiveFolderView::createParentEntry()
+QList<QStandardItem*> TeArchiveFolderView::createParentEntry(const QString& path)
 {
 	QList<QStandardItem*> entries;
 
 	// Entry Name and referenced path.
 	QStandardItem* entry = new TeStandardFileItem("..");
-	entry->setData(TeArchive::EN_PARENT, Qt::UserRole + 2);
+	entry->setData(path, TeFileInfo::ROLE_PATH);
+	entry->setData("..", TeFileInfo::ROLE_NAME);
+	entry->setData(0x755, TeFileInfo::ROLE_PERM);
+	entry->setData(TeFileInfo::EN_PARENT, TeFileInfo::ROLE_TYPE);
+	entry->setData(0, TeFileInfo::ROLE_SIZE);
+	entry->setData(QDateTime(), TeFileInfo::ROLE_DATE);
 	entry->setEditable(false);
 	entries.append(entry);
 
 	// Size
 	entry = new TeStandardFileItem("");
-	entry->setData(TeArchive::EN_PARENT, Qt::UserRole + 2);
-	entry->setEditable(false);
 	entries.append(entry);
 
 	// Type
 	entry = new TeStandardFileItem("");
-	entry->setData(TeArchive::EN_PARENT, Qt::UserRole + 2);
-	entry->setData(TeArchive::EN_PARENT);
-	entry->setEditable(false);
 	entries.append(entry);
 
 	// lastModified Date
 	entry = new TeStandardFileItem("");
-	entry->setData(TeArchive::EN_PARENT, Qt::UserRole + 2);
-	entry->setEditable(false);
 	entries.append(entry);
 
 	return entries;
-}
-
-QList<QStandardItem*> TeArchiveFolderView::createDirEntry(const QFileIconProvider & iconProvider, const QString & name)
-{
-	QList<QStandardItem*> entries;
-
-	// Entry Name and referenced path.
-	QStandardItem* entry = new TeStandardFileItem(iconProvider.icon(QFileIconProvider::Folder), name);
-	entry->setData(TeArchive::EN_DIR, Qt::UserRole + 2);
-	entry->setEditable(false);
-	entries.append(entry);
-
-	// Size
-	entry = new TeStandardFileItem(""); //directory entry doesn't have "Size". 
-	entry->setData(TeArchive::EN_DIR, Qt::UserRole + 2);
-	entry->setEditable(false);
-	entries.append(entry);
-
-	// Type
-#ifdef Q_OS_WIN
-	entry = new TeStandardFileItem(QApplication::translate("QFileDialog", "File Folder", "Match Windows Explorer"));
-#else
-	entry = new TeStandardFileItem(QApplication::translate("QFileDialog", "Folder", "All other platforms"));
-#endif
-	entry->setData(TeArchive::EN_DIR, Qt::UserRole + 2);
-	entry->setData(TeArchive::EN_DIR);
-	entry->setEditable(false);
-	entries.append(entry);
-
-	// lastModified Date
-	entry = new TeStandardFileItem(""); //directory entry doesn't have "lastModified Date".
-	entry->setData(TeArchive::EN_DIR, Qt::UserRole + 2);
-	entry->setEditable(false);
-	entries.append(entry);
-
-	return entries;
-}
-
-QList<QStandardItem*> TeArchiveFolderView::createFileEntry(const QFileIconProvider & iconProvider, const QString & name, qint64 size, const QDateTime & lastModified, const QString& src)
-{
-	QList<QStandardItem*> entries;
-
-	// Entry Name and referenced path.
-	QStandardItem* entry = new TeStandardFileItem(iconProvider.icon(QFileIconProvider::File), name);
-	entry->setData(TeArchive::EN_FILE, Qt::UserRole + 2);
-	entry->setData(src);
-	entry->setEditable(false);
-	entries.append(entry);
-
-	// Size
-	entry = new TeStandardFileItem(QLocale::system().formattedDataSize(size));
-	entry->setData(TeArchive::EN_FILE, Qt::UserRole + 2);
-	entry->setData(size);
-	entry->setEditable(false);
-	entries.append(entry);
-
-	// Type
-	int index = name.lastIndexOf('.');
-	if (index >= 0 && index+1 < name.count()) {
-		//: %1 is a file name suffix, for example txt
-		entry = new TeStandardFileItem(QApplication::translate("QFileDialog", "%1 File").arg(name.mid(index+1)));
-	}
-	else {
-		entry = new TeStandardFileItem(QApplication::translate("QFileDialog", "File"));
-	}
-
-	entry->setData(TeArchive::EN_FILE, Qt::UserRole + 2);
-	entry->setData(TeArchive::EN_FILE);
-	entry->setEditable(false);
-	entries.append(entry);
-
-	// lastModified Date
-	entry = new TeStandardFileItem(lastModified.toString(Qt::ISODate));
-	entry->setData(TeArchive::EN_FILE, Qt::UserRole + 2);
-	entry->setData(lastModified);
-	entry->setEditable(false);
-	entries.append(entry);
-
-	return entries;
-}
-
-void TeArchiveFolderView::buildArchiveEntry(TeArchive::Writer * writer, QStandardItem * rootItem)
-{
-	for (int i = 0; i < rootItem->rowCount(); i++) {
-		QStandardItem* item = rootItem->child(i);
-		
-		if (rootItem->child(i, COL_TYPE)->data().toInt() == TeArchive::EN_FILE) {
-			QString dstPath = indexToPath(item->index());
-			QString srcPath = item->data().toString();
-			if (!dstPath.isEmpty() && !srcPath.isEmpty()) {
-				writer->addEntry(srcPath, dstPath);
-			}
-		}
-
-		if (item->hasChildren()) {
-			buildArchiveEntry(writer, item);
-		}
-	}
 }
 
 void TeArchiveFolderView::showContextMenu(const QAbstractItemView * /*pView*/, const QPoint & /*pos*/) const
@@ -653,8 +547,8 @@ void TeArchiveFolderView::showContextMenu(const QAbstractItemView * /*pView*/, c
 void TeArchiveFolderView::itemActivated(const QModelIndex & index)
 {
 	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
-	int type = list_model->index(index.row(), 2, index.parent()).data(Qt::UserRole + 1).toInt();
-	if (type == TeArchive::EN_DIR || type == TeArchive::EN_PARENT) {
+	int type = index.data(TeFileInfo::ROLE_TYPE).toInt();
+	if (type == TeFileInfo::EN_DIR || type == TeFileInfo::EN_PARENT) {
 		setCurrentPath(indexToPath(index));
 	}
 }

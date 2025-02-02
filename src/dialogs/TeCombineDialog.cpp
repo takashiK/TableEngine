@@ -94,7 +94,7 @@ TeCombineDialog::TeCombineDialog(QWidget *parent)
 
 	//Extend selection
 	mp_extendSelection = new QCheckBox(tr("Extend selection"));
-	connect(mp_extendSelection, &QCheckBox::stateChanged, [this](int state) { updateFileList();});
+	connect(mp_extendSelection, &QCheckBox::stateChanged, [this](int) { updateFileList();});
 	pGrid->addWidget(mp_extendSelection, ++gridRow, 1);
 
 	//Input file list
@@ -170,7 +170,7 @@ void TeCombineDialog::updateFileList()
 	model->clear();
 	qsizetype size = 0;
 
-	if (mp_outputFile->text().isEmpty()) {
+	if (mp_outputFile->text().isEmpty() && !fileInfos.isEmpty()) {
 		mp_outputFile->setText(fileInfos.first().completeBaseName());
 	}
 

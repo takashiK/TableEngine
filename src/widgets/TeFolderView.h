@@ -25,6 +25,7 @@
 
 class TeFileTreeView;
 class TeFileListView;
+class TeFinder;
 
 class TeFolderView : public QWidget, public TeDispatchable
 {
@@ -44,6 +45,12 @@ public:
 	virtual QString rootPath() =0;
 	virtual void setCurrentPath(const QString& path) =0;
 	virtual QString currentPath() =0;
+
+	virtual void moveNextPath() = 0;
+	virtual void movePrevPath() = 0;
+	virtual QStringList getPathHistory() const = 0;
+
+	virtual TeFinder* makeFinder() = 0;
 
 signals:
 	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);

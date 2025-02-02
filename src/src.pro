@@ -44,6 +44,7 @@ SOURCES += $$files(viewer/document/*.cpp,true)
 SOURCES += $$files(viewer/picture/*.cpp,true)
 SOURCES += $$files(viewer/binary/*.cpp,true)
 SOURCES += $$files(dialogs/*.cpp,true)
+HEADERS += $$files(platform/*.cpp,true)
 SOURCES += $$files(widgets/*.cpp,true)
 
 win32-msvc {

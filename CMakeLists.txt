@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.19)
+
+project(TableEngine VERSION 1.0.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets WebChannel WebEngineCore WebEngineWidgets Positioning Core5Compat)
+qt_standard_project_setup()
+
+add_subdirectory(main)
+add_subdirectory(src)
+add_subdirectory(tests)
+add_subdirectory(viewer_tests)
+add_subdirectory(support_package/src/QHexView-5.0)
+
+#find_package(Qt6 REQUIRED COMPONENTS Core)
+#target_link_libraries(mytarget PRIVATE Qt6::Core)
+#find_package(Qt6 REQUIRED COMPONENTS Gui)
+#target_link_libraries(mytarget PRIVATE Qt6::Gui)
+#find_package(Qt6 REQUIRED COMPONENTS Widgets)
+#target_link_libraries(mytarget PRIVATE Qt6::Widgets)
+#find_package(Qt6 REQUIRED COMPONENTS WebChannel)
+#target_link_libraries(mytarget PRIVATE Qt6::WebChannel)
+#find_package(Qt6 REQUIRED COMPONENTS WebEngineCore)
+#target_link_libraries(target PRIVATE Qt6::WebEngineCore)
+#find_package(Qt6 REQUIRED COMPONENTS WebEngineWidgets)
+#target_link_libraries(target PRIVATE Qt6::WebEngineWidgets)
+#find_package(Qt6 REQUIRED COMPONENTS Core5Compat)
+#target_link_libraries(mytarget PRIVATE Qt6::Core5Compat)
+#find_package(Qt6 REQUIRED COMPONENTS Positioning)
+#target_link_libraries(mytarget PRIVATE Qt6::Positioning)

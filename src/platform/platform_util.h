@@ -22,23 +22,31 @@
 #include <QString>
 #include <QPixmap>
 #include <QSize>
+#include <QApplication>
 
 class QMimeData;
+class TeNativeEvent;
 
 //Initialize and uninitialize platform system
-extern bool threadInitialize();
+extern bool threadInitialize(QApplication* a);
 extern void threadUninitialize();
 
 //File action
 extern bool showFilesContext(int px, int py, const QStringList& paths);
 extern void showFileContext( int px, int py, const QString& path);
+
 extern void showFilesProperties(const QStringList& paths);
 extern void showFileProperties(const QString& path);
+
 extern void openFile(const QString& path);
+
 extern bool copyFiles(const QStringList& files, const QString& path);
 extern bool copyFile(const QString& fromFile, const QString& toFile);
+
 extern bool moveFiles(const QStringList& files, const QString& path);
+
 extern bool deleteFiles(const QStringList& files);
+
 extern QPixmap getThumbnail(const QString& path, const QSize& size);
 extern QPixmap getFileIcon(const QString& path, const QSize& size);
 
@@ -46,3 +54,6 @@ extern QPixmap getFileIcon(const QString& path, const QSize& size);
 extern bool isMoveAction(const QMimeData* mime);
 extern void setMoveAction(QMimeData* mime);
 extern void setCopyAction(QMimeData* mime);
+
+//NativeEventFilter
+extern TeNativeEvent* getNativeEvent();

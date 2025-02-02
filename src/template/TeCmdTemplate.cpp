@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdTemplate.h"
+#include "TeUtils.h"
 
 TeCmdTemplate::TeCmdTemplate()
 {
@@ -30,6 +31,7 @@ TeCmdTemplate::~TeCmdTemplate()
 
 bool TeCmdTemplate::isActive(TeViewStore* p_store)
 {
+	NOT_USED(p_store);
 	return false;
 }
 

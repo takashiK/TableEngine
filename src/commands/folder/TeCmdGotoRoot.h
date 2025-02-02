@@ -20,17 +20,34 @@
 
 #pragma once
 
-#include <QObject>
-#include <TeArchive.h>
+#include "commands/TeCommandBase.h"
 
-class FileEntry : public QObject, public TeArchive::FileInfo {
-	Q_OBJECT
+#include <QList>
+#include <QFlags>
+
+class TeViewStore;
+
+class TeCmdGotoRoot :
+    public TeCommandBase
+{
 public:
-	FileEntry(FileEntry* parent, const QString& name) : QObject(parent) { path = name; type = TeArchive::EN_DIR; }
-	FileEntry(FileEntry* parent, const QString& name, qint64 size, const QDateTime& lastModified, const QString& src)
-		: QObject(parent)
-	{
-		this->type = TeArchive::EN_FILE;
-		this->path = name; this->size = size; this->lastModifyed = lastModified; this->src = src;
-	}
+	TeCmdGotoRoot();
+	virtual ~TeCmdGotoRoot();
+
+	// Check if this command can process when item is not selected.
+	static bool isActive(TeViewStore* p_store);
+
+	// type of command
+	static QFlags<TeTypes::CmdType> type();
+
+	// Parameter list. it use for menu access.
+	static QList<TeMenuParam> menuParam();
+
+protected:
+	// Execute command.
+	// return
+	//   true  : command is finished. after execute, this command is deleted.
+	//   false : command is still processing. after finish. you must call finish() to delete this command.
+	virtual bool execute(TeViewStore* p_store);
 };
+

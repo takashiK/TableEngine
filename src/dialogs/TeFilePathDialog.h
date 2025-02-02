@@ -31,12 +31,6 @@ class TeFilePathDialog : public QDialog
 	Q_OBJECT
 
 public:
-	enum Mode {
-		FileMode,
-		FolderMode,
-	};
-
-public:
 	TeFilePathDialog(QWidget *parent = nullptr, const QStringList& extraFlags=QStringList());
 	virtual  ~TeFilePathDialog();
 
@@ -49,14 +43,17 @@ public:
 	void setExtraFlag(int index, bool flag);
 	bool getExtraFlag(int index);
 
-//	void addWidget(QWidget *widget, int stretch = 0, Qt::Alignment alignment = Qt::Alignment());
+	void setFavorites(const QStringList& paths);
+	void setHistory(const QStringList& paths);
 
 protected:
 	virtual bool eventFilter(QObject *obj, QEvent *event);
 
 private:
-	Mode       m_mode;
 	QComboBox* mp_combo;
 	QList<QCheckBox*> m_extraFlags;
 	QString    m_currentPath;
+
+	QStringList m_favorites;
+	QStringList m_history;
 };

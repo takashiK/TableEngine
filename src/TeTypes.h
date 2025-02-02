@@ -56,6 +56,7 @@ public:
 		CMDID_NONE,
 		CMDID_SYSTEM         = 0x00000000,
 		CMDID_SYSTEM_FILE    = CMDID_SYSTEM + 0x1000,     // Menu Item : File
+		CMDID_SYSTEM_FILE_NEW,                            // Create file
 		CMDID_SYSTEM_FILE_OPEN,                           // #Open file
 		CMDID_SYSTEM_FILE_COPY_TO,                        // #Copy to folder
 		CMDID_SYSTEM_FILE_MOVE_TO,                        // #Move to folder
@@ -77,7 +78,7 @@ public:
 		CMDID_SYSTEM_EDIT_PASTE,                          // #Paste
 		CMDID_SYSTEM_EDIT_SELECT_ALL,                     // #Change select All
 		CMDID_SYSTEM_EDIT_SELECT_TOGGLE,                  // #Toggle select
-		CMDID_SYSTEM_EDIT_SELECT_BY_FILTER,               // Select by filter
+		CMDID_SYSTEM_EDIT_SELECT_BY_FILTER,               // #Select by filter
 
 		CMDID_SYSTEM_FOLDER  = CMDID_SYSTEM + 0x3000,     // Menu Item : Folder
 		CMDID_SYSTEM_FOLDER_OPEN_ONE,                     // #Expand current folder
@@ -86,15 +87,15 @@ public:
 		CMDID_SYSTEM_FOLDER_CLOSE_UNDER,                  // #Collapse current folder and its children
 		CMDID_SYSTEM_FOLDER_CLOSE_ALL,                    // #Collapse all folders
 		CMDID_SYSTEM_FOLDER_CREATE_FOLDER,                // #Create folder
-		CMDID_SYSTEM_FOLDER_ADD_FAVORITES,                // Add folder to favorites
-		CMDID_SYSTEM_FOLDER_DEL_FAVORITES,                // Delete folder from favorites
-		CMDID_SYSTEM_FOLDER_PREV_FOLDER,                  // Back to previous folder
-		CMDID_SYSTEM_FOLDER_NEXT_FOLDER,                  // Go to next folder
-		CMDID_SYSTEM_FOLDER_GOTO_PARENT,				  // Go to parent folder
-		CMDID_SYSTEM_FOLDER_GOTO_ROOT,                    // Go to root folder
-		CMDID_SYSTEM_FOLDER_GOTO_FOLDER,                  // Go to folder
+		CMDID_SYSTEM_FOLDER_ADD_FAVORITE,                 // #Add folder to favorite
+		CMDID_SYSTEM_FOLDER_EDIT_FAVORITES,               // #Edit favorites folder list
+		CMDID_SYSTEM_FOLDER_PREV_FOLDER,                  // #Back to previous folder
+		CMDID_SYSTEM_FOLDER_NEXT_FOLDER,                  // #Go to next folder
+		CMDID_SYSTEM_FOLDER_GOTO_PARENT,				  // #Go to parent folder
+		CMDID_SYSTEM_FOLDER_GOTO_ROOT,                    // #Go to root folder
+		CMDID_SYSTEM_FOLDER_GOTO_FOLDER,                  // #Go to folder
 		CMDID_SYSTEM_FOLDER_CHANGE_ROOT,                  // #Change root folder
-		CMDID_SYSTEM_FOLDER_FIND,                         // find files
+		CMDID_SYSTEM_FOLDER_FIND,                         // #find files
 
 		CMDID_SYSTEM_VIEW    = CMDID_SYSTEM + 0x4000,     // Menu item : View
 

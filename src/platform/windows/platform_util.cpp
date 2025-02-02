@@ -19,6 +19,8 @@
 ****************************************************************************/
 
 #include "platform/platform_util.h"
+#include "platform/TeNativeEvent.h"
+#include "platform/windows/TeWindowsEventFilter.h"
 
 #include <QMap>
 #include <QDir>
@@ -38,27 +40,19 @@
 
 #include <vector>
 
-//////////////////////////////////////////////////////////////
-//
-// Initialize and uninitialize platform system
-//
-bool threadInitialize()
-{
-	return SUCCEEDED(CoInitialize(NULL));
-}
-
-void threadUninitialize()
-{
-	CoUninitialize();
-}
-
-
 //////////////////////////////////////////////////////////
 //
-// File action
-//
+// Namespace
 
 namespace {
+	//////////////////////////////////////////////////////////
+	// NativeEventFilter
+	
+	TeWindowsEventFilter g_eventFilter;
+	TeNativeEvent g_event;
+
+	//////////////////////////////////////////////////////////
+	// File action
 
 	QMap<HWND, IContextMenu2*> g_context;
 	QString cname;
@@ -152,6 +146,32 @@ namespace {
 		DestroyWindow(hwnd);
 	}
 }
+// Namespace end
+// 
+//////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////
+//
+// Initialize and uninitialize platform system
+//
+bool threadInitialize(QApplication* a)
+{
+	bool result = SUCCEEDED(CoInitialize(NULL));
+
+	if (result) {
+		//setup eventfilter for windows message.
+		g_eventFilter.setNativeEvent(&g_event);
+		a->installNativeEventFilter(&g_eventFilter);
+	}
+
+	return result;
+}
+
+void threadUninitialize()
+{
+	CoUninitialize();
+}
+
 
 bool showFilesContext(int px, int py, const QStringList& paths)
 {
@@ -511,7 +531,7 @@ QPixmap getFileIcon(const QString& path, const QSize& size)
 		iconType = SHIL_EXTRALARGE;
 	}
 
-	IImageList* piml;
+	IImageList* piml=nullptr;
 	HRESULT hr = SHGetImageList(iconType, IID_IImageList, reinterpret_cast<void**>(&piml));
 
 	if (FAILED(hr))
@@ -584,4 +604,9 @@ void setCopyAction(QMimeData* mime)
 	QByteArray data(4, 0);
 	data[0] = 5;
 	mime->setData("Preferred DropEffect", data);
+}
+
+TeNativeEvent* getNativeEvent()
+{
+	return &g_event;
 }

@@ -23,43 +23,12 @@
 #include <QString>
 #include <QDateTime>
 
+#include "TeFileInfo.h"
+
 class QFileInfo;
 class QFile;
 
 namespace TeArchive {
-
-//! Archive entry type descripter.
-enum EntryType {
-	EN_NONE,	//!< Undefined type
-	EN_FILE,	//!< File type
-	EN_DIR,		//!< Directory type
-	EN_PARENT,	//!< Parent directory type
-};
-
-//! Archive entry descripter.
-class FileInfo {
-public:
-	FileInfo() :type(EN_NONE), size(0) {}
-	bool operator==(const FileInfo& info) const Q_DECL_NOTHROW { return path == info.path;  }
-	bool operator!=(const FileInfo& info) const Q_DECL_NOTHROW  { return !(*this == info); }
-	bool operator<(const FileInfo& info) const Q_DECL_NOTHROW { return path < info.path; }
-	bool operator>(const FileInfo& info) const Q_DECL_NOTHROW { return info < *this; }
-	bool operator<=(const FileInfo& info) const Q_DECL_NOTHROW { return !(*this > info); }
-	bool operator>=(const FileInfo& info) const Q_DECL_NOTHROW { return !(*this < info); }
-
-	bool operator==(const QString& rpath) const Q_DECL_NOTHROW { return path == rpath; }
-	bool operator!=(const QString& rpath) const Q_DECL_NOTHROW { return path != rpath; }
-	bool operator<(const QString& rpath) const Q_DECL_NOTHROW { return path < rpath; }
-	bool operator>(const QString& rpath) const Q_DECL_NOTHROW { return path > rpath; }
-	bool operator<=(const QString& rpath) const Q_DECL_NOTHROW { return path <= rpath; }
-	bool operator>=(const QString& rpath) const Q_DECL_NOTHROW { return path >= rpath; }
-
-	EntryType type;			//!< Entry type descripter.
-	QString   path;			//!< Path in archive.
-	QString   src;			//!< Source path of entry.
-	qint64    size;			//!< File size.
-	QDateTime lastModifyed;	//!< File last modification time.
-};
 
 //! Archive type descripter.
 enum ArchiveType {
@@ -91,6 +60,7 @@ public:
 		Return target archive filepath.
 	*/
 	const QString& path() { return m_path; }
+	bool isValid();
 	ArchiveType type();
 
 public slots:
@@ -122,7 +92,7 @@ signals:
 	/*!
 		Provide current extraction file information.
 	*/
-	void currentFileInfoChanged(const FileInfo& info);
+	void currentFileInfoChanged(const TeFileInfo& info);
 	
 	/*!
 		extraction process is finished;
@@ -136,13 +106,13 @@ public:
 		const_iterator(Reader* ar);
 		const_iterator(const_iterator &&o) noexcept;
 		~const_iterator();
-		const FileInfo &operator*() const { return info; }
-		const FileInfo *operator->() const { return &info; }
+		const TeFileInfo &operator*() const { return info; }
+		const TeFileInfo *operator->() const { return &info; }
 		bool operator==(const const_iterator &o) const Q_DECL_NOTHROW { return (data == o.data) && (info.path == o.info.path); }
 		bool operator!=(const const_iterator &o) const Q_DECL_NOTHROW { return !(*this == o); }
 		const_iterator &operator++();
 	private:
-		FileInfo info;
+		TeFileInfo info;
 		void* data;
 	};
 	friend const_iterator;
@@ -183,7 +153,7 @@ signals:
 	/*!
 		Infomation of added File info by addEntry() or addEntries().
 	*/
-	void addedFileInfo(const FileInfo& info);
+	void addedFileInfo(const TeFileInfo& info);
 
 	/*!
 		Provide a summentional byte counts of source files.
@@ -206,7 +176,7 @@ signals:
 	/*!
 		Provide current archving file information.
 	*/
-	void currentFileInfoChanged(const FileInfo& info);
+	void currentFileInfoChanged(const TeFileInfo& info);
 
 	/*!
 		archive process is finished.
@@ -214,7 +184,18 @@ signals:
 	void finished();
 
 private:
-	QList<FileInfo> m_entryList;
+
+	struct ArchiveInfo {
+		TeFileInfo::EntryType type;
+		QString src;
+		QString dst;
+		qint64 size;
+
+		bool operator==(const ArchiveInfo& o) const {
+			return (type == o.type) && (src == o.src) && (dst == o.dst);
+		}
+	};
+	QList<ArchiveInfo> m_entryList;
 	qint64 m_totalBytes;
 	bool m_cancel;
 };

@@ -31,7 +31,8 @@
 #include "commands/TeCommandInfo.h"
 #include "commands/folder/TeCmdFolderChangeRoot.h"
 #include "TeEventEmitter.h"
-
+#include "TeUtils.h"
+#include "dialogs/TeFilePathDialog.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -95,12 +96,48 @@ void TeViewStore::initialize()
 
 	//Drive bar
 	mp_driveBar = new TeDriveBar("Drive Bar");
-	mp_mainWindow->addToolBar(mp_driveBar);
-	connect(mp_driveBar, &TeDriveBar::changeDrive, [this](const QString& path) {
+	mp_driveBar->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(mp_driveBar, &TeDriveBar::customContextMenuRequested, [this](const QPoint& pos) {
+		QAction* act = mp_driveBar->actionAt(pos);
+		QString path;
+		if (act != nullptr) {
+			path = act->data().toString();
+		}
+		QMenu menu;
+		QAction* act1 = menu.addAction(tr("Add Quick Access"));
+		connect(act1, &QAction::triggered, [this, path](bool) {
+			TeFilePathDialog dlg;
+			dlg.setCurrentPath(getCurrentFolder(this));
+			dlg.setTargetPath(getCurrentFolder(this));
+			dlg.setFavorites(getFavorites());
+			dlg.setHistory(currentFolderView()->getPathHistory());
+			if (dlg.exec() == QDialog::Accepted) {
+				QFileInfo info(dlg.targetPath());
+				if (info.exists() && info.isDir()) {
+					mp_driveBar->addQuickAccess(info.absoluteFilePath());
+					mp_driveBar->storeQuickAccesses();
+				}
+			}
+
+			});
+		QAction* act2 = menu.addAction(tr("Remove Quick Access"));
+		if (act == nullptr) {
+			act2->setEnabled(false);
+		}
+		connect(act2, &QAction::triggered, [this, path](bool) {
+			mp_driveBar->removeQuickAccess(path);
+			mp_driveBar->storeQuickAccesses();
+			});
+		menu.exec(mp_driveBar->mapToGlobal(pos));
+		});
+
+	connect(mp_driveBar, &TeDriveBar::driveSelected, [this](const QString& path) {
 		TeCmdParam param;
 		param.insert(TeCmdFolderChangeRoot::PARAM_ROOT_PATH, path);
 		emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT,TeTypes::WT_DRIVEBAR,nullptr,&param);
 		});
+	mp_mainWindow->addToolBar(mp_driveBar);
 
 	//Status Bar
 	QLabel *labelR = new QLabel(u8"Right Text");
@@ -580,6 +617,7 @@ void TeViewStore::changeRootPath(const QString& path, bool newView, int place)
 
 void TeViewStore::focusFolderViewChanged(QWidget* widget, QEvent* event)
 {
+	NOT_USED(event);
 	TeFolderView* p_folder = qobject_cast<TeFolderView*>(widget);
 	if (p_folder) {
 		int place = tabPlace(p_folder);

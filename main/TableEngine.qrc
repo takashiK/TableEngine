@@ -1,5 +1,5 @@
 <RCC>
-    <qresource lang="copy.png" prefix="/TableEngine">
+    <qresource prefix="/TableEngine">
         <file alias="selectAll.png">Resources/icon/iconmonstr-selection-13-64.png</file>
         <file alias="selectToggle.png">Resources/icon/iconmonstr-selection-15-64.png</file>
         <file alias="question.png">Resources/icon/iconmonstr-help-6-64.png</file>
@@ -34,5 +34,18 @@
         <file alias="rename.png">Resources/icon/iconmonstr-pencil-square-lined-64.png</file>
         <file alias="renameMulti.png">Resources/icon/iconmonstr-pencil-text-lined-64.png</file>
         <file alias="combine.png">Resources/icon/iconmonstr-zip-12-64.png</file>
+        <file alias="selectFilter.png">Resources/icon/iconmonstr-selection-7-64.png</file>
+        <file alias="delete.png">Resources/icon/iconmonstr-x-mark-8-64.png</file>
+        <file alias="down.png">Resources/icon/iconmonstr-arrow-down-alt-lined-64.png</file>
+        <file alias="up.png">Resources/icon/iconmonstr-arrow-up-alt-lined-64.png</file>
+        <file alias="previous.png">Resources/icon/iconmonstr-caret-left-circle-lined-64.png</file>
+        <file alias="next.png">Resources/icon/iconmonstr-caret-right-circle-lined-64.png</file>
+        <file alias="home.png">Resources/icon/iconmonstr-home-9-64.png</file>
+        <file alias="addFavorite.png">Resources/icon/iconmonstr-bookmark-6-64.png</file>
+        <file alias="editFavorites.png">Resources/icon/iconmonstr-bookmark-22-64.png</file>
+        <file alias="goto.png">Resources/icon/iconmonstr-navigation-5-64.png</file>
+        <file alias="parent.png">Resources/icon/iconmonstr-caret-up-circle-lined-64.png</file>
+        <file alias="newFile.png">Resources/icon/iconmonstr-file-14-64.png</file>
+        <file alias="root.png">Resources/icon/iconmonstr-sitemap-7-64.png</file>
     </qresource>
 </RCC>

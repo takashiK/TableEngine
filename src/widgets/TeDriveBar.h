@@ -21,6 +21,8 @@
 #pragma once
 
 #include <QToolBar>
+#include <QChar>
+#include <QMap>
 
 class QFileSystemWatcher;
 
@@ -33,16 +35,29 @@ public:
 	TeDriveBar(const QString &title, QWidget *parent = Q_NULLPTR);
 	virtual ~TeDriveBar();
 
+	void updateKey(const QChar& c);
+	void loadQuickAccesses();
+	void storeQuickAccesses();
+
+	void addQuickAccess(const QString& path);
+	void removeQuickAccess(const QString& path);
+	void setQuickAccess(const QStringList& paths);
+	QStringList quickAccess() const;
+	void clear();
+
 signals:
-	void changeDrive(const QString& path);
+	void driveSelected(const QString& path);
 
 public slots:
-	void driveChanged(const QString& path);
+	void updateDrive(bool state);
 
 protected:
-	void selectDrive(QAction* act, bool checked);
+	void selectDrive(const QString& path);
 
 private:
-	QAction* mp_current;
-	QFileSystemWatcher* mp_watcher;
+	QChar m_key;
+	QAction* mp_driveStart;
+	QAction* mp_quickStart;
+	QList<QAction*> m_driveActions;
+	QList<QAction*> m_quickActions;
 };

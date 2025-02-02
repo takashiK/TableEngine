@@ -148,13 +148,13 @@ void TeCmdExtract::extractItems(TeViewStore* p_store, const QStringList & list, 
 
 			QObject::connect(&reader, &TeArchive::Reader::maximumValue, &progress, &QProgressDialog::setMaximum);
 			QObject::connect(&reader, &TeArchive::Reader::valueChanged, &progress, &QProgressDialog::setValue);
-			QObject::connect(&reader, &TeArchive::Reader::currentFileInfoChanged, [&progress,&targetInfo](const TeArchive::FileInfo& info) {
+			QObject::connect(&reader, &TeArchive::Reader::currentFileInfoChanged, [&progress,&targetInfo](const TeFileInfo& info) {
 				progress.setLabelText(targetInfo + info.path.right(30));
 				});
 			QObject::connect(&reader, &TeArchive::Reader::finished, [&progress]() { progress.setValue(progress.maximum()); });
 			QObject::connect(&progress, &QProgressDialog::canceled, &reader, &TeArchive::Reader::cancel);
 
-			bool result = reader.extractAll(basePath);
+			bSuccess = reader.extractAll(basePath);
 		}
 	}
 

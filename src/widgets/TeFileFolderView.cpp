@@ -26,6 +26,7 @@
 #include "TeSettings.h"
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
+#include "TeFileFinder.h"
 
 #include <QLayout>
 #include <QFileSystemModel>
@@ -36,6 +37,7 @@
 #include <QSettings>
 #include <QStack>
 #include <QDebug>
+
 
 TeFileFolderView::TeFileFolderView(QWidget *parent)
 	: TeFolderView(parent)
@@ -243,26 +245,8 @@ void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint
 
 void TeFileFolderView::setRootPath(const QString & path)
 {
-	QDir dir;
-	QString absPath = dir.absoluteFilePath(path);
-	if (rootPath() != absPath) {
-		//Set root path to treeview.
-		QModelIndex index = mp_treeModel->index(absPath);
-		tree()->setVisualRootIndex(index);
-		tree()->setCurrentIndex(index);
-
-		//Set target path of listview to same as treeview.
-		list()->clearSelection();
-		list()->setCurrentIndex(QModelIndex());
-		QModelIndex rootIndex = mp_listModel->setRootPath(absPath);
-		list()->setRootIndex(rootIndex);
-
-		QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
-		if (curIndex.isValid())
-			list()->setCurrentIndex(curIndex);
-		//invalid case : setCurrentIndex at directoryLoaded event.
-
-	}
+	updatePath(path, QString());
+	m_history.push({ rootPath(), currentPath()});
 }
 
 QString TeFileFolderView::rootPath()
@@ -272,35 +256,92 @@ QString TeFileFolderView::rootPath()
 
 void TeFileFolderView::setCurrentPath(const QString & path)
 {
-	//Set current path to listview. and current index to treeview.
-	QModelIndex index = mp_treeModel->index(path);
-	if (tree()->currentIndex() != index) {
-		tree()->clearSelection();
-		tree()->setCurrentIndex(index);
-	}
-
-	QModelIndex prevIndex = list()->rootIndex();
-	QString prevPath = mp_listModel->filePath(list()->rootIndex());
-	index = mp_listModel->index(path);
-	if (list()->rootIndex() != index) {
-		list()->clearSelection();
-		list()->setCurrentIndex(QModelIndex());
-		QModelIndex rootIndex = mp_listModel->setRootPath(path);
-		list()->setRootIndex(rootIndex);
-
-		if(path == mp_listModel->filePath(prevIndex.parent())){
-			list()->setCurrentIndex(mp_listModel->index(prevPath));
-		}
-		else {
-			QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
-			if (curIndex.isValid())
-				list()->setCurrentIndex(curIndex);
-			//invalid case : setCurrentIndex at directoryLoaded event.
-		}
-	}
+	updatePath(rootPath(), path);
+	m_history.push({ rootPath(), currentPath() });
 }
 
 QString TeFileFolderView::currentPath()
 {
 	return mp_treeModel->filePath(tree()->currentIndex());
+}
+
+void TeFileFolderView::moveNextPath()
+{
+	TeHistory::PathPair pair = m_history.next();
+	if(pair != TeHistory::PathPair())
+		updatePath(pair.first, pair.second);
+}
+
+void TeFileFolderView::movePrevPath()
+{
+	TeHistory::PathPair pair = m_history.previous();
+	if (pair != TeHistory::PathPair())
+		updatePath(pair.first, pair.second);
+}
+
+QStringList TeFileFolderView::getPathHistory() const
+{
+	return m_history.get();
+}
+
+TeFinder* TeFileFolderView::makeFinder()
+{
+	if(rootPath().isEmpty() == false)
+		return new TeFileFinder(rootPath());
+	return nullptr;
+}
+
+void TeFileFolderView::updatePath(const QString& root, const QString& current)
+{
+
+	QDir dir;
+	QString absRoot = dir.absoluteFilePath(root);
+	if (rootPath() != absRoot) {
+		//Set root path to treeview.
+		QModelIndex index = mp_treeModel->index(absRoot);
+		tree()->setVisualRootIndex(index);
+		tree()->setCurrentIndex(index);
+
+		//Set target path of listview to same as treeview.
+		list()->clearSelection();
+		list()->setCurrentIndex(QModelIndex());
+		QModelIndex rootIndex = mp_listModel->setRootPath(absRoot);
+		list()->setRootIndex(rootIndex);
+
+		QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
+		if (curIndex.isValid())
+			list()->setCurrentIndex(curIndex);
+		//invalid case : setCurrentIndex at directoryLoaded event.
+
+	}
+
+	if (!current.isEmpty()) {
+		//Set current path to listview. and current index to treeview.
+		QModelIndex index = mp_treeModel->index(current);
+		if (tree()->currentIndex() != index) {
+			tree()->clearSelection();
+			tree()->setCurrentIndex(index);
+		}
+
+		QModelIndex prevIndex = list()->rootIndex();
+		QString prevPath = mp_listModel->filePath(list()->rootIndex());
+		index = mp_listModel->index(current);
+		if (list()->rootIndex() != index) {
+			list()->clearSelection();
+			list()->setCurrentIndex(QModelIndex());
+			QModelIndex rootIndex = mp_listModel->setRootPath(current);
+			list()->setRootIndex(rootIndex);
+
+			if (current == mp_listModel->filePath(prevIndex.parent())) {
+				list()->setCurrentIndex(mp_listModel->index(prevPath));
+			}
+			else {
+				QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
+				if (curIndex.isValid())
+					list()->setCurrentIndex(curIndex);
+				//invalid case : setCurrentIndex at directoryLoaded event.
+			}
+		}
+	}
+
 }

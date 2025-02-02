@@ -24,7 +24,7 @@
 #include <cstdint>
 
 #include "TestFileCreator.h"
-#include "FileEntry.h"
+#include "TeFileInfo.h"
 #include <QDir>
 #include <QRegularExpression>
 
@@ -198,58 +198,86 @@ bool compareFileTree(const QString & src, const QString & dst, bool binComp)
 	return result;
 }
 
-void expectEntries(FileEntry* root, const QStringList& paths, const QDateTime& date, bool noDotDot)
+QStandardItem* findChild(QStandardItem* parent, const QString& name)
+{
+	for (int i = 0; i < parent->rowCount(); i++) {
+		QStandardItem* item = parent->child(i);
+		if (item->data(Qt::DisplayRole).toString() == name) {
+			return item;
+		}
+	}
+	return nullptr;
+}
+
+void expectEntries(QStandardItem* root, const QStringList& paths, const QDateTime& date)
 {
 	for (auto& path : paths) {
-		FileEntry* parent = root;
+		QStandardItem* parent = root;
 		QStringList spath = path.split('/');
+		QString last = spath.takeLast();
+
+		//middle path loop. so all entries are Directory.
 		for (auto& name : spath) {
-			FileEntry* entry = parent->findChild<FileEntry*>(name);
+			QStandardItem* entry = findChild(parent,name);
 			if (entry == nullptr) {
-				if (name.indexOf(".") > 0) {
-					entry = new FileEntry(parent, name, path.size(), date, path);
-				}
-				else {
-					entry = new FileEntry(parent, name);
-					if (!noDotDot) {
-						FileEntry* pp = new FileEntry(entry, "..");
-						pp->setObjectName("..");
-					}
-				}
-				entry->setObjectName(name);
+				TeFileInfo tInfo;
+				tInfo.type = TeFileInfo::EN_DIR;
+				tInfo.path = parent->data(ROLE_FINFO_PATH).toString() + "/" + name;
+				entry = new QStandardItem();
+				convertToStandardItem(tInfo, entry);
+				parent->appendRow(entry);
 			}
 			parent = entry;
+		}
+
+		//last path entry. it's file if name is valid.
+		if (!last.isEmpty()) {
+			TeFileInfo tInfo;
+			tInfo.type = TeFileInfo::EN_FILE;
+			tInfo.path = parent->data(ROLE_FINFO_PATH).toString() + "/" + last;
+			QStandardItem* entry = new QStandardItem();
+			convertToStandardItem(tInfo, entry);
+			parent->appendRow(entry);
 		}
 	}
 }
 
-bool lessThanFileEntryObject(const QObject* l, const QObject* r) {
-	if (l->objectName() == "..") return true;
-	if (r->objectName() == "..") return false;
+bool lessThanFileInfo(const QStandardItem* l, const QStandardItem* r) {
+	if (l->data(Qt::DisplayRole).toString() == "..") return true;
+	if (r->data(Qt::DisplayRole).toString() == "..") return false;
 
-	return l->objectName() < r->objectName();
+	return l->data(Qt::DisplayRole).toString() < r->data(Qt::DisplayRole).toString();
 }
 
-bool compareFileEntry(const FileEntry* src, const QFileInfo& dst, bool binComp)
+bool compareFileEntry(const QStandardItem* src, const QFileInfo& dst, bool binComp)
 {
 	bool result = true;
-	if (src->size != dst.size()) {
-		EXPECT_EQ(src->size, dst.size()) << "Different Size: " << src->path.toStdString();
+	TeFileInfo info;
+	convertToFileInfo(src, &info);
+	if (info.size != dst.size()) {
+		EXPECT_EQ(info.size, dst.size()) << "Different Size: " << info.path.toStdString();
 		result = false;
 	}
 	else if(binComp){
 		QFile dfile(dst.filePath());
 		dfile.open(QFile::ReadOnly);
 		QByteArray dstBin = dfile.readAll();
-		if (src->src != dstBin) {
-			ADD_FAILURE() << "Different data: " << src->path.toStdString();
+		if (src->data(ROLE_FINFO_PATH).toString() != dstBin) {
+			ADD_FAILURE() << "Different data: " << src->data(ROLE_FINFO_PATH).toString().toStdString();
 			result = false;
 		}
 	}
 	return result;
 }
 
-bool compareFileTree(const FileEntry* srcRoot, const QString & dst, bool binComp)
+bool lessThanFileItem(const QStandardItem* l, const QStandardItem* r) {
+	if (l->data(Qt::DisplayRole).toString() == "..") return true;
+	if (r->data(Qt::DisplayRole).toString() == "..") return false;
+
+	return l->data(ROLE_FINFO_PATH).toString() < r->data(ROLE_FINFO_PATH).toString();
+}
+
+bool compareFileTree(const QStandardItem* srcRoot, const QString & dst, bool binComp)
 {
 	bool result = true;
 	QDir dstDir(dst);
@@ -260,26 +288,29 @@ bool compareFileTree(const FileEntry* srcRoot, const QString & dst, bool binComp
 	QDir::Filters filter = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::System | QDir::Hidden;
 	QFileInfoList dstInfo = dstDir.entryInfoList(filter, QDir::Name);
 
-	EXPECT_EQ(srcRoot->children().count(), dstInfo.count()) << "Invalid entry count: " << srcRoot->path.toStdString();
-	QObjectList children = srcRoot->children();
-	std::sort(children.begin(), children.end(), lessThanFileEntryObject);
+	EXPECT_EQ(srcRoot->rowCount(), dstInfo.count()) << "Invalid entry count: " << srcRoot->data(ROLE_FINFO_PATH).toString().toStdString();
+	QList<QStandardItem*> children;
+	for(int i=0; i< srcRoot->rowCount(); i++){
+		children.append(srcRoot->child(i));
+	}
+	std::sort(children.begin(), children.end(), lessThanFileItem);
 	auto srcItr = children.begin();
 	auto dstItr = dstInfo.begin();
 
 	while ((srcItr != children.end()) && (dstItr != dstInfo.end())) {
-		FileEntry* src = qobject_cast<FileEntry*>(*srcItr);
-		int c = QString::compare(src->path, dstItr->fileName());
+		QStandardItem* src = *srcItr;
+		int c = QString::compare(src->data(Qt::DisplayRole).toString(), dstItr->fileName());
 		if (c == 0) {
 			// src == dst
-			if ((src->type == TeArchive::EN_DIR) && dstItr->isDir()) {
+			if ((src->data(ROLE_FINFO_TYPE).toInt() == TeFileInfo::EN_DIR) && dstItr->isDir()) {
 				bool res = compareFileTree(src, dstItr->filePath(), binComp);
 				result = result && res;
-			}if ((src->type == TeArchive::EN_FILE) && dstItr->isFile()) {
+			}if ((src->data(ROLE_FINFO_TYPE).toInt() == TeFileInfo::EN_FILE) && dstItr->isFile()) {
 				bool res = compareFileEntry(src, *dstItr, binComp);
 				result = result && res;
 			}
 			else {
-				EXPECT_EQ(src->type == TeArchive::EN_FILE, dstItr->isFile()) << "Invalid Type:" << src->path.toStdString();
+				EXPECT_EQ(src->data(ROLE_FINFO_TYPE).toInt() == TeFileInfo::EN_FILE, dstItr->isFile()) << "Invalid Type:" << src->data(ROLE_FINFO_PATH).toString().toStdString();
 				result = false;
 			}
 			++srcItr;
@@ -293,15 +324,15 @@ bool compareFileTree(const FileEntry* srcRoot, const QString & dst, bool binComp
 		}
 		else if (c < 0) {
 			// src < dst
-			ADD_FAILURE() << "Lost Entry: " << src->path.toStdString();
+			ADD_FAILURE() << "Lost Entry: " << src->data(ROLE_FINFO_PATH).toString().toStdString();
 			result = false;
 			++srcItr;
 		}
 	}
 
 	while (srcItr != children.end()) {
-		FileEntry* src = qobject_cast<FileEntry*>(*srcItr);
-		ADD_FAILURE() << "Lost Entry: " << src->path.toStdString();
+		QStandardItem* src = *srcItr;
+		ADD_FAILURE() << "Lost Entry: " << src->data(ROLE_FINFO_PATH).toString().toStdString();
 		result = false;
 		++srcItr;
 	}
@@ -313,5 +344,25 @@ bool compareFileTree(const FileEntry* srcRoot, const QString & dst, bool binComp
 	}
 
 	return result;
+}
+
+void convertToStandardItem(const TeFileInfo& info, QStandardItem* item)
+{
+	QFileInfo finfo(info.path);
+	item->setData(finfo.fileName(), Qt::DisplayRole);
+	item->setData(info.type, ROLE_FINFO_TYPE);
+	item->setData(info.path, ROLE_FINFO_PATH);
+	item->setData(info.size, ROLE_FINFO_SIZE);
+	item->setData(info.lastModified, ROLE_FINFO_DATE);
+	item->setData(info.permissions, ROLE_FINFO_PERM);
+}
+
+void convertToFileInfo(const QStandardItem* item, TeFileInfo* info)
+{
+	info->type = static_cast<TeFileInfo::EntryType>(item->data(ROLE_FINFO_TYPE).toInt());
+	info->path = item->data(ROLE_FINFO_PATH).toString();
+	info->size = item->data(ROLE_FINFO_SIZE).toLongLong();
+	info->lastModified = item->data(ROLE_FINFO_DATE).toDateTime();
+	info->permissions = item->data(ROLE_FINFO_PERM).toUInt();
 }
 

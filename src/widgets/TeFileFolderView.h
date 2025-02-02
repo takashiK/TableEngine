@@ -25,6 +25,7 @@
 #include <QAbstractItemView>
 #include "TeDispatchable.h"
 #include "TeFolderView.h"
+#include "TeHistory.h"
 
 class TeFileTreeView;
 class TeFileListView;
@@ -50,9 +51,17 @@ public:
 	virtual void setCurrentPath(const QString& path);
 	virtual QString currentPath();
 
+	virtual void moveNextPath();
+	virtual void movePrevPath();
+	virtual QStringList getPathHistory() const;
+
+	virtual TeFinder* makeFinder();
+
 protected:
+	void updatePath(const QString& root, const QString& current=QString());
 	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos);
 	void showUserContextMenu(const QString& menuName, const QPoint& pos);
+
 private:
 	TeFileTreeView* mp_treeView;
 	TeFileListView* mp_listView;
@@ -63,4 +72,5 @@ private:
 	TeEventFilter* mp_treeEvent;
 	TeEventFilter* mp_listEvent;
 
+	TeHistory m_history;
 };

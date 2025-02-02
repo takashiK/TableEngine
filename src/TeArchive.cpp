@@ -404,21 +404,22 @@ namespace {
 		\param arInfo read opened information structure.
 		\param info file informaition of next archive entry.
 	 */
-	bool read_next_entry(QtArchiveInfo* arInfo, TeArchive::FileInfo* info) {
-		info->type = TeArchive::EN_NONE;
+	bool read_next_entry(QtArchiveInfo* arInfo, TeFileInfo* info) {
+		info->type = TeFileInfo::EN_NONE;
 		info->size = 0;
 		info->path.clear();
-		info->lastModifyed = QDateTime::currentDateTime();
+		info->lastModified = QDateTime::currentDateTime();
+		info->permissions = 0x644;
 
 		while (ARCHIVE_OK == archive_read_next_header(arInfo->ar, &arInfo->entry)) {
 
 			__LA_MODE_T mode = archive_entry_filetype(arInfo->entry);
 			switch (mode) {
 			case AE_IFREG:
-				info->type = TeArchive::EN_FILE;
+				info->type = TeFileInfo::EN_FILE;
 				break;
 			case AE_IFDIR:
-				info->type = TeArchive::EN_DIR;
+				info->type = TeFileInfo::EN_DIR;
 				break;
 			default:
 				//reject other type.
@@ -436,7 +437,7 @@ namespace {
 
 			if (info->path.startsWith(".") || info->path.startsWith("/") || info->path.contains(":")) {
 				//reject unacceptable path
-				info->type = TeArchive::EN_NONE;
+				info->type = TeFileInfo::EN_NONE;
 				info->path.clear();
 				continue;
 			}
@@ -447,8 +448,10 @@ namespace {
 
 			if (archive_entry_mtime_is_set(arInfo->entry)) {
 				time_t mtime = archive_entry_mtime(arInfo->entry);
-				info->lastModifyed.setSecsSinceEpoch(mtime);
+				info->lastModified.setSecsSinceEpoch(mtime);
 			}
+
+			info->permissions = archive_entry_perm(arInfo->entry);
 			return true;
 		}
 		return false;
@@ -652,7 +655,7 @@ void Reader::clearCancel()
  */
 bool Reader::extractAll(const QString & destPath)
 {
-	FileInfo info;
+	TeFileInfo info;
 
 	if (m_path.isEmpty()) {
 		emit finished();
@@ -695,10 +698,10 @@ bool Reader::extractAll(const QString & destPath)
 		emit currentFileInfoChanged(info);
 		emit valueChanged(archive_read_bytes(&arInfo));
 
-		if (info.type == EN_DIR) {
+		if (info.type == TeFileInfo::EN_DIR) {
 			dir.mkpath(destBase + info.path);
 		}
-		else if (info.type == EN_FILE) {
+		else if (info.type == TeFileInfo::EN_FILE) {
 			QFileInfo fileInfo(destBase + info.path);
 			if (fileInfo.exists()) {
 				if ((overwrite_check != Q_NULLPTR) && !overwrite_check(&fileInfo)) {
@@ -742,7 +745,7 @@ bool Reader::extractAll(const QString & destPath)
  */
 bool Reader::extract(const QString & destPath, const QString & base, const QStringList & entries)
 {
-	FileInfo info;
+	TeFileInfo info;
 
 	if (m_path.isEmpty()) {
 		emit finished();
@@ -778,7 +781,7 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 		emit currentFileInfoChanged(info);
 		emit valueChanged(archive_read_bytes(&arInfo));
 
-		if (info.type == EN_DIR || info.type == EN_FILE) {
+		if (info.type == TeFileInfo::EN_DIR || info.type == TeFileInfo::EN_FILE) {
 			if (!info.path.startsWith(base)) {
 				continue;
 			}
@@ -791,10 +794,10 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 			if (!found) continue;
 		}
 
-		if (info.type == EN_DIR) {
+		if (info.type == TeFileInfo::EN_DIR) {
 			dir.mkpath(destBase + info.path);
 		}
-		else if (info.type == EN_FILE) {
+		else if (info.type == TeFileInfo::EN_FILE) {
 			QFileInfo fileInfo(destBase + info.path);
 			if (fileInfo.exists() && (overwrite_check != Q_NULLPTR) && !overwrite_check(&fileInfo)) {
 				continue;
@@ -860,6 +863,11 @@ bool Reader::copy_data(void* arPtr, QFile* ofile)
 	return false;
 }
 
+bool Reader::isValid()
+{
+	return m_type != AR_NONE;
+}
+
 /*!
 	Return the type of archive format.
  */
@@ -914,8 +922,6 @@ Reader::const_iterator::const_iterator(const_iterator && o) noexcept
 	info = o.info;
 
 	o.data = Q_NULLPTR;
-	o.info.type = EN_NONE;
-	o.info.size = 0;
 }
 
 Reader::const_iterator::~const_iterator()
@@ -926,8 +932,6 @@ Reader::const_iterator::~const_iterator()
 		delete arInfo;
 		
 		data = Q_NULLPTR;
-		info.type = EN_NONE;
-		info.size = 0;
 	}
 }
 
@@ -1008,9 +1012,9 @@ void Writer::clearCancel()
  */
 bool Writer::addEntry(const QString & src, const QString& dest)
 {
-	FileInfo info;
-	info.path = QDir::cleanPath(dest);
-	if(info.path.startsWith('/') || info.path.startsWith('.') || m_entryList.contains(info))
+	ArchiveInfo info;
+	info.dst = QDir::cleanPath(dest);
+	if(info.dst.startsWith('/') || info.dst.startsWith('.') || m_entryList.contains(info))
 		return false;
 
 	QFileInfo fileInfo(src);
@@ -1020,7 +1024,7 @@ bool Writer::addEntry(const QString & src, const QString& dest)
 	info.src = QDir::cleanPath(src);
 
 	if (fileInfo.isDir() && !fileInfo.isSymLink()) {
-		info.type = EN_DIR;
+		info.type = TeFileInfo::EN_DIR;
 		QDir dir(info.src);
 		QStringList entries = dir.entryList(QDir::Dirs | QDir::Files|QDir::NoDotAndDotDot|QDir::System|QDir::Hidden);
 		if (!entries.isEmpty()) {
@@ -1031,7 +1035,7 @@ bool Writer::addEntry(const QString & src, const QString& dest)
 		}
 	}
 	else if (fileInfo.isFile()) {
-		info.type = EN_FILE;
+		info.type = TeFileInfo::EN_FILE;
 		info.size = fileInfo.size();
 		m_entryList.append(info);
 		m_totalBytes += info.size;
@@ -1039,7 +1043,15 @@ bool Writer::addEntry(const QString & src, const QString& dest)
 	else {
 		return false;
 	}
-	emit addedFileInfo(info);
+
+	TeFileInfo tInfo;
+	tInfo.type = info.type;
+	tInfo.size = info.size;
+	tInfo.path = info.dst;
+	tInfo.lastModified = fileInfo.lastModified();
+	tInfo.permissions = fileInfo.permissions();
+	
+	emit addedFileInfo(tInfo);
 
 	return true;
 }
@@ -1109,10 +1121,17 @@ bool Writer::archive(const QString & dest, ArchiveType type)
 		QFileInfo fileInfo(info.src);
 		if (!fileInfo.isFile() && !fileInfo.isDir()) continue;
 
-		emit currentFileInfoChanged(info);
+		TeFileInfo tInfo;
+		tInfo.type = info.type;
+		tInfo.path = info.dst;
+		tInfo.size = info.size;
+		tInfo.lastModified = fileInfo.lastModified();
+		tInfo.permissions = fileInfo.permissions();
+
+		emit currentFileInfoChanged(tInfo);
 
 		entry = archive_entry_new();
-		archive_entry_set_pathname(entry, info.path.toLocal8Bit());
+		archive_entry_set_pathname(entry, info.dst.toLocal8Bit());
 		if (fileInfo.isDir()) {
 			archive_entry_set_filetype(entry, AE_IFDIR);
 		}

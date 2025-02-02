@@ -43,6 +43,7 @@ TeCmdCopy::~TeCmdCopy()
 
 bool TeCmdCopy::isActive( TeViewStore* p_store )
 {
+	NOT_USED(p_store);
 	return false;
 }
 

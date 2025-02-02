@@ -1,5 +1,6 @@
 #include "TeUtils.h"
 #include "TeViewStore.h"
+#include "TeSettings.h"
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeFileTreeView.h"
 #include "widgets/TeFileListView.h"
@@ -12,6 +13,7 @@
 #include <QFileInfo>
 
 #include <QDebug>
+#include <QSettings>
 
 #include <magic.h>
 #include <icu.h>
@@ -93,6 +95,40 @@ QString getCurrentFolder(TeViewStore* p_store)
 		return p_folder->currentPath();
 	}
 	return QString();
+}
+
+QStringList getFavorites()
+{
+	QSettings settings;
+	QStringList favorites;
+	settings.beginGroup(SETTING_FAVORITES);
+	for (auto& key : settings.childKeys()) {
+		favorites.append(settings.value(key).toString());
+	}
+	settings.endGroup();
+	return favorites;
+}
+
+void updateFavorites(const QStringList& list)
+{
+	QSettings settings;
+	settings.beginGroup(SETTING_FAVORITES);
+	settings.remove("");
+	for (int i = 0; i < list.size(); i++) {
+		settings.setValue(QString("path%1").arg(i, 2, 10, QChar('0')), list.at(i));
+	}
+	settings.endGroup();
+}
+
+bool isDir(const QAbstractItemModel* p_model, const QModelIndex& index)
+{
+	if (p_model != nullptr && index.isValid()) {
+		const QFileSystemModel* model = qobject_cast<const QFileSystemModel*>(p_model);
+		if (model != nullptr) {
+			return model->isDir(index);
+		}
+	}
+	return false;
 }
 
 /*!

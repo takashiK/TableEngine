@@ -21,6 +21,7 @@
 #include "TeCommandFactory.h"
 #include "TeCommandInfo.h"
 
+#include "file/TeCmdFileCreate.h"
 #include "file/TeCmdOpenFile.h"
 #include "file/TeCmdCopyTo.h"
 #include "file/TeCmdMoveTo.h"
@@ -41,6 +42,7 @@
 #include "edit/TeCmdPaste.h"
 #include "edit/TeCmdSelectAll.h"
 #include "edit/TeCmdSelectToggle.h"
+#include "edit/TeCmdSelectFilter.h"
 
 #include "folder/TeCmdFolderCloseAll.h"
 #include "folder/TeCmdFolderCloseUnder.h"
@@ -48,8 +50,15 @@
 #include "folder/TeCmdFolderOpenAll.h"
 #include "folder/TeCmdFolderOpenOne.h"
 #include "folder/TeCmdFolderOpenUnder.h"
-
+#include "folder/TeCmdAddFavorite.h"
+#include "folder/TeCmdEditFavorites.h"
+#include "folder/TeCmdPrevFolder.h"
+#include "folder/TeCmdNextFolder.h"
+#include "folder/TeCmdGotoParent.h"
+#include "folder/TeCmdGotoRoot.h"
+#include "folder/TeCmdGotoFolder.h"
 #include "folder/TeCmdFolderChangeRoot.h"
+#include "folder/TeCmdFind.h"
 
 #include "tool/TeCmdToolFile.h"
 #include "tool/TeCmdToolBinary.h"
@@ -73,6 +82,7 @@ TeCommandFactory::TeCommandFactory()
 
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_FILE);
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_NEW, TeCmdFileCreate, tr("&New"), tr("Create New file."), QIcon(":/TableEngine/newFile.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_OPEN, TeCmdOpenFile, tr("&Open"), tr("Open file by shell."), QIcon(":/TableEngine/openFile.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_COPY_TO, TeCmdCopyTo, tr("&Copy To"), tr("Copy selected files to other folder."), QIcon(":/TableEngine/copyTo.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_MOVE_TO, TeCmdMoveTo, tr("&Move To"), tr("Move selected files to other folder."), QIcon(":/TableEngine/moveTo.png"));
@@ -101,6 +111,7 @@ TeCommandFactory::TeCommandFactory()
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_PASTE, TeCmdPaste, tr("Paste"), tr("Select all files."), QIcon(":/TableEngine/paste.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL, TeCmdSelectAll, tr("Select &All"), tr("Select all files."), QIcon(":/TableEngine/selectAll.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE, TeCmdSelectToggle, tr("&Toggle"), tr("Toggle selection."), QIcon(":/TableEngine/selectToggle.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_BY_FILTER, TeCmdSelectFilter, tr("&Filter"), tr("Select by filter."), QIcon(":/TableEngine/selectFilter.png"));
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_FOLDER);
@@ -110,14 +121,15 @@ TeCommandFactory::TeCommandFactory()
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CLOSE_UNDER, TeCmdFolderCloseUnder, tr("Colla&pse"), tr("Collapse current Folder."), QIcon(":/TableEngine/collapse.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CLOSE_ALL, TeCmdFolderCloseAll, tr("&Collapse All"), tr("Collapse all Folders."), QIcon(":/TableEngine/collapseAll.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CREATE_FOLDER, TeCmdFolderCreate, tr("&New Folder"), tr("Create new folder."), QIcon(":/TableEngine/newFolder.png"));
-		//	MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_ADD_FAVORITES, TeCmdFolderAddFavorites, tr("Add Favorites"), tr("Add a folder to favorites list."), QIcon(":/TableEngine/addFavorites.png");
-		//	MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_DEL_FAVORITES, TeCmdFolderDelFavorites, tr("Del Favorites"), tr("Delete a folder from favorites list."), QIcon(":/TableEngine/delFavorites.png"));
-		//	MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_PREV_FOLDER, TeCmdFolderPrevFolder, tr("Previous Folder"),tr("Go to previous folder."), QIcon(":/TableEngine/prevFolder.png"));
-		//	MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_NEXT_FOLDER, TeCmdFolderNextFolder, tr("Next Folder"), tr("Go to next folder."), QIcon(":/TableEngine/nextFolder.png"));
-		//	MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_GOTO_ROOT, TeCmdFolderGotoRoot, tr("Go to Root"), tr("Go to root folder."), QIcon(":/TableEngine/gotoRoot.png"));
-		//	MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_GOTO_FOLDER, TeCmdFolderGotoFolder, tr("&Go to folder"), tr("Go to folder."), QIcon(":/TableEngine/goto.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_ADD_FAVORITE, TeCmdAddFavorite, tr("Add Favorite"), tr("Add a folder to favorites list."), QIcon(":/TableEngine/addFavorite.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_EDIT_FAVORITES, TeCmdEditFavorites, tr("Edit Favorites"), tr("Edit favorites list."), QIcon(":/TableEngine/editFavorites.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_PREV_FOLDER, TeCmdPrevFolder, tr("Previous Folder"),tr("Go to previous folder."), QIcon(":/TableEngine/previous.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_NEXT_FOLDER, TeCmdNextFolder, tr("Next Folder"), tr("Go to next folder."), QIcon(":/TableEngine/next.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_GOTO_PARENT, TeCmdGotoParent, tr("Go to Parent"), tr("Go to parent folder."), QIcon(":/TableEngine/parent.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_GOTO_ROOT, TeCmdGotoRoot, tr("Go to Root"), tr("Go to root folder."), QIcon(":/TableEngine/root.png"));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_GOTO_FOLDER, TeCmdGotoFolder, tr("&Go to folder"), tr("Go to folder."), QIcon(":/TableEngine/goto.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT, TeCmdFolderChangeRoot, tr("Change Root folder"), tr("Change root folder."), QIcon(":/TableEngine/changeRoot.png"));
-		//	MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_FIND, TeCmdFolderFind, tr("Find"), tr("Find items."), QIcon(":/TableEngine/find.png"));
+		//MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_FIND, TeCmdFind, tr("Find"), tr("Find items."), QIcon(":/TableEngine/find.png"));
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_VIEW);

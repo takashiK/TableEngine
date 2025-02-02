@@ -156,7 +156,7 @@ void TeCmdArchive::archiveItems(TeViewStore* p_store, const QStringList & list, 
 		if (bSuccess) {
 			QObject::connect(&writer, &TeArchive::Writer::maximumValue, &progress, &QProgressDialog::setMaximum);
 			QObject::connect(&writer, &TeArchive::Writer::valueChanged, &progress, &QProgressDialog::setValue);
-			QObject::connect(&writer, &TeArchive::Writer::currentFileInfoChanged, [&progress](const TeArchive::FileInfo& info) {
+			QObject::connect(&writer, &TeArchive::Writer::currentFileInfoChanged, [&progress](const TeFileInfo& info) {
 					progress.setLabelText(QObject::tr("Archive : ") + info.path.right(30));
 				});
 			QObject::connect(&writer, &TeArchive::Writer::finished, [&progress]() { progress.setValue(progress.maximum()); });

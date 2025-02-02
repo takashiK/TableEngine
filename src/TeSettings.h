@@ -21,11 +21,15 @@
 #pragma once
 
 namespace TeSettings {
+	enum {
+		MAX_FAVORITES = 99,
+		MAX_HISTORY   = 99,
+	};
+
 	enum InitFolderMode {
 		INIT_FOLDER_MODE_PREVIOUS,
 		INIT_FOLDER_MODE_SELECTED,
 	};
-
 };
 
 #ifdef _STTING_STR_DEF_
@@ -45,5 +49,7 @@ SETTING_STR(SETTING_MENU, "menu");
 SETTING_STR(SETTING_MENUBAR_GROUP, "menuGroup00");
 SETTING_STR(SETTING_TREEPOPUP_GROUP, "menuGroup01");
 SETTING_STR(SETTING_LISTPOPUP_GROUP, "menuGroup02");
+
+SETTING_STR(SETTING_FAVORITES, "Favorites");
 
 #undef SETTING_STR

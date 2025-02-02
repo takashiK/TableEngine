@@ -128,6 +128,16 @@ bool TeFilePathDialog::getExtraFlag(int index)
 	return false;
 }
 
+void TeFilePathDialog::setFavorites(const QStringList& paths)
+{
+	m_favorites = paths;
+}
+
+void TeFilePathDialog::setHistory(const QStringList& paths)
+{
+	m_history = paths;
+}
+
 bool TeFilePathDialog::eventFilter(QObject * obj, QEvent * event)
 {
 	if (obj == mp_combo) {
@@ -141,6 +151,20 @@ bool TeFilePathDialog::eventFilter(QObject * obj, QEvent * event)
 				if (dlg.exec() == QDialog::Accepted) {
 					setTargetPath(dlg.targetPath());
 				}
+				return true;
+			}
+			else if (keyEvent->key() == Qt::Key_Up) {
+				//Support show history when Up are pushed.
+				mp_combo->clear();
+				mp_combo->addItems(m_history);
+				mp_combo->showPopup();
+				return true;
+			}
+			else if (keyEvent->key() == Qt::Key_Down) {
+				//Support show favorite when Down are pushed.
+				mp_combo->clear();
+				mp_combo->addItems(m_favorites);
+				mp_combo->showPopup();
 				return true;
 			}
 		}

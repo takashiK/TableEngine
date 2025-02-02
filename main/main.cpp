@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	TeMenuSetting::storeDefaultSettings();
 	
 	//initialize com thread. it use for windows shell.
-	threadInitialize();
+	threadInitialize(&a);
 
 	//setup dispatcher for command.
 	TeDispatcher dispatcher;
