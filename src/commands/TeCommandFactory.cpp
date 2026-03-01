@@ -42,6 +42,7 @@
 #include "edit/TeCmdPaste.h"
 #include "edit/TeCmdSelectAll.h"
 #include "edit/TeCmdSelectToggle.h"
+#include "edit/TeCmdSelectionStyle.h"
 #include "edit/TeCmdSelectFilter.h"
 
 #include "folder/TeCmdFolderCloseAll.h"
@@ -77,8 +78,9 @@ TeCommandFactory::TeCommandFactory()
 
 #define SEPARATOR() m_menuSpecs[cur_group].append({TeTypes::CMDID_SPECIAL_SEPARATOR,"",cur_rank})
 #define MENU_ENTRY(cmdId,cmdClass,name,description,icon)   m_menuSpecs[cur_group].append({cmdId,name,cur_rank}); m_commands[cmdId] = new TeCommandInfo<cmdClass>(cmdId, name, description, icon); m_group[cur_group].append(cmdId)
+#define MENU_ENTRY_WITH_SELECT(cmdId,cmdClass, param, name,description,icon)   m_menuSpecs[cur_group].append({cmdId,name,cur_rank}); m_commands[cmdId] = new TeCommandInfo<cmdClass>(cmdId, name, description, icon, {{"SELECTION",param}}); m_group[cur_group].append(cmdId)
 #define CMD_ENTRY(cmdId,cmdClass,name,description,icon)  m_commands[cmdId] = new TeCommandInfo<cmdClass>(cmdId, name, description, icon); m_group[cur_group].append(cmdId)
-
+#define CMD_ENTRY_WITH_SELECT(cmdId,cmdClass, param, name,description,icon)  m_commands[cmdId] = new TeCommandInfo<cmdClass>(cmdId, name, description, icon, {{"SELECTION",param}}); m_group[cur_group].append(cmdId)
 
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_FILE);
@@ -111,6 +113,10 @@ TeCommandFactory::TeCommandFactory()
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_PASTE, TeCmdPaste, tr("Paste"), tr("Select all files."), QIcon(":/TableEngine/paste.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL, TeCmdSelectAll, tr("Select &All"), tr("Select all files."), QIcon(":/TableEngine/selectAll.png"));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE, TeCmdSelectToggle, tr("&Toggle"), tr("Toggle selection."), QIcon(":/TableEngine/selectToggle.png"));
+		BEGIN_FOLDER("Selection Style");
+			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_EDIT_SELECTION_STYLE_EXPLORER, TeCmdSelectionStyle, TeCmdSelectionStyle::Explorer, tr("&Explorer"), tr("Use explorer style selection."), QIcon(":/TableEngine/selectionExplorer.png"));
+			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_EDIT_SELECTION_STYLE_TABLEENGINE, TeCmdSelectionStyle, TeCmdSelectionStyle::TableEngine, tr("&TableEngine"), tr("Use TableEngine style selection."), QIcon(":/TableEngine/selectionTableEngine.png"));
+		END_FOLDER();
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_BY_FILTER, TeCmdSelectFilter, tr("&Filter"), tr("Select by filter."), QIcon(":/TableEngine/selectFilter.png"));
 	END_GROUP();
 

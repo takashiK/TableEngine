@@ -29,6 +29,9 @@
 #include <QtWidgets/QApplication>
 #include <QTranslator>
 
+#include <QFile>
+#include <QTextStream>
+
 #include <QSettings>
 
 int main(int argc, char *argv[])
@@ -63,6 +66,14 @@ int main(int argc, char *argv[])
 	store.show();
 
 	dispatcher.setViewStore(&store);
+
+	//setup default stylesheet
+	QFile styleFile(":/TableEngine/stylesheet_dark.css");
+	bool ok = styleFile.open(QFile::ReadOnly | QFile::Text);
+
+	QTextStream stream(&styleFile);
+	QString stylesheet = stream.readAll();
+	a.setStyleSheet(stylesheet);
 
 	//start event loop.
 	return a.exec();

@@ -39,8 +39,10 @@ public:
 	virtual TeFolderView* folderView();
 	void setFolderView(TeFolderView* view);
 
-	void setSelectionMode(TeTypes::SelectionMode mode);
 	TeTypes::SelectionMode selectionMode() const;
+
+public slots:
+	void setSelectionMode(TeTypes::SelectionMode mode);
 
 protected:
 	virtual void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
@@ -50,8 +52,8 @@ protected:
 	virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event = Q_NULLPTR) const;
 
 private:
+
 	TeFolderView* mp_folderView;
-	bool m_clearAndSelect_by_press;
 
 	QModelIndex m_pressedIndex;
 	QPoint m_pressedPos;

@@ -8,7 +8,7 @@
 
 TeDocument::TeDocument(QObject* parent) : QObject(parent)
 {
-	m_codecList = { "UTF-8", "EUC-JP", "Shift_JIS", "ISO-2022-JP" };
+	m_codecList = { "UTF-8", "EUC-JP", "Shift_JIS", "ISO-2022-JP", "UTF-16LE", "UTF-16BE", "UTF-32LE", "UTF-32BE" };
 	m_codecName = "UTF-8";
 }
 

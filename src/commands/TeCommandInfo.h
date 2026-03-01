@@ -41,7 +41,7 @@ public:
 	void setCommandInfo(TeTypes::CmdId cmdId, const QString& name, const QString& description, const QIcon& icon);
 
 	virtual bool isActive(TeViewStore* p_store ) const = 0;
-	virtual QList<TeMenuParam> menuParam() const = 0;
+	virtual bool isSelected( TeViewStore* p_store ) const = 0;
 	virtual QFlags<TeTypes::CmdType> type() const = 0;
 	virtual TeCommandBase* createCommand() const = 0;
 
@@ -60,15 +60,15 @@ protected:
 template <class T> class TeCommandInfo : public TeCommandInfoBase{
 public:
 	TeCommandInfo() {}
-	TeCommandInfo(TeTypes::CmdId type, const QString& name, const QString& description, const QIcon& icon, QList<TeMenuParam> menuParam = QList<TeMenuParam>())
-		: TeCommandInfoBase(type, name, description, icon) {}
+	TeCommandInfo(TeTypes::CmdId type, const QString& name, const QString& description, const QIcon& icon, const TeCmdParam& cmdParam = TeCmdParam())
+		: TeCommandInfoBase(type, name, description, icon), m_cmdParam(cmdParam) {}
 	virtual ~TeCommandInfo() {}
 
 	virtual bool isActive( TeViewStore* p_store ) const { return T::isActive(p_store); }
-	virtual QList<TeMenuParam> menuParam() const { return type() == TeTypes::CMD_TRIGGER_PARAMETRINC ?  m_menuParam : T::menuParam(); }
+	virtual bool isSelected( TeViewStore* p_store ) const { return T::isSelected(p_store, &m_cmdParam); }
 	virtual QFlags<TeTypes::CmdType> type() const { return T::type(); }
-	virtual TeCommandBase* createCommand() const { return new T; }
+	virtual TeCommandBase* createCommand() const {  T* cmd = new T; cmd->setDefaultParam(m_cmdParam); return cmd; }
 
 private:
-	QList<TeMenuParam> m_menuParam;
+	const TeCmdParam m_cmdParam;
 };

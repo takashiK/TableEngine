@@ -18,56 +18,40 @@
 **
 ****************************************************************************/
 
-#include "TeCmdFind.h"
-#include "TeUtils.h"
-#include "TeViewStore.h"
-#include "widgets/TeFolderView.h"
-#include "TeFinder.h"
+#pragma once
 
+#include "commands/TeCommandBase.h"
 
-TeCmdFind::TeCmdFind()
+#include <QList>
+#include <QFlags>
+
+class TeViewStore;
+
+class TeCmdSelectionStyle :
+    public TeCommandBase
 {
-}
+public:
+    enum SelectionStyle {
+        Explorer,
+        TableEngine
+    };
+	TeCmdSelectionStyle();
+	virtual ~TeCmdSelectionStyle();
 
-TeCmdFind::~TeCmdFind()
-{
-}
+	// Check if this command can process when item is not selected.
+	static bool isActive(TeViewStore* p_store);
 
-bool TeCmdFind::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
+	// Check if this command is selected when item is selected.
+	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
 
-bool TeCmdFind::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
-{
-	NOT_USED(p_store);
-	return false;
-}
+	// type of command
+	static QFlags<TeTypes::CmdType> type();
 
-QFlags<TeTypes::CmdType> TeCmdFind::type()
-{
-	return QFlags<TeTypes::CmdType>(
-		TeTypes::CMD_TRIGGER_NORMAL
-		// TeTypes::CMD_TRIGGER_SELECT
+protected:
+	// Execute command.
+	// return
+	//   true  : command is finished. after execute, this command is deleted.
+	//   false : command is still processing. after finish. you must call finish() to delete this command.
+	virtual bool execute(TeViewStore* p_store);
+};
 
-		| TeTypes::CMD_CATEGORY_TREE
-		| TeTypes::CMD_CATEGORY_LIST
-		| TeTypes::CMD_CATEGORY_OTHER
-
-		| TeTypes::CMD_TARGET_FILE
-		| TeTypes::CMD_TARGET_DIRECTORY
-	);
-}
-
-bool TeCmdFind::execute(TeViewStore* p_store)
-{
-	TeFinder* pfinder = p_store->currentFolderView()->makeFinder();
-	if (pfinder == nullptr)
-	{
-		return true;
-	}
-
-
-	return true;
-}

@@ -47,7 +47,9 @@
 target_wrapper.bat
 
 # uncommitable folder
+builds/*
 build/*
+out/*
 .vs/*
 main/x64/*
 main/debug/*

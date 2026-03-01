@@ -38,6 +38,47 @@
 #include <QStack>
 #include <QDebug>
 
+class DebugItemSelectionModel : public QItemSelectionModel
+{
+public:
+	DebugItemSelectionModel(QAbstractItemModel *model) : QItemSelectionModel(model) {}
+
+	virtual void select(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) override
+	{
+		qDebug() << "select index:" << index << " command:" << command;
+		QItemSelectionModel::select(index, command);
+	}
+
+	virtual void select(const QItemSelection &selection, QItemSelectionModel::SelectionFlags command) override
+	{
+		qDebug() << "select selection:" << selection << " command:" << command;
+		QItemSelectionModel::select(selection, command);
+	}
+
+	virtual void setCurrentIndex(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) override
+	{
+		qDebug() << "setCurrentIndex index:" << index << " command:" << command;
+		QItemSelectionModel::setCurrentIndex(index, command);
+	}
+
+	virtual void clear() override
+	{
+		qDebug() << "clear";
+		QItemSelectionModel::clear();
+	}
+
+	virtual void reset() override
+	{
+		qDebug() << "reset";
+		QItemSelectionModel::reset();
+	}
+
+	virtual void clearCurrentIndex() override
+	{
+		qDebug() << "clearCurrentIndex";
+		QItemSelectionModel::clearCurrentIndex();
+	}
+};
 
 TeFileFolderView::TeFileFolderView(QWidget *parent)
 	: TeFolderView(parent)
@@ -76,8 +117,10 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	mp_listView->setResizeMode(QListView::Adjust);
 	mp_listView->setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
-	mp_listView->setSpacing(2);
+	mp_listView->setSpacing(1);
 	mp_listView->setSelectionRectVisible(true);
+
+	//mp_listView->setSelectionModel(new DebugItemSelectionModel(mp_listModel));
 
 	//set default path
 	setRootPath(QDir::rootPath());

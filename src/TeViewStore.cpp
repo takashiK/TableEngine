@@ -59,6 +59,7 @@ TeViewStore::TeViewStore(QObject *parent)
 	mp_tab[TAB_LEFT] = nullptr;
 	mp_tab[TAB_RIGHT] = nullptr;
 	mp_split = nullptr;
+	m_selectionMode = TeTypes::SELECTION_NONE;
 	mp_closeEventEmitter = nullptr;
 	mp_focusEventEmitter = nullptr;
 }
@@ -260,6 +261,10 @@ void TeViewStore::loadMenu()
 					QAction* action = new QAction(p_info->icon(), p_info->name());
 					connect(action, &QAction::triggered, [this, cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
 					menus.top()->addAction(action);
+					if (p_info->type().testFlag(TeTypes::CMD_TRIGGER_SELECT)){
+						action->setCheckable(true);
+						connect(menus.top(), &QMenu::aboutToShow, [this,p_info,action](){ action->setChecked(p_info->isSelected(this)); });
+					}
 				}
 			}
 		}
@@ -285,6 +290,7 @@ void TeViewStore::loadMenu()
  */
 void TeViewStore::loadSetting()
 {
+	setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
 }
 
 void TeViewStore::loadKeySetting()
@@ -464,6 +470,8 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	folderView->setDispatcher(this);
 	folderView->setRootPath(path);
 	folderView->list()->setFocusPolicy(Qt::ClickFocus);
+	folderView->list()->setSelectionMode(selectionMode());
+	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
 	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
 	addFolderView(folderView, place);
@@ -477,6 +485,8 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 	folderView->setDispatcher(this);
 	folderView->setArchive(path);
 	folderView->list()->setFocusPolicy(Qt::ClickFocus);
+	folderView->list()->setSelectionMode(selectionMode());
+	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
 	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
 	addFolderView(folderView, place);
@@ -660,5 +670,13 @@ void TeViewStore::floatingWidgetClosed(QWidget* widget, QEvent* )
 	if (m_floatingWidgets.contains(widget)) {
 		m_floatingWidgets.removeAll(widget);
 		delete widget;
+	}
+}
+
+void TeViewStore::setSelectionMode(TeTypes::SelectionMode mode)
+{
+	if (m_selectionMode != mode) {
+		m_selectionMode = mode;
+		emit selectionModeChanged(mode);
 	}
 }

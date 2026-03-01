@@ -18,38 +18,44 @@
 **
 ****************************************************************************/
 
-#include "TeCmdFind.h"
+#include "TeCmdSelectionStyle.h"
 #include "TeUtils.h"
 #include "TeViewStore.h"
-#include "widgets/TeFolderView.h"
-#include "TeFinder.h"
 
-
-TeCmdFind::TeCmdFind()
+TeCmdSelectionStyle::TeCmdSelectionStyle()
 {
 }
 
-TeCmdFind::~TeCmdFind()
+TeCmdSelectionStyle::~TeCmdSelectionStyle()
 {
 }
 
-bool TeCmdFind::isActive(TeViewStore* p_store)
+bool TeCmdSelectionStyle::isActive(TeViewStore* p_store)
 {
 	NOT_USED(p_store);
 	return false;
 }
 
-bool TeCmdFind::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+bool TeCmdSelectionStyle::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
-	NOT_USED(p_store);
-	return false;
+	if (!p_cmdParam || !p_cmdParam->contains("SELECTION"))
+		return false;
+
+	switch(p_cmdParam->value("SELECTION").toInt()){
+	case Explorer:
+		return p_store->selectionMode() == TeTypes::SELECTION_EXPLORER;
+	case TableEngine:
+		return p_store->selectionMode() == TeTypes::SELECTION_TABLE_ENGINE;
+	default:
+		return false;
+	}
 }
 
-QFlags<TeTypes::CmdType> TeCmdFind::type()
+QFlags<TeTypes::CmdType> TeCmdSelectionStyle::type()
 {
 	return QFlags<TeTypes::CmdType>(
-		TeTypes::CMD_TRIGGER_NORMAL
-		// TeTypes::CMD_TRIGGER_SELECT
+		// TeTypes::CMD_TRIGGER_NORMAL
+		TeTypes::CMD_TRIGGER_SELECT
 
 		| TeTypes::CMD_CATEGORY_TREE
 		| TeTypes::CMD_CATEGORY_LIST
@@ -60,14 +66,21 @@ QFlags<TeTypes::CmdType> TeCmdFind::type()
 	);
 }
 
-bool TeCmdFind::execute(TeViewStore* p_store)
+
+bool TeCmdSelectionStyle::execute(TeViewStore* p_store)
 {
-	TeFinder* pfinder = p_store->currentFolderView()->makeFinder();
-	if (pfinder == nullptr)
-	{
-		return true;
+	if (cmdParam()->contains("SELECTION")) {
+		int selection = cmdParam()->value("SELECTION").toInt();
+		switch (selection) {
+		case Explorer:
+			p_store->setSelectionMode(TeTypes::SELECTION_EXPLORER);
+			break;
+		case TableEngine:
+			p_store->setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
+			break;
+		default:
+			return true;
+		}
 	}
-
-
 	return true;
 }

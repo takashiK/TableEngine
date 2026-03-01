@@ -45,6 +45,11 @@ void TeCommandBase::setDispatcher(TeDispatcher * p_dispatcher)
 	mp_dispatcher = p_dispatcher;
 }
 
+void TeCommandBase::setDefaultParam(const TeCmdParam &param)
+{
+	m_cmdParam = param;
+}
+
 void TeCommandBase::setSource(TeTypes::WidgetType type, QEvent * event, const TeCmdParam* p_cmdParam)
 {
 	m_srcType = type;

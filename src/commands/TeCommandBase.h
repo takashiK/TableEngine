@@ -31,6 +31,7 @@ public:
 	TeCommandBase();
 	virtual ~TeCommandBase();
 	void setDispatcher(TeDispatcher* p_dispatcher);
+	void setDefaultParam(const TeCmdParam& param);
 	void setSource(TeTypes::WidgetType type, QEvent *event, const TeCmdParam* p_cmdParam);
 	void run(TeViewStore* p_store);
 

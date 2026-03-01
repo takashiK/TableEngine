@@ -79,6 +79,8 @@ public:
 		CMDID_SYSTEM_EDIT_SELECT_ALL,                     // #Change select All
 		CMDID_SYSTEM_EDIT_SELECT_TOGGLE,                  // #Toggle select
 		CMDID_SYSTEM_EDIT_SELECT_BY_FILTER,               // #Select by filter
+		CMDID_SYSTEM_EDIT_SELECTION_STYLE_EXPLORER,       // #Use explorer style selection
+		CMDID_SYSTEM_EDIT_SELECTION_STYLE_TABLEENGINE,    // #Use TableEngine style selection
 
 		CMDID_SYSTEM_FOLDER  = CMDID_SYSTEM + 0x3000,     // Menu Item : Folder
 		CMDID_SYSTEM_FOLDER_OPEN_ONE,                     // #Expand current folder
@@ -142,19 +144,17 @@ public:
 
 	enum CmdType {
 		CMD_TRIGGER_MASK       = 0xFF,
-		CMD_TRIGGER_NORMAL     = 0x01,       // Normal Command
-		CMD_TRIGGER_TOGGLE     = 0x02,       // Toggle Command
-		CMD_TRIGGER_SELECTION  = 0x03,       // Selectional Command
-		CMD_TRIGGER_PARAMETRINC= 0x04,       // Parametric Command
+		CMD_TRIGGER_NORMAL     = 0x01,       // Normal Command (not stateful)
+		CMD_TRIGGER_SELECT     = 0x02,       // Toggle Command (selected or not)
 
 		CMD_CATEGORY_MASK      = 0xFF00,
-		CMD_CATEGORY_TREE      = 0x0100,
-		CMD_CATEGORY_LIST      = 0x0200,
-		CMD_CATEGORY_NONE      = 0x0400,
+		CMD_CATEGORY_OTHER     = 0x0100,
+		CMD_CATEGORY_TREE      = 0x0200,
+		CMD_CATEGORY_LIST      = 0x0400,
 
 		CMD_TARGET_MASK        = 0xFF0000,
-		CMD_TARGET_FILE        = 0x010000,
-		CMD_TARGET_ARCHIVE     = 0x020000,
+		CMD_TARGET_DIRECTORY   = 0x010000,
+		CMD_TARGET_FILE        = 0x020000,
 	};
 
 	Q_FLAG(CmdType)
@@ -167,4 +167,3 @@ public:
 Q_DECLARE_OPERATORS_FOR_FLAGS(TeTypes::CmdTypes)
 
 typedef QMap<QString, QVariant> TeCmdParam;
-typedef QPair<QString, TeCmdParam> TeMenuParam;

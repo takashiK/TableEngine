@@ -47,6 +47,8 @@ public:
 		TAB_MAX,
 	};
 
+	Q_PROPERTY(TeTypes::SelectionMode selectionMode READ selectionMode WRITE setSelectionMode NOTIFY selectionModeChanged)	
+
 	TeViewStore(QObject *parent = Q_NULLPTR);
 	virtual  ~TeViewStore();
 	virtual TeTypes::WidgetType getType() const;
@@ -87,9 +89,15 @@ public:
 
 	void registerFloatingWidget(QWidget* widget);
 
+	TeTypes::SelectionMode selectionMode() const { return m_selectionMode; }
+
+signals:
+	void selectionModeChanged(TeTypes::SelectionMode mode);
+
 public slots:
 	void floatingWidgetClosed(QWidget* widget, QEvent* event);
 	void focusFolderViewChanged(QWidget* widget, QEvent* event);
+	void setSelectionMode(TeTypes::SelectionMode mode);
 
 protected:
 	void addFolderView(TeFolderView* folderView, int place = -1);
@@ -102,6 +110,7 @@ private:
 	QTabWidget*          mp_tab[TAB_MAX]; // 0:left 1:right
 	TeDriveBar*  mp_driveBar;
 	QSplitter*     mp_split;
+	TeTypes::SelectionMode m_selectionMode;
 
 	int  m_currentTabPlace;
 

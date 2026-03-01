@@ -35,9 +35,11 @@ TeFileListView::TeFileListView(QWidget *parent)
 {
 	mp_folderView = nullptr;
 	mp_rubberBand = new QRubberBand(QRubberBand::Rectangle,this);
-	m_clearAndSelect_by_press = false;
 	m_selectionMode = TeTypes::SELECTION_NONE;
+	m_pressedIndex = QModelIndex();
 	QListView::setSelectionMode(QAbstractItemView::NoSelection);
+
+//	QListView::setStyleSheet("QListView::item::focus { background: palette(highlight); }");
 }
 
 TeFileListView::~TeFileListView()
@@ -139,6 +141,12 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 					selectionModel()->setCurrentIndex(newCurrent, QItemSelectionModel::NoUpdate);
 				}
 				break;
+			case Qt::Key_Up:
+			case Qt::Key_Down:
+			case Qt::Key_Left:
+			case Qt::Key_Right:
+				// change current index by arrow keys.
+				break;
 			default:
 				break;
 			}
@@ -151,6 +159,10 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 
 void TeFileListView::mousePressEvent(QMouseEvent* event)
 {
+	Qt::KeyboardModifiers modifiers = event && event->isInputEvent()
+		? static_cast<const QInputEvent*>(event)->modifiers()
+		: QGuiApplication::keyboardModifiers();
+
 	if ((QListView::selectionMode() == QListView::NoSelection) && (selectionMode() == TeTypes::SELECTION_TABLE_ENGINE)) {
 		QPoint pos = event->position().toPoint();
 		QModelIndex index = indexAt(pos);
@@ -165,9 +177,6 @@ void TeFileListView::mousePressEvent(QMouseEvent* event)
 			}
 		}
 
-		Qt::KeyboardModifiers modifiers = event && event->isInputEvent()
-			? static_cast<const QInputEvent*>(event)->modifiers()
-			: QGuiApplication::keyboardModifiers();
 		if (!index.isValid() && !(modifiers & (Qt::ShiftModifier | Qt::ControlModifier))) {
 			clearSelection();
 		}
@@ -175,6 +184,7 @@ void TeFileListView::mousePressEvent(QMouseEvent* event)
 	QListView::mousePressEvent(event);
 
 	if ((QListView::selectionMode() == QListView::NoSelection) && (selectionMode() == TeTypes::SELECTION_TABLE_ENGINE)) {
+		//deselect ".." entry.
 		QModelIndex topIndex = model()->index(0, 0, rootIndex());
 		if (".." == model()->data(topIndex, Qt::DisplayRole).toString()) {
 			selectionModel()->select(topIndex, QItemSelectionModel::Deselect);
@@ -206,12 +216,12 @@ void TeFileListView::mouseReleaseEvent(QMouseEvent* event)
 			selectionModel()->select(topIndex, QItemSelectionModel::Deselect);
 		}
 
-		if (selectionModel()->isSelected(currentIndex())) {
-			selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::Select);
-		}
-		else {
-			selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::NoUpdate);
-		}
+//		if (selectionModel()->isSelected(currentIndex())) {
+//			selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::Select);
+//		}
+//		else {
+//			selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::NoUpdate);
+//		}
 	}
 }
 
@@ -220,8 +230,8 @@ void TeFileListView::mouseReleaseEvent(QMouseEvent* event)
  */
 QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QModelIndex& index, const QEvent* event) const
 {
+	//qDebug() << "event type:" << (event ? event->type() : QEvent::None) << "index:" << index << "selected:" << selectionModel()->isSelected(index);
 	if ((QListView::selectionMode() == QListView::NoSelection) && (selectionMode() == TeTypes::SELECTION_TABLE_ENGINE)) {
-
 		Qt::KeyboardModifiers modifiers = event && event->isInputEvent()
             ? static_cast<const QInputEvent*>(event)->modifiers()
             : QGuiApplication::keyboardModifiers();
@@ -233,9 +243,11 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
             switch (event->type()) {
             case QEvent::MouseMove: {
 				if (modifiers & Qt::ShiftModifier) {
+					//qDebug() << "MouseMove ShiftModifier SelectCurrent";
 					return QItemSelectionModel::SelectCurrent;
 				}
 				else {
+					//qDebug() << "MouseMove No Modifier ToggleCurrent";
 					return QItemSelectionModel::ToggleCurrent;
 				}
 
@@ -244,24 +256,30 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
             case QEvent::MouseButtonPress: {
 				if (modifiers & Qt::ShiftModifier) {
 					if (index.isValid()) {
+						//qDebug() << "MouseButtonPress ShiftModifier indexValid SelectCurrent";
 						return QItemSelectionModel::SelectCurrent;
 					}
 					else {
+						//qDebug() << "MouseButtonPress ShiftModifier indexInvalid Select";
 						return QItemSelectionModel::Select;
 					}
 
 				}
 				else if (modifiers & Qt::ControlModifier) {
+					//qDebug() << "MouseButtonPress ControlModifier Toggle";
 					return QItemSelectionModel::Toggle;
 				}
 				else {
 					if (indexInvalid) {
+						//qDebug() << "MouseButtonPress No Modifier indexInvalid Clear";
 						return QItemSelectionModel::Clear;
 					}
 					else if (indexSelected) {
+						//qDebug() << "MouseButtonPress No Modifier indexSelected NoUpdate";
 						return QItemSelectionModel::NoUpdate;
 					}
 					else {
+						//qDebug() << "MouseButtonPress No Modifier ClearAndSelect";
 						return QItemSelectionModel::ClearAndSelect;
 					}
 				}
@@ -274,9 +292,21 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
             default:
                 break;
             }
+
+			return QItemSelectionModel::NoUpdate;
         }
 
+		if (modifiers & Qt::ShiftModifier){
+			//qDebug() << "KeyPress ShiftModifier SelectCurrent";
+			return QItemSelectionModel::SelectCurrent;
+		}
+
+		//qDebug() << "Default No Modifier NoUpdate";
 		return QItemSelectionModel::NoUpdate;
 	}
-	return QListView::selectionCommand(index, event);
+
+	auto flags = QListView::selectionCommand(index, event);
+
+	//qDebug() << "QListView::selectionCommand flags:" << flags;
+	return flags;
 }
