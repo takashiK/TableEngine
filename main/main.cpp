@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	dispatcher.setViewStore(&store);
 
 	//setup default stylesheet
-	QFile styleFile(":/TableEngine/stylesheet_dark.css");
+	QFile styleFile(":/Style/stylesheet_dark.css");
 	bool ok = styleFile.open(QFile::ReadOnly | QFile::Text);
 
 	QTextStream stream(&styleFile);

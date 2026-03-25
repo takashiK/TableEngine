@@ -83,14 +83,12 @@ bool TeCmdFolderChangeRoot::execute(TeViewStore* p_store)
 	}
 
 	if (tabPos == -1) {
-		tabPos = p_store->currentTabIndex();
+		tabPos = p_store->currentTabPlace();
 	}
 
 	TeFolderView* p_folder = p_store->getFolderView(tabPos);
-	if (p_folder && p_folder->getType() != TeTypes::WT_FOLDERVIEW) {
-		tabPos = ( tabPos == p_store->TAB_LEFT ? p_store->TAB_RIGHT : p_store->TAB_LEFT );
-	}
 
+	qDebug() << "TeCmdFolderChangeRoot: tabPos=" << tabPos;
 
 	if (cmdParam()->contains(PARAM_ROOT_PATH)) {
 		rootPath = cmdParam()->value(PARAM_ROOT_PATH).toString();
@@ -118,6 +116,7 @@ bool TeCmdFolderChangeRoot::execute(TeViewStore* p_store)
 
 	QDir dir;
 	if (dir.exists(rootPath)) {
+		qDebug() << "TeCmdFolderChangeRoot: new:" << newTab << " tabPos:" << tabPos << " Change root path to " << rootPath;
 		p_store->changeRootPath(rootPath, newTab, tabPos);
 	}
 

@@ -71,6 +71,9 @@ public:
 	bool setArchive(const QString& path);
 	bool setArchive(TeArchive::Reader* p_archive);
 
+public slots:
+	virtual void setFileShowMode(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed);
+
 protected:
 	void updatePath(const QString& path);
 	void internalAddEntry(const QString& path, qint64 size, const QDateTime& lastModified, int permission);

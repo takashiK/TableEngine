@@ -27,6 +27,8 @@
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
 #include "TeFileFinder.h"
+#include "TeFileItemDelegate.h"
+#include "TeFileSortProxyModel.h"
 
 #include <QLayout>
 #include <QFileSystemModel>
@@ -111,14 +113,16 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	mp_treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	mp_listModel->setFilter(QDir::Drives | QDir::AllDirs | QDir::Files | QDir::NoDot );
-	mp_listView->setModel(mp_listModel);
-	mp_listView->setViewMode(QListView::ListMode);
-	mp_listView->setWrapping(true);
-	mp_listView->setResizeMode(QListView::Adjust);
+	mp_listSortModel = new TeFileSortProxyModel(this);
+	mp_listSortModel->setSourceModel(mp_listModel);
+	mp_listView->setModel(mp_listSortModel);
+	setFileShowMode(TeTypes::FILETYPE_ALL, TeTypes::ORDER_NAME, false);
+	mp_listView->setFileViewMode(TeTypes::FILEINFO_NONE, TeTypes::FILEVIEW_SMALL_ICON);
 	mp_listView->setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
-	mp_listView->setSpacing(1);
+//	mp_listView->setSpacing(1);
 	mp_listView->setSelectionRectVisible(true);
+	mp_listView->setItemDelegate(new TeFileItemDelegate(this));
 
 	//mp_listView->setSelectionModel(new DebugItemSelectionModel(mp_listModel));
 
@@ -131,14 +135,17 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 		{ setCurrentPath(mp_treeModel->filePath(current)); });
 
 	connect(mp_listView, &QListView::activated, 
-		[this](const QModelIndex &index)
-	{	if (mp_listModel->isDir(index)){
+		[this](const QModelIndex &proxyIndex)
+	{	
+		QModelIndex index = mp_listSortModel->mapToSource(proxyIndex);
+		if (mp_listModel->isDir(index)){
 			setCurrentPath(mp_listModel->filePath(index));
 		}
 		else {
 			//file open by double click.
 			openFile(mp_listModel->filePath(index));
-		}});
+		}
+	});
 
 	//set platform native context menu.
 	connect(mp_treeView, &QTreeView::customContextMenuRequested,
@@ -153,7 +160,8 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	connect(mp_listModel, &QFileSystemModel::directoryLoaded,
 				[this](const QString& )
 		{ if (mp_listView->currentIndex().isValid() == false) {
-			mp_listView->setCurrentIndex(mp_listModel->index(0,0,mp_listView->rootIndex()));
+			QModelIndex index = mp_listSortModel->mapFromSource(mp_listModel->index(0,0,mp_listView->rootIndex()));
+			mp_listView->setCurrentIndex(index);
 		}});
 
 	//Enable Drag & Drop
@@ -349,11 +357,11 @@ void TeFileFolderView::updatePath(const QString& root, const QString& current)
 		list()->clearSelection();
 		list()->setCurrentIndex(QModelIndex());
 		QModelIndex rootIndex = mp_listModel->setRootPath(absRoot);
-		list()->setRootIndex(rootIndex);
+		list()->setRootIndex(mp_listSortModel->mapFromSource(rootIndex));
 
 		QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
 		if (curIndex.isValid())
-			list()->setCurrentIndex(curIndex);
+			list()->setCurrentIndex(mp_listSortModel->mapFromSource(curIndex));
 		//invalid case : setCurrentIndex at directoryLoaded event.
 
 	}
@@ -366,25 +374,52 @@ void TeFileFolderView::updatePath(const QString& root, const QString& current)
 			tree()->setCurrentIndex(index);
 		}
 
-		QModelIndex prevIndex = list()->rootIndex();
-		QString prevPath = mp_listModel->filePath(list()->rootIndex());
+		QModelIndex prevIndex = mp_listSortModel->mapToSource(list()->rootIndex());
+		QString prevPath = mp_listModel->filePath(prevIndex);
 		index = mp_listModel->index(current);
-		if (list()->rootIndex() != index) {
+		if (list()->rootIndex() != mp_listSortModel->mapFromSource(index)) {
 			list()->clearSelection();
 			list()->setCurrentIndex(QModelIndex());
 			QModelIndex rootIndex = mp_listModel->setRootPath(current);
-			list()->setRootIndex(rootIndex);
+			list()->setRootIndex(mp_listSortModel->mapFromSource(rootIndex));
 
 			if (current == mp_listModel->filePath(prevIndex.parent())) {
-				list()->setCurrentIndex(mp_listModel->index(prevPath));
+				list()->setCurrentIndex(mp_listSortModel->mapFromSource(mp_listModel->index(prevPath)));
 			}
 			else {
 				QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
 				if (curIndex.isValid())
-					list()->setCurrentIndex(curIndex);
+					list()->setCurrentIndex( mp_listSortModel->mapFromSource(curIndex));
 				//invalid case : setCurrentIndex at directoryLoaded event.
 			}
 		}
 	}
 
+}
+
+void TeFileFolderView::setFileShowMode(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed)
+{
+	QDir::Filters filters = mp_listModel->filter();
+	if (typeFlags.testFlag(TeTypes::FILETYPE_HIDDEN)) {
+		filters |= QDir::Hidden;
+	}
+	else {
+		filters &= ~QDir::Hidden;
+	}
+	if (typeFlags.testFlag(TeTypes::FILETYPE_SYSTEM)) {
+		filters |= QDir::System;
+	}
+	else {
+		filters &= ~QDir::System;
+	}
+	mp_listModel->setFilter(filters);
+
+	mp_listSortModel->setSortType(order);
+
+	if(orderReversed){
+		mp_listSortModel->sort(0, Qt::DescendingOrder);
+	}
+	else {
+		mp_listSortModel->sort(0, Qt::AscendingOrder);
+	}
 }

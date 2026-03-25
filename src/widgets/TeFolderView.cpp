@@ -49,6 +49,9 @@ void TeFolderView::setDispatcher(TeDispatchable * p_dispatcher)
 
 bool TeFolderView::dispatch(TeTypes::WidgetType type, QEvent * event)
 {
+	if(event->type() == QEvent::FocusIn) {
+		emit focusIn();
+	}
 	if ((mp_dispatcher != nullptr) && isDispatchable(type, event)) {
 		return mp_dispatcher->dispatch(type, event);
 	}

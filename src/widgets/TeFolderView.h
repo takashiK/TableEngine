@@ -52,8 +52,12 @@ public:
 
 	virtual TeFinder* makeFinder() = 0;
 
+public slots:
+	virtual void setFileShowMode(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed) = 0;
+
 signals:
 	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);
+	void focusIn();
 
 protected:
 	bool isDispatchable(TeTypes::WidgetType type, QEvent *event) const;

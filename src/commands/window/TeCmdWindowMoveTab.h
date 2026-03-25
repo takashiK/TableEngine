@@ -27,17 +27,12 @@
 
 class TeViewStore;
 
-class TeCmdSelectionStyle :
+class TeCmdWindowMoveTab :
     public TeCommandBase
 {
 public:
-    enum SelectionStyle {
-		None,
-        Explorer,
-        TableEngine
-    };
-	TeCmdSelectionStyle();
-	virtual ~TeCmdSelectionStyle();
+	TeCmdWindowMoveTab();
+	virtual ~TeCmdWindowMoveTab();
 
 	// Check if this command can process when item is not selected.
 	static bool isActive(TeViewStore* p_store);

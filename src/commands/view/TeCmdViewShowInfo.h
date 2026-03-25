@@ -27,17 +27,17 @@
 
 class TeViewStore;
 
-class TeCmdSelectionStyle :
+class TeCmdViewShowInfo :
     public TeCommandBase
 {
 public:
-    enum SelectionStyle {
-		None,
-        Explorer,
-        TableEngine
-    };
-	TeCmdSelectionStyle();
-	virtual ~TeCmdSelectionStyle();
+	enum ShowInfoType {
+		FileSize,
+		ModifiedDate,
+	};
+
+	TeCmdViewShowInfo();
+	virtual ~TeCmdViewShowInfo();
 
 	// Check if this command can process when item is not selected.
 	static bool isActive(TeViewStore* p_store);

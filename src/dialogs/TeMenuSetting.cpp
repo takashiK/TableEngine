@@ -278,7 +278,11 @@ void TeMenuSetting::loadSettings(QList<TeTreeWidget*>* p_itemList)
 			}
 			else if ( (p_parentItem != nullptr) && (indent < prvIndent) ) {
 				//change parent group
-				p_parentItem = p_parentItem->parent();
+				for(int i = 0; i < (prvIndent - indent); i++) {
+					if (p_parentItem != nullptr) {
+						p_parentItem = p_parentItem->parent();
+					}
+				}
 			}
 
 			p_prvItem = nullptr;

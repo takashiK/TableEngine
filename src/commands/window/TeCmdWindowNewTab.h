@@ -27,17 +27,12 @@
 
 class TeViewStore;
 
-class TeCmdSelectionStyle :
+class TeCmdWindowNewTab :
     public TeCommandBase
 {
 public:
-    enum SelectionStyle {
-		None,
-        Explorer,
-        TableEngine
-    };
-	TeCmdSelectionStyle();
-	virtual ~TeCmdSelectionStyle();
+	TeCmdWindowNewTab();
+	virtual ~TeCmdWindowNewTab();
 
 	// Check if this command can process when item is not selected.
 	static bool isActive(TeViewStore* p_store);

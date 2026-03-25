@@ -53,6 +53,7 @@ TeViewStore::TeViewStore(QObject *parent)
 	: QObject(parent)
 {
 	m_currentTabPlace = TAB_LEFT;
+	m_isNavigationVisible = true;
 	mp_dispatcher = nullptr;
 	mp_driveBar = nullptr;
 	mp_mainWindow = nullptr;
@@ -62,6 +63,12 @@ TeViewStore::TeViewStore(QObject *parent)
 	m_selectionMode = TeTypes::SELECTION_NONE;
 	mp_closeEventEmitter = nullptr;
 	mp_focusEventEmitter = nullptr;
+
+	m_fileInfoFlags = TeTypes::FILEINFO_SIZE | TeTypes::FILEINFO_MODIFIED;
+	m_fileTypeFlags = TeTypes::FILETYPE_NONE;
+	m_fileOrderBy = TeTypes::ORDER_NAME;
+	m_fileOrderReversed = false;
+	m_viewMode = TeTypes::FILEVIEW_SMALL_ICON;
 }
 
 TeViewStore::~TeViewStore()
@@ -349,24 +356,18 @@ QWidget * TeViewStore::mainWindow()
 
 int TeViewStore::currentTabPlace()
 {
+	qDebug() << "currentTabPlace:" << m_currentTabPlace;
 	return m_currentTabPlace;
 }
 
 int TeViewStore::currentTabIndex()
 {
-	int currentIndex = 0; 
-
-	//If FolderView is current then treeview that child of FolderView is set to left part of split.
-	QWidget* tree = mp_split->widget(0);
-
-	if (tree->inherits("TeFileTreeView")) {
-		for (int i = 0; i < TAB_MAX; i++) {
-			if (mp_tab[i]->indexOf(qobject_cast<TeFileTreeView*>(tree)->folderView()) >= 0 ) {
-				currentIndex = i;
-				break;
-			}
-		}
+	int currentIndex = mp_tab[currentTabPlace()]->currentIndex();
+	if (currentIndex < 0) {
+		return 0;
 	}
+
+	qDebug() << "currentTabIndex:" << currentIndex;
 
 	return currentIndex;
 }
@@ -453,11 +454,12 @@ void TeViewStore::setCurrentFolderView(TeFolderView * view)
 				//So we need call updategeometory() before call any geometoric function.
 				mp_tab[place]->updateGeometry();
 				mp_split->insertWidget(0, view->tree());
+				view->tree()->setHidden(!isNavigationVisible());
 			}
 			else {
 				//change current
 				mp_split->replaceWidget(0, view->tree());
-				view->tree()->setHidden(false);
+				view->tree()->setHidden(!isNavigationVisible());
 			}
 			tree = view->tree();
 		}
@@ -473,6 +475,20 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	folderView->list()->setSelectionMode(selectionMode());
 	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
 	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
+
+	connect(folderView, &TeFolderView::focusIn, [this, folderView]() {
+		if (currentFolderView() != folderView) {
+			int pos = tabPlace(folderView);
+			if (pos >= 0) {
+				m_currentTabPlace = pos;
+			}
+		}
+	});
+
+	folderView->list()->setFileViewMode(fileInfoFlags(), viewMode());
+	folderView->setFileShowMode(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+	connect(this, &TeViewStore::fileListViewModeChanged, folderView->list(), &TeFileListView::setFileViewMode);
+	connect(this, &TeViewStore::fileListShowModeChanged, folderView, &TeFileFolderView::setFileShowMode);
 
 	addFolderView(folderView, place);
 
@@ -601,8 +617,8 @@ void TeViewStore::changeRootPath(const QString& path, bool newView, int place)
 {
 	if (place >= TAB_MAX) return;
 
-	if (place < 1) {
-		place = currentTabIndex();
+	if (place < 0) {
+		place = currentTabPlace();
 	}
 
 	TeFolderView* view = getFolderView(place);
@@ -679,4 +695,100 @@ void TeViewStore::setSelectionMode(TeTypes::SelectionMode mode)
 		m_selectionMode = mode;
 		emit selectionModeChanged(mode);
 	}
+}
+
+bool TeViewStore::isDriveBarVisible() const
+{
+	return mp_driveBar && !mp_driveBar->isHidden();
+}
+
+void TeViewStore::setDriveBarVisible(bool visible)
+{
+	if (mp_driveBar) {
+		mp_driveBar->setHidden(!visible);
+	}
+}
+
+bool TeViewStore::isStatusBarVisible() const
+{
+	return mp_mainWindow && !mp_mainWindow->statusBar()->isHidden();
+}
+
+void TeViewStore::setStatusBarVisible(bool visible)
+{
+	if (mp_mainWindow) {
+		mp_mainWindow->statusBar()->setHidden(!visible);
+	}
+}
+
+bool TeViewStore::isToolBarVisible() const
+{
+	//return mp_mainWindow && !mp_mainWindow->toolBar()->isHidden();
+	return false; //ToolBarは今のところ実装しない。常に非表示。
+}
+
+void TeViewStore::setToolBarVisible(bool visible)
+{
+	//if (mp_mainWindow) {
+	//	mp_mainWindow->toolBar()->setHidden(!visible);
+	//}
+}
+
+bool TeViewStore::isNavigationVisible() const
+{
+	return m_isNavigationVisible;
+}
+
+void TeViewStore::setNavigationVisible(bool visible)
+{
+	if (m_isNavigationVisible != visible) {
+		m_isNavigationVisible = visible;
+		TeFileTreeView* tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
+		if (tree) {
+			tree->setHidden(!visible);
+		}
+	}
+}
+
+bool TeViewStore::isDetailVisible() const
+{
+	//return mp_tab[TAB_RIGHT] && !mp_tab[TAB_RIGHT]->isHidden();
+	return false; //Detailは今のところ実装しない。常に非表示。
+}
+
+void TeViewStore::setDetailVisible(bool visible)
+{
+	//if (mp_tab[TAB_RIGHT]) {
+	//	mp_tab[TAB_RIGHT]->setHidden(!visible);
+	//}
+}
+
+void TeViewStore::setFileInfoFlags(TeTypes::FileInfoFlags flags)
+{
+	m_fileInfoFlags = flags;
+	emit fileListViewModeChanged(fileInfoFlags(), viewMode());
+}
+
+void TeViewStore::setFileTypeFlags(TeTypes::FileTypeFlags flags)
+{
+	m_fileTypeFlags = flags;
+	emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+}
+
+void TeViewStore::setFileOrderBy(TeTypes::OrderType order)
+{
+	m_fileOrderBy = order;
+	emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+}
+
+void TeViewStore::setFileOrderReversed(bool reversed)
+{
+	m_fileOrderReversed = reversed;
+	emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+}
+
+void TeViewStore::setViewMode(TeTypes::FileViewMode mode)
+{
+	m_viewMode = mode;
+	emit fileListViewModeChanged(fileInfoFlags(), viewMode());
 }

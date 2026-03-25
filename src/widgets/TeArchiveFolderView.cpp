@@ -552,3 +552,12 @@ void TeArchiveFolderView::itemActivated(const QModelIndex & index)
 		setCurrentPath(indexToPath(index));
 	}
 }
+
+void TeArchiveFolderView::setFileShowMode(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed)
+{
+	// TODO: Implement file show mode in archive folder view.
+	Q_UNUSED(typeFlags);
+	Q_UNUSED(order);
+	Q_UNUSED(orderReversed);
+	//In archive folder view, file show mode is not supported.
+}

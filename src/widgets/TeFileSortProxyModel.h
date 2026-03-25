@@ -20,39 +20,23 @@
 
 #pragma once
 
-#include "commands/TeCommandBase.h"
+#include <QSortFilterProxyModel>
+#include "TeTypes.h"
 
-#include <QList>
-#include <QFlags>
-
-class TeViewStore;
-
-class TeCmdSelectionStyle :
-    public TeCommandBase
+class TeFileSortProxyModel : public QSortFilterProxyModel
 {
+    Q_OBJECT
 public:
-    enum SelectionStyle {
-		None,
-        Explorer,
-        TableEngine
-    };
-	TeCmdSelectionStyle();
-	virtual ~TeCmdSelectionStyle();
+    explicit TeFileSortProxyModel(QObject* parent = nullptr);
+    virtual ~TeFileSortProxyModel();
 
-	// Check if this command can process when item is not selected.
-	static bool isActive(TeViewStore* p_store);
-
-	// Check if this command is selected when item is selected.
-	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
-
-	// type of command
-	static QFlags<TeTypes::CmdType> type();
+    void setSortType(TeTypes::OrderType type);
+    TeTypes::OrderType sortType() const;
 
 protected:
-	// Execute command.
-	// return
-	//   true  : command is finished. after execute, this command is deleted.
-	//   false : command is still processing. after finish. you must call finish() to delete this command.
-	virtual bool execute(TeViewStore* p_store);
-};
+    virtual bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
+    static bool stringLessThan(const QString &left, const QString &right, Qt::CaseSensitivity cs, bool isLocaleAware);
 
+private:
+    TeTypes::OrderType m_sortType;
+};

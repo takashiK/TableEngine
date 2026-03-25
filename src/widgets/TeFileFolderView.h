@@ -32,6 +32,7 @@ class TeFileListView;
 class QFileSystemModel;
 class TeEventFilter;
 class TeDispatcher;
+class TeFileSortProxyModel;
 
 class TeFileFolderView : public TeFolderView
 {
@@ -57,6 +58,9 @@ public:
 
 	virtual TeFinder* makeFinder();
 
+public slots:
+	virtual void setFileShowMode(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed);
+
 protected:
 	void updatePath(const QString& root, const QString& current=QString());
 	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos);
@@ -68,6 +72,7 @@ private:
 
 	QFileSystemModel* mp_treeModel;
 	QFileSystemModel* mp_listModel;
+	TeFileSortProxyModel* mp_listSortModel;
 
 	TeEventFilter* mp_treeEvent;
 	TeEventFilter* mp_listEvent;

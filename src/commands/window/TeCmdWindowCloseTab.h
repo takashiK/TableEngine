@@ -27,17 +27,12 @@
 
 class TeViewStore;
 
-class TeCmdSelectionStyle :
+class TeCmdWindowCloseTab :
     public TeCommandBase
 {
 public:
-    enum SelectionStyle {
-		None,
-        Explorer,
-        TableEngine
-    };
-	TeCmdSelectionStyle();
-	virtual ~TeCmdSelectionStyle();
+	TeCmdWindowCloseTab();
+	virtual ~TeCmdWindowCloseTab();
 
 	// Check if this command can process when item is not selected.
 	static bool isActive(TeViewStore* p_store);

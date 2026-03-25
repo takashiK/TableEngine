@@ -41,8 +41,11 @@ public:
 
 	TeTypes::SelectionMode selectionMode() const;
 
+	virtual QModelIndex	indexAt(const QPoint &point) const;
+
 public slots:
 	void setSelectionMode(TeTypes::SelectionMode mode);
+	void setFileViewMode(TeTypes::FileInfoFlags infoFlags, TeTypes::FileViewMode viewMode);
 
 protected:
 	virtual void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;

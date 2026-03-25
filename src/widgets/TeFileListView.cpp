@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 #include "TeFileListView.h"
+#include "TeFileItemDelegate.h"
 
 #include <QKeyEvent>
 #include <QRubberBand>
@@ -215,13 +216,6 @@ void TeFileListView::mouseReleaseEvent(QMouseEvent* event)
 		if (".." == model()->data(topIndex, Qt::DisplayRole).toString()) {
 			selectionModel()->select(topIndex, QItemSelectionModel::Deselect);
 		}
-
-//		if (selectionModel()->isSelected(currentIndex())) {
-//			selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::Select);
-//		}
-//		else {
-//			selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::NoUpdate);
-//		}
 	}
 }
 
@@ -309,4 +303,65 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
 
 	//qDebug() << "QListView::selectionCommand flags:" << flags;
 	return flags;
+}
+
+QModelIndex TeFileListView::indexAt(const QPoint &point) const
+{
+	QModelIndex index = QListView::indexAt(point);
+	QRect rect = visualRect(index);
+	// unsense margin for empty space between items.
+	// this is convinient for user to select region between items.
+	rect.adjust(2, 2, -2, -2);
+	if (!rect.contains(point)) {
+		return QModelIndex();
+	}
+
+	return index;
+}
+
+void TeFileListView::setFileViewMode(TeTypes::FileInfoFlags infoFlags, TeTypes::FileViewMode viewMode)
+{
+	//file info
+	TeFileItemDelegate* delegate = qobject_cast<TeFileItemDelegate*>(itemDelegate());
+	if (delegate) {
+		delegate->setInfoFlags(infoFlags);
+	}
+
+	//view mode
+	switch (viewMode) {
+	case TeTypes::FILEVIEW_SMALL_ICON:
+		QListView::setViewMode(QListView::ListMode);
+		QListView::setFlow(QListView::TopToBottom);
+		QListView::setWrapping(true);
+		QListView::setIconSize(QSize(-1, -1));
+		QListView::setWordWrap(false);
+		QListView::setResizeMode(QListView::Adjust);
+		break;
+	case TeTypes::FILEVIEW_LARGE_ICON:
+		QListView::setViewMode(QListView::IconMode);
+		QListView::setFlow(QListView::LeftToRight);
+		QListView::setWrapping(true);
+		QListView::setIconSize(QSize(64, 64));
+		QListView::setWordWrap(true);
+		QListView::setResizeMode(QListView::Adjust);
+		break;
+	case TeTypes::FILEVIEW_HUGE_ICON:
+		QListView::setViewMode(QListView::IconMode);
+		QListView::setFlow(QListView::LeftToRight);
+		QListView::setWrapping(true);
+		QListView::setIconSize(QSize(192, 192));
+		QListView::setWordWrap(true);
+		QListView::setResizeMode(QListView::Adjust);
+		break;
+	case TeTypes::FILEVIEW_DETAIL_LIST:
+		QListView::setViewMode(QListView::ListMode);
+		QListView::setFlow(QListView::TopToBottom);
+		QListView::setWrapping(false);
+		QListView::setIconSize(QSize(-1, -1));
+		QListView::setWordWrap(false);
+		QListView::setResizeMode(QListView::Adjust);
+		break;
+	default:
+		break;
+	}
 }

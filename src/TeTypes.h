@@ -49,14 +49,47 @@ public:
 		SELECTION_EXPLORER,
 		SELECTION_TABLE_ENGINE
 	};
-
 	Q_ENUM(SelectionMode)
+
+	enum FileViewMode {
+		FILEVIEW_SMALL_ICON,
+		FILEVIEW_LARGE_ICON,
+		FILEVIEW_HUGE_ICON,
+		FILEVIEW_DETAIL_LIST
+	};
+	Q_ENUM(FileViewMode)
+
+	enum OrderType {
+		ORDER_NAME,
+		ORDER_SIZE,
+		ORDER_EXTENSION,
+		ORDER_MODIFIED
+	};
+	Q_ENUM(OrderType)
+
+	enum FileInfo {
+		FILEINFO_NONE        = 0x00,
+		FILEINFO_SIZE        = 0x01,
+		FILEINFO_MODIFIED    = 0x02,
+		FILEINFO_ALL		 = 0xFF,
+	};
+	Q_FLAG(FileInfo)
+	Q_DECLARE_FLAGS(FileInfoFlags, FileInfo)
+
+	enum FileType {
+		FILETYPE_NONE        = 0x00,
+		FILETYPE_HIDDEN      = 0x01,
+		FILETYPE_SYSTEM      = 0x02,
+		FILETYPE_ALL         = 0xFF,
+	};
+	Q_FLAG(FileType)
+	Q_DECLARE_FLAGS(FileTypeFlags, FileType)
 
 	enum CmdId {
 		CMDID_NONE,
 		CMDID_SYSTEM         = 0x00000000,
 		CMDID_SYSTEM_FILE    = CMDID_SYSTEM + 0x1000,     // Menu Item : File
-		CMDID_SYSTEM_FILE_NEW,                            // Create file
+		CMDID_SYSTEM_FILE_NEW,                            // #Create file
 		CMDID_SYSTEM_FILE_OPEN,                           // #Open file
 		CMDID_SYSTEM_FILE_COPY_TO,                        // #Copy to folder
 		CMDID_SYSTEM_FILE_MOVE_TO,                        // #Move to folder
@@ -97,10 +130,24 @@ public:
 		CMDID_SYSTEM_FOLDER_GOTO_ROOT,                    // #Go to root folder
 		CMDID_SYSTEM_FOLDER_GOTO_FOLDER,                  // #Go to folder
 		CMDID_SYSTEM_FOLDER_CHANGE_ROOT,                  // #Change root folder
-		CMDID_SYSTEM_FOLDER_FIND,                         // #find files
+		CMDID_SYSTEM_FOLDER_FIND,                         // #Find files   TODO: Implement find command
 
 		CMDID_SYSTEM_VIEW    = CMDID_SYSTEM + 0x4000,     // Menu item : View
-
+		CMDID_SYSTEM_VIEW_FILESIZE,					      // Show file size
+		CMDID_SYSTEM_VIEW_MODIFIED,					      // Show modified date
+		CMDID_SYSTEM_VIEW_SHOW_HIDDEN,					  // Show hidden files
+		CMDID_SYSTEM_VIEW_SHOW_SYSTEM,					  // Show system files
+		CMDID_SYSTEM_VIEW_FILTER,						  // File Filter setting
+		CMDID_SYSTEM_VIEW_ORDERBY_NAME,					  // Order by name
+		CMDID_SYSTEM_VIEW_ORDERBY_SIZE,					  // Order by size
+		CMDID_SYSTEM_VIEW_ORDERBY_EXTENSION,			  // Order by extension
+		CMDID_SYSTEM_VIEW_ORDERBY_MODIFIED,				  // Order by modified date
+		CMDID_SYSTEM_VIEW_ORDER_ASCENDING,				  // Order ascending
+		CMDID_SYSTEM_VIEW_ORDER_DESCENDING,		          // Order descending
+		CMDID_SYSTEM_VIEW_SMALL_ICON,					  // Show small icon
+		CMDID_SYSTEM_VIEW_LARGE_ICON,					  // Show large icon
+		CMDID_SYSTEM_VIEW_HUGE_ICON,					  // Show huge icon
+		CMDID_SYSTEM_VIEW_DETAIL_LIST,			          // Show detail list
 
 		CMDID_SYSTEM_TOOL    = CMDID_SYSTEM + 0x5000,     // Menu item : Tool
 		CMDID_SYSTEM_TOOL_VIEW_FILE,					  // #View file
@@ -109,11 +156,11 @@ public:
 		CMDID_SYSTEM_TOOL_EXECUTE,                        // Execute Tool with parameters
 
 		CMDID_SYSTEM_WINDOW  = CMDID_SYSTEM + 0x6000,     // Menu item : Window
-		CMDID_SYSTEM_WINDOW_TOOLBAR,                      // Show ToolBar
-		CMDID_SYSTEM_WINDOW_DRIVEBAR,                     // Show DriveBar
-		CMDID_SYSTEM_WINDOW_STATUSBAR,                    // Show StatusBar
-		CMDID_SYSTEM_WINDOW_NAVIGATION,                   // Show Navigation
-		CMDID_SYSTEM_WINDOW_DETAIL,                       // Show Detail
+		CMDID_SYSTEM_WINDOW_TOOLBAR,                      // #Show ToolBar
+		CMDID_SYSTEM_WINDOW_DRIVEBAR,                     // #Show DriveBar
+		CMDID_SYSTEM_WINDOW_STATUSBAR,                    // #Show StatusBar
+		CMDID_SYSTEM_WINDOW_NAVIGATION,                   // #Show Navigation
+		CMDID_SYSTEM_WINDOW_DETAIL,                       // #Show Detail  TODO: Implement Detail view
 		CMDID_SYSTEM_WINDOW_NEW_TAB,		              // New Tab
 		CMDID_SYSTEM_WINDOW_CLOSE_TAB,                    // Close Tab
 		CMDID_SYSTEM_WINDOW_MOVE_TAB,                     // Move Tab
@@ -165,5 +212,7 @@ public:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(TeTypes::CmdTypes)
+Q_DECLARE_OPERATORS_FOR_FLAGS(TeTypes::FileInfoFlags)
+Q_DECLARE_OPERATORS_FOR_FLAGS(TeTypes::FileTypeFlags)
 
 typedef QMap<QString, QVariant> TeCmdParam;

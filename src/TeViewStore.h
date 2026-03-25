@@ -47,7 +47,19 @@ public:
 		TAB_MAX,
 	};
 
-	Q_PROPERTY(TeTypes::SelectionMode selectionMode READ selectionMode WRITE setSelectionMode NOTIFY selectionModeChanged)	
+	Q_PROPERTY(TeTypes::SelectionMode selectionMode READ selectionMode WRITE setSelectionMode NOTIFY selectionModeChanged)
+	Q_PROPERTY(bool driveBarVisible READ isDriveBarVisible WRITE setDriveBarVisible)
+	Q_PROPERTY(bool statusBarVisible READ isStatusBarVisible WRITE setStatusBarVisible)
+	Q_PROPERTY(bool toolBarVisible READ isToolBarVisible WRITE setToolBarVisible)
+	Q_PROPERTY(bool navigationVisible READ isNavigationVisible WRITE setNavigationVisible)
+	Q_PROPERTY(bool detailVisible READ isDetailVisible WRITE setDetailVisible)
+
+	Q_PROPERTY(QFlags<TeTypes::FileInfo> fileInfoFlags READ fileInfoFlags WRITE setFileInfoFlags)
+	Q_PROPERTY(QFlags<TeTypes::FileType> fileTypeFlags READ fileTypeFlags WRITE setFileTypeFlags)
+	Q_PROPERTY(TeTypes::OrderType fileOrderBy READ fileOrderBy WRITE setFileOrderBy)
+	Q_PROPERTY(bool fileOrderReversed READ isFileOrderReversed WRITE setFileOrderReversed)
+	Q_PROPERTY(TeTypes::FileViewMode viewMode READ viewMode WRITE setViewMode)
+
 
 	TeViewStore(QObject *parent = Q_NULLPTR);
 	virtual  ~TeViewStore();
@@ -90,14 +102,38 @@ public:
 	void registerFloatingWidget(QWidget* widget);
 
 	TeTypes::SelectionMode selectionMode() const { return m_selectionMode; }
+	bool isDriveBarVisible() const;
+	bool isStatusBarVisible() const;
+	bool isToolBarVisible() const;
+	bool isNavigationVisible() const;
+	bool isDetailVisible() const;
+
+	TeTypes::FileInfoFlags fileInfoFlags() const { return m_fileInfoFlags; };
+	TeTypes::FileTypeFlags fileTypeFlags() const { return m_fileTypeFlags; };
+	TeTypes::OrderType fileOrderBy() const { return m_fileOrderBy; };
+	bool isFileOrderReversed() const { return m_fileOrderReversed; };
+	TeTypes::FileViewMode viewMode() const { return m_viewMode; };
 
 signals:
 	void selectionModeChanged(TeTypes::SelectionMode mode);
-
+	void fileListViewModeChanged(TeTypes::FileInfoFlags infoFlags, TeTypes::FileViewMode viewMode);
+	void fileListShowModeChanged(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed);
+	
 public slots:
 	void floatingWidgetClosed(QWidget* widget, QEvent* event);
 	void focusFolderViewChanged(QWidget* widget, QEvent* event);
 	void setSelectionMode(TeTypes::SelectionMode mode);
+	void setDriveBarVisible(bool visible);
+	void setStatusBarVisible(bool visible);
+	void setToolBarVisible(bool visible);
+	void setNavigationVisible(bool visible);
+	void setDetailVisible(bool visible);
+
+	void setFileInfoFlags(TeTypes::FileInfoFlags flags);
+	void setFileTypeFlags(TeTypes::FileTypeFlags flags);
+	void setFileOrderBy(TeTypes::OrderType order);
+	void setFileOrderReversed(bool reversed);
+	void setViewMode(TeTypes::FileViewMode mode);
 
 protected:
 	void addFolderView(TeFolderView* folderView, int place = -1);
@@ -113,6 +149,13 @@ private:
 	TeTypes::SelectionMode m_selectionMode;
 
 	int  m_currentTabPlace;
+	bool m_isNavigationVisible;
+
+	TeTypes::FileInfoFlags m_fileInfoFlags;
+	TeTypes::FileTypeFlags m_fileTypeFlags;
+	TeTypes::OrderType m_fileOrderBy;
+	bool m_fileOrderReversed;
+	TeTypes::FileViewMode m_viewMode;
 
 	TeDispatcher* mp_dispatcher;
 	TeEventEmitter* mp_closeEventEmitter;

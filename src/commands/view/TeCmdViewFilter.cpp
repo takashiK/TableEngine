@@ -18,41 +18,47 @@
 **
 ****************************************************************************/
 
-#pragma once
+#include "TeCmdViewFilter.h"
+#include "TeUtils.h"
 
-#include "commands/TeCommandBase.h"
-
-#include <QList>
-#include <QFlags>
-
-class TeViewStore;
-
-class TeCmdSelectionStyle :
-    public TeCommandBase
+TeCmdViewFilter::TeCmdViewFilter()
 {
-public:
-    enum SelectionStyle {
-		None,
-        Explorer,
-        TableEngine
-    };
-	TeCmdSelectionStyle();
-	virtual ~TeCmdSelectionStyle();
+}
 
-	// Check if this command can process when item is not selected.
-	static bool isActive(TeViewStore* p_store);
+TeCmdViewFilter::~TeCmdViewFilter()
+{
+}
 
-	// Check if this command is selected when item is selected.
-	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
+bool TeCmdViewFilter::isActive(TeViewStore* p_store)
+{
+	NOT_USED(p_store);
+	return false;
+}
 
-	// type of command
-	static QFlags<TeTypes::CmdType> type();
+bool TeCmdViewFilter::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+{
+	NOT_USED(p_store);
+	NOT_USED(p_cmdParam);
+	return false;
+}
 
-protected:
-	// Execute command.
-	// return
-	//   true  : command is finished. after execute, this command is deleted.
-	//   false : command is still processing. after finish. you must call finish() to delete this command.
-	virtual bool execute(TeViewStore* p_store);
-};
+QFlags<TeTypes::CmdType> TeCmdViewFilter::type()
+{
+	return QFlags<TeTypes::CmdType>(
+		TeTypes::CMD_TRIGGER_NORMAL
+		// TeTypes::CMD_TRIGGER_SELECT
 
+		| TeTypes::CMD_CATEGORY_TREE
+		| TeTypes::CMD_CATEGORY_LIST
+		| TeTypes::CMD_CATEGORY_OTHER
+
+		| TeTypes::CMD_TARGET_FILE
+		| TeTypes::CMD_TARGET_DIRECTORY
+	);
+}
+
+
+bool TeCmdViewFilter::execute(TeViewStore* p_store)
+{
+	return true;
+}

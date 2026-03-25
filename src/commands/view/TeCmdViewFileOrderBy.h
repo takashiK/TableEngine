@@ -27,17 +27,19 @@
 
 class TeViewStore;
 
-class TeCmdSelectionStyle :
+class TeCmdViewFileOrderBy :
     public TeCommandBase
 {
 public:
-    enum SelectionStyle {
-		None,
-        Explorer,
-        TableEngine
-    };
-	TeCmdSelectionStyle();
-	virtual ~TeCmdSelectionStyle();
+	enum OrderByType {
+		FileName,
+		FileSize,
+		Extension,
+		ModifiedDate,
+	};
+
+	TeCmdViewFileOrderBy();
+	virtual ~TeCmdViewFileOrderBy();
 
 	// Check if this command can process when item is not selected.
 	static bool isActive(TeViewStore* p_store);

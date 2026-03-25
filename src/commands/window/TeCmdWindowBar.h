@@ -27,17 +27,21 @@
 
 class TeViewStore;
 
-class TeCmdSelectionStyle :
+class TeCmdWindowBar :
     public TeCommandBase
 {
 public:
-    enum SelectionStyle {
+	enum WindowBarType {
 		None,
-        Explorer,
-        TableEngine
-    };
-	TeCmdSelectionStyle();
-	virtual ~TeCmdSelectionStyle();
+		ToolBar,
+		DriveBar,
+		StatusBar,
+		Navigation,
+		Detail
+	};
+
+	TeCmdWindowBar();
+	virtual ~TeCmdWindowBar();
 
 	// Check if this command can process when item is not selected.
 	static bool isActive(TeViewStore* p_store);
