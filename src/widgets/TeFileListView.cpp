@@ -345,6 +345,7 @@ void TeFileListView::setFileViewMode(TeTypes::FileInfoFlags infoFlags, TeTypes::
 		QListView::setIconSize(QSize(64, 64));
 		QListView::setWordWrap(true);
 		QListView::setResizeMode(QListView::Adjust);
+		QListView::setUniformItemSizes(true);
 		break;
 	case TeTypes::FILEVIEW_HUGE_ICON:
 		QListView::setViewMode(QListView::IconMode);
@@ -353,6 +354,7 @@ void TeFileListView::setFileViewMode(TeTypes::FileInfoFlags infoFlags, TeTypes::
 		QListView::setIconSize(QSize(192, 192));
 		QListView::setWordWrap(true);
 		QListView::setResizeMode(QListView::Adjust);
+		QListView::setUniformItemSizes(true);
 		break;
 	case TeTypes::FILEVIEW_DETAIL_LIST:
 		QListView::setViewMode(QListView::ListMode);

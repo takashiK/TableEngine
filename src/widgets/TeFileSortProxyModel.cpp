@@ -92,6 +92,14 @@ QVariant TeFileSortProxyModel::data(const QModelIndex& index, int role) const
 
         mp_imageLoader->requestLoad(info.absoluteFilePath(), m_pixmapSize);
         return QVariant();
+    } else if (role == Qt::DecorationRole){
+        if(data(index).toString() == "..") {
+            //folder up icon
+            QIcon icon(":/TableEngine/folder_up.png");
+            if (!icon.isNull()) {
+                return icon;
+            }
+        }
     }
 
     return QSortFilterProxyModel::data(index, role);

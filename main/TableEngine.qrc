@@ -71,6 +71,7 @@
         <file alias="system.png">Resources/icon/iconmonstr-tools-13-64.png</file>
         <file alias="smallIcon.png">Resources/icon/iconmonstr-view-3-64.png</file>
         <file alias="sortName.png">Resources/icon/iconmonstr-id-card-5-64.png</file>
+        <file alias="folder_up.png">Resources/icon/iconmonstr-arrow_R-60-240.png</file>
     </qresource>
     <qresource prefix="/Style">
         <file alias="stylesheet_dark.css">Resources/stylesheet/stylesheet_dark.css</file>
