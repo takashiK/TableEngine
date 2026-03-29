@@ -31,6 +31,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QPixmapCache>
 
 #include <QSettings>
 
@@ -58,6 +59,8 @@ int main(int argc, char *argv[])
 	//setup dispatcher for command.
 	TeDispatcher dispatcher;
 	dispatcher.setFactory(TeCommandFactory::factory());
+
+	QPixmapCache::setCacheLimit(51200); // 50MB
 
 	//create main window
 	TeViewStore store;

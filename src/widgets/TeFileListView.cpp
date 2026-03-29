@@ -39,6 +39,7 @@ TeFileListView::TeFileListView(QWidget *parent)
 	m_selectionMode = TeTypes::SELECTION_NONE;
 	m_pressedIndex = QModelIndex();
 	QListView::setSelectionMode(QAbstractItemView::NoSelection);
+	setItemDelegate(new TeFileItemDelegate(this));
 
 //	QListView::setStyleSheet("QListView::item::focus { background: palette(highlight); }");
 }

@@ -21,22 +21,42 @@
 #pragma once
 
 #include <QSortFilterProxyModel>
+#include <QSize>
 #include "TeTypes.h"
+
+class TeImageLoader;
 
 class TeFileSortProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 public:
+    enum Role {
+        FilePixmap = Qt::UserRole + 50,
+    };
+    Q_ENUM(Role)
+
     explicit TeFileSortProxyModel(QObject* parent = nullptr);
     virtual ~TeFileSortProxyModel();
 
     void setSortType(TeTypes::OrderType type);
     TeTypes::OrderType sortType() const;
 
+    void setPixmapSize(const QSize& size);
+    QSize pixmapSize() const;
+
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    void setSourceModel(QAbstractItemModel* sourceModel) override;
+
 protected:
     virtual bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
     static bool stringLessThan(const QString &left, const QString &right, Qt::CaseSensitivity cs, bool isLocaleAware);
 
+private slots:
+    void onImageReady(const QString& filePath);
+    void onSourceRootPathChanged();
+
 private:
     TeTypes::OrderType m_sortType;
+    QSize m_pixmapSize;
+    TeImageLoader* mp_imageLoader;
 };

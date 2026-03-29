@@ -19,13 +19,20 @@
 ****************************************************************************/
 
 #include "TeFileSortProxyModel.h"
+#include "TeImageLoader.h"
 
 #include <QFileSystemModel>
+#include <QImageReader>
+#include <QPixmapCache>
 
 TeFileSortProxyModel::TeFileSortProxyModel(QObject* parent)
     : QSortFilterProxyModel(parent)
+    , m_sortType(TeTypes::ORDER_NAME)
+    , m_pixmapSize(128, 128)
+    , mp_imageLoader(new TeImageLoader(this))
 {
-    m_sortType = TeTypes::ORDER_NAME;
+    connect(mp_imageLoader, &TeImageLoader::imageReady,
+            this, &TeFileSortProxyModel::onImageReady);
 }
 
 TeFileSortProxyModel::~TeFileSortProxyModel()
@@ -41,6 +48,92 @@ void TeFileSortProxyModel::setSortType(TeTypes::OrderType type)
 TeTypes::OrderType TeFileSortProxyModel::sortType() const
 {
     return m_sortType;
+}
+
+void TeFileSortProxyModel::setPixmapSize(const QSize& size)
+{
+    if (m_pixmapSize == size)
+        return;
+
+    m_pixmapSize = size;
+
+    if (rowCount() > 0) {
+        emit dataChanged(index(0, 0),
+                         index(rowCount() - 1, 0),
+                         {FilePixmap});
+    }
+}
+
+QSize TeFileSortProxyModel::pixmapSize() const
+{
+    return m_pixmapSize;
+}
+
+QVariant TeFileSortProxyModel::data(const QModelIndex& index, int role) const
+{
+    if (role == FilePixmap) {
+        QVariant fileInfoVar = QSortFilterProxyModel::data(index, QFileSystemModel::FileInfoRole);
+        if (!fileInfoVar.isValid())
+            return QVariant();
+
+        QFileInfo info = qvariant_cast<QFileInfo>(fileInfoVar);
+        if (!info.isFile())
+            return QVariant();
+
+        if (!QImageReader::supportedImageFormats().contains(info.suffix().toLower().toUtf8()))
+            return QVariant();
+
+        QDateTime lastModified = info.lastModified();
+        QString key = TeImageLoader::cacheKey(info.absoluteFilePath(), m_pixmapSize, lastModified);
+        QPixmap pixmap;
+        if (QPixmapCache::find(key, &pixmap)) {
+            return pixmap;
+        }
+
+        mp_imageLoader->requestLoad(info.absoluteFilePath(), m_pixmapSize);
+        return QVariant();
+    }
+
+    return QSortFilterProxyModel::data(index, role);
+}
+
+void TeFileSortProxyModel::setSourceModel(QAbstractItemModel* model)
+{
+    if (sourceModel()) {
+        if (auto* fsModel = qobject_cast<QFileSystemModel*>(sourceModel())) {
+            disconnect(fsModel, &QFileSystemModel::rootPathChanged,
+                       this, &TeFileSortProxyModel::onSourceRootPathChanged);
+        }
+    }
+
+    QSortFilterProxyModel::setSourceModel(model);
+
+    if (auto* fsModel = qobject_cast<QFileSystemModel*>(model)) {
+        connect(fsModel, &QFileSystemModel::rootPathChanged,
+                this, &TeFileSortProxyModel::onSourceRootPathChanged);
+    }
+}
+
+void TeFileSortProxyModel::onImageReady(const QString& filePath)
+{
+    QFileSystemModel* fsModel = qobject_cast<QFileSystemModel*>(sourceModel());
+    if (!fsModel)
+        return;
+
+    QModelIndex sourceIndex = fsModel->index(filePath);
+    if (!sourceIndex.isValid())
+        return;
+
+    QModelIndex proxyIndex = mapFromSource(sourceIndex);
+    if (!proxyIndex.isValid())
+        return;
+
+    emit dataChanged(proxyIndex, proxyIndex, {FilePixmap});
+}
+
+void TeFileSortProxyModel::onSourceRootPathChanged()
+{
+    mp_imageLoader->clearPendingRequests();
 }
 
 bool TeFileSortProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const

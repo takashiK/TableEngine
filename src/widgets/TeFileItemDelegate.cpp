@@ -1,5 +1,5 @@
 #include "TeFileItemDelegate.h"
-
+#include "TeFileSortProxyModel.h"
 #include <QApplication>
 #include <QFileInfo>
 #include <QFileSystemModel>
@@ -57,6 +57,13 @@ void TeFileItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 
     if (opt.decorationPosition == QStyleOptionViewItem::Top) {
         // IconMode: custom text wrapping with WrapAtWordBoundaryOrAnywhere
+        QVariant fileInfoVar = index.data(TeFileSortProxyModel::FilePixmap);
+        if (fileInfoVar.isValid()) {
+            QPixmap pixmap = qvariant_cast<QPixmap>(fileInfoVar);
+            if (!pixmap.isNull()) {
+                opt.icon = QIcon(pixmap);
+            }
+        }
         paintIconMode(painter, opt, style, widget);
     } else {
         // ListMode: check for QFileSystemModel extended info

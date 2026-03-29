@@ -27,7 +27,6 @@
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
 #include "TeFileFinder.h"
-#include "TeFileItemDelegate.h"
 #include "TeFileSortProxyModel.h"
 
 #include <QLayout>
@@ -115,6 +114,7 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	mp_listModel->setFilter(QDir::Drives | QDir::AllDirs | QDir::Files | QDir::NoDot );
 	mp_listSortModel = new TeFileSortProxyModel(this);
 	mp_listSortModel->setSourceModel(mp_listModel);
+	mp_listSortModel->setPixmapSize(QSize(192,192));
 	mp_listView->setModel(mp_listSortModel);
 	setFileShowMode(TeTypes::FILETYPE_ALL, TeTypes::ORDER_NAME, false);
 	mp_listView->setFileViewMode(TeTypes::FILEINFO_NONE, TeTypes::FILEVIEW_SMALL_ICON);
@@ -122,7 +122,6 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
 //	mp_listView->setSpacing(1);
 	mp_listView->setSelectionRectVisible(true);
-	mp_listView->setItemDelegate(new TeFileItemDelegate(this));
 
 	//mp_listView->setSelectionModel(new DebugItemSelectionModel(mp_listModel));
 
