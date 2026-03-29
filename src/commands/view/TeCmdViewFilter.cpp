@@ -20,6 +20,14 @@
 
 #include "TeCmdViewFilter.h"
 #include "TeUtils.h"
+#include "TeViewStore.h"
+#include "widgets/TeFolderView.h"
+#include "widgets/TeFileListView.h"
+#include "widgets/TeFileSortProxyModel.h"
+
+#include "dialogs/TeFilterDialog.h"
+
+#include <QRegularExpression>
 
 TeCmdViewFilter::TeCmdViewFilter()
 {
@@ -60,5 +68,35 @@ QFlags<TeTypes::CmdType> TeCmdViewFilter::type()
 
 bool TeCmdViewFilter::execute(TeViewStore* p_store)
 {
+	TeFilterDialog dialog(p_store->mainWindow());
+	dialog.setForceFileOnly(true);
+	if(dialog.exec() == QDialog::Accepted) {
+		QString filter = dialog.filter();
+		bool fileOnly = dialog.fileOnly();
+		bool caseSensitive = dialog.caseSensitive();
+		bool regexp = dialog.regexp();
+
+		TeFileListView* p_list = p_store->currentFolderView()->list();
+		TeFileSortProxyModel* proxyModel = qobject_cast<TeFileSortProxyModel*>(p_list->model());
+
+		if (proxyModel) {
+			QRegularExpression re;
+			if (filter.isEmpty()){
+			} else if (regexp) {
+				if(!filter.startsWith("^")){
+					re.setPattern("^" + filter);
+				}else{
+					re.setPattern(filter);
+				}
+				re.setPatternOptions(caseSensitive ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
+			}
+			else {
+				QRegularExpression tmp = QRegularExpression::fromWildcard(filter, caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+				re.swap(tmp);
+			}
+			proxyModel->setFileRegex(re);
+		}
+	}
+	
 	return true;
 }

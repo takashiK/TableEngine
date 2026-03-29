@@ -122,6 +122,17 @@ void TeFileSortProxyModel::setSourceModel(QAbstractItemModel* model)
     }
 }
 
+void TeFileSortProxyModel::setFileRegex(const QRegularExpression &re)
+{
+    m_fileRegex = re;
+    invalidateFilter();
+}
+
+QRegularExpression TeFileSortProxyModel::fileRegex() const
+{
+    return m_fileRegex;
+}
+
 void TeFileSortProxyModel::onImageReady(const QString& filePath)
 {
     QFileSystemModel* fsModel = qobject_cast<QFileSystemModel*>(sourceModel());
@@ -142,6 +153,30 @@ void TeFileSortProxyModel::onImageReady(const QString& filePath)
 void TeFileSortProxyModel::onSourceRootPathChanged()
 {
     mp_imageLoader->clearPendingRequests();
+}
+
+bool TeFileSortProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
+{
+    if(QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent)){
+        if(m_fileRegex.pattern().isEmpty()){
+            return true;
+        }
+        QModelIndex index = sourceModel()->index(source_row, 0, source_parent);
+        if (!index.isValid())
+            return false;
+
+        QVariant var = sourceModel()->data(index, QFileSystemModel::FileInfoRole);
+        if (!var.isValid())
+            return true;
+
+        QFileInfo fileInfo = var.value<QFileInfo>();
+        if (fileInfo.isDir()) {
+            return true; // Always include directories
+        }else{
+            return m_fileRegex.match(fileInfo.fileName()).hasMatch();
+        }
+    }
+    return false;
 }
 
 bool TeFileSortProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const

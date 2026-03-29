@@ -47,7 +47,11 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     void setSourceModel(QAbstractItemModel* sourceModel) override;
 
+    void setFileRegex(const QRegularExpression& re);
+    QRegularExpression fileRegex() const;
+
 protected:
+    virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
     virtual bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
     static bool stringLessThan(const QString &left, const QString &right, Qt::CaseSensitivity cs, bool isLocaleAware);
 
@@ -59,4 +63,5 @@ private:
     TeTypes::OrderType m_sortType;
     QSize m_pixmapSize;
     TeImageLoader* mp_imageLoader;
+    QRegularExpression m_fileRegex;
 };

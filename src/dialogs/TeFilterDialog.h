@@ -13,6 +13,7 @@ public:
 	TeFilterDialog(QWidget *parent = nullptr);
 	~TeFilterDialog();
 
+	void setForceFileOnly(bool fileOnly);
 	QString filter() const;
 	bool fileOnly() const;
 	bool caseSensitive() const;

@@ -50,6 +50,12 @@ TeFilterDialog::TeFilterDialog(QWidget *parent)
 TeFilterDialog::~TeFilterDialog()
 {}
 
+void TeFilterDialog::setForceFileOnly(bool fileOnly)
+{
+    mp_fileOnly->setChecked(fileOnly);
+	mp_fileOnly->setDisabled(fileOnly);
+}
+
 QString TeFilterDialog::filter() const
 {
 	return mp_filter->text();

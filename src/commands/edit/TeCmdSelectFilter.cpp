@@ -79,7 +79,11 @@ bool TeCmdSelectFilter::execute(TeViewStore* p_store)
 
 		QRegularExpression re;
 		if (regexp) {
-			re.setPattern(filter);
+			if(!filter.startsWith("^")){
+				re.setPattern("^" + filter);
+			}else{
+				re.setPattern(filter);
+			}
 			re.setPatternOptions(caseSensitive ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
 		}
 		else {
