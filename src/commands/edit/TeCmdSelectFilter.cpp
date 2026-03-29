@@ -91,7 +91,7 @@ bool TeCmdSelectFilter::execute(TeViewStore* p_store)
 		for (int i = 0; i < p_list->model()->rowCount(root); i++) {
 			QModelIndex index = p_list->model()->index(i, 0, root);
 			QString name = p_list->model()->data(index, Qt::DisplayRole).toString();
-			if (!fileOnly || !isDir(p_list->model(), index)) {
+			if (!fileOnly || !isDir(index)) {
 				if (re.match(name).hasMatch()) {
 					selectionModel->select(index, QItemSelectionModel::Select);
 				}

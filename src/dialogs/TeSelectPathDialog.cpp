@@ -95,6 +95,7 @@ TeSelectPathDialog::~TeSelectPathDialog()
 void TeSelectPathDialog::setTargetPath(const QString & path)
 {
 	QFileSystemModel* model = qobject_cast<QFileSystemModel*>(mp_tree->model());
+	Q_ASSERT(model != nullptr);
 	QModelIndex index = model->index(path);
 	if (index.isValid()) {
 		mp_tree->setCurrentIndex(index);

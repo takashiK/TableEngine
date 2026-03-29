@@ -25,7 +25,6 @@
 #include "widgets/TeFileFolderView.h"
 #include "platform/platform_util.h"
 
-#include <QFileSystemModel>
 #include <QFileInfo>
 #include <QMessageBox>
 

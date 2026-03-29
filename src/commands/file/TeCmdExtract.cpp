@@ -27,11 +27,10 @@
 
 #include "TeArchive.h"
 
-#include <QFileSystemModel>
-#include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QDir>
 
 TeCmdExtract::TeCmdExtract()
 {

@@ -24,9 +24,6 @@
 #include "widgets/TeFileFolderView.h"
 #include "TeArchive.h"
 
-
-#include <QFileSystemModel>
-#include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -99,8 +96,6 @@ bool TeCmdArchive::execute(TeViewStore* p_store)
 
 void TeCmdArchive::archiveItems(TeViewStore* p_store, const QStringList & list, const QString & targetPath, const QString& currentPath)
 {
-	QDir dir;
-
 	bool bSuccess = true;
 	QFileInfo info(targetPath);
 

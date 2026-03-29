@@ -133,21 +133,21 @@ public:
 		CMDID_SYSTEM_FOLDER_FIND,                         // #Find files   TODO: Implement find command
 
 		CMDID_SYSTEM_VIEW    = CMDID_SYSTEM + 0x4000,     // Menu item : View
-		CMDID_SYSTEM_VIEW_FILESIZE,					      // Show file size
-		CMDID_SYSTEM_VIEW_MODIFIED,					      // Show modified date
-		CMDID_SYSTEM_VIEW_SHOW_HIDDEN,					  // Show hidden files
-		CMDID_SYSTEM_VIEW_SHOW_SYSTEM,					  // Show system files
-		CMDID_SYSTEM_VIEW_FILTER,						  // File Filter setting
-		CMDID_SYSTEM_VIEW_ORDERBY_NAME,					  // Order by name
-		CMDID_SYSTEM_VIEW_ORDERBY_SIZE,					  // Order by size
-		CMDID_SYSTEM_VIEW_ORDERBY_EXTENSION,			  // Order by extension
-		CMDID_SYSTEM_VIEW_ORDERBY_MODIFIED,				  // Order by modified date
-		CMDID_SYSTEM_VIEW_ORDER_ASCENDING,				  // Order ascending
-		CMDID_SYSTEM_VIEW_ORDER_DESCENDING,		          // Order descending
-		CMDID_SYSTEM_VIEW_SMALL_ICON,					  // Show small icon
-		CMDID_SYSTEM_VIEW_LARGE_ICON,					  // Show large icon
-		CMDID_SYSTEM_VIEW_HUGE_ICON,					  // Show huge icon
-		CMDID_SYSTEM_VIEW_DETAIL_LIST,			          // Show detail list
+		CMDID_SYSTEM_VIEW_FILESIZE,					      // #Show file size
+		CMDID_SYSTEM_VIEW_MODIFIED,					      // #Show modified date
+		CMDID_SYSTEM_VIEW_SHOW_HIDDEN,					  // #Show hidden files
+		CMDID_SYSTEM_VIEW_SHOW_SYSTEM,					  // #Show system files
+		CMDID_SYSTEM_VIEW_FILTER,						  // #File Filter setting
+		CMDID_SYSTEM_VIEW_ORDERBY_NAME,					  // #Order by name
+		CMDID_SYSTEM_VIEW_ORDERBY_SIZE,					  // #Order by size
+		CMDID_SYSTEM_VIEW_ORDERBY_EXTENSION,			  // #Order by extension
+		CMDID_SYSTEM_VIEW_ORDERBY_MODIFIED,				  // #Order by modified date
+		CMDID_SYSTEM_VIEW_ORDER_ASCENDING,				  // #Order ascending
+		CMDID_SYSTEM_VIEW_ORDER_DESCENDING,		          // #Order descending
+		CMDID_SYSTEM_VIEW_SMALL_ICON,					  // #Show small icon
+		CMDID_SYSTEM_VIEW_LARGE_ICON,					  // #Show large icon
+		CMDID_SYSTEM_VIEW_HUGE_ICON,					  // #Show huge icon
+		CMDID_SYSTEM_VIEW_DETAIL_LIST,			          // #Show detail list
 
 		CMDID_SYSTEM_TOOL    = CMDID_SYSTEM + 0x5000,     // Menu item : Tool
 		CMDID_SYSTEM_TOOL_VIEW_FILE,					  // #View file
@@ -161,9 +161,9 @@ public:
 		CMDID_SYSTEM_WINDOW_STATUSBAR,                    // #Show StatusBar
 		CMDID_SYSTEM_WINDOW_NAVIGATION,                   // #Show Navigation
 		CMDID_SYSTEM_WINDOW_DETAIL,                       // #Show Detail  TODO: Implement Detail view
-		CMDID_SYSTEM_WINDOW_NEW_TAB,		              // New Tab
-		CMDID_SYSTEM_WINDOW_CLOSE_TAB,                    // Close Tab
-		CMDID_SYSTEM_WINDOW_MOVE_TAB,                     // Move Tab
+		CMDID_SYSTEM_WINDOW_NEW_TAB,		              // #New Tab
+		CMDID_SYSTEM_WINDOW_CLOSE_TAB,                    // #Close Tab
+		CMDID_SYSTEM_WINDOW_MOVE_TAB,                     // #Move Tab
 
 		CMDID_SYSTEM_SETTING = CMDID_SYSTEM + 0x7000,     // Menu item : Setting
 		CMDID_SYSTEM_SETTING_OPTION,                      // #Global Setting

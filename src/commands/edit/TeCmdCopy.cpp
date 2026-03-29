@@ -22,8 +22,6 @@
 #include "TeUtils.h"
 #include "platform/platform_util.h"
 
-#include <QAbstractItemView>
-#include <QFileSystemModel>
 #include <QURL>
 #include <QList>
 

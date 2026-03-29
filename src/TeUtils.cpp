@@ -39,24 +39,27 @@ bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths)
 			p_itemView = p_folder->list();
 		}
 
-		QFileSystemModel* model = qobject_cast<QFileSystemModel*>(p_itemView->model());
+		if (p_itemView->selectionModel()->hasSelection()) {
+			//target selected files.
+			QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
+			for (const QModelIndex& index : indexList)
+			{
+				if (index.column() == 0) {
+					QVariant var = index.data(QFileSystemModel::FileInfoRole);
+					Q_ASSERT(var.isValid() && var.canConvert<QFileInfo>());
+					QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
 
-		if (model != nullptr) {
-			if (p_itemView->selectionModel()->hasSelection()) {
-				//target selected files.
-				QModelIndexList indexList = p_itemView->selectionModel()->selectedIndexes();
-				for (const QModelIndex& index : indexList)
-				{
-					if (index.column() == 0) {
-						p_paths->append(model->filePath(index));
-					}
+					p_paths->append(fileInfo.filePath());
 				}
 			}
-			else {
-				//no files selected. so use current file.
-				if (p_itemView->currentIndex().isValid()) {
-					p_paths->append(model->filePath(p_itemView->currentIndex()));
-				}
+		}
+		else {
+			//no files selected. so use current file.
+			if (p_itemView->currentIndex().isValid()) {
+				QVariant var = p_itemView->currentIndex().data(QFileSystemModel::FileInfoRole);
+				Q_ASSERT(var.isValid() && var.canConvert<QFileInfo>());
+				QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
+				p_paths->append(fileInfo.filePath());
 			}
 		}
 	}
@@ -77,12 +80,11 @@ QString getCurrentItem(TeViewStore* p_store)
 			p_itemView = p_folder->list();
 		}
 
-		QFileSystemModel* model = qobject_cast<QFileSystemModel*>(p_itemView->model());
-
-		if (model != nullptr) {
-			if (p_itemView->currentIndex().isValid()) {
-				return model->filePath(p_itemView->currentIndex());
-			}
+		if (p_itemView->currentIndex().isValid()) {
+			QVariant var = p_itemView->currentIndex().data(QFileSystemModel::FileInfoRole);
+			Q_ASSERT(var.isValid() && var.canConvert<QFileInfo>());
+			QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
+			return fileInfo.filePath();
 		}
 	}
 	return QString();
@@ -120,13 +122,13 @@ void updateFavorites(const QStringList& list)
 	settings.endGroup();
 }
 
-bool isDir(const QAbstractItemModel* p_model, const QModelIndex& index)
+bool isDir(const QModelIndex& index)
 {
-	if (p_model != nullptr && index.isValid()) {
-		const QFileSystemModel* model = qobject_cast<const QFileSystemModel*>(p_model);
-		if (model != nullptr) {
-			return model->isDir(index);
-		}
+	if (index.isValid()) {
+		QVariant var = index.data(QFileSystemModel::FileInfoRole);
+		Q_ASSERT(var.isValid() && var.canConvert<QFileInfo>());
+		QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
+		return fileInfo.isDir();
 	}
 	return false;
 }

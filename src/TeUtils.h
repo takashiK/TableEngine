@@ -22,7 +22,7 @@ QString getCurrentFolder(TeViewStore* p_store);
 QStringList getFavorites();
 void updateFavorites(const QStringList& list);
 
-bool isDir(const QAbstractItemModel* p_model, const QModelIndex& index);
+bool isDir(const QModelIndex& index);
 
 TeFileType getFileType(const QString& path);
 

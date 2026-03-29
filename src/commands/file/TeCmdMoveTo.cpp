@@ -27,12 +27,9 @@
 #include "platform/platform_util.h"
 
 #include <QMainWindow>
-#include <QFileSystemModel>
-#include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
-
-
+#include <QDir>
 
 TeCmdMoveTo::TeCmdMoveTo()
 {

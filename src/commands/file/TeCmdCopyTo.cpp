@@ -26,9 +26,8 @@
 #include "dialogs/TeAskCreationModeDialog.h"
 #include "platform/platform_util.h"
 
-#include <QFileSystemModel>
-#include <QDir>
 #include <QFileInfo>
+#include <QDir>
 #include <QMessageBox>
 
 TeCmdCopyTo::TeCmdCopyTo()

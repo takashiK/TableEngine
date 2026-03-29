@@ -217,16 +217,23 @@ void TeFileFolderView::showContextMenu(const QAbstractItemView * pView, const QP
 		QPersistentModelIndex index = pView->indexAt(pos);
 		if (index.isValid() && index == pView->currentIndex()) {
 			//ContextMenu for the item
-			QFileSystemModel* fmodel = qobject_cast<QFileSystemModel*>(pView->model());
 			QStringList files;
 			if (pView->selectionModel()->hasSelection()) {
 				QModelIndexList list = pView->selectionModel()->selectedIndexes();
 				for (auto& sindex : list) {
-					files.append(fmodel->filePath(sindex));
+					QVariant var = sindex.data(QFileSystemModel::FileInfoRole);
+					if (var.isValid() && var.canConvert<QFileInfo>()) {
+						QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
+						files.append(fileInfo.filePath());
+					}
 				}
 			}
 			else {
-				files.append(fmodel->filePath(index));
+				QVariant var = index.data(QFileSystemModel::FileInfoRole);
+				if (var.isValid() && var.canConvert<QFileInfo>()) {
+					QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
+					files.append(fileInfo.filePath());
+				}
 			}
 			::showFilesContext(gpos.x(), gpos.y(), files);
 		}

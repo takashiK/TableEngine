@@ -40,7 +40,6 @@
 #include <QToolBar>
 #include <QLabel>
 #include <QStatusBar>
-#include <QFileSystemModel>
 #include <QHeaderView>
 #include <QSplitter>
 #include <QHBoxLayout>
@@ -48,6 +47,7 @@
 #include <QSettings>
 #include <QStack>
 #include <QDebug>
+#include <QDir>
 
 TeViewStore::TeViewStore(QObject *parent)
 	: QObject(parent)
@@ -356,7 +356,7 @@ QWidget * TeViewStore::mainWindow()
 
 int TeViewStore::currentTabPlace()
 {
-	qDebug() << "currentTabPlace:" << m_currentTabPlace;
+	//qDebug() << "currentTabPlace:" << m_currentTabPlace;
 	return m_currentTabPlace;
 }
 
@@ -367,7 +367,7 @@ int TeViewStore::currentTabIndex()
 		return 0;
 	}
 
-	qDebug() << "currentTabIndex:" << currentIndex;
+	//qDebug() << "currentTabIndex:" << currentIndex;
 
 	return currentIndex;
 }

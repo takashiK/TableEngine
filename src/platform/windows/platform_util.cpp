@@ -156,7 +156,7 @@ namespace {
 //
 bool threadInitialize(QApplication* a)
 {
-	bool result = SUCCEEDED(CoInitialize(NULL));
+	bool result = SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE));
 
 	if (result) {
 		//setup eventfilter for windows message.
@@ -283,7 +283,11 @@ void showFileProperties(const QString& path)
 
 void openFile(const QString& path)
 {
-	ShellExecute(NULL,L"open", reinterpret_cast<LPCWSTR>(path.utf16()), NULL, NULL, SW_SHOWNORMAL);
+	auto res = ShellExecute(NULL,L"open", reinterpret_cast<LPCWSTR>(path.utf16()), NULL, NULL, SW_SHOWNORMAL);
+	if(reinterpret_cast<int>(res) <= 32) {
+		//error
+		qDebug() << "Failed to open file:" << path << "  Error code:" << reinterpret_cast<int>(res);
+	}
 }
 
 bool copyFiles(const QStringList & files, const QString & path)

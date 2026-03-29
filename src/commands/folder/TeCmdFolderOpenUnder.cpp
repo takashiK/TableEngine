@@ -26,7 +26,6 @@
 #include "widgets/TeFileTreeView.h"
 #include "widgets/TeFileListView.h"
 
-#include <QFileSystemModel>
 #include <QModelIndex>
 
 TeCmdFolderOpenUnder::TeCmdFolderOpenUnder()
