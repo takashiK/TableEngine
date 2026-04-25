@@ -36,14 +36,7 @@ TeFolderView* TeFinder::relatedView() const
 
 void TeFinder::startSearch(const TeSearchQuery& query)
 {
-	if (m_workerThread) {
-		m_cancelFlag.storeRelaxed(1);
-		m_workerThread->wait();
-		delete m_workerThread;
-		m_workerThread = nullptr;
-	}
-	reset();
-	m_cancelFlag.storeRelaxed(0);
+	reset();   // stops any running worker and clears results
 
 	m_workerThread = QThread::create([this, query]() {
 		doSearch(query);
@@ -61,6 +54,13 @@ void TeFinder::cancelSearch()
 
 void TeFinder::reset()
 {
+	if (m_workerThread) {
+		m_cancelFlag.storeRelaxed(1);
+		m_workerThread->wait();
+		delete m_workerThread;
+		m_workerThread = nullptr;
+	}
+	m_cancelFlag.storeRelaxed(0);
 	QMutexLocker lock(&m_resultsMutex);
 	m_results.clear();
 }
