@@ -20,7 +20,7 @@
 
 #include "TeCmdKeySetting.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "dialogs/TeKeySetting.h"
 
 

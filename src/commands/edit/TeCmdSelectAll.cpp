@@ -22,7 +22,7 @@
 #include "TeViewStore.h"
 #include "widgets/TeFolderView.h"
 #include "widgets/TeFileListView.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 
 #include <QAbstractItemModel>
 

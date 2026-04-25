@@ -21,7 +21,7 @@
 #pragma once
 
 #include "TeFolderView.h"
-#include "TeHistory.h"
+#include "utils/TeHistory.h"
 
 #include <QModelIndex>
 #include <QStringList>

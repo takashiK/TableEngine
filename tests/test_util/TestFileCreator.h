@@ -23,8 +23,8 @@
 #include <QString>
 #include <QDateTime>
 
-#include "TeFileFinder.h"
-#include "TeFileInfo.h"
+#include "utils/TeFileFinder.h"
+#include "utils/TeFileInfo.h"
 #include <QStandardItem>
 
 void createFileTree(const QString& dest, const QStringList& paths, int extend_mbytes=0);

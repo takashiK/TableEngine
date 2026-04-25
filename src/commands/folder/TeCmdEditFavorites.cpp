@@ -20,8 +20,8 @@
 
 #include "TeCmdEditFavorites.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
-#include "TeFavorites.h"
+#include "utils/TeUtils.h"
+#include "utils/TeFavorites.h"
 
 #include "dialogs/TePathListDialog.h"
 

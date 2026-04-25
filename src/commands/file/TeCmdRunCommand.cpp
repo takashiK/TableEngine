@@ -20,7 +20,7 @@
 
 #include "TeCmdRunCommand.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "dialogs/TeCommandInputDialog.h"
 
 #include <QProcess>

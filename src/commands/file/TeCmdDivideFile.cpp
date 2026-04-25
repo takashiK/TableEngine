@@ -20,7 +20,7 @@
 
 #include "TeCmdDivideFile.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "dialogs/TeDivideDialog.h"
 
 #include <QDir>

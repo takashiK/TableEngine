@@ -1,8 +1,8 @@
 #pragma once
 
 #include "widgets/TeFolderView.h"
-#include "TeHistory.h"
-#include "TeFileInfo.h"
+#include "utils/TeHistory.h"
+#include "utils/TeFileInfo.h"
 
 class TeEventFilter;
 class QAbstractItemView;

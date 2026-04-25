@@ -20,7 +20,7 @@
 
 #include "TeCmdCombineFile.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "dialogs/TeCombineDialog.h"
 
 #include <QStringList>

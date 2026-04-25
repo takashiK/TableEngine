@@ -20,9 +20,9 @@
 
 #include "TeCmdArchive.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "widgets/TeFileFolderView.h"
-#include "TeArchive.h"
+#include "utils/TeArchive.h"
 
 #include <QFileInfo>
 #include <QMessageBox>

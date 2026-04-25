@@ -20,7 +20,7 @@
 
 #include "TeCmdRename.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 
 #include <QStringList>
 #include <QInputDialog>

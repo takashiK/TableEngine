@@ -23,7 +23,7 @@
 #include "dialogs/TeFilePathDialog.h"
 #include "widgets/TeFolderView.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 
 #include <QMessageBox>
 #include <QDir>

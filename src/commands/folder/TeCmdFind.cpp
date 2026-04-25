@@ -19,11 +19,13 @@
 ****************************************************************************/
 
 #include "TeCmdFind.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 #include "widgets/TeFolderView.h"
-#include "TeFinder.h"
-
+#include "utils/TeFinder.h"
+#include "utils/TeSearchQuery.h"
+#include "dialogs/TeFindDialog.h"
+	
 
 TeCmdFind::TeCmdFind()
 {
@@ -68,6 +70,15 @@ bool TeCmdFind::execute(TeViewStore* p_store)
 		return true;
 	}
 
+	TeFindDialog dlg(p_store->mainWindow());
+	if (dlg.exec() == QDialog::Accepted)
+	{
+		const QString targetPath = p_store->currentFolderView()->currentPath();
+		const TeSearchQuery query = TeSearchQuery::fromDialog(dlg, targetPath);
+		if (query.isValid()) {
+			pfinder->startSearch(query);
+		}
+	}
 
 	return true;
 }

@@ -1,6 +1,6 @@
 #include "TeDocument.h"
 #include "TeDocumentSettings.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 
 #include <QFile>
 #include <QTextCodec>

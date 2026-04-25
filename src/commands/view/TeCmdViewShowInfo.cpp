@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdViewShowInfo.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
 TeCmdViewShowInfo::TeCmdViewShowInfo()

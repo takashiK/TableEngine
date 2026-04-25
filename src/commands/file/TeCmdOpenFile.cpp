@@ -21,7 +21,7 @@
 #include "TeCmdOpenFile.h"
 
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "widgets/TeFileFolderView.h"
 #include "platform/platform_util.h"
 

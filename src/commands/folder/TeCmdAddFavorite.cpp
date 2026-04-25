@@ -19,12 +19,12 @@
 ****************************************************************************/
 
 #include "TeCmdAddFavorite.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 #include "dialogs/TeFilePathDialog.h"
 #include "TeSettings.h"
-#include "TeFavorites.h"
-#include "TeHistory.h"
+#include "utils/TeFavorites.h"
+#include "utils/TeHistory.h"
 #include "widgets/TeFolderView.h"
 
 #include <QFileInfo>

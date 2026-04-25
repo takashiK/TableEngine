@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdWindowBar.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
 TeCmdWindowBar::TeCmdWindowBar()

@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdTemplate.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 
 TeCmdTemplate::TeCmdTemplate()
 {

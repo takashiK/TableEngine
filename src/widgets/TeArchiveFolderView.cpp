@@ -23,9 +23,9 @@
 #include "TeEventFilter.h"
 #include "TeFileTreeView.h"
 #include "TeFileListView.h"
-#include "TeArchiveFinder.h"
+#include "utils/TeArchiveFinder.h"
 
-#include <TeArchive.h>
+#include "utils/TeArchive.h"
 
 #include <QFile>
 #include <QStandardItemModel>

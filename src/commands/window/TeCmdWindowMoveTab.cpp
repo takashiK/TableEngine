@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdWindowMoveTab.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
 TeCmdWindowMoveTab::TeCmdWindowMoveTab()

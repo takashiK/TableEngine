@@ -25,7 +25,7 @@
 #include <QAbstractItemView>
 #include "TeDispatchable.h"
 #include "TeFolderView.h"
-#include "TeHistory.h"
+#include "utils/TeHistory.h"
 
 class TeFileTreeView;
 class TeFileListView;

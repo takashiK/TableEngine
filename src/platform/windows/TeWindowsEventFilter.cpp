@@ -1,6 +1,6 @@
 #include "TeWindowsEventFilter.h"
 #include "platform/TeNativeEvent.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 
 #include <QApplication>
 

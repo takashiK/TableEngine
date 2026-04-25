@@ -31,7 +31,7 @@
 #include "commands/TeCommandInfo.h"
 #include "commands/folder/TeCmdFolderChangeRoot.h"
 #include "TeEventEmitter.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "dialogs/TeFilePathDialog.h"
 
 #include <QMenu>

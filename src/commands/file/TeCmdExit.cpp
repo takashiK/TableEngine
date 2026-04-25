@@ -20,7 +20,7 @@
 
 #include "TeCmdExit.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 
 TeCmdExit::TeCmdExit()
 {

@@ -26,7 +26,7 @@
 #include "TeSettings.h"
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
-#include "TeFileFinder.h"
+#include "utils/TeFileFinder.h"
 #include "TeFileSortProxyModel.h"
 
 #include <QLayout>

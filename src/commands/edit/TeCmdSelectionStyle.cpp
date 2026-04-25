@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdSelectionStyle.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
 TeCmdSelectionStyle::TeCmdSelectionStyle()

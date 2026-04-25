@@ -20,7 +20,7 @@
 
 #include "TeCmdCopyTo.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "widgets/TeFileFolderView.h"
 #include "dialogs/TeFilePathDialog.h"
 #include "dialogs/TeAskCreationModeDialog.h"

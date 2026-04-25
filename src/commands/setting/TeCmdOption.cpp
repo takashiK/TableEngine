@@ -20,7 +20,7 @@
 
 #include "TeCmdOption.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "dialogs/TeOptionSetting.h"
 #include <QDialog>
 

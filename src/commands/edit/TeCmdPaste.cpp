@@ -22,7 +22,7 @@
 #include "platform/platform_util.h"
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 
 #include <QGuiApplication>
 #include <QClipboard>

@@ -20,7 +20,7 @@
 
 #include "TeCmdFolderOpenAll.h"
 
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeFileTreeView.h"

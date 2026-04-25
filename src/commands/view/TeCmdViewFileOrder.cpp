@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdViewFileOrder.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
 TeCmdViewFileOrder::TeCmdViewFileOrder()

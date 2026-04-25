@@ -2,7 +2,7 @@
 #include "widgets/TeFileTreeView.h"
 #include "widgets/TeFileListView.h"
 #include "TeEventFilter.h"
-#include "TeFileInfoAcsr.h"
+#include "utils/TeFileInfoAcsr.h"
 
 #include <QStandardItemModel>
 #include <QHBoxLayout>

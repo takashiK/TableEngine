@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdProperties.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "platform/platform_util.h"
 
 #include <QURL>

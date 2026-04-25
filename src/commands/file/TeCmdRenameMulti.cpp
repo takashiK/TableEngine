@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdRenameMulti.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 #include "dialogs/TeRenameMultiDialog.h"
 

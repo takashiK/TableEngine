@@ -3,7 +3,7 @@
 #include "viewer/document/TeDocViewer.h"
 #include "viewer/picture/TePictureViewer.h"
 #include "viewer/binary/TeBinaryViewer.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
 #include <QMessageBox>

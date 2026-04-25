@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeCmdPrevFolder.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 #include "TeViewStore.h"
 #include "widgets/TeFolderView.h"
 

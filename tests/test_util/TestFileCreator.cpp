@@ -24,7 +24,7 @@
 #include <cstdint>
 
 #include "TestFileCreator.h"
-#include "TeFileInfo.h"
+#include "utils/TeFileInfo.h"
 #include <QDir>
 #include <QRegularExpression>
 

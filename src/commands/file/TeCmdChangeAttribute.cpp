@@ -20,7 +20,7 @@
 
 #include "TeCmdChangeAttribute.h"
 #include "TeViewStore.h"
-#include "TeUtils.h"
+#include "utils/TeUtils.h"
 
 #include <QInputDialog>
 
