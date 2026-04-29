@@ -24,6 +24,7 @@
 #include "widgets/TeFileTreeView.h"
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeArchiveFolderView.h"
+#include "widgets/TeFindFolderView.h"
 #include "widgets/TeDriveBar.h"
 #include "TeDispatcher.h"
 #include "TeSettings.h"
@@ -83,6 +84,9 @@ TeViewStore::~TeViewStore()
 	//TeFolderView is child of QTab. so this action do "delete TeFolderView before QMainWindow."
 	if (mp_tab[TAB_LEFT]) delete mp_tab[TAB_LEFT];
 	if (mp_tab[TAB_RIGHT]) delete mp_tab[TAB_RIGHT];
+	// mp_findView is owned by a tab (addFolderView makes it a tab child).
+	// If it was never added to a tab, delete it explicitly.
+	if (mp_findView && mp_findView->parent() == nullptr) delete mp_findView;
 	if (mp_mainWindow) delete mp_mainWindow;
 
 	for (auto widget : m_floatingWidgets) {
@@ -510,6 +514,24 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 	return folderView;
 }
 
+TeFindFolderView* TeViewStore::findFolderView()
+{
+	if (mp_findView == nullptr) {
+		mp_findView = new TeFindFolderView;
+		mp_findView->setDispatcher(this);
+		mp_findView->list()->setFocusPolicy(Qt::ClickFocus);
+		mp_findView->list()->setSelectionMode(selectionMode());
+		connect(this, &TeViewStore::selectionModeChanged,
+		        mp_findView->list(), &TeFileListView::setSelectionMode);
+		mp_findView->tree()->setFocusPolicy(Qt::ClickFocus);
+		addFolderView(mp_findView, TAB_LEFT);
+	} else if (tabPlace(mp_findView) < 0) {
+		// It was closed from the tab — re-add it
+		addFolderView(mp_findView, TAB_LEFT);
+	}
+	return mp_findView;
+}
+
 void TeViewStore::deleteFolderView(TeFolderView * view)
 {
 	if (view == nullptr) return;
@@ -518,6 +540,9 @@ void TeViewStore::deleteFolderView(TeFolderView * view)
 	int index = tabPlace(view);
 
 	bool isCurrentDelete = (folder == view);
+	if (view == mp_findView) {
+		mp_findView = nullptr;
+	}
 	delete view;
 
 	//If Left Tab are empty then Right Tab entries move to Left Tab.

@@ -71,6 +71,13 @@ QList<TeFileInfo> TeFinder::results() const
 	return m_results;
 }
 
+QList<TeFileInfo> TeFinder::resultsSnapshot(int& count) const
+{
+	QMutexLocker lock(&m_resultsMutex);
+	count = m_results.size();
+	return m_results;
+}
+
 int TeFinder::resultCount() const
 {
 	QMutexLocker lock(&m_resultsMutex);
@@ -84,11 +91,13 @@ bool TeFinder::isCancelled() const
 
 void TeFinder::reportItems(const QList<TeFileInfo>& items)
 {
+	int startOffset;
 	{
 		QMutexLocker lock(&m_resultsMutex);
+		startOffset = m_results.size();
 		m_results.append(items);
 	}
-	emit itemsFound(items);
+	emit itemsFound(startOffset, items);
 }
 
 void TeFinder::onWorkerFinished()

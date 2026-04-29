@@ -22,6 +22,7 @@
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
 #include "widgets/TeFolderView.h"
+#include "widgets/TeFindFolderView.h"
 #include "utils/TeFinder.h"
 #include "utils/TeSearchQuery.h"
 #include "dialogs/TeFindDialog.h"
@@ -65,20 +66,26 @@ QFlags<TeTypes::CmdType> TeCmdFind::type()
 bool TeCmdFind::execute(TeViewStore* p_store)
 {
 	TeFinder* pfinder = p_store->currentFolderView()->makeFinder();
-	if (pfinder == nullptr)
-	{
+	if (pfinder == nullptr) {
 		return true;
 	}
 
 	TeFindDialog dlg(p_store->mainWindow());
-	if (dlg.exec() == QDialog::Accepted)
-	{
-		const QString targetPath = p_store->currentFolderView()->currentPath();
-		const TeSearchQuery query = TeSearchQuery::fromDialog(dlg, targetPath);
-		if (query.isValid()) {
-			pfinder->startSearch(query);
-		}
+	if (dlg.exec() != QDialog::Accepted) {
+		delete pfinder;
+		return true;
 	}
+
+	const QString targetPath = p_store->currentFolderView()->currentPath();
+	const TeSearchQuery query = TeSearchQuery::fromDialog(dlg, targetPath);
+	if (!query.isValid()) {
+		delete pfinder;
+		return true;
+	}
+
+	TeFindFolderView* findView = p_store->findFolderView();
+	findView->addSearchEntry(query, pfinder);  // ownership transferred to findView
+	p_store->setCurrentFolderView(findView);
 
 	return true;
 }

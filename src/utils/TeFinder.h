@@ -50,9 +50,21 @@ public:
 	/*! Thread-safe count of all results collected so far. */
 	int resultCount() const;
 
+	/*!
+	 * Atomically returns a copy of all current results and stores their count
+	 * in \a count.  Connect itemsFound() first, then call this to avoid the
+	 * connect/snapshot race: any batch emitted between connect() and this call
+	 * will have offset < count and can be safely skipped in the slot.
+	 */
+	QList<TeFileInfo> resultsSnapshot(int& count) const;
+
 signals:
-	/*! Emitted in the GUI thread for each directory batch of matching entries. */
-	void itemsFound(const QList<TeFileInfo>& newItems);
+	/*!
+	 * Emitted in the GUI thread for each directory batch of matching entries.
+	 * \param offset Index of the first item of this batch within results().
+	 *               Use with resultsSnapshot() to avoid race-condition gaps.
+	 */
+	void itemsFound(int offset, const QList<TeFileInfo>& newItems);
 	void searchFinished();
 	void searchCancelled();
 

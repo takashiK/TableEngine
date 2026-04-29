@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 #include "TeFileSortProxyModel.h"
-#include "TeImageLoader.h"
+#include "utils/TeImageLoader.h"
 
 #include <QFileSystemModel>
 #include <QImageReader>

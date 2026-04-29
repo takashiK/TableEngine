@@ -28,6 +28,7 @@ class TeMainWindow;
 class TeFolderView;
 class TeFileFolderView;
 class TeArchiveFolderView;
+class TeFindFolderView;
 class TeEventEmitter;
 class QTabWidget;
 class TeDispatcher;
@@ -93,6 +94,12 @@ public:
 
 	TeFileFolderView* createFolderView( const QString& path, int place = -1 );
 	TeArchiveFolderView* createArchiveFolderView(const QString& path, int place = -1);
+
+	/*!
+	 * Returns the single TeFindFolderView, creating and adding it to the tab
+	 * on first call.  If it was previously closed from the tab it is re-added.
+	 */
+	TeFindFolderView* findFolderView();
 
 	void deleteFolderView( TeFolderView* view);
 	void moveFolderView( TeFolderView* view, int place = 0, int position = -1);
@@ -161,4 +168,5 @@ private:
 	TeEventEmitter* mp_closeEventEmitter;
 	TeEventEmitter* mp_focusEventEmitter;
 	QList<QWidget*> m_floatingWidgets;
+	TeFindFolderView* mp_findView = nullptr;
 };

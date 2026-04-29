@@ -37,6 +37,7 @@ HEADERS += $$files(viewer/binary/*.h,true)
 HEADERS += $$files(dialogs/*.h,true)
 HEADERS += $$files(platform/*.h)
 HEADERS += $$files(widgets/*.h,true)
+HEADERS += $$files(utils/*.h,true)
 
 SOURCES += $$files(*.cpp)
 SOURCES += $$files(commands/*.cpp,true)
@@ -44,8 +45,9 @@ SOURCES += $$files(viewer/document/*.cpp,true)
 SOURCES += $$files(viewer/picture/*.cpp,true)
 SOURCES += $$files(viewer/binary/*.cpp,true)
 SOURCES += $$files(dialogs/*.cpp,true)
-HEADERS += $$files(platform/*.cpp,true)
+SOURCES += $$files(platform/*.cpp,true)
 SOURCES += $$files(widgets/*.cpp,true)
+SOURCES += $$files(utils/*.cpp,true)
 
 win32-msvc {
     HEADERS += $$files(platform/windows/*.h,true)

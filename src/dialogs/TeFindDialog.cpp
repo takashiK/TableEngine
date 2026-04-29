@@ -36,8 +36,15 @@ TeFindDialog::TeFindDialog(QWidget *parent)
 	connect(m_advancedButton, &QPushButton::clicked, this, &TeFindDialog::toggleAdvancedPanel);
 	searchBarLayout->addWidget(m_advancedButton);
 
-	m_searchButton = new QPushButton(tr("Search"), this);
-	searchBarLayout->addWidget(m_searchButton);
+	QVBoxLayout *buttonLayout = new QVBoxLayout();	
+	QPushButton *searchButton = new QPushButton(tr("Search"), this);
+	connect(searchButton, &QPushButton::clicked, this, &TeFindDialog::accept);
+	searchButton->setDefault(true);
+	buttonLayout->addWidget(searchButton);
+	QPushButton *cancelButton = new QPushButton(tr("Cancel"), this);
+	connect(cancelButton, &QPushButton::clicked, this, &TeFindDialog::reject);
+	buttonLayout->addWidget(cancelButton);
+	searchBarLayout->addLayout(buttonLayout);
 
 	mainLayout->addLayout(searchBarLayout);
 

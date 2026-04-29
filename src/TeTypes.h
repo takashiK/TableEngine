@@ -40,6 +40,7 @@ public:
 		WT_TREEVIEW,
 		WT_LISTVIEW,
 		WT_ARCHIVEVIEW,
+		WT_FINDVIEW,
 		WT_DRIVEBAR,
 	};
 	Q_ENUM(WidgetType)

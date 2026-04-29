@@ -1,5 +1,5 @@
 #include "TePictureViewer.h"
-#include "widgets/TeThumbnailProvider.h"
+#include "utils/TeThumbnailProvider.h"
 
 #include <QMenuBar>
 #include <QMenu>
