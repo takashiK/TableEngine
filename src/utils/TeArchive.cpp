@@ -26,6 +26,18 @@
 #include <QDir>
 #include <algorithm>
 
+/**
+ * @file TeArchive.cpp
+ * @brief Implementation of TeArchive.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeArchive.cpp
+ * @brief Implementation of TeArchive.
+ * @ingroup utility
+ */
+
 /*!
 	\namespace TeArchive
 	\ingroup utility

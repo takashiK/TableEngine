@@ -10,6 +10,13 @@
 #include <QHBoxLayout>
 #include <QDialogButtonBox>
 
+/**
+ * @file TeRenameMultiDialog.cpp
+ * @brief Declaration of TeRenameMultiDialog.
+ * @ingroup dialogs
+ */
+
+
 TeRenameMultiDialog::TeRenameMultiDialog(QWidget *parent)
 	: QDialog(parent)
 {

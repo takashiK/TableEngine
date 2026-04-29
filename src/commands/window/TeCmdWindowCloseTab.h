@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdWindowCloseTab.h
+ * @brief Declaration of TeCmdWindowCloseTab.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdWindowCloseTab :

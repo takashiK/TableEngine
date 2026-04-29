@@ -25,6 +25,11 @@
 #include <QRubberBand>
 #include <QApplication>
 #include <qdebug.h>
+/**
+ * @file TeFileListView.cpp
+ * @brief Implementation of TeFileListView.
+ * @ingroup widgets
+ */
 
 /*!
 	\class TeFileListView

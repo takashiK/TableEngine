@@ -2,6 +2,13 @@
 #include <QString>
 #include <QMap>
 
+/**
+ * @file TeMarkupLoader.h
+ * @brief Declaration of TeMarkupLoader.
+ * @ingroup viewer
+ */
+
+
 class TeMarkupLoader
 {
 public:

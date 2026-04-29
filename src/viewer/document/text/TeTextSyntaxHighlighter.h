@@ -5,6 +5,13 @@
 
 #include "TeTextSyntax.h"
 
+/**
+ * @file TeTextSyntaxHighlighter.h
+ * @brief Declaration of TeTextSyntaxHighlighter.
+ * @ingroup viewer
+ */
+
+
 class TeTextSyntaxHighlighter :
     public QSyntaxHighlighter
 {

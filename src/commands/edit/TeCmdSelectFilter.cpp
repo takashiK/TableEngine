@@ -29,6 +29,12 @@
 #include <QItemSelectionModel>
 #include <QRegularexpression>
 
+/**
+ * @file TeCmdSelectFilter.cpp
+ * @brief Implementation of TeCmdSelectFilter.
+ * @ingroup commands
+ */
+
 TeCmdSelectFilter::TeCmdSelectFilter()
 {
 }

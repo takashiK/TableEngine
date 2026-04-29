@@ -3,6 +3,13 @@
 #include <QDialog>
 #include <QFileInfo>
 
+/**
+ * @file TeDivideDialog.h
+ * @brief Declaration of TeDivideDialog.
+ * @ingroup dialogs
+ */
+
+
 class QLineEdit;
 class QSpinBox;
 

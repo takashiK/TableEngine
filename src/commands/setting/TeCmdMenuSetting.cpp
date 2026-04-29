@@ -23,6 +23,12 @@
 #include "utils/TeUtils.h"
 #include "dialogs/TeMenuSetting.h"
 
+/**
+ * @file TeCmdMenuSetting.cpp
+ * @brief Implementation of TeCmdMenuSetting.
+ * @ingroup commands
+ */
+
 
 TeCmdMenuSetting::TeCmdMenuSetting()
 {

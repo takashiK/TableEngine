@@ -30,6 +30,12 @@
 #include <QClipboard>
 #include <QStringList>
 
+/**
+ * @file TeCmdProperties.cpp
+ * @brief Implementation of TeCmdProperties.
+ * @ingroup commands
+ */
+
 
 TeCmdProperties::TeCmdProperties()
 {

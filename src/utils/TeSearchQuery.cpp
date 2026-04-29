@@ -1,6 +1,18 @@
 #include "TeSearchQuery.h"
 #include "dialogs/TeFindDialog.h"
 
+/**
+ * @file TeSearchQuery.cpp
+ * @brief Implementation of TeSearchQuery.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeSearchQuery.cpp
+ * @brief Implementation of TeSearchQuery.
+ * @ingroup utility
+ */
+
 bool TeSearchQuery::isValid() const
 {
 	return !targetPath.isEmpty();

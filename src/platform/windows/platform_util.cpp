@@ -40,6 +40,13 @@
 
 #include <vector>
 
+/**
+ * @file platform_util.cpp
+ * @brief Declaration of platform_util.
+ * @ingroup platform
+ */
+
+
 //////////////////////////////////////////////////////////
 //
 // Namespace

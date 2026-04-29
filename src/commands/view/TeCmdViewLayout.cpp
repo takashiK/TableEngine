@@ -22,6 +22,12 @@
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
+/**
+ * @file TeCmdViewLayout.cpp
+ * @brief Implementation of TeCmdViewLayout.
+ * @ingroup commands
+ */
+
 TeCmdViewLayout::TeCmdViewLayout()
 {
 }

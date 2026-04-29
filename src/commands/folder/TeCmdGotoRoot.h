@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdGotoRoot.h
+ * @brief Declaration of TeCmdGotoRoot.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdGotoRoot :

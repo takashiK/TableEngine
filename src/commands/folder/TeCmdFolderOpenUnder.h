@@ -21,6 +21,13 @@
 #pragma once
 #include "commands/TeCommandBase.h"
 
+/**
+ * @file TeCmdFolderOpenUnder.h
+ * @brief Declaration of TeCmdFolderOpenUnder.
+ * @ingroup commands
+ */
+
+
 class TeFileTreeView;
 class TeCmdFolderOpenUnder :
 	public TeCommandBase

@@ -2,6 +2,13 @@
 
 #include <QMainWindow>
 
+/**
+ * @file TeDocViewer.h
+ * @brief Declaration of TeDocViewer.
+ * @ingroup viewer
+ */
+
+
 class QWebEngineView;
 class QWebChannel;
 

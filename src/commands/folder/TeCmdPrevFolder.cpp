@@ -23,6 +23,12 @@
 #include "TeViewStore.h"
 #include "widgets/TeFolderView.h"
 
+/**
+ * @file TeCmdPrevFolder.cpp
+ * @brief Implementation of TeCmdPrevFolder.
+ * @ingroup commands
+ */
+
 TeCmdPrevFolder::TeCmdPrevFolder()
 {
 }

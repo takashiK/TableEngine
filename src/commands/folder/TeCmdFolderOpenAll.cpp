@@ -25,6 +25,12 @@
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeFileTreeView.h"
 
+/**
+ * @file TeCmdFolderOpenAll.cpp
+ * @brief Implementation of TeCmdFolderOpenAll.
+ * @ingroup commands
+ */
+
 
 
 TeCmdFolderOpenAll::TeCmdFolderOpenAll()

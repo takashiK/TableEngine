@@ -1,5 +1,12 @@
 #include "TeTextSyntax.h"
 
+/**
+ * @file TeTextSyntax.cpp
+ * @brief Declaration of TeTextSyntax.
+ * @ingroup viewer
+ */
+
+
 TeTextSyntax::TeTextSyntax()
 {
     m_update_keywords = false;

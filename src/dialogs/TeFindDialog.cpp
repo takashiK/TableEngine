@@ -13,6 +13,13 @@
 #include <QSpinBox>
 #include <QButtonGroup>
 
+/**
+ * @file TeFindDialog.cpp
+ * @brief Declaration of TeFindDialog.
+ * @ingroup dialogs
+ */
+
+
 TeFindDialog::TeFindDialog(QWidget *parent)
 	: QDialog(parent)
 {

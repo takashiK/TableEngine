@@ -24,6 +24,11 @@
 #include <QFileSystemModel>
 #include <QImageReader>
 #include <QPixmapCache>
+/**
+ * @file TeFileSortProxyModel.cpp
+ * @brief Implementation of TeFileSortProxyModel.
+ * @ingroup widgets
+ */
 
 TeFileSortProxyModel::TeFileSortProxyModel(QObject* parent)
     : QSortFilterProxyModel(parent)

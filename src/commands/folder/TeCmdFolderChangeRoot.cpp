@@ -29,6 +29,12 @@
 #include <QDir>
 #include <QDebug>
 
+/**
+ * @file TeCmdFolderChangeRoot.cpp
+ * @brief Implementation of TeCmdFolderChangeRoot.
+ * @ingroup commands
+ */
+
 const char* TeCmdFolderChangeRoot::PARAM_ROOT_PATH = "rootPath";
 const char* TeCmdFolderChangeRoot::PARAM_NEW_TAB = "newTab";
 const char* TeCmdFolderChangeRoot::PARAM_TAB_POS = "tabPos";

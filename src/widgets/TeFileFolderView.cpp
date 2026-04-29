@@ -38,6 +38,11 @@
 #include <QSettings>
 #include <QStack>
 #include <QDebug>
+/**
+ * @file TeFileFolderView.cpp
+ * @brief Implementation of TeFileFolderView.
+ * @ingroup widgets
+ */
 
 class DebugItemSelectionModel : public QItemSelectionModel
 {

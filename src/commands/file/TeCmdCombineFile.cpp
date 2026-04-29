@@ -29,6 +29,12 @@
 #include <QDataStream>
 #include <QMessageBox>
 
+/**
+ * @file TeCmdCombineFile.cpp
+ * @brief Implementation of TeCmdCombineFile.
+ * @ingroup commands
+ */
+
 TeCmdCombineFile::TeCmdCombineFile()
 {
 }

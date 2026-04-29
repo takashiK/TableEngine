@@ -30,6 +30,12 @@
 #include <QList>
 #include <QUrl>
 
+/**
+ * @file TeCmdPaste.cpp
+ * @brief Implementation of TeCmdPaste.
+ * @ingroup commands
+ */
+
 TeCmdPaste::TeCmdPaste()
 {
 }

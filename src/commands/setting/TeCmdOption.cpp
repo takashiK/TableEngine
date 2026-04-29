@@ -24,6 +24,12 @@
 #include "dialogs/TeOptionSetting.h"
 #include <QDialog>
 
+/**
+ * @file TeCmdOption.cpp
+ * @brief Implementation of TeCmdOption.
+ * @ingroup commands
+ */
+
 TeCmdOption::TeCmdOption()
 {
 }

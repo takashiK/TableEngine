@@ -31,6 +31,12 @@
 #include <QMessageBox>
 #include <QDir>
 
+/**
+ * @file TeCmdMoveTo.cpp
+ * @brief Implementation of TeCmdMoveTo.
+ * @ingroup commands
+ */
+
 TeCmdMoveTo::TeCmdMoveTo()
 {
 }

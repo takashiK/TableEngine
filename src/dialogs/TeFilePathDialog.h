@@ -23,6 +23,13 @@
 #include <QDialog>
 #include <QList>
 
+/**
+ * @file TeFilePathDialog.h
+ * @brief Declaration of TeFilePathDialog.
+ * @ingroup dialogs
+ */
+
+
 class QComboBox;
 class QCheckBox;
 

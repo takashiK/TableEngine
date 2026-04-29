@@ -2,6 +2,13 @@
 
 #include <QAbstractNativeEventFilter>
 
+/**
+ * @file TeWindowsEventFilter.h
+ * @brief Declaration of TeWindowsEventFilter.
+ * @ingroup platform
+ */
+
+
 class QApplication;
 
 class TeNativeEvent;

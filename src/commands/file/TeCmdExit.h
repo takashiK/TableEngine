@@ -21,6 +21,13 @@
 #pragma once
 
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdExit.h
+ * @brief Declaration of TeCmdExit.
+ * @ingroup commands
+ */
+
 class TeCmdExit :
     public TeCommandBase
 {

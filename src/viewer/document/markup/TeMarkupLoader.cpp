@@ -13,6 +13,13 @@
 #include <valijson/schema_parser.hpp>
 #include <valijson/validator.hpp>
 
+/**
+ * @file TeMarkupLoader.cpp
+ * @brief Declaration of TeMarkupLoader.
+ * @ingroup viewer
+ */
+
+
 namespace {
     const QString relationFile = "container_suffix.relation";
 }

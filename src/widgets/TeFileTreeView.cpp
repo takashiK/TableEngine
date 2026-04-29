@@ -21,6 +21,12 @@
 #include "TeFileTreeView.h"
 #include <QEvent>
 
+/**
+ * @file TeFileTreeView.cpp
+ * @brief Implementation of TeFileTreeView.
+ * @ingroup widgets
+ */
+
 #include <QFileSystemModel>
 
 TeFileTreeView::TeFileTreeView(QWidget *parent)

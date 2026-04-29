@@ -31,6 +31,13 @@
 #include <QDir>
 #include <QDebug>
 
+/**
+ * @file TeDocViewer.cpp
+ * @brief Declaration of TeDocViewer.
+ * @ingroup viewer
+ */
+
+
 
 TeDocViewer::TeDocViewer(QWidget* parent)
     : QMainWindow(parent)

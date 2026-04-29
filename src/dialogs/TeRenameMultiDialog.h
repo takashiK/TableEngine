@@ -2,6 +2,13 @@
 
 #include <QDialog>
 
+/**
+ * @file TeRenameMultiDialog.h
+ * @brief Declaration of TeRenameMultiDialog.
+ * @ingroup dialogs
+ */
+
+
 class QLineEdit;
 class QButtonGroup;
 class QSpinBox;

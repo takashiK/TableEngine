@@ -24,6 +24,13 @@
 #include <QHash>
 #include <QVariant>
 
+/**
+ * @file TeOptionSetting.h
+ * @brief Declaration of TeOptionSetting.
+ * @ingroup dialogs
+ */
+
+
 class TeOptionSetting : public QDialog
 {
 	Q_OBJECT

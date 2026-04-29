@@ -28,6 +28,12 @@
 #include <QFileInfo>
 #include <QDir>
 
+/**
+ * @file TeCmdFileCreate.cpp
+ * @brief Implementation of TeCmdFileCreate.
+ * @ingroup commands
+ */
+
 TeCmdFileCreate::TeCmdFileCreate()
 {
 }

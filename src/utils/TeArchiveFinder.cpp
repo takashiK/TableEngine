@@ -3,6 +3,18 @@
 
 #include <QFileInfo>
 
+/**
+ * @file TeArchiveFinder.cpp
+ * @brief Implementation of TeArchiveFinder.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeArchiveFinder.cpp
+ * @brief Implementation of TeArchiveFinder.
+ * @ingroup utility
+ */
+
 TeArchiveFinder::TeArchiveFinder(const QString& path, QObject* parent)
 	: TeFinder(parent)
 {

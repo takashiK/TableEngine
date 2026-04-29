@@ -2,6 +2,13 @@
 
 #include <QDialog>
 
+/**
+ * @file TePathListDialog.h
+ * @brief Declaration of TePathListDialog.
+ * @ingroup dialogs
+ */
+
+
 class QListView;
 class QLabel;
 

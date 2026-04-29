@@ -21,6 +21,13 @@
 #pragma once
 
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdFolderChangeRoot.h
+ * @brief Declaration of TeCmdFolderChangeRoot.
+ * @ingroup commands
+ */
+
 class TeCmdFolderChangeRoot :
     public TeCommandBase
 {

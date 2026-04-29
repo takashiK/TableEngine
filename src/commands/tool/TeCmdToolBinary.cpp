@@ -8,6 +8,12 @@
 
 #include <QMessageBox>
 
+/**
+ * @file TeCmdToolBinary.cpp
+ * @brief Implementation of TeCmdToolBinary.
+ * @ingroup commands
+ */
+
 
 TeCmdToolBinary::TeCmdToolBinary()
 {

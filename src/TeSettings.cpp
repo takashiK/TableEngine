@@ -20,3 +20,13 @@
 
 #define _STTING_STR_DEF_
 #include "TeSettings.h"
+
+/**
+ * @file TeSettings.cpp
+ * @brief Defines QSettings key-path string constants.
+ * @ingroup main
+ *
+ * Defining @c _STTING_STR_DEF_ before including TeSettings.h causes the
+ * SETTING_STR macro to emit const-char* definitions instead of extern
+ * declarations.
+ */

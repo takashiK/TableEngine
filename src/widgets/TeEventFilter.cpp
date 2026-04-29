@@ -20,6 +20,11 @@
 
 #include "TeEventFilter.h"
 #include "TeDispatcher.h"
+/**
+ * @file TeEventFilter.cpp
+ * @brief Implementation of TeEventFilter.
+ * @ingroup widgets
+ */
 
 TeEventFilter::TeEventFilter(QObject *parent)
 	: QObject(parent)

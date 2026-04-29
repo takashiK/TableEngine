@@ -22,6 +22,12 @@
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
+/**
+ * @file TeCmdWindowBar.cpp
+ * @brief Implementation of TeCmdWindowBar.
+ * @ingroup commands
+ */
+
 TeCmdWindowBar::TeCmdWindowBar()
 {
 }

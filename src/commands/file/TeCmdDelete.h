@@ -20,6 +20,13 @@
 
 #pragma once
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdDelete.h
+ * @brief Declaration of TeCmdDelete.
+ * @ingroup commands
+ */
+
 class TeCmdDelete :
 	public TeCommandBase
 {

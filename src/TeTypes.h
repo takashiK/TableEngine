@@ -25,10 +25,37 @@
 #include <QVariant>
 #include <QPair>
 
+/**
+ * @file TeTypes.h
+ * @brief Application-wide type and constant definitions.
+ * @ingroup main
+ *
+ * @details Centralises all enumerations, flags, command IDs, and the
+ * TeCmdParam type alias used throughout the TableEngine codebase.
+ *
+ * @see doc/markdown/04_architecture.md
+ */
+
+/**
+ * @class TeTypes
+ * @brief Container class for all application-wide enumerations and types.
+ * @ingroup main
+ *
+ * @details TeTypes is not instantiated directly; it acts as a namespace-like
+ * holder so that Q_ENUM / Q_FLAG macros register the enumerations with
+ * Qt's meta-object system, enabling use in QSettings, signals/slots, and
+ * property bindings.
+ */
 class TeTypes : public QObject
 {
 	Q_GADGET
 public:
+	/**
+	 * @brief Identifies the logical type of a UI widget.
+	 *
+	 * Used by TeDispatcher and TeCommandBase to determine which widget
+	 * context a command originates from.
+	 */
 	enum WidgetType {
 		WT_NONE,
 		WT_MAINWINDOW,
@@ -45,6 +72,10 @@ public:
 	};
 	Q_ENUM(WidgetType)
 
+	/**
+	 * @brief Item-selection behaviour of TeFileListView.
+	 * @see TeFileListView, doc/markdown/widgets/TeFileListView.md
+	 */
 	enum SelectionMode {
 		SELECTION_NONE,
 		SELECTION_EXPLORER,
@@ -52,6 +83,9 @@ public:
 	};
 	Q_ENUM(SelectionMode)
 
+	/**
+	 * @brief Display mode for TeFileListView.
+	 */
 	enum FileViewMode {
 		FILEVIEW_SMALL_ICON,
 		FILEVIEW_LARGE_ICON,
@@ -60,6 +94,9 @@ public:
 	};
 	Q_ENUM(FileViewMode)
 
+	/**
+	 * @brief Sort criterion for TeFileSortProxyModel.
+	 */
 	enum OrderType {
 		ORDER_NAME,
 		ORDER_SIZE,
@@ -68,6 +105,9 @@ public:
 	};
 	Q_ENUM(OrderType)
 
+	/**
+	 * @brief Bitfield selecting which file metadata columns are shown.
+	 */
 	enum FileInfo {
 		FILEINFO_NONE        = 0x00,
 		FILEINFO_SIZE        = 0x01,
@@ -77,6 +117,9 @@ public:
 	Q_FLAG(FileInfo)
 	Q_DECLARE_FLAGS(FileInfoFlags, FileInfo)
 
+	/**
+	 * @brief Bitfield controlling which file types are shown in the list.
+	 */
 	enum FileType {
 		FILETYPE_NONE        = 0x00,
 		FILETYPE_HIDDEN      = 0x01,
@@ -86,6 +129,16 @@ public:
 	Q_FLAG(FileType)
 	Q_DECLARE_FLAGS(FileTypeFlags, FileType)
 
+	/**
+	 * @brief Unique command identifiers dispatched through TeDispatcher.
+	 *
+	 * IDs are grouped by menu category (File, Edit, Folder, View, Tool,
+	 * Window, Setting, Help, User).  The CMDID_SYSTEM_* prefix denotes
+	 * built-in commands; CMDID_USER is reserved for user-registered
+	 * external tool commands.
+	 *
+	 * @see doc/markdown/06_dispatcher_command.md
+	 */
 	enum CmdId {
 		CMDID_NONE,
 		CMDID_SYSTEM         = 0x00000000,
@@ -190,6 +243,12 @@ public:
 
 	Q_ENUM(CmdId)
 
+	/**
+	 * @brief Bitfield describing the execution characteristics of a command.
+	 *
+	 * Combines a trigger type (normal or toggle), a category (tree/list/other)
+	 * and an optional target constraint (file/directory).
+	 */
 	enum CmdType {
 		CMD_TRIGGER_MASK       = 0xFF,
 		CMD_TRIGGER_NORMAL     = 0x01,       // Normal Command (not stateful)

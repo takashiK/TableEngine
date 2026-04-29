@@ -31,6 +31,12 @@
 #include <QMessageBox>
 #include <QSettings>
 
+/**
+ * @file TeCmdAddFavorite.cpp
+ * @brief Implementation of TeCmdAddFavorite.
+ * @ingroup commands
+ */
+
 TeCmdAddFavorite::TeCmdAddFavorite()
 {
 }

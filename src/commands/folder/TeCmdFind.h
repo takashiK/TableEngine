@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdFind.h
+ * @brief Declaration of TeCmdFind.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdFind :

@@ -24,6 +24,13 @@
 #include <QSize>
 #include <QApplication>
 
+/**
+ * @file platform_util.h
+ * @brief Declaration of platform_util.
+ * @ingroup platform
+ */
+
+
 class QMimeData;
 class TeNativeEvent;
 

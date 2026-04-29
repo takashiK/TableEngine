@@ -1,6 +1,18 @@
 #include "TeHistory.h"
 #include "TeSettings.h"
 
+/**
+ * @file TeHistory.cpp
+ * @brief Implementation of TeHistory.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeHistory.cpp
+ * @brief Implementation of TeHistory.
+ * @ingroup utility
+ */
+
 TeHistory::TeHistory(QObject *parent)
 	: QObject(parent)
 {

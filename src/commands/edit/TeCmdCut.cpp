@@ -30,6 +30,12 @@
 #include <QGuiApplication>
 #include <QClipboard>
 
+/**
+ * @file TeCmdCut.cpp
+ * @brief Implementation of TeCmdCut.
+ * @ingroup commands
+ */
+
 TeCmdCut::TeCmdCut()
 {
 }

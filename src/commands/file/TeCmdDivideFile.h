@@ -21,6 +21,13 @@
 #pragma once
 
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdDivideFile.h
+ * @brief Declaration of TeCmdDivideFile.
+ * @ingroup commands
+ */
+
 class TeCmdDivideFile :
     public TeCommandBase
 {

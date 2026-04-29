@@ -22,6 +22,12 @@
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
 
+/**
+ * @file TeCmdExit.cpp
+ * @brief Implementation of TeCmdExit.
+ * @ingroup commands
+ */
+
 TeCmdExit::TeCmdExit()
 {
 }

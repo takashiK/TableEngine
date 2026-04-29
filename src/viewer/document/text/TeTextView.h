@@ -2,6 +2,13 @@
 
 #include <QPlainTextEdit>
 
+/**
+ * @file TeTextView.h
+ * @brief Declaration of TeTextView.
+ * @ingroup viewer
+ */
+
+
 class TeLineNumberArea;
 
 class TeTextView :

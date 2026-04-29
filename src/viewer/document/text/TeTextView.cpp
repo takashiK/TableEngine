@@ -3,6 +3,13 @@
 #include <QPainter>
 #include <QTextBlock>
 
+/**
+ * @file TeTextView.cpp
+ * @brief Declaration of TeTextView.
+ * @ingroup viewer
+ */
+
+
 class TeLineNumberArea :
     public QWidget
 {

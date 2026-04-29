@@ -25,6 +25,13 @@
 #include <QDialog>
 #include <QList>
 
+/**
+ * @file TeKeySetting.h
+ * @brief Declaration of TeKeySetting.
+ * @ingroup dialogs
+ */
+
+
 class QTreeWidget;
 class QTreeWidgetItem;
 

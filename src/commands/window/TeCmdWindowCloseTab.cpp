@@ -22,6 +22,12 @@
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
+/**
+ * @file TeCmdWindowCloseTab.cpp
+ * @brief Implementation of TeCmdWindowCloseTab.
+ * @ingroup commands
+ */
+
 TeCmdWindowCloseTab::TeCmdWindowCloseTab()
 {
 }

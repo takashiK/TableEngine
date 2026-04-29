@@ -4,6 +4,18 @@
 
 #include <QImageReader>
 
+/**
+ * @file TeThumbnailProvider.cpp
+ * @brief Implementation of TeThumbnailProvider.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeThumbnailProvider.cpp
+ * @brief Implementation of TeThumbnailProvider.
+ * @ingroup utility
+ */
+
 TeThumbnailProvider::TeThumbnailProvider()
 {
 }

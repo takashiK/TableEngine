@@ -23,6 +23,12 @@
 #include "TeFileListView.h"
 #include "TeEventFilter.h"
 
+/**
+ * @file TeFolderView.cpp
+ * @brief Implementation of TeFolderView.
+ * @ingroup widgets
+ */
+
 #include <QLayout>
 #include <QHeaderView>
 #include <QKeyEvent>

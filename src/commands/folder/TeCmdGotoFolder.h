@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdGotoFolder.h
+ * @brief Declaration of TeCmdGotoFolder.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdGotoFolder :

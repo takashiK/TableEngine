@@ -32,6 +32,12 @@
 #include <QProgressDialog>
 #include <QDir>
 
+/**
+ * @file TeCmdExtract.cpp
+ * @brief Implementation of TeCmdExtract.
+ * @ingroup commands
+ */
+
 TeCmdExtract::TeCmdExtract()
 {
 }

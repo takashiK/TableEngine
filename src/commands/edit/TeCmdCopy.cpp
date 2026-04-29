@@ -30,6 +30,12 @@
 #include <QClipboard>
 #include <QStringList>
 
+/**
+ * @file TeCmdCopy.cpp
+ * @brief Implementation of TeCmdCopy.
+ * @ingroup commands
+ */
+
 
 TeCmdCopy::TeCmdCopy()
 {

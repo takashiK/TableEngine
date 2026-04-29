@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdAddFavorite.h
+ * @brief Declaration of TeCmdAddFavorite.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdAddFavorite :

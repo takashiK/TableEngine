@@ -20,6 +20,13 @@
 
 #pragma once
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdSelectToggle.h
+ * @brief Declaration of TeCmdSelectToggle.
+ * @ingroup commands
+ */
+
 class TeCmdSelectToggle :
 	public TeCommandBase
 {

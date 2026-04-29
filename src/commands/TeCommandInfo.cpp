@@ -20,6 +20,12 @@
 
 #include "TeCommandInfo.h"
 
+/**
+ * @file TeCommandInfo.cpp
+ * @brief Implementation of TeCommandInfo.
+ * @ingroup commands
+ */
+
 
 
 TeCommandInfoBase::TeCommandInfoBase()

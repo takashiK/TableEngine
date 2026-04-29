@@ -28,6 +28,12 @@
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandBase.h"
 
+/**
+ * @file TeDispatcher.cpp
+ * @brief Implementation of TeDispatcher.
+ * @ingroup main
+ */
+
 TeDispatcher::TeDispatcher()
 {
 	mp_factory = nullptr;
@@ -59,7 +65,11 @@ void TeDispatcher::setViewStore(TeViewStore * p_store)
 }
 
 /**
- *	dispatch event to command.
+ * @brief Dispatches an event from a list or tree view to a command.
+ *
+ * Only QEvent::KeyPress events originating from WT_LISTVIEW or WT_TREEVIEW
+ * are translated into commands via the key-binding map.  All other events are
+ * silently accepted and the function returns true.
  */
 bool TeDispatcher::dispatch(TeTypes::WidgetType type, QEvent *event)
 {
@@ -82,7 +92,11 @@ bool TeDispatcher::dispatch(TeTypes::WidgetType type, QEvent *event)
 }
 
 /**
- * execute command by commad Id
+ * @brief Creates and enqueues a command for the given @p cmdId.
+ *
+ * Instantiates the command via TeCommandFactory, captures the source context,
+ * and appends it to the serial execution queue.  If the queue was empty
+ * the command is started immediately.
  */
 void TeDispatcher::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent * event, const TeCmdParam* p_cmdParam)
 {

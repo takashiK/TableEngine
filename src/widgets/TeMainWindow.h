@@ -22,6 +22,21 @@
 
 #include <QMainWindow>
 
+/**
+ * @file TeMainWindow.h
+ * @brief Application main window.
+ * @ingroup widgets
+ */
+
+/**
+ * @class TeMainWindow
+ * @brief The application main window created by TeViewStore.
+ * @ingroup widgets
+ *
+ * @details Extends QMainWindow with no additional public API.  Layout,
+ * menu-bar, and toolbar setup are performed inside the constructor via
+ * TeViewStore.
+ */
 class TeMainWindow : public QMainWindow
 {
 	Q_OBJECT

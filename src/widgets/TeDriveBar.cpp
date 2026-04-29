@@ -28,6 +28,11 @@
 #include <QStyle>
 #include <QSettings>
 #include <QMenu>
+/**
+ * @file TeDriveBar.cpp
+ * @brief Implementation of TeDriveBar.
+ * @ingroup widgets
+ */
 
 TeDriveBar::TeDriveBar(QWidget *parent)
 	: QToolBar(parent)

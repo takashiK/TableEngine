@@ -11,6 +11,13 @@
 
 #include <algorithm>
 
+/**
+ * @file TePathListDialog.cpp
+ * @brief Declaration of TePathListDialog.
+ * @ingroup dialogs
+ */
+
+
 TePathListDialog::TePathListDialog(QWidget *parent)
 	: QDialog(parent)
 {

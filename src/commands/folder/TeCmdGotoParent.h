@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdGotoParent.h
+ * @brief Declaration of TeCmdGotoParent.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdGotoParent :

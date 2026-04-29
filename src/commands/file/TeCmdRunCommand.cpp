@@ -30,6 +30,12 @@
 #include <QString>
 #include <QTextCodec>
 
+/**
+ * @file TeCmdRunCommand.cpp
+ * @brief Implementation of TeCmdRunCommand.
+ * @ingroup commands
+ */
+
 TeCmdRunCommand::TeCmdRunCommand()
 {
 }

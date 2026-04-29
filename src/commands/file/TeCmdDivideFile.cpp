@@ -26,6 +26,12 @@
 #include <QDir>
 #include <QMessageBox>
 
+/**
+ * @file TeCmdDivideFile.cpp
+ * @brief Implementation of TeCmdDivideFile.
+ * @ingroup commands
+ */
+
 TeCmdDivideFile::TeCmdDivideFile()
 {
 }

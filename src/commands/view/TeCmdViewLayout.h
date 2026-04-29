@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdViewLayout.h
+ * @brief Declaration of TeCmdViewLayout.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdViewLayout :

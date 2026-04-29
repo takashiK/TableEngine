@@ -5,6 +5,13 @@
 #include <QMainWindow>
 #include <QModelIndex>
 
+/**
+ * @file TePictureViewer.h
+ * @brief Declaration of TePictureViewer.
+ * @ingroup viewer
+ */
+
+
 class QGraphicsView;
 class QGraphicsPixmapItem;
 class QListView;

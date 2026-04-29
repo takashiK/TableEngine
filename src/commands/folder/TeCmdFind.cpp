@@ -26,6 +26,12 @@
 #include "utils/TeFinder.h"
 #include "utils/TeSearchQuery.h"
 #include "dialogs/TeFindDialog.h"
+
+/**
+ * @file TeCmdFind.cpp
+ * @brief Implementation of TeCmdFind.
+ * @ingroup commands
+ */
 	
 
 TeCmdFind::TeCmdFind()

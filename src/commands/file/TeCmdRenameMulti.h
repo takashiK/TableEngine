@@ -21,6 +21,13 @@
 #pragma once
 
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdRenameMulti.h
+ * @brief Declaration of TeCmdRenameMulti.
+ * @ingroup commands
+ */
+
 class TeCmdRenameMulti :
     public TeCommandBase
 {

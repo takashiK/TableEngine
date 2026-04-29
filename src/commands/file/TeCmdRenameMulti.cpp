@@ -27,6 +27,12 @@
 #include <QFileInfo>
 #include <QFile>
 
+/**
+ * @file TeCmdRenameMulti.cpp
+ * @brief Implementation of TeCmdRenameMulti.
+ * @ingroup commands
+ */
+
 TeCmdRenameMulti::TeCmdRenameMulti()
 {
 }

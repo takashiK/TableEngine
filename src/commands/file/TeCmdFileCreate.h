@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdFileCreate.h
+ * @brief Declaration of TeCmdFileCreate.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdFileCreate :

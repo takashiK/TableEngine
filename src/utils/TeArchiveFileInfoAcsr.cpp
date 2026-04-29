@@ -1,5 +1,17 @@
 #include "TeArchiveFileInfoAcsr.h"
 
+/**
+ * @file TeArchiveFileInfoAcsr.cpp
+ * @brief Implementation of TeArchiveFileInfoAcsr.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeArchiveFileInfoAcsr.cpp
+ * @brief Implementation of TeArchiveFileInfoAcsr.
+ * @ingroup utility
+ */
+
 TeArchiveFileInfoAcsr::TeArchiveFileInfoAcsr(QObject *parent)
 	: TeFileInfoAcsr(parent)
 {}

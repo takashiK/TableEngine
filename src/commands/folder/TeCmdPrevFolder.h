@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdPrevFolder.h
+ * @brief Declaration of TeCmdPrevFolder.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdPrevFolder :

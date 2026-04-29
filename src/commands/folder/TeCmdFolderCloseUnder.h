@@ -20,6 +20,13 @@
 
 #pragma once
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdFolderCloseUnder.h
+ * @brief Declaration of TeCmdFolderCloseUnder.
+ * @ingroup commands
+ */
+
 class TeCmdFolderCloseUnder :
 	public TeCommandBase
 {

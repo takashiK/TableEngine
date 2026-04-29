@@ -21,6 +21,11 @@
 #include "TeTreeWidget.h"
 
 #include <QDragEnterEvent>
+/**
+ * @file TeTreeWidget.cpp
+ * @brief Implementation of TeTreeWidget.
+ * @ingroup widgets
+ */
 
 TeTreeWidget::TeTreeWidget(QWidget *parent)
 	: QTreeWidget(parent)

@@ -23,6 +23,12 @@
 #include "TeViewStore.h"
 #include "widgets/TeFolderView.h"
 
+/**
+ * @file TeCmdGotoRoot.cpp
+ * @brief Implementation of TeCmdGotoRoot.
+ * @ingroup commands
+ */
+
 TeCmdGotoRoot::TeCmdGotoRoot()
 {
 }

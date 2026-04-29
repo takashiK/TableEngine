@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdWindowBar.h
+ * @brief Declaration of TeCmdWindowBar.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdWindowBar :

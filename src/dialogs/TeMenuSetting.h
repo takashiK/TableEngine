@@ -23,6 +23,13 @@
 #include <QDialog>
 #include "TeTypes.h"
 
+/**
+ * @file TeMenuSetting.h
+ * @brief Declaration of TeMenuSetting.
+ * @ingroup dialogs
+ */
+
+
 class QTreeWidgetItem;
 class QSettings;
 class TeTreeWidget;

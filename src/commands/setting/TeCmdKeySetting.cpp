@@ -23,6 +23,12 @@
 #include "utils/TeUtils.h"
 #include "dialogs/TeKeySetting.h"
 
+/**
+ * @file TeCmdKeySetting.cpp
+ * @brief Implementation of TeCmdKeySetting.
+ * @ingroup commands
+ */
+
 
 TeCmdKeySetting::TeCmdKeySetting()
 {

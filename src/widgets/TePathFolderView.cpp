@@ -7,6 +7,11 @@
 #include <QStandardItemModel>
 #include <QHBoxLayout>
 #include <QRegularExpression>
+/**
+ * @file TePathFolderView.cpp
+ * @brief Implementation of TePathFolderView.
+ * @ingroup widgets
+ */
 
 TePathFolderView::TePathFolderView(QWidget *parent)
 	: TeFolderView(parent)

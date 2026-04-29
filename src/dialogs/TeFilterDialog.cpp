@@ -7,6 +7,13 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
+/**
+ * @file TeFilterDialog.cpp
+ * @brief Declaration of TeFilterDialog.
+ * @ingroup dialogs
+ */
+
+
 TeFilterDialog::TeFilterDialog(QWidget *parent)
 	: QDialog(parent)
 {

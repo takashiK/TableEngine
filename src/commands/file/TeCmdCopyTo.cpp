@@ -30,6 +30,12 @@
 #include <QDir>
 #include <QMessageBox>
 
+/**
+ * @file TeCmdCopyTo.cpp
+ * @brief Implementation of TeCmdCopyTo.
+ * @ingroup commands
+ */
+
 TeCmdCopyTo::TeCmdCopyTo()
 {
 }

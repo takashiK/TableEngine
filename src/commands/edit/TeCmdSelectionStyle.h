@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdSelectionStyle.h
+ * @brief Declaration of TeCmdSelectionStyle.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdSelectionStyle :

@@ -9,6 +9,13 @@
 
 #include <QFileInfo>
 
+/**
+ * @file TeDivideDialog.cpp
+ * @brief Declaration of TeDivideDialog.
+ * @ingroup dialogs
+ */
+
+
 TeDivideDialog::TeDivideDialog(QWidget *parent)
 	: QDialog(parent)
 {

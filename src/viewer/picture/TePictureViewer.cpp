@@ -11,6 +11,13 @@
 #include <QDockWidget>
 #include <QFileSystemModel>
 
+/**
+ * @file TePictureViewer.cpp
+ * @brief Declaration of TePictureViewer.
+ * @ingroup viewer
+ */
+
+
 TePictureViewer::TePictureViewer(QWidget *parent)
 	: QMainWindow(parent)
 {

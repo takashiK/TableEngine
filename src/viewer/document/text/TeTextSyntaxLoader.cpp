@@ -16,6 +16,13 @@
 #include <valijson/schema_parser.hpp>
 #include <valijson/validator.hpp>
 
+/**
+ * @file TeTextSyntaxLoader.cpp
+ * @brief Declaration of TeTextSyntaxLoader.
+ * @ingroup viewer
+ */
+
+
 namespace {
     const QString relationPath = "text_suffix.relation";
 

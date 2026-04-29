@@ -2,6 +2,18 @@
 #include <QFileInfo>
 #include <QStandardItem>
 #include <QFileIconProvider>
+
+/**
+ * @file TeFileInfo.cpp
+ * @brief Implementation of TeFileInfo.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeFileInfo.cpp
+ * @brief Implementation of TeFileInfo.
+ * @ingroup utility
+ */
 TeFileInfo::TeFileInfo()
 {
 	type = EN_NONE;

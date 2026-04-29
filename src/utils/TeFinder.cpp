@@ -3,6 +3,18 @@
 
 #include <QCoreApplication>
 
+/**
+ * @file TeFinder.cpp
+ * @brief Implementation of TeFinder.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeFinder.cpp
+ * @brief Implementation of TeFinder.
+ * @ingroup utility
+ */
+
 TeFinder::TeFinder(QObject* parent)
 	: QObject(parent)
 {}

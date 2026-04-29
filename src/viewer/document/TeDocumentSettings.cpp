@@ -20,3 +20,11 @@
 
 #define _STTING_STR_DEF_
 #include "TeDocumentSettings.h"
+
+/**
+ * @file TeDocumentSettings.cpp
+ * @brief Declaration of TeDocumentSettings.
+ * @ingroup viewer
+ */
+
+#include "TeDocumentSettings.h"

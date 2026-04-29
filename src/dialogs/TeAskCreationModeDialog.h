@@ -22,6 +22,13 @@
 
 #include <QDialog>
 
+/**
+ * @file TeAskCreationModeDialog.h
+ * @brief Declaration of TeAskCreationModeDialog.
+ * @ingroup dialogs
+ */
+
+
 class QButtonGroup;
 class QLineEdit;
 

@@ -24,6 +24,12 @@
 
 #include <QInputDialog>
 
+/**
+ * @file TeCmdChangeAttribute.cpp
+ * @brief Implementation of TeCmdChangeAttribute.
+ * @ingroup commands
+ */
+
 TeCmdChangeAttribute::TeCmdChangeAttribute()
 {
 }

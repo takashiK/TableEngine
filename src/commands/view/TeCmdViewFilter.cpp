@@ -29,6 +29,12 @@
 
 #include <QRegularExpression>
 
+/**
+ * @file TeCmdViewFilter.cpp
+ * @brief Implementation of TeCmdViewFilter.
+ * @ingroup commands
+ */
+
 TeCmdViewFilter::TeCmdViewFilter()
 {
 }

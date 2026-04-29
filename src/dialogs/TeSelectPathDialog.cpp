@@ -30,6 +30,13 @@
 #include <QDir>
 #include <QCompleter>
 
+/**
+ * @file TeSelectPathDialog.cpp
+ * @brief Declaration of TeSelectPathDialog.
+ * @ingroup dialogs
+ */
+
+
 TeSelectPathDialog::TeSelectPathDialog(QWidget *parent)
 	: QDialog(parent)
 {

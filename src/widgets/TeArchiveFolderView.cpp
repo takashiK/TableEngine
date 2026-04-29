@@ -36,6 +36,11 @@
 #include <QApplication>
 #include <QIcon>
 #include <QDir>
+/**
+ * @file TeArchiveFolderView.cpp
+ * @brief Implementation of TeArchiveFolderView.
+ * @ingroup widgets
+ */
 
 const QString TeArchiveFolderView::URI_WRITE(u8"ar_write:");
 const QString TeArchiveFolderView::URI_READ(u8"ar_read:");

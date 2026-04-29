@@ -2,6 +2,13 @@
 
 #include "TeTextSyntax.h"
 
+/**
+ * @file TeTextSyntaxLoader.h
+ * @brief Declaration of TeTextSyntaxLoader.
+ * @ingroup viewer
+ */
+
+
 class TeTextSyntaxLoader
 {
 public:

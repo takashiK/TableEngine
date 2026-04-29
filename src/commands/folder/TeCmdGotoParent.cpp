@@ -25,6 +25,12 @@
 
 #include <QDir>
 
+/**
+ * @file TeCmdGotoParent.cpp
+ * @brief Implementation of TeCmdGotoParent.
+ * @ingroup commands
+ */
+
 TeCmdGotoParent::TeCmdGotoParent()
 {
 }

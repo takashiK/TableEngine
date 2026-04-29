@@ -22,6 +22,13 @@
 
 #include <QDialog>
 
+/**
+ * @file TeSelectPathDialog.h
+ * @brief Declaration of TeSelectPathDialog.
+ * @ingroup dialogs
+ */
+
+
 class QLineEdit;
 class TeFileTreeView;
 

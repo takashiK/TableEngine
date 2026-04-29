@@ -3,6 +3,12 @@
 #include <QWidget>
 #include <QEvent>
 
+/**
+ * @file TeEventEmitter.cpp
+ * @brief Implementation of TeEventEmitter.
+ * @ingroup main
+ */
+
 TeEventEmitter::TeEventEmitter(QObject *parent)
 	: QObject(parent)
 {}

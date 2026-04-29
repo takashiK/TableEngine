@@ -3,6 +3,13 @@
 #include <QDate>
 #include <QDialog>
 
+/**
+ * @file TeFindDialog.h
+ * @brief Declaration of TeFindDialog.
+ * @ingroup dialogs
+ */
+
+
 class QCheckBox;
 class QLineEdit;
 class QComboBox;

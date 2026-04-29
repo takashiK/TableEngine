@@ -18,6 +18,18 @@
 #include <magic.h>
 #include <icu.h>
 
+/**
+ * @file TeUtils.cpp
+ * @brief Implementation of TeUtils.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeUtils.cpp
+ * @brief Implementation of TeUtils.
+ * @ingroup utility
+ */
+
 
 namespace {
 	const QSet<const QString> txtSuffixes{ "txt","html","htm","md","h","c","cpp","ini","py","json","ts","js","sh" };

@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdSelectFilter.h
+ * @brief Declaration of TeCmdSelectFilter.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdSelectFilter :

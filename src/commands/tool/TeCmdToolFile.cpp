@@ -8,6 +8,12 @@
 
 #include <QMessageBox>
 
+/**
+ * @file TeCmdToolFile.cpp
+ * @brief Implementation of TeCmdToolFile.
+ * @ingroup commands
+ */
+
 
 TeCmdToolFile::TeCmdToolFile()
 {

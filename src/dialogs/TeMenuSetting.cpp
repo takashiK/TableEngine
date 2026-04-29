@@ -41,6 +41,13 @@
 #include <QInputDialog>
 #include <QSettings>
 
+/**
+ * @file TeMenuSetting.cpp
+ * @brief Declaration of TeMenuSetting.
+ * @ingroup dialogs
+ */
+
+
 TeMenuSetting::TeMenuSetting(QWidget *parent)
 	: QDialog(parent)
 {

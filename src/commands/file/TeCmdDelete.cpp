@@ -28,6 +28,12 @@
 #include <QMessageBox>
 #include <QDir>
 
+/**
+ * @file TeCmdDelete.cpp
+ * @brief Implementation of TeCmdDelete.
+ * @ingroup commands
+ */
+
 
 
 TeCmdDelete::TeCmdDelete()

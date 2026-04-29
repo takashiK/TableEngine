@@ -25,21 +25,44 @@
 
 #include "TeFileInfo.h"
 
+/**
+ * @file TeArchive.h
+ * @brief Archive read/write interface for supported archive formats.
+ * @ingroup utility
+ *
+ * @details Declares TeArchive::Reader (extraction) and TeArchive::Writer
+ * (creation) inside the TeArchive namespace.
+ *
+ * @see doc/markdown/utils/TeArchive.md
+ */
+
 class QFileInfo;
 class QFile;
 
 namespace TeArchive {
 
-//! Archive type descripter.
+/** @brief Archive format type tag. */
 enum ArchiveType {
-	AR_NONE,		//!< Unkown file.
-	AR_ZIP,			//!< Zip file
-	AR_7ZIP,		//!< 7 zip file
-	AR_TAR,			//!< Tar archive.
-	AR_TAR_GZIP,	//!< Tar archive with gzip compress.
-	AR_TAR_BZIP2,	//!< Tar archive with bzip2 compress.
+	AR_NONE,        ///< Unknown file.
+	AR_ZIP,         ///< ZIP archive.
+	AR_7ZIP,        ///< 7-Zip archive.
+	AR_TAR,         ///< Tar archive.
+	AR_TAR_GZIP,    ///< Tar archive with gzip compression.
+	AR_TAR_BZIP2,   ///< Tar archive with bzip2 compression.
 };
 
+/**
+ * @class TeArchive::Reader
+ * @brief Reads (extracts) entries from a supported archive file.
+ * @ingroup utility
+ *
+ * @details Supports iteration over archive entries via a C++11-style
+ * forward iterator (begin() / end()).  Extraction is performed by
+ * extractAll() or extract() — both run asynchronously and emit
+ * progress signals.
+ *
+ * @see TeArchive::Writer, doc/markdown/utils/TeArchive.md
+ */
 class Reader :
 	public QObject
 {
@@ -50,56 +73,84 @@ public:
 	Reader(const QString& path);
 	virtual ~Reader();
 
+	/**
+	 * @brief Installs an overwrite-confirmation callback.
+	 *
+	 * @p overwrite is called with the conflicting QFileInfo before overwriting.
+	 * Return true to allow overwriting.
+	 * @param overwrite Callback function pointer.
+	 */
 	void setCallback( bool(*overwrite)(QFileInfo*) );
-	bool open( const QString& path);
-	void close();
 
+	/**
+	 * @brief Opens an archive file.
+	 * @param path Absolute path to the archive.
+	 * @return true on success.
+	 */
+	bool open( const QString& path);
+	/** @brief Closes the archive and releases all resources. */
+	void close();
+	/** @brief Clears the internal cancellation flag before a new extraction. */
 	void clearCancel();
 
-	/*!
-		Return target archive filepath.
-	*/
+	/** @brief Returns the path of the currently opened archive. */
 	const QString& path() { return m_path; }
+	/** @brief Returns true when an archive is open and valid. */
 	bool isValid();
+	/** @brief Returns the detected archive format. */
 	ArchiveType type();
 
 public slots:
+	/**
+	 * @brief Extracts all entries to @p destPath.
+	 * @param destPath Absolute destination directory.
+	 * @return true on success.
+	 */
 	bool extractAll(const QString& destPath);
+
+	/**
+	 * @brief Extracts a subset of entries.
+	 * @param destPath Absolute destination directory.
+	 * @param base     Common path prefix to strip from entry paths.
+	 * @param entries  List of entry paths to extract.
+	 * @return true on success.
+	 */
 	bool extract( const QString& destPath, const QString& base, const QStringList& entries);
+
+	/** @brief Requests cancellation of an in-progress extraction. */
 	void cancel();
 
 signals:
-	/*!
-		Provide a maximum byte counts for extraction from archive.
-		This signal emit after call extractAll() or extract().
-		This value is allways same as archive file size.
-		so it return archive file size when you call extract() with partial entries.
-
-		\param value archive file size  (unit by 1KB).
-	*/
+	/**
+	 * @brief Provides the total archive byte count for progress tracking.
+	 *
+	 * Emitted after extractAll() or extract() starts.  The value equals the
+	 * archive file size (in KB), which is used as the progress maximum.
+	 * @param value Archive file size in KB.
+	 */
 	void maximumValue(int value);
-	/*!
-		Provide progress value at extraction from archive.
-		This value indidate read bytes from archive file by extraction function.
-		this values has limitation below.
-		\li It's not include decompression and write extracted data to file. 
-		\li It's not reach to maximubValue. Remaining value is approximately 10KB.
 
-		\param value readed bytes  (unit by 1KB).
-	*/
+	/**
+	 * @brief Provides a progress update during extraction.
+	 *
+	 * Indicates bytes read from the archive file.  Does not include
+	 * decompression or file-write time, and will not reach maximumValue
+	 * exactly (~10 KB remain).
+	 * @param value Bytes read from the archive so far (in KB).
+	 */
 	void valueChanged(int value);
 
-	/*!
-		Provide current extraction file information.
-	*/
+	/**
+	 * @brief Emitted when extraction of a new entry begins.
+	 * @param info Metadata of the entry being extracted.
+	 */
 	void currentFileInfoChanged(const TeFileInfo& info);
-	
-	/*!
-		extraction process is finished;
-	*/
+
+	/** @brief Emitted when extraction completes (success or cancellation). */
 	void finished();
 
 public:
+	/** @brief Forward iterator over archive entries. */
 	class const_iterator {
 	public:
 		const_iterator() : data(Q_NULLPTR) {}
@@ -117,18 +168,31 @@ public:
 	};
 	friend const_iterator;
 
+	/** @brief Returns an iterator to the first archive entry. */
 	const_iterator begin();
+	/** @brief Returns the past-the-end iterator. */
 	const_iterator end();
 
 private:
-	QString m_path;
-	ArchiveType m_type;
-	bool m_cancel;
-	bool(*overwrite_check)(QFileInfo*);
+	QString     m_path;             ///< Path of the opened archive.
+	ArchiveType m_type;             ///< Detected archive format.
+	bool        m_cancel;           ///< Cancellation flag.
+	bool(*overwrite_check)(QFileInfo*); ///< Optional overwrite callback.
 
 	bool copy_data(void* arPtr, QFile* ofile);
 };
 
+/**
+ * @class TeArchive::Writer
+ * @brief Creates archive files from a registered list of source entries.
+ * @ingroup utility
+ *
+ * @details Files and directories are registered via addEntry() / addEntries().
+ * The actual archive is written by archive(), which runs synchronously and
+ * emits progress signals.
+ *
+ * @see TeArchive::Reader, doc/markdown/utils/TeArchive.md
+ */
 class Writer :
 	public QObject
 {
@@ -150,37 +214,32 @@ public slots:
 	void cancel();
 
 signals:
-	/*!
-		Infomation of added File info by addEntry() or addEntries().
-	*/
+	/** @brief Emitted for each entry registered by addEntry() or addEntries(). */
 	void addedFileInfo(const TeFileInfo& info);
 
-	/*!
-		Provide a summentional byte counts of source files.
-		This signal emit after call archive().
-
-		\param summentional byte counts of source files (unit by 1KB).
-	*/
+	/**
+	 * @brief Provides the total source-file byte count for progress tracking.
+	 *
+	 * Emitted at the start of archive().
+	 * @param value Total source bytes in KB.
+	 */
 	void maximumValue(int value);
-	/*!
-		Provide progress value for archiving.
-		This value indidate read bytes from srouce files by archive().
-		It's not include compression and write data to archive file.
-		so if you use this value for progress then it reach 100% before totally complition for archive.
-		but its difference is small so convenient for progress.
 
-		\param value readed bytes  (unit by 1KB).
-	*/
+	/**
+	 * @brief Provides a progress update during archiving.
+	 *
+	 * Reports bytes read from source files.
+	 * @param value Bytes read so far (in KB).
+	 */
 	void valueChanged(int value);
 
-	/*!
-		Provide current archving file information.
-	*/
+	/**
+	 * @brief Emitted when archiving of a new entry begins.
+	 * @param info Metadata of the entry being archived.
+	 */
 	void currentFileInfoChanged(const TeFileInfo& info);
 
-	/*!
-		archive process is finished.
-	*/
+	/** @brief Emitted when the archive operation completes. */
 	void finished();
 
 private:

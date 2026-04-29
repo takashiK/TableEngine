@@ -1,5 +1,12 @@
 #pragma once
 
+/**
+ * @file TeDocumentSettings.h
+ * @brief Declaration of TeDocumentSettings.
+ * @ingroup viewer
+ */
+
+
 #ifdef _STTING_STR_DEF_
 #define SETTING_STR( name , str) const char* name = str
 #else

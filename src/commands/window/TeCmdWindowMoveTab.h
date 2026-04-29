@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdWindowMoveTab.h
+ * @brief Declaration of TeCmdWindowMoveTab.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdWindowMoveTab :

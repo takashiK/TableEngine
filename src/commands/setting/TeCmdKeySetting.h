@@ -20,6 +20,13 @@
 
 #pragma once
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdKeySetting.h
+ * @brief Declaration of TeCmdKeySetting.
+ * @ingroup commands
+ */
+
 class TeCmdKeySetting :
 	public TeCommandBase
 {

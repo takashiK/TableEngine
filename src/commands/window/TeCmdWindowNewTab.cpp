@@ -23,6 +23,12 @@
 #include "TeViewStore.h"
 #include "widgets/TeFolderView.h"
 
+/**
+ * @file TeCmdWindowNewTab.cpp
+ * @brief Implementation of TeCmdWindowNewTab.
+ * @ingroup commands
+ */
+
 TeCmdWindowNewTab::TeCmdWindowNewTab()
 {
 }

@@ -22,6 +22,12 @@
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
+/**
+ * @file TeCmdWindowMoveTab.cpp
+ * @brief Implementation of TeCmdWindowMoveTab.
+ * @ingroup commands
+ */
+
 TeCmdWindowMoveTab::TeCmdWindowMoveTab()
 {
 }

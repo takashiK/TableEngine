@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdViewFilter.h
+ * @brief Declaration of TeCmdViewFilter.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdViewFilter :

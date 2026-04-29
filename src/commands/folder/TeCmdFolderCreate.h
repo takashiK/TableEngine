@@ -20,6 +20,13 @@
 
 #pragma once
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdFolderCreate.h
+ * @brief Declaration of TeCmdFolderCreate.
+ * @ingroup commands
+ */
+
 class TeCmdFolderCreate :
 	public TeCommandBase
 {

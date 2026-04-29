@@ -28,6 +28,12 @@
 #include "widgets/TeDriveBar.h"
 #include "TeDispatcher.h"
 #include "TeSettings.h"
+
+/**
+ * @file TeViewStore.cpp
+ * @brief Implementation of TeViewStore.
+ * @ingroup main
+ */
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
 #include "commands/folder/TeCmdFolderChangeRoot.h"

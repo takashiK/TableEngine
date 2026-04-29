@@ -1,5 +1,12 @@
 #include "TeNativeEvent.h"
 
+/**
+ * @file TeNativeEvent.cpp
+ * @brief Declaration of TeNativeEvent.
+ * @ingroup platform
+ */
+
+
 TeNativeEvent::TeNativeEvent(QObject *parent)
 	: QObject(parent)
 {}

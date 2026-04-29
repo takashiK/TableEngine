@@ -31,6 +31,12 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
+/**
+ * @file TeCmdFolderCreate.cpp
+ * @brief Implementation of TeCmdFolderCreate.
+ * @ingroup commands
+ */
+
 TeCmdFolderCreate::TeCmdFolderCreate()
 {
 }

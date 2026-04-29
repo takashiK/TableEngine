@@ -3,6 +3,13 @@
 
 #include <QDebug>
 
+/**
+ * @file TeTextSyntaxHighlighter.cpp
+ * @brief Declaration of TeTextSyntaxHighlighter.
+ * @ingroup viewer
+ */
+
+
 #if 0
     Highlight patterns
     - multi line commnet       : /* */start pattern to end pattern. not nested. (Prioritical nest support)

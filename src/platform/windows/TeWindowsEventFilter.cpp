@@ -8,6 +8,13 @@
 #include <winuser.h>
 #include <dbt.h>
 
+/**
+ * @file TeWindowsEventFilter.cpp
+ * @brief Declaration of TeWindowsEventFilter.
+ * @ingroup platform
+ */
+
+
 TeWindowsEventFilter::TeWindowsEventFilter()
 {
 	mp_nativeEvent = nullptr;

@@ -10,6 +10,11 @@
 #include <QHBoxLayout>
 #include <QFileInfo>
 #include <QFileIconProvider>
+/**
+ * @file TeFindFolderView.cpp
+ * @brief Implementation of TeFindFolderView.
+ * @ingroup widgets
+ */
 
 // ---------------------------------------------------------------------------
 // Internal helpers

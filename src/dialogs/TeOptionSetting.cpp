@@ -33,6 +33,13 @@
 #include <QLineEdit>
 #include <QPushButton>
 
+/**
+ * @file TeOptionSetting.cpp
+ * @brief Declaration of TeOptionSetting.
+ * @ingroup dialogs
+ */
+
+
 TeOptionSetting::TeOptionSetting(QWidget *parent)
 	: QDialog(parent)
 {

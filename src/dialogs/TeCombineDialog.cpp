@@ -16,6 +16,13 @@
 #include <QRegularExpression>
 #include <QFileDialog>
 
+/**
+ * @file TeCombineDialog.cpp
+ * @brief Declaration of TeCombineDialog.
+ * @ingroup dialogs
+ */
+
+
 namespace {
 	QList<QFileInfo> getTargetFiles(const QSet<QString>& files, bool extend)
 	{

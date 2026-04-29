@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdViewFileOrderBy.h
+ * @brief Declaration of TeCmdViewFileOrderBy.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdViewFileOrderBy :

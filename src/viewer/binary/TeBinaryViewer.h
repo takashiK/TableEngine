@@ -2,6 +2,13 @@
 
 #include <QMainWindow>
 
+/**
+ * @file TeBinaryViewer.h
+ * @brief Declaration of TeBinaryViewer.
+ * @ingroup viewer
+ */
+
+
 class QHexView;
 class QHexDocument;
 

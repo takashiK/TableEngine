@@ -3,6 +3,18 @@
 #include <QVariant>
 #include "TeFileInfo.h"
 
+/**
+ * @file TeFileInfoAcsr.cpp
+ * @brief Implementation of TeFileInfoAcsr.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeFileInfoAcsr.cpp
+ * @brief Implementation of TeFileInfoAcsr.
+ * @ingroup utility
+ */
+
 TeFileInfoAcsr::TeFileInfoAcsr(QObject *parent)
 	: QObject(parent)
 {}

@@ -4,6 +4,13 @@
 
 #include <QHexView/qhexview.h>
 
+/**
+ * @file TeBinaryViewer.cpp
+ * @brief Declaration of TeBinaryViewer.
+ * @ingroup viewer
+ */
+
+
 TeBinaryViewer::TeBinaryViewer(QWidget *parent)
 	: QMainWindow(parent)
 {

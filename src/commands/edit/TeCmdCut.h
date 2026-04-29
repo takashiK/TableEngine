@@ -21,6 +21,13 @@
 #pragma once
 
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdCut.h
+ * @brief Declaration of TeCmdCut.
+ * @ingroup commands
+ */
+
 class TeCmdCut :
     public TeCommandBase
 {

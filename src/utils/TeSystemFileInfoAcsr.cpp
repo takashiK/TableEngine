@@ -1,6 +1,18 @@
 #include "TeSystemFileInfoAcsr.h"
 #include "platform/platform_util.h"
 
+/**
+ * @file TeSystemFileInfoAcsr.cpp
+ * @brief Implementation of TeSystemFileInfoAcsr.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeSystemFileInfoAcsr.cpp
+ * @brief Implementation of TeSystemFileInfoAcsr.
+ * @ingroup utility
+ */
+
 TeSystemFileInfoAcsr::TeSystemFileInfoAcsr(QObject *parent)
 	: TeFileInfoAcsr(parent)
 {}

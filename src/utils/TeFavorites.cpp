@@ -3,6 +3,18 @@
 #include "TeSettings.h"
 #include <QSettings>
 
+/**
+ * @file TeFavorites.cpp
+ * @brief Implementation of TeFavorites.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeFavorites.cpp
+ * @brief Implementation of TeFavorites.
+ * @ingroup utility
+ */
+
 TeFavorites::TeFavorites(QObject *parent)
 	: QObject(parent)
 {

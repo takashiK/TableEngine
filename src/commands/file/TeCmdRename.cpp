@@ -26,6 +26,12 @@
 #include <QInputDialog>
 #include <QFileInfo>
 
+/**
+ * @file TeCmdRename.cpp
+ * @brief Implementation of TeCmdRename.
+ * @ingroup commands
+ */
+
 TeCmdRename::TeCmdRename()
 {
 }

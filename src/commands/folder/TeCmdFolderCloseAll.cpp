@@ -25,6 +25,12 @@
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeFileTreeView.h"
 
+/**
+ * @file TeCmdFolderCloseAll.cpp
+ * @brief Implementation of TeCmdFolderCloseAll.
+ * @ingroup commands
+ */
+
 
 TeCmdFolderCloseAll::TeCmdFolderCloseAll()
 {

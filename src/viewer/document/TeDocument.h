@@ -3,6 +3,13 @@
 #include <QObject>
 #include <QFileInfo>
 
+/**
+ * @file TeDocument.h
+ * @brief Declaration of TeDocument.
+ * @ingroup viewer
+ */
+
+
 class QTextCodec;
 
 class TeDocument :

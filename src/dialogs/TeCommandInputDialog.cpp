@@ -8,6 +8,13 @@
 #include <QCheckBox>
 #include <QDialogButtonBox>
 
+/**
+ * @file TeCommandInputDialog.cpp
+ * @brief Declaration of TeCommandInputDialog.
+ * @ingroup dialogs
+ */
+
+
 TeCommandInputDialog::TeCommandInputDialog(QWidget *parent)
 	: QDialog(parent)
 {

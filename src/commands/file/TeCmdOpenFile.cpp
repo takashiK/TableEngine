@@ -28,6 +28,12 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
+/**
+ * @file TeCmdOpenFile.cpp
+ * @brief Implementation of TeCmdOpenFile.
+ * @ingroup commands
+ */
+
 TeCmdOpenFile::TeCmdOpenFile()
 {
 }

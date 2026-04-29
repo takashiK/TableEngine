@@ -19,6 +19,11 @@
 ****************************************************************************/
 
 #include "TeMainWindow.h"
+/**
+ * @file TeMainWindow.cpp
+ * @brief Implementation of TeMainWindow.
+ * @ingroup widgets
+ */
 
 TeMainWindow::TeMainWindow(QWidget *parent)
 	: QMainWindow(parent)

@@ -26,6 +26,12 @@
 
 #include <QAbstractItemModel>
 
+/**
+ * @file TeCmdSelectAll.cpp
+ * @brief Implementation of TeCmdSelectAll.
+ * @ingroup commands
+ */
+
 TeCmdSelectAll::TeCmdSelectAll()
 {
 }

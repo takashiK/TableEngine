@@ -31,6 +31,13 @@
 #include <QCompleter>
 #include <QFileSystemModel>
 
+/**
+ * @file TeFilePathDialog.cpp
+ * @brief Declaration of TeFilePathDialog.
+ * @ingroup dialogs
+ */
+
+
 TeFilePathDialog::TeFilePathDialog(QWidget *parent, const QStringList& extraFlags)
 	: QDialog(parent)
 {

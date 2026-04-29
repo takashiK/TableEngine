@@ -22,6 +22,12 @@
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
+/**
+ * @file TeCmdSelectionStyle.cpp
+ * @brief Implementation of TeCmdSelectionStyle.
+ * @ingroup commands
+ */
+
 TeCmdSelectionStyle::TeCmdSelectionStyle()
 {
 }

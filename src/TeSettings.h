@@ -20,15 +20,36 @@
 
 #pragma once
 
+/**
+ * @file TeSettings.h
+ * @brief Application settings constants and QSettings key strings.
+ * @ingroup main
+ *
+ * @details Declares the TeSettings namespace with numeric limits and
+ * QSettings key-path constants.  The SETTING_STR macro expands to either
+ * a definition or an extern declaration depending on whether
+ * _STTING_STR_DEF_ is defined before inclusion.
+ */
+
+/**
+ * @namespace TeSettings
+ * @brief Compile-time constants and QSettings key paths.
+ */
 namespace TeSettings {
+	/**
+	 * @brief Limits for list-style settings.
+	 */
 	enum {
-		MAX_FAVORITES = 99,
-		MAX_HISTORY   = 99,
+		MAX_FAVORITES = 99, ///< Maximum number of favourite folder entries.
+		MAX_HISTORY   = 99, ///< Maximum number of navigation history entries.
 	};
 
+	/**
+	 * @brief Startup folder initialisation behaviour.
+	 */
 	enum InitFolderMode {
-		INIT_FOLDER_MODE_PREVIOUS,
-		INIT_FOLDER_MODE_SELECTED,
+		INIT_FOLDER_MODE_PREVIOUS, ///< Restore last-used folder on startup.
+		INIT_FOLDER_MODE_SELECTED, ///< Use the configured initial folder on startup.
 	};
 };
 

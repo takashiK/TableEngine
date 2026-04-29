@@ -21,6 +21,13 @@
 #pragma once
 
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdRunCommand.h
+ * @brief Declaration of TeCmdRunCommand.
+ * @ingroup commands
+ */
+
 class TeCmdRunCommand :
     public TeCommandBase
 {

@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdTemplate.h
+ * @brief Declaration of TeCmdTemplate.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdTemplate :

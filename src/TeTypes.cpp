@@ -20,13 +20,20 @@
 
 #include "TeTypes.h"
 
-/*!
-	\defgroup main main
-	\defgroup utility utility
-	\defgroup commands commands
-	\defgroup platform platform
-	\defgroup widgets widgets
-	\defgroup dialogs dialogs
+/**
+ * @file TeTypes.cpp
+ * @brief Doxygen group definitions and TeTypes implementation.
+ * @ingroup main
+ */
+
+/**
+ * @defgroup main      Core infrastructure
+ * @defgroup utility   Utility classes (utils/)
+ * @defgroup commands  Command implementations (commands/)
+ * @defgroup platform  Platform-specific abstractions (platform/)
+ * @defgroup widgets   UI widgets (widgets/)
+ * @defgroup dialogs   Dialog windows (dialogs/)
+ * @defgroup viewer    File viewers (viewer/)
  */
 
 

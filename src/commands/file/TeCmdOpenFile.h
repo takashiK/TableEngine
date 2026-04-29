@@ -21,6 +21,13 @@
 #pragma once
 
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdOpenFile.h
+ * @brief Declaration of TeCmdOpenFile.
+ * @ingroup commands
+ */
+
 class TeCmdOpenFile :
     public TeCommandBase
 {

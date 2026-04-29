@@ -24,6 +24,12 @@
 #include "widgets/TeFileListView.h"
 #include "utils/TeUtils.h"
 
+/**
+ * @file TeCmdSelectToggle.cpp
+ * @brief Implementation of TeCmdSelectToggle.
+ * @ingroup commands
+ */
+
 
 TeCmdSelectToggle::TeCmdSelectToggle()
 {

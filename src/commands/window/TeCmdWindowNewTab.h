@@ -25,6 +25,13 @@
 #include <QList>
 #include <QFlags>
 
+/**
+ * @file TeCmdWindowNewTab.h
+ * @brief Declaration of TeCmdWindowNewTab.
+ * @ingroup commands
+ */
+
+
 class TeViewStore;
 
 class TeCmdWindowNewTab :

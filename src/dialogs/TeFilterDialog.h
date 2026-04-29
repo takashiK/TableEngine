@@ -2,6 +2,13 @@
 
 #include <QDialog>
 
+/**
+ * @file TeFilterDialog.h
+ * @brief Declaration of TeFilterDialog.
+ * @ingroup dialogs
+ */
+
+
 class QCheckBox;
 class QLineEdit;
 

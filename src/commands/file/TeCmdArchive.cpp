@@ -29,6 +29,12 @@
 #include <QFileDialog>
 #include <QProgressDialog>
 
+/**
+ * @file TeCmdArchive.cpp
+ * @brief Implementation of TeCmdArchive.
+ * @ingroup commands
+ */
+
 TeCmdArchive::TeCmdArchive()
 {
 }

@@ -27,6 +27,18 @@
 #include <QThreadPool>
 #include <QMetaObject>
 
+/**
+ * @file TeImageLoader.cpp
+ * @brief Implementation of TeImageLoader.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeImageLoader.cpp
+ * @brief Implementation of TeImageLoader.
+ * @ingroup utility
+ */
+
 TeImageLoader::TeImageLoader(QObject* parent)
     : QObject(parent)
 {

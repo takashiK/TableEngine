@@ -3,6 +3,18 @@
 #include <QDir>
 #include <QFileInfo>
 
+/**
+ * @file TeFileFinder.cpp
+ * @brief Implementation of TeFileFinder.
+ * @ingroup utility
+ */
+
+/**
+ * @file TeFileFinder.cpp
+ * @brief Implementation of TeFileFinder.
+ * @ingroup utility
+ */
+
 TeFileFinder::TeFileFinder(const QString& path, QObject* parent)
 	: TeFinder(parent)
 	, m_rootPath(path)

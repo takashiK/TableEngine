@@ -22,6 +22,12 @@
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
+/**
+ * @file TeCmdViewFileOrderBy.cpp
+ * @brief Implementation of TeCmdViewFileOrderBy.
+ * @ingroup commands
+ */
+
 TeCmdViewFileOrderBy::TeCmdViewFileOrderBy()
 {
 }

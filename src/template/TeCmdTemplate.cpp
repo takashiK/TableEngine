@@ -21,6 +21,13 @@
 #include "TeCmdTemplate.h"
 #include "utils/TeUtils.h"
 
+/**
+ * @file TeCmdTemplate.cpp
+ * @brief Declaration of TeCmdTemplate.
+ * @ingroup commands
+ */
+
+
 TeCmdTemplate::TeCmdTemplate()
 {
 }

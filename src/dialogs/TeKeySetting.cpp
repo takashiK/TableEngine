@@ -34,6 +34,13 @@
 #include <QSettings>
 #include <QString>
 
+/**
+ * @file TeKeySetting.cpp
+ * @brief Declaration of TeKeySetting.
+ * @ingroup dialogs
+ */
+
+
 static void changeKeyTree(int key, QCheckBox* ctrl, QCheckBox* shift, QTreeWidget* tree)
 {
 	switch (key) {

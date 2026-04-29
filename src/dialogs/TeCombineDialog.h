@@ -4,6 +4,13 @@
 #include <QStringList>
 #include <QSet>
 
+/**
+ * @file TeCombineDialog.h
+ * @brief Declaration of TeCombineDialog.
+ * @ingroup dialogs
+ */
+
+
 class QLineEdit;
 class QListView;
 class QCheckBox;

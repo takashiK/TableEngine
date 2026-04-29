@@ -27,6 +27,12 @@
 #include <QDir>
 #include <QMessageBox>
 
+/**
+ * @file TeCmdGotoFolder.cpp
+ * @brief Implementation of TeCmdGotoFolder.
+ * @ingroup commands
+ */
+
 TeCmdGotoFolder::TeCmdGotoFolder()
 {
 }

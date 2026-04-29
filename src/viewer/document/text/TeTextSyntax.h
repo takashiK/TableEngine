@@ -5,6 +5,13 @@
 #include <QTextCharFormat>
 #include <QRegularExpression>
 
+/**
+ * @file TeTextSyntax.h
+ * @brief Declaration of TeTextSyntax.
+ * @ingroup viewer
+ */
+
+
 class TeTextSyntax
 {
 public:

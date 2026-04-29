@@ -1,6 +1,13 @@
 #pragma once
 #include "commands/TeCommandBase.h"
 
+/**
+ * @file TeCmdToolFile.h
+ * @brief Declaration of TeCmdToolFile.
+ * @ingroup commands
+ */
+
+
 class TeCmdToolFile :
     public TeCommandBase
 {

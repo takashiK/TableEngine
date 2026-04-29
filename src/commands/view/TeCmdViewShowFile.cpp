@@ -22,6 +22,12 @@
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
 
+/**
+ * @file TeCmdViewShowFile.cpp
+ * @brief Implementation of TeCmdViewShowFile.
+ * @ingroup commands
+ */
+
 TeCmdViewShowFile::TeCmdViewShowFile()
 {
 }

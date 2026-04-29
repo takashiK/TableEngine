@@ -7,6 +7,11 @@
 #include <QTextLayout>
 #include <QTextOption>
 #include <QtMath>
+/**
+ * @file TeFileItemDelegate.cpp
+ * @brief Implementation of TeFileItemDelegate.
+ * @ingroup widgets
+ */
 
 /****************************************************************************
 **

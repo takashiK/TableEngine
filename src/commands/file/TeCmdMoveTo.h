@@ -20,6 +20,13 @@
 
 #pragma once
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdMoveTo.h
+ * @brief Declaration of TeCmdMoveTo.
+ * @ingroup commands
+ */
+
 class TeCmdMoveTo :
 	public TeCommandBase
 {

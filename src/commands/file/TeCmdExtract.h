@@ -20,6 +20,13 @@
 
 #pragma once
 #include "commands/TeCommandBase.h"
+
+/**
+ * @file TeCmdExtract.h
+ * @brief Declaration of TeCmdExtract.
+ * @ingroup commands
+ */
+
 class TeCmdExtract :
 	public TeCommandBase
 {

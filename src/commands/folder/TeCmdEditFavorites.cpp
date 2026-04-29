@@ -25,6 +25,12 @@
 
 #include "dialogs/TePathListDialog.h"
 
+/**
+ * @file TeCmdEditFavorites.cpp
+ * @brief Implementation of TeCmdEditFavorites.
+ * @ingroup commands
+ */
+
 TeCmdEditFavorites::TeCmdEditFavorites()
 {
 }

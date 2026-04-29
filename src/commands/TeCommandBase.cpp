@@ -21,6 +21,11 @@
 #include "TeCommandBase.h"
 #include "TeDispatcher.h"
 
+/**
+ * @file TeCommandBase.cpp
+ * @brief Implementation of TeCommandBase.
+ * @ingroup commands
+ */
 
 TeCommandBase::TeCommandBase()
 {

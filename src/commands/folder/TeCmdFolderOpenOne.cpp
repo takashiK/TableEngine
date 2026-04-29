@@ -25,6 +25,12 @@
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeFileTreeView.h"
 
+/**
+ * @file TeCmdFolderOpenOne.cpp
+ * @brief Implementation of TeCmdFolderOpenOne.
+ * @ingroup commands
+ */
+
 
 
 TeCmdFolderOpenOne::TeCmdFolderOpenOne()

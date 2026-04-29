@@ -30,6 +30,13 @@
 #include <QIcon>
 #include <QDir>
 
+/**
+ * @file TeAskCreationModeDialog.cpp
+ * @brief Declaration of TeAskCreationModeDialog.
+ * @ingroup dialogs
+ */
+
+
 TeAskCreationModeDialog::TeAskCreationModeDialog(QWidget *parent)
 	: QDialog(parent)
 {

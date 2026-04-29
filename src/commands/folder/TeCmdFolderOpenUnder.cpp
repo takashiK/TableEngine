@@ -28,6 +28,12 @@
 
 #include <QModelIndex>
 
+/**
+ * @file TeCmdFolderOpenUnder.cpp
+ * @brief Implementation of TeCmdFolderOpenUnder.
+ * @ingroup commands
+ */
+
 TeCmdFolderOpenUnder::TeCmdFolderOpenUnder()
 {
 }

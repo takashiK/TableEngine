@@ -80,6 +80,12 @@
 #include "setting/TeCmdKeySetting.h"
 #include "setting/TeCmdMenuSetting.h"
 
+/**
+ * @file TeCommandFactory.cpp
+ * @brief Implementation of TeCommandFactory.
+ * @ingroup commands
+ */
+
 TeCommandFactory::TeCommandFactory()
 {
 #define BEGIN_GROUP( groupId ) { TeTypes::CmdId cur_group = groupId; int cur_rank = 1
