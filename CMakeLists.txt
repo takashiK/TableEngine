@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets WebChannel WebEngineCore WebEngineWidgets Positioning Core5Compat)
 qt_standard_project_setup()
 
+enable_testing()
+
 add_subdirectory(main)
 add_subdirectory(src)
 add_subdirectory(tests)

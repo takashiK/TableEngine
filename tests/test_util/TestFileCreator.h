@@ -27,10 +27,10 @@
 #include "utils/TeFileInfo.h"
 #include <QStandardItem>
 
-void createFileTree(const QString& dest, const QStringList& paths, int extend_mbytes=0);
+void createFileTree(const QString& dest, const QStringList& paths, int extend_kbytes=0);
 void cleanFileTree(const QString& path);
 bool compareFileTree(const QString& src, const QString& dst, bool binComp);
-void expectEntries(QStandardItem* root, const QStringList& paths, const QDateTime& date = QDateTime());
+void expectEntries(QStandardItem* root, const QString& rootPath, const QStringList& paths, const QDateTime& date = QDateTime());
 bool compareFileTree(const QStandardItem* srcRoot, const QString& dst, bool binComp);
 
 enum FileInfoUserRole {

@@ -127,7 +127,7 @@
 
 #include <gmock/gmock.h>
 
-#include <TeArchive.h>
+#include <utils/TeArchive.h>
 #include <test_util/TestFileCreator.h>
 #include <test_util/ProgressTracker.h>
 
@@ -152,10 +152,10 @@ bool checkArchive(const QStringList& expect, const QStringList& setup, TeArchive
 	cleanFileTree("debug/test2");
 	QFile::remove("debug/test.zip");
 
-	createFileTree("debug/test", expect);
+	createFileTree("debug/test", expect, 10);
 
 	QScopedPointer<QStandardItem> entries( new QStandardItem );
-	expectEntries(entries.data(), expect, QDateTime());
+	expectEntries(entries.data(), "debug/test", expect, QDateTime());
 
 	TeArchive::Writer writer;
 	TeArchive::Reader reader;
@@ -477,7 +477,7 @@ TEST(tst_TeArchive, archive_progress)
 	wthread.wait();
 
 	//Check Progress values
-	EXPECT_LE(list.size() *1024,wtracker.maxvalue);
+	EXPECT_LE(list.size() ,wtracker.maxvalue);
 	EXPECT_LE(list.size(), wtracker.count);
 	EXPECT_EQ(wtracker.maxvalue, wtracker.progress);
 	EXPECT_EQ(list.size(), wtracker.strList.size());
@@ -507,7 +507,7 @@ TEST(tst_TeArchive, archive_progress)
 	rcvThread.quit();
 	rcvThread.wait();
 
-	EXPECT_LE(100, tracker.maxvalue);
+	EXPECT_LE(10, tracker.maxvalue);
 	EXPECT_LE(list.size(), tracker.count);
 	EXPECT_GE(tracker.maxvalue, tracker.progress);
 	EXPECT_EQ(list.size(), tracker.strList.size());

@@ -25,8 +25,8 @@
 
 class mock_TeDispatcher : public TeDispatcher {
 public:
-	MOCK_METHOD3(dispatch,
-		bool(TeTypes::WidgetType type, QObject* obj, QEvent *event));
+	MOCK_METHOD2(dispatch,
+		bool(TeTypes::WidgetType type, QEvent *event));
 	MOCK_METHOD1(requestCommandFinalize,
 		void(TeCommandBase* cmdBase));
 };

@@ -157,50 +157,52 @@ TeFileType getFileType(const QString& path)
 	TeFileType type = TE_FILE_UNKNOWN;
 	QFileInfo fileInfo(path);
 
-	//check suffix
+	//lazy check by suffix
 	if (fileInfo.isDir()) {
 		type = TE_FILE_FOLDER;
-	}
-	else if (txtSuffixes.contains(fileInfo.suffix())) {
+	} else if (txtSuffixes.contains(fileInfo.suffix().toLower())) {
 		type = TE_FILE_TEXT;
 	}
-	else if (imageSuffixes.contains(fileInfo.suffix())) {
+	else if (imageSuffixes.contains(fileInfo.suffix().toLower())) {
 		type = TE_FILE_IMAGE;
 	}
-	else if (archiveSuffixes.contains(fileInfo.suffix())) {
+	else if (archiveSuffixes.contains(fileInfo.suffix().toLower())) {
 		type = TE_FILE_ARCHIVE;
 	}
 
 	if (type != TE_FILE_UNKNOWN){
 		return type;
 	}
-	// Initialize the magic library
-	static magic_t magic = nullptr;
-	if (magic == nullptr) {
-		magic = magic_open(MAGIC_MIME_TYPE);
+
+	if (fileInfo.isFile() && fileInfo.size() > 0) {
+		// Initialize the magic library
+		static magic_t magic = nullptr;
 		if (magic == nullptr) {
-			qDebug() << "unable to initialize magic library";
-			return TE_FILE_UNKNOWN;
+			magic = magic_open(MAGIC_MIME_TYPE);
+			if (magic == nullptr) {
+				qDebug() << "unable to initialize magic library";
+				return TE_FILE_UNKNOWN;
+			}
+			if (magic_load(magic, nullptr) != 0) {
+				qDebug() << "unable to load magic database - " << magic_error(magic);
+				magic_close(magic);
+				magic = nullptr;
+				return TE_FILE_UNKNOWN;
+			}
 		}
-		if (magic_load(magic, nullptr) != 0) {
-			qDebug() << "unable to load magic database - " << magic_error(magic);
-			magic_close(magic);
-			magic = nullptr;
-			return TE_FILE_UNKNOWN;
+
+		//get file type
+		QString typeStr = magic_file(magic, path.toLocal8Bit().data());
+
+		if (typeStr.startsWith("text/")) {
+			type = TE_FILE_TEXT;
 		}
-	}
-
-	//get file type
-	QString typeStr = magic_file(magic, path.toLocal8Bit().data());
-
-	if (typeStr.startsWith("text/")) {
-		type = TE_FILE_TEXT;
-	}
-	else if (typeStr.startsWith("image/")) {
-		type = TE_FILE_IMAGE;
-	}
-	else if (typeStr.startsWith("application/zip")) {
-		type = TE_FILE_ARCHIVE;
+		else if (typeStr.startsWith("image/")) {
+			type = TE_FILE_IMAGE;
+		}
+		else if (typeStr.startsWith("application/zip")) {
+			type = TE_FILE_ARCHIVE;
+		}
 	}
 
 	return type;

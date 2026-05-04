@@ -31,13 +31,13 @@
 /*!
 	Create file tree to \a dest by \a paths.
 	Default file include path string data.
-	If you set positive value to \a extend_mbytes then files append extra extend random data.
+	If you set positive value to \a extend_kbytes then files append extra extend random data.
 
 	\param dest          Destination  path.
 	\param paths         list of file tree entry.
-	\param extend_mbytes extended data size (MB unit).
+	\param extend_kbytes extended data size (KB unit).
 */
-void createFileTree(const QString & dest, const QStringList & paths, int extend_mbytes)
+void createFileTree(const QString & dest, const QStringList & paths, int extend_kbytes)
 {
 	QDir dir(dest);
 	dir.mkpath(".");
@@ -58,17 +58,15 @@ void createFileTree(const QString & dest, const QStringList & paths, int extend_
 
 			QFile file(dir.filePath(path));
 			file.open(QFile::WriteOnly | QFile::Truncate);
-			QByteArray data = path.toLocal8Bit();
-			file.write(data);
-			if (extend_mbytes > 0) {
+			if (extend_kbytes > 0) {
 				QByteArray extend;
 				std::mt19937_64 ran(qHash(path));
 				std::uint64_t value;
-				for (int i = 0; i < 128*1024; i++) {
+				for (int i = 0; i < (1024/8); i++) {
 					value = ran();
 					extend.append(reinterpret_cast<char*>(&value),8);
 				}
-				for (int i = 0; i < extend_mbytes; i++) {
+				for (int i = 0; i < extend_kbytes; i++) {
 					file.write(extend);
 				}
 			}
@@ -209,8 +207,15 @@ QStandardItem* findChild(QStandardItem* parent, const QString& name)
 	return nullptr;
 }
 
-void expectEntries(QStandardItem* root, const QStringList& paths, const QDateTime& date)
+void expectEntries(QStandardItem* root, const QString& rootPath, const QStringList& paths, const QDateTime& date)
 {
+	// setup root entry
+	TeFileInfo tInfo;
+	tInfo.type = TeFileInfo::EN_DIR;
+	tInfo.path = rootPath;
+	tInfo.lastModified = date;
+	convertToStandardItem(tInfo, root);
+
 	for (auto& path : paths) {
 		QStandardItem* parent = root;
 		QStringList spath = path.split('/');
@@ -223,6 +228,20 @@ void expectEntries(QStandardItem* root, const QStringList& paths, const QDateTim
 				TeFileInfo tInfo;
 				tInfo.type = TeFileInfo::EN_DIR;
 				tInfo.path = parent->data(ROLE_FINFO_PATH).toString() + "/" + name;
+				//if real file found then use file attribute. otherwise use default value.
+				// tInfo.size , tInfo.lastModified , tInfo.permissions
+				if (!tInfo.path.isEmpty()) {
+					QFileInfo fileInfo(tInfo.path);
+					if (fileInfo.exists()) {
+						tInfo.size = fileInfo.size();
+						tInfo.lastModified = fileInfo.lastModified();
+						tInfo.permissions = fileInfo.permissions();
+					}
+					else {
+						tInfo.lastModified = date;
+					}
+				}
+
 				entry = new QStandardItem();
 				convertToStandardItem(tInfo, entry);
 				parent->appendRow(entry);
@@ -235,6 +254,21 @@ void expectEntries(QStandardItem* root, const QStringList& paths, const QDateTim
 			TeFileInfo tInfo;
 			tInfo.type = TeFileInfo::EN_FILE;
 			tInfo.path = parent->data(ROLE_FINFO_PATH).toString() + "/" + last;
+
+			//if real file found then use file attribute. otherwise use default value.
+			// tInfo.size , tInfo.lastModified , tInfo.permissions
+			if (!tInfo.path.isEmpty()) {
+				QFileInfo fileInfo(tInfo.path);
+				if (fileInfo.exists()) {
+					tInfo.size = fileInfo.size();
+					tInfo.lastModified = fileInfo.lastModified();
+					tInfo.permissions = fileInfo.permissions();
+				}
+				else {
+					tInfo.lastModified = date;
+				}
+			}
+
 			QStandardItem* entry = new QStandardItem();
 			convertToStandardItem(tInfo, entry);
 			parent->appendRow(entry);
@@ -262,7 +296,10 @@ bool compareFileEntry(const QStandardItem* src, const QFileInfo& dst, bool binCo
 		QFile dfile(dst.filePath());
 		dfile.open(QFile::ReadOnly);
 		QByteArray dstBin = dfile.readAll();
-		if (src->data(ROLE_FINFO_PATH).toString() != dstBin) {
+		QFile sfile(src->data(ROLE_FINFO_PATH).toString());
+		sfile.open(QFile::ReadOnly);
+		QByteArray srcBin = sfile.readAll();
+		if (srcBin != dstBin) {
 			ADD_FAILURE() << "Different data: " << src->data(ROLE_FINFO_PATH).toString().toStdString();
 			result = false;
 		}

@@ -251,7 +251,7 @@ private:
 		qint64 size;
 
 		bool operator==(const ArchiveInfo& o) const {
-			return (type == o.type) && (src == o.src) && (dst == o.dst);
+			return (dst == o.dst);
 		}
 	};
 	QList<ArchiveInfo> m_entryList;
