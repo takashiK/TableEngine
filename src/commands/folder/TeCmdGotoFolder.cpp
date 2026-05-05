@@ -71,7 +71,11 @@ QFlags<TeTypes::CmdType> TeCmdGotoFolder::type()
 bool TeCmdGotoFolder::execute(TeViewStore* p_store)
 {
 	TeFilePathDialog dlg(p_store->mainWindow());
+	TeFolderView* p_view = p_store->currentFolderView();
 	dlg.setCurrentPath(getCurrentFolder(p_store));
+	dlg.setFavorites(getFavorites());
+	dlg.setHistory(p_view->getPathHistory());
+
 	if(dlg.exec() == QDialog::Accepted)
 	{
 		QString path = dlg.targetPath();
