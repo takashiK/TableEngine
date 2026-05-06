@@ -1,0 +1,32 @@
+/* QListView — widget-level palette overrides.
+   color: sets QPalette::Text (normal item text).
+   selection-color: sets QPalette::HighlightedText (selected item text).
+   These are applied via polish() and flow through to opt.palette in the delegate.
+   Item-level color: on ::item sub-rules only affects the internal optCopy inside
+   drawControl() and does NOT reach the delegate's manual text drawing. */
+QListView {
+    color: #1e1e1e;
+    selection-color: #1e1e1e;
+    show-decoration-selected: 1;
+}
+
+/* QListView item — normal state */
+QListView::item {
+    background-color: #ffffff;
+
+}
+
+/* QListView item — selected state */
+QListView::item:selected {
+    background-color: #cce4f7;
+}
+
+/* QListView item — active state (keyboard focus / current item) */
+QListView::item:focus:!selected {
+    background-color: #ffffff;
+}
+
+/* QListView item — active state (keyboard focus / current item) */
+QListView::item:focus:selected {
+    background-color: #cce4f7;
+}

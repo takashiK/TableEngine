@@ -62,6 +62,14 @@ int main(int argc, char *argv[])
 
 	QPixmapCache::setCacheLimit(51200); // 50MB
 
+	//setup default stylesheet
+	QFile styleFile(":/Style/stylesheet_light.css");
+	bool ok = styleFile.open(QFile::ReadOnly | QFile::Text);
+
+	QTextStream stream(&styleFile);
+	QString stylesheet = stream.readAll();
+	a.setStyleSheet(stylesheet);
+
 	//create main window
 	TeViewStore store;
 	store.initialize();
@@ -69,14 +77,6 @@ int main(int argc, char *argv[])
 	store.show();
 
 	dispatcher.setViewStore(&store);
-
-	//setup default stylesheet
-	QFile styleFile(":/Style/stylesheet_dark.css");
-	bool ok = styleFile.open(QFile::ReadOnly | QFile::Text);
-
-	QTextStream stream(&styleFile);
-	QString stylesheet = stream.readAll();
-	a.setStyleSheet(stylesheet);
 
 	//start event loop.
 	return a.exec();

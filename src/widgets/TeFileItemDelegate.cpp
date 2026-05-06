@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QFileSystemModel>
 #include <QPainter>
+#include <qpainterstateguard.h>
 #include <QTextLayout>
 #include <QTextOption>
 #include <QtMath>
@@ -55,7 +56,7 @@ TeTypes::FileInfoFlags TeFileItemDelegate::infoFlags() const
 void TeFileItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyleOptionViewItem opt = option;
-
+    
     if(index.data(Qt::DisplayRole).toString() == "..") {
         // Special handling for ".." entry to ensure it gets the correct icon
         qDebug() << "Painting '..' entry, ensuring folder up icon is used.";
@@ -175,6 +176,22 @@ void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& 
     if (m_infoFlags & TeTypes::FILEINFO_MODIFIED) {
         QString dtText = fileInfo.lastModified().toString(QLatin1String("yyyy/MM/dd hh:mm:ss"));
         style->drawItemText(painter, dateTimeRect, Qt::AlignRight | Qt::AlignVCenter, opt.palette, enabled, dtText, role);
+    }
+
+    // Paint a vertical accent marker on the left edge when the item is selected (List mode)
+    if (opt.state & QStyle::State_Selected) {
+        const QRect &rect = opt.rect;
+        const bool isRtl = opt.direction == Qt::RightToLeft;
+        const QColor col = opt.palette.accent().color();
+        QPainterStateGuard psg(painter);
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->setBrush(col);
+        painter->setPen(col);
+        const qreal xPos = isRtl ? rect.right() - 4.5f : rect.left() + 3.5f;
+        const qreal yOfs = rect.height() / 4.0;
+        QRectF r(QPointF(xPos, rect.y() + yOfs),
+                 QPointF(xPos + 1, rect.y() + rect.height() - yOfs));
+        painter->drawRoundedRect(r, 1, 1);
     }
 }
 
