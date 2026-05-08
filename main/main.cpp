@@ -32,6 +32,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QPixmapCache>
+#include <QStyleHints>
 
 #include <QSettings>
 
@@ -62,13 +63,23 @@ int main(int argc, char *argv[])
 
 	QPixmapCache::setCacheLimit(51200); // 50MB
 
-	//setup default stylesheet
-	QFile styleFile(":/Style/stylesheet_light.css");
-	bool ok = styleFile.open(QFile::ReadOnly | QFile::Text);
 
-	QTextStream stream(&styleFile);
-	QString stylesheet = stream.readAll();
-	a.setStyleSheet(stylesheet);
+	//setup default stylesheet
+	auto applyStyleSheet = [&a](Qt::ColorScheme scheme) {
+		QString path = (scheme == Qt::ColorScheme::Dark)
+			? ":/Style/stylesheet_dark.css"
+			: ":/Style/stylesheet_light.css";
+		QFile f(path);
+		if (f.open(QFile::ReadOnly | QFile::Text))
+			a.setStyleSheet(QTextStream(&f).readAll());
+	};
+
+	applyStyleSheet(QGuiApplication::styleHints()->colorScheme());
+
+	QObject::connect(
+		QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged,
+		&a, applyStyleSheet
+	);
 
 	//create main window
 	TeViewStore store;

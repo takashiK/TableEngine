@@ -5,6 +5,7 @@
    Item-level color: on ::item sub-rules only affects the internal optCopy inside
    drawControl() and does NOT reach the delegate's manual text drawing. */
 QListView {
+    background-color: #ffffff;
     color: #1e1e1e;
     selection-color: #1e1e1e;
     show-decoration-selected: 1;
@@ -23,10 +24,43 @@ QListView::item:selected {
 
 /* QListView item — active state (keyboard focus / current item) */
 QListView::item:focus:!selected {
-    background-color: #ffffff;
+    background-color: #f0f0f0;
 }
 
 /* QListView item — active state (keyboard focus / current item) */
 QListView::item:focus:selected {
+    background-color: #cce4f7;
+}
+
+/* QTreeView */
+QTreeView {
+    background-color: #ffffff;
+    color: #1e1e1e;
+    selection-color: #1e1e1e;
+    show-decoration-selected: 1;
+    border: 1px solid #c0c0c0;
+}
+
+QTreeView::item {
+    background-color: #ffffff;
+}
+
+QTreeView::item:selected {
+    background-color: #cce4f7;
+}
+
+QTreeView::item:focus:!selected {
+    background-color: #f0f0f0;
+}
+
+QTreeView::item:focus:selected {
+    background-color: #cce4f7;
+}
+
+QTreeView::branch {
+    background-color: #ffffff;
+}
+
+QTreeView::branch:selected {
     background-color: #cce4f7;
 }
