@@ -33,6 +33,7 @@
 #include <QTextStream>
 #include <QPixmapCache>
 #include <QStyleHints>
+#include <TeEventEmitter.h>
 
 #include <QSettings>
 
@@ -76,16 +77,29 @@ int main(int argc, char *argv[])
 
 	applyStyleSheet(QGuiApplication::styleHints()->colorScheme());
 
-	QObject::connect(
-		QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged,
-		&a, applyStyleSheet
-	);
-
 	//create main window
 	TeViewStore store;
 	store.initialize();
 	store.setDispatcher(&dispatcher);
 	store.show();
+
+	// ApplicationPaletteChange は Qt の updatePalette() 完了後にポストされるため、
+	// setStyleSheet 呼び出し時のシステムパレットが確実に新モードになっている。
+	// colorSchemeChanged シグナルはパレット更新前に発火するため使用しない。
+	TeEventEmitter paletteChangeEmitter;
+	paletteChangeEmitter.addEventType(QEvent::ApplicationPaletteChange);
+	paletteChangeEmitter.addEmitter(qobject_cast<QWidget*>(store.mainWindow()));
+	Qt::ColorScheme lastScheme = QGuiApplication::styleHints()->colorScheme();
+	QObject::connect(
+		&paletteChangeEmitter, &TeEventEmitter::emitEvent,
+		&a, [&applyStyleSheet, &lastScheme](QWidget*, QEvent*) {
+			Qt::ColorScheme current = QGuiApplication::styleHints()->colorScheme();
+			if (current != lastScheme) {
+				lastScheme = current;
+				applyStyleSheet(current);
+			}
+		}
+	);
 
 	dispatcher.setViewStore(&store);
 
