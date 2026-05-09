@@ -32,6 +32,8 @@
 #include <QRadioButton>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QGridLayout>
+#include <QLabel>
 
 /**
  * @file TeOptionSetting.cpp
@@ -156,7 +158,33 @@ QWidget * TeOptionSetting::createPageFolder()
 	QWidget* page = new QWidget();
 	QVBoxLayout* layout = new QVBoxLayout();
 
+	QGroupBox* groupBox = new QGroupBox(tr("Colors"));
 
+	QGridLayout* grid = new QGridLayout();
+	grid->addWidget(new QLabel(tr("Normal:")), 0, 0);
+	QPushButton* normal = new QPushButton(tr("Fontfamily/Size"));
+	normal->setFixedWidth(200);
+	grid->addWidget(normal, 0, 1);
+
+	grid->addWidget(new QLabel(tr("Selected:")), 1, 0);
+	QPushButton* selected = new QPushButton(tr("Fontfamily/Size"));
+	selected->setFixedWidth(200);
+	grid->addWidget(selected, 1, 1);
+	grid->addWidget(new QLabel(tr("Accent:")), 1, 2);
+	QPushButton* accent = new QPushButton();
+	accent->setFixedWidth(50);
+	grid->addWidget(accent, 1, 3);
+
+	grid->addWidget(new QLabel(tr("Focused:")), 2, 0);
+	QPushButton* focused = new QPushButton(tr("Fontfamily/Size"));
+	focused->setFixedWidth(200);
+	grid->addWidget(focused, 2, 1);
+	grid->addWidget(new QLabel(tr("Prioritize:")), 2, 2);
+	QCheckBox* prioritize = new QCheckBox();
+	grid->addWidget(prioritize, 2, 3);
+
+	groupBox->setLayout(grid);
+	layout->addWidget(groupBox);
 
 	page->setLayout(layout);
 	return page;

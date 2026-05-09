@@ -66,5 +66,5 @@ protected:
 	virtual void dropEvent(QDropEvent* event);
 
 private:
-	QTreeWidget* mp_buddy; ///< Linked partner tree widget for D&D moves.
+	QTreeWidget* mp_buddy = nullptr; ///< Linked partner tree widget for D&D moves.
 };

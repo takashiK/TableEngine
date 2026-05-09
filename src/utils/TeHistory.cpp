@@ -16,7 +16,6 @@
 TeHistory::TeHistory(QObject *parent)
 	: QObject(parent)
 {
-	m_index = 0;
 }
 
 TeHistory::~TeHistory()

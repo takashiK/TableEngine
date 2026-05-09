@@ -17,7 +17,6 @@
 
 TeWindowsEventFilter::TeWindowsEventFilter()
 {
-	mp_nativeEvent = nullptr;
 }
 
 TeWindowsEventFilter::~TeWindowsEventFilter()

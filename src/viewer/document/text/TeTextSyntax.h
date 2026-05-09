@@ -57,7 +57,7 @@ private:
 	void update_keywords();
 
 	QList<SyntaxKeywords> m_keywords;
-	bool m_update_keywords;
+	bool m_update_keywords = false;
 	QList<SyntaxRegex> m_keywordRegexes;
 	QList<SyntaxRegex> m_regexes;
 	QList<SyntaxRegion> m_regions;

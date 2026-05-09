@@ -30,7 +30,6 @@
 
 TeCommandInfoBase::TeCommandInfoBase()
 {
-	m_cmdId = TeTypes::CMDID_NONE;
 }
 
 TeCommandInfoBase::TeCommandInfoBase(TeTypes::CmdId cmdId, const QString & name, const QString & description, const QIcon & icon)

@@ -123,10 +123,10 @@ protected:
 	const QEvent*       srcEvent() const;
 
 private:
-	bool mb_isFinished;
-	TeDispatcher* mp_dispatcher;
-	TeTypes::WidgetType m_srcType;
+	bool mb_isFinished = false;
+	TeDispatcher* mp_dispatcher = nullptr;
+	TeTypes::WidgetType m_srcType = TeTypes::WT_NONE;
 	TeCmdParam          m_cmdParam;
-	QEvent*             mp_srcEvent;
+	QEvent*             mp_srcEvent = nullptr;
 };
 

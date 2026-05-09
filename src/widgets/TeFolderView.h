@@ -148,5 +148,5 @@ protected:
 	bool isDispatchable(TeTypes::WidgetType type, QEvent *event) const;
 
 private:
-	TeDispatchable* mp_dispatcher;
+	TeDispatchable* mp_dispatcher = nullptr;
 };

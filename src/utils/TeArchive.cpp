@@ -571,9 +571,6 @@ namespace TeArchive {
 
 Reader::Reader()
 {
-	overwrite_check = Q_NULLPTR;
-	m_type = AR_NONE;
-	m_cancel = false;
 }
 
 /*!
@@ -582,9 +579,6 @@ Reader::Reader()
  */
 Reader::Reader(const QString & path)
 {
-	overwrite_check = Q_NULLPTR;
-	m_type = AR_NONE;
-	m_cancel = false;
 	open(path);
 }
 
@@ -978,8 +972,6 @@ Reader::const_iterator& Reader::const_iterator::operator++()
  */
 Writer::Writer()
 {
-	m_totalBytes = 0;
-	m_cancel = false;
 }
 
 

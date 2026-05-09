@@ -56,16 +56,16 @@ private:
     void loadSettings();
     void fontSettings();
 
-    TeTextView* mp_textView;
-    QWebChannel* mp_channel;
-    TeMarkupPage* mp_page;
-    QWebEngineView* mp_webView;
+    TeTextView* mp_textView = nullptr;
+    QWebChannel* mp_channel = nullptr;
+    TeMarkupPage* mp_page = nullptr;
+    QWebEngineView* mp_webView = nullptr;
     TeDocument* mp_document;
-    TeTextSyntaxHighlighter* mp_textHighlighter;
+    TeTextSyntaxHighlighter* mp_textHighlighter = nullptr;
     TeTextSyntaxLoader* mp_syntaxLoader;
     TeMarkupLoader* mp_markupLoader;
     QList<QAction*> mp_textActions;
-    QDialog* mp_findDialog;
-    QDialog* mp_gotoLineDialog;
+    QDialog* mp_findDialog = nullptr;
+    QDialog* mp_gotoLineDialog = nullptr;
 };
 

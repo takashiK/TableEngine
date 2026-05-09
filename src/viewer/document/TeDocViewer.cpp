@@ -42,21 +42,12 @@
 TeDocViewer::TeDocViewer(QWidget* parent)
     : QMainWindow(parent)
 {
-    mp_textView = nullptr;
-    mp_textHighlighter = nullptr;
-    mp_channel = nullptr;
-    mp_page = nullptr;
-    mp_webView = nullptr;
-
     mp_document = new TeDocument();
     mp_syntaxLoader = new TeTextSyntaxLoader();
     mp_syntaxLoader->loadAll();
 
     mp_markupLoader = new TeMarkupLoader();
     mp_markupLoader->loadAll();
-
-    mp_findDialog = nullptr;
-    mp_gotoLineDialog = nullptr;
 
     setupViewer();
     setupMenu();

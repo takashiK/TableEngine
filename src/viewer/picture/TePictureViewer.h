@@ -59,9 +59,9 @@ private:
 	QListView* mp_list;
 	QDockWidget* mp_dock;
 	QFileSystemModel* mp_model;
-	Strech m_strechMode;
-	int m_sortColumn;
-	Qt::SortOrder m_sortOrder;
+	Strech m_strechMode = StrechFit;
+	int m_sortColumn = 0;
+	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 	QModelIndex m_imageIndex;
 	TeEventEmitter* mp_emitter;
 };

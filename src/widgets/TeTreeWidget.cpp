@@ -30,7 +30,6 @@
 TeTreeWidget::TeTreeWidget(QWidget *parent)
 	: QTreeWidget(parent)
 {
-	mp_buddy = nullptr;
 }
 
 TeTreeWidget::~TeTreeWidget()

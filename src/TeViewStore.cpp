@@ -55,27 +55,16 @@
 #include <QStack>
 #include <QDebug>
 #include <QDir>
+#include <QFile>
+#include <QTextStream>
+#include <QGuiApplication>
+#include <QStyleHints>
+#include <QtWidgets/QApplication>
+#include "utils/TeStyleSheetBuilder.h"
 
 TeViewStore::TeViewStore(QObject *parent)
 	: QObject(parent)
 {
-	m_currentTabPlace = TAB_LEFT;
-	m_isNavigationVisible = true;
-	mp_dispatcher = nullptr;
-	mp_driveBar = nullptr;
-	mp_mainWindow = nullptr;
-	mp_tab[TAB_LEFT] = nullptr;
-	mp_tab[TAB_RIGHT] = nullptr;
-	mp_split = nullptr;
-	m_selectionMode = TeTypes::SELECTION_NONE;
-	mp_closeEventEmitter = nullptr;
-	mp_focusEventEmitter = nullptr;
-
-	m_fileInfoFlags = TeTypes::FILEINFO_SIZE | TeTypes::FILEINFO_MODIFIED;
-	m_fileTypeFlags = TeTypes::FILETYPE_NONE;
-	m_fileOrderBy = TeTypes::ORDER_NAME;
-	m_fileOrderReversed = false;
-	m_viewMode = TeTypes::FILEVIEW_SMALL_ICON;
 }
 
 TeViewStore::~TeViewStore()
@@ -100,6 +89,7 @@ TeViewStore::~TeViewStore()
 	}
 	m_floatingWidgets.clear();
 	delete mp_closeEventEmitter;
+	delete mp_paletteEmitter;
 }
 
 TeTypes::WidgetType TeViewStore::getType() const
@@ -211,6 +201,21 @@ void TeViewStore::initialize()
 	mp_focusEventEmitter->addEventType(QEvent::FocusIn);
 	connect(mp_focusEventEmitter, &TeEventEmitter::emitEvent, this, &TeViewStore::focusFolderViewChanged, Qt::QueuedConnection);
 
+	//setup paletteEmitter — ApplicationPaletteChange is posted after updatePalette()
+	// so the system palette is guaranteed to reflect the new colour scheme when
+	// applyStyleSheet() runs. This avoids the race condition with colorSchemeChanged.
+	mp_paletteEmitter = new TeEventEmitter();
+	mp_paletteEmitter->addEventType(QEvent::ApplicationPaletteChange);
+	mp_paletteEmitter->addEmitter(mp_mainWindow);
+	connect(mp_paletteEmitter, &TeEventEmitter::emitEvent,
+		this, [this](QWidget*, QEvent*) {
+			Qt::ColorScheme current = QGuiApplication::styleHints()->colorScheme();
+			if (current != m_lastColorScheme) {
+				m_lastColorScheme = current;
+				applyStyleSheet(current);
+			}
+		});
+
 	//load settings
 	loadMenu();
 	loadSetting();
@@ -308,11 +313,51 @@ void TeViewStore::loadMenu()
 void TeViewStore::loadSetting()
 {
 	setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
+	applyStyleSheet();
 }
 
 void TeViewStore::loadKeySetting()
 {
 	if (mp_dispatcher) mp_dispatcher->loadKeySetting();
+}
+
+void TeViewStore::applyStyleSheet(Qt::ColorScheme scheme)
+{
+	m_lastColorScheme = scheme;
+
+	auto loadFile = [](const QString& path) -> QString {
+		QFile f(path);
+		if (f.open(QFile::ReadOnly | QFile::Text))
+			return QTextStream(&f).readAll();
+		return {};
+	};
+
+	const bool dark = (scheme == Qt::ColorScheme::Dark);
+
+	// ① System default (embedded QRC resource)
+	QString merged = loadFile(dark
+		? QStringLiteral(":/Style/stylesheet_dark.css")
+		: QStringLiteral(":/Style/stylesheet_light.css"));
+
+	// ② User override file (next to the executable) — applied after base so rules win
+	const QString userSheet = loadFile(QApplication::applicationDirPath()
+		+ (dark ? QStringLiteral("/stylesheet_user_dark.css")
+		        : QStringLiteral("/stylesheet_user_light.css")));
+	if (!userSheet.isEmpty())
+		merged += QStringLiteral("\n") + userSheet;
+
+	// ③ QSettings-derived CSS — applied last so it takes highest priority
+	const QString settingsSheet = buildStyleSheetFromSettings();
+	if (!settingsSheet.isEmpty())
+		merged += QStringLiteral("\n") + settingsSheet;
+
+	if (!merged.isEmpty())
+		qApp->setStyleSheet(merged);
+}
+
+void TeViewStore::applyStyleSheet()
+{
+	applyStyleSheet(QGuiApplication::styleHints()->colorScheme());
 }
 
 /*!

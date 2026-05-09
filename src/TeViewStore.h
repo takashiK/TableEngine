@@ -120,6 +120,15 @@ public:
 	/** @brief Reloads key-binding settings into the TeDispatcher. */
 	void loadKeySetting();
 
+	/**
+	 * @brief Applies the merged stylesheet (base + user file + QSettings) to the application.
+	 * @param scheme The colour scheme to use when selecting the base stylesheet file.
+	 */
+	void applyStyleSheet(Qt::ColorScheme scheme);
+
+	/** @brief Applies the stylesheet using the current system colour scheme. */
+	void applyStyleSheet();
+
 	/** @brief Restores the last-used folder paths for all open tabs. */
 	void loadStatus();
 
@@ -304,24 +313,26 @@ signals:
 	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);
 
 private:
-	TeMainWindow*        mp_mainWindow;
-	QTabWidget*          mp_tab[TAB_MAX]; ///< Left and right tab panels.
-	TeDriveBar*  mp_driveBar;
-	QSplitter*     mp_split;
-	TeTypes::SelectionMode m_selectionMode;
+	TeMainWindow*        mp_mainWindow = nullptr;
+	QTabWidget*          mp_tab[TAB_MAX] = {}; ///< Left and right tab panels.
+	TeDriveBar*  mp_driveBar = nullptr;
+	QSplitter*     mp_split = nullptr;
+	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE;
 
-	int  m_currentTabPlace;
-	bool m_isNavigationVisible;
+	int  m_currentTabPlace = TAB_LEFT;
+	bool m_isNavigationVisible = true;
 
-	TeTypes::FileInfoFlags m_fileInfoFlags;
-	TeTypes::FileTypeFlags m_fileTypeFlags;
-	TeTypes::OrderType m_fileOrderBy;
-	bool m_fileOrderReversed;
-	TeTypes::FileViewMode m_viewMode;
+	TeTypes::FileInfoFlags m_fileInfoFlags = TeTypes::FILEINFO_SIZE | TeTypes::FILEINFO_MODIFIED;
+	TeTypes::FileTypeFlags m_fileTypeFlags = TeTypes::FILETYPE_NONE;
+	TeTypes::OrderType m_fileOrderBy = TeTypes::ORDER_NAME;
+	bool m_fileOrderReversed = false;
+	TeTypes::FileViewMode m_viewMode = TeTypes::FILEVIEW_SMALL_ICON;
 
-	TeDispatcher* mp_dispatcher;
-	TeEventEmitter* mp_closeEventEmitter;
-	TeEventEmitter* mp_focusEventEmitter;
+	TeDispatcher* mp_dispatcher = nullptr;
+	TeEventEmitter* mp_closeEventEmitter = nullptr;
+	TeEventEmitter* mp_focusEventEmitter = nullptr;
+	TeEventEmitter* mp_paletteEmitter = nullptr;
+	Qt::ColorScheme m_lastColorScheme = Qt::ColorScheme::Unknown;
 	QList<QWidget*> m_floatingWidgets;
 	TeFindFolderView* mp_findView = nullptr;
 };

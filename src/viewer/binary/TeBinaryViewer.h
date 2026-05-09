@@ -24,6 +24,6 @@ public:
 
 
 private:
-	QHexView* mp_hexEdit;
-	QHexDocument* mp_hexDocument;
+	QHexView* mp_hexEdit = nullptr;
+	QHexDocument* mp_hexDocument = nullptr;
 };

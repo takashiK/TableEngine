@@ -91,7 +91,6 @@ namespace {
 
 TeTextSyntaxLoader::TeTextSyntaxLoader()
 {
-	m_isUpdateRelation = false;
 }
 
 TeTextSyntaxLoader::~TeTextSyntaxLoader()

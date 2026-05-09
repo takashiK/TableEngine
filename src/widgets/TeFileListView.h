@@ -119,9 +119,9 @@ protected:
 	virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event = Q_NULLPTR) const;
 
 private:
-	TeFolderView*         mp_folderView;    ///< Owning folder view.
+	TeFolderView*         mp_folderView = nullptr;    ///< Owning folder view.
 	QModelIndex           m_pressedIndex;   ///< Model index under the mouse at press time.
 	QPoint                m_pressedPos;     ///< Cursor position at press time (for drag detection).
-	QRubberBand*          mp_rubberBand;    ///< Rubber-band selection rectangle.
-	TeTypes::SelectionMode m_selectionMode; ///< Current selection mode.
+	QRubberBand*          mp_rubberBand = nullptr;    ///< Rubber-band selection rectangle.
+	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE; ///< Current selection mode.
 };

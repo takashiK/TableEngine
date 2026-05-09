@@ -76,6 +76,6 @@ public:
 	void set(const QList<PathPair>& list);
 
 private:
-	int             m_index;   ///< Current cursor position in m_history.
+	int             m_index = 0;   ///< Current cursor position in m_history.
 	QList<PathPair> m_history; ///< All recorded path pairs.
 };

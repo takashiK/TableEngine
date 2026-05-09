@@ -17,18 +17,13 @@ QListView::item {
 
 }
 
-/* QListView item — selected state */
-QListView::item:selected {
-    background-color: #cce4f7;
-}
-
 /* QListView item — active state (keyboard focus / current item) */
-QListView::item:focus:!selected {
+QListView::item:focus {
     background-color: #f0f0f0;
 }
 
-/* QListView item — active state (keyboard focus / current item) */
-QListView::item:focus:selected {
+/* QListView item — selected state */
+QListView::item:selected {
     background-color: #cce4f7;
 }
 
@@ -45,17 +40,14 @@ QTreeView::item {
     background-color: #ffffff;
 }
 
+QTreeView::item:focus{
+    background-color: #f0f0f0;
+}
+
 QTreeView::item:selected {
     background-color: #cce4f7;
 }
 
-QTreeView::item:focus:!selected {
-    background-color: #f0f0f0;
-}
-
-QTreeView::item:focus:selected {
-    background-color: #cce4f7;
-}
 
 QTreeView::branch {
     background-color: #ffffff;

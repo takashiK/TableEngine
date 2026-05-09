@@ -29,11 +29,6 @@
 
 TeCommandBase::TeCommandBase()
 {
-	mp_dispatcher = nullptr;
-	mb_isFinished = false;
-
-	m_srcType = TeTypes::WT_NONE;
-	mp_srcEvent = nullptr;
 }
 
 

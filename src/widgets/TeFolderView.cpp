@@ -38,8 +38,6 @@
 TeFolderView::TeFolderView(QWidget *parent)
 	: QWidget(parent)
 {
-	mp_dispatcher = Q_NULLPTR;
-
 	connect(this, &TeFolderView::requestCommand,
 		[this](TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param) { execCommand(cmdId,type,event,p_param); });
 }

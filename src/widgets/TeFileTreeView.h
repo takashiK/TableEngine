@@ -84,5 +84,5 @@ protected slots:
 private:
 	QModelIndex m_rootIndex;
 	QModelIndex m_rootIndexParent;
-	TeFolderView* mp_folderView;
+	TeFolderView* mp_folderView = nullptr;
 };

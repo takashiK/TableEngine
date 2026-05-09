@@ -27,9 +27,6 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	mp_graphics->scene()->addItem(mp_image);
 	mp_list = new QListView();
 	mp_model = new QFileSystemModel();
-	m_strechMode = StrechFit;
-	m_sortColumn = 0;
-	m_sortOrder = Qt::AscendingOrder;
 
 	mp_list->setIconSize(QSize(96, 96));
 

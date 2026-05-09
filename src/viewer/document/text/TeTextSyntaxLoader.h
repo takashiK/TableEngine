@@ -44,6 +44,6 @@ private:
 
     QMap<QString, Syntax> m_syntaxes;
     QMap<QString, QString> m_relations;
-    bool m_isUpdateRelation;
+    bool m_isUpdateRelation = false;
 };
 

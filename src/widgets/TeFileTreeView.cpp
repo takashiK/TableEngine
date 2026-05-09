@@ -32,7 +32,6 @@
 TeFileTreeView::TeFileTreeView(QWidget *parent)
 	: QTreeView(parent)
 {
-	mp_folderView = nullptr;
 }
 
 TeFileTreeView::~TeFileTreeView()

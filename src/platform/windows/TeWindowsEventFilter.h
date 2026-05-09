@@ -25,5 +25,5 @@ public:
 	void setNativeEvent(TeNativeEvent* p_event);
 
 private:
-	TeNativeEvent* mp_nativeEvent;
+	TeNativeEvent* mp_nativeEvent = nullptr;
 };

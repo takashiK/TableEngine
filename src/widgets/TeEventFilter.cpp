@@ -29,8 +29,6 @@
 TeEventFilter::TeEventFilter(QObject *parent)
 	: QObject(parent)
 {
-	mp_dispatcher = nullptr;
-	m_type = TeTypes::WT_NONE;
 }
 
 TeEventFilter::~TeEventFilter()

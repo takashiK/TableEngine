@@ -79,6 +79,6 @@ protected:
 	virtual bool eventFilter(QObject *obj, QEvent *event);
 
 private:
-	TeDispatchable*     mp_dispatcher; ///< Target dispatcher.
-	TeTypes::WidgetType m_type;        ///< Widget-type tag used when dispatching.
+	TeDispatchable*     mp_dispatcher = nullptr; ///< Target dispatcher.
+	TeTypes::WidgetType m_type = TeTypes::WT_NONE;        ///< Widget-type tag used when dispatching.
 };

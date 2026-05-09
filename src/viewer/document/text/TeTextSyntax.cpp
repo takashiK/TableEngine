@@ -9,7 +9,6 @@
 
 TeTextSyntax::TeTextSyntax()
 {
-    m_update_keywords = false;
 }
 
 

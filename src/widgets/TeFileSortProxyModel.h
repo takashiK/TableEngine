@@ -139,8 +139,8 @@ private slots:
     void onSourceRootPathChanged();
 
 private:
-    TeTypes::OrderType m_sortType;        ///< Active sort criterion.
-    QSize m_pixmapSize;                   ///< Target thumbnail size.
-    TeImageLoader* mp_imageLoader;        ///< Async thumbnail loader.
+    TeTypes::OrderType m_sortType = TeTypes::ORDER_NAME;        ///< Active sort criterion.
+    QSize m_pixmapSize = QSize(128, 128);                   ///< Target thumbnail size.
+    TeImageLoader* mp_imageLoader = nullptr;        ///< Async thumbnail loader.
     QRegularExpression m_fileRegex;       ///< Optional filename filter.
 };

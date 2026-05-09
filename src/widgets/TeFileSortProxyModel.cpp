@@ -32,8 +32,6 @@
 
 TeFileSortProxyModel::TeFileSortProxyModel(QObject* parent)
     : QSortFilterProxyModel(parent)
-    , m_sortType(TeTypes::ORDER_NAME)
-    , m_pixmapSize(128, 128)
     , mp_imageLoader(new TeImageLoader(this))
 {
     connect(mp_imageLoader, &TeImageLoader::imageReady,

@@ -29,11 +29,7 @@
 #include <QtWidgets/QApplication>
 #include <QTranslator>
 
-#include <QFile>
-#include <QTextStream>
 #include <QPixmapCache>
-#include <QStyleHints>
-#include <TeEventEmitter.h>
 
 #include <QSettings>
 
@@ -64,42 +60,11 @@ int main(int argc, char *argv[])
 
 	QPixmapCache::setCacheLimit(51200); // 50MB
 
-
-	//setup default stylesheet
-	auto applyStyleSheet = [&a](Qt::ColorScheme scheme) {
-		QString path = (scheme == Qt::ColorScheme::Dark)
-			? ":/Style/stylesheet_dark.css"
-			: ":/Style/stylesheet_light.css";
-		QFile f(path);
-		if (f.open(QFile::ReadOnly | QFile::Text))
-			a.setStyleSheet(QTextStream(&f).readAll());
-	};
-
-	applyStyleSheet(QGuiApplication::styleHints()->colorScheme());
-
 	//create main window
 	TeViewStore store;
 	store.initialize();
 	store.setDispatcher(&dispatcher);
 	store.show();
-
-	// ApplicationPaletteChange は Qt の updatePalette() 完了後にポストされるため、
-	// setStyleSheet 呼び出し時のシステムパレットが確実に新モードになっている。
-	// colorSchemeChanged シグナルはパレット更新前に発火するため使用しない。
-	TeEventEmitter paletteChangeEmitter;
-	paletteChangeEmitter.addEventType(QEvent::ApplicationPaletteChange);
-	paletteChangeEmitter.addEmitter(qobject_cast<QWidget*>(store.mainWindow()));
-	Qt::ColorScheme lastScheme = QGuiApplication::styleHints()->colorScheme();
-	QObject::connect(
-		&paletteChangeEmitter, &TeEventEmitter::emitEvent,
-		&a, [&applyStyleSheet, &lastScheme](QWidget*, QEvent*) {
-			Qt::ColorScheme current = QGuiApplication::styleHints()->colorScheme();
-			if (current != lastScheme) {
-				lastScheme = current;
-				applyStyleSheet(current);
-			}
-		}
-	);
 
 	dispatcher.setViewStore(&store);
 

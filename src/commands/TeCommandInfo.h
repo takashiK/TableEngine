@@ -101,7 +101,7 @@ public:
 	QIcon icon() const { return m_icon; }
 
 protected:
-	TeTypes::CmdId m_cmdId;
+	TeTypes::CmdId m_cmdId = TeTypes::CMDID_NONE;
 	QString m_name;
 	QString m_description;
 	QIcon   m_icon;

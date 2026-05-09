@@ -39,10 +39,7 @@
 TeFileListView::TeFileListView(QWidget *parent)
 	: QListView(parent)
 {
-	mp_folderView = nullptr;
 	mp_rubberBand = new QRubberBand(QRubberBand::Rectangle,this);
-	m_selectionMode = TeTypes::SELECTION_NONE;
-	m_pressedIndex = QModelIndex();
 	QListView::setSelectionMode(QAbstractItemView::NoSelection);
 	setItemDelegate(new TeFileItemDelegate(this));
 

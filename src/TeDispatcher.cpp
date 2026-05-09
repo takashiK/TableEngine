@@ -36,8 +36,6 @@
 
 TeDispatcher::TeDispatcher()
 {
-	mp_factory = nullptr;
-	mp_store = nullptr;
 	connect(this, SIGNAL(commandFinalize(TeCommandBase*)), this, SLOT(finishCommand(TeCommandBase*)));
 	connect(this, SIGNAL(requestCommand(TeTypes::CmdId, TeTypes::WidgetType, QEvent*, const TeCmdParam*)), this, SLOT(execCommand(TeTypes::CmdId, TeTypes::WidgetType, QEvent*, const TeCmdParam*)));
 

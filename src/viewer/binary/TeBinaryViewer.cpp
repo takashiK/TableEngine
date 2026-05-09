@@ -14,7 +14,6 @@
 TeBinaryViewer::TeBinaryViewer(QWidget *parent)
 	: QMainWindow(parent)
 {
-	mp_hexDocument = nullptr;
 	mp_hexEdit = new QHexView();
 	mp_hexEdit->setReadOnly(true);
 

@@ -39,7 +39,7 @@ private slots:
 
 private:
     QWidget* mp_lineNumberArea;
-    bool m_lineNumberVisible;
-    int m_tabStop;
+    bool m_lineNumberVisible = true;
+    int m_tabStop = 4;
 };
 

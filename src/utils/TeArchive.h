@@ -175,9 +175,9 @@ public:
 
 private:
 	QString     m_path;             ///< Path of the opened archive.
-	ArchiveType m_type;             ///< Detected archive format.
-	bool        m_cancel;           ///< Cancellation flag.
-	bool(*overwrite_check)(QFileInfo*); ///< Optional overwrite callback.
+	ArchiveType m_type = AR_NONE;             ///< Detected archive format.
+	bool        m_cancel = false;           ///< Cancellation flag.
+	bool(*overwrite_check)(QFileInfo*) = nullptr; ///< Optional overwrite callback.
 
 	bool copy_data(void* arPtr, QFile* ofile);
 };
@@ -255,7 +255,7 @@ private:
 		}
 	};
 	QList<ArchiveInfo> m_entryList;
-	qint64 m_totalBytes;
-	bool m_cancel;
+	qint64 m_totalBytes = 0;
+	bool m_cancel = false;
 };
 }

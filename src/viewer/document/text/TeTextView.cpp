@@ -35,8 +35,6 @@ private:
 TeTextView::TeTextView(QWidget* parent) : QPlainTextEdit(parent)
 {
     mp_lineNumberArea = new TeLineNumberArea(this);
-    m_lineNumberVisible = true;
-    m_tabStop = 4;
     setTabStopWidth(m_tabStop);
 
     connect(this, &TeTextView::blockCountChanged, this, &TeTextView::updateLineNumberAreaWidth);

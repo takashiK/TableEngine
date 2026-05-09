@@ -130,8 +130,8 @@ public slots:
 	void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_cmdParam);
 
 private:
-	const TeCommandFactory* mp_factory;
-	TeViewStore* mp_store;
+	const TeCommandFactory* mp_factory = nullptr;
+	TeViewStore* mp_store = nullptr;
 
 	/** @brief Key-modifier + key-code to command ID mapping. */
 	QHash< QPair<int,int>, TeTypes::CmdId> m_keyCmdMap;
