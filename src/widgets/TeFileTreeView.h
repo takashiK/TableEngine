@@ -22,6 +22,7 @@
 
 #include <QTreeView>
 #include <QList>
+#include <QPersistentModelIndex>
 
 /**
  * @file TeFileTreeView.h
@@ -82,7 +83,7 @@ protected slots:
 	virtual void	rowsInserted(const QModelIndex &parent, int start, int end);
 
 private:
-	QModelIndex m_rootIndex;
-	QModelIndex m_rootIndexParent;
+	QPersistentModelIndex m_rootIndex;
+	QPersistentModelIndex m_rootIndexParent;
 	TeFolderView* mp_folderView = nullptr;
 };

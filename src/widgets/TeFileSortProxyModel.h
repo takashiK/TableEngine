@@ -101,6 +101,19 @@ public:
     /** @brief Returns the current filename filter regex. */
     QRegularExpression fileRegex() const;
 
+    /**
+     * @brief Controls visibility of Unix-style hidden files (names starting with ".").
+     * @param show true to show dot-files, false to hide them.
+     *
+     * @note Detection is based solely on the leading '.' in the filename and is
+     *       therefore cross-platform.  QFileInfo::isHidden() is intentionally
+     *       avoided because on Windows it tests the Windows "hidden" attribute,
+     *       not the dot-prefix convention.
+     */
+    void setShowHiddenFiles(bool show);
+    /** @brief Returns true if dot-files are currently visible. */
+    bool showHiddenFiles() const;
+
 protected:
     /**
      * @brief Filters rows based on file type flags and the filename regex.
@@ -143,4 +156,5 @@ private:
     QSize m_pixmapSize = QSize(128, 128);                   ///< Target thumbnail size.
     TeImageLoader* mp_imageLoader = nullptr;        ///< Async thumbnail loader.
     QRegularExpression m_fileRegex;       ///< Optional filename filter.
+    bool m_showHiddenFiles = true;        ///< Whether dot-files are visible.
 };

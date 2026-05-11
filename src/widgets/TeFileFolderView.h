@@ -133,6 +133,7 @@ private:
 	TeFileListView* mp_listView;         ///< Right-pane list widget.
 
 	QFileSystemModel*     mp_treeModel;       ///< Model for the tree pane.
+	TeFileSortProxyModel* mp_treeSortModel;   ///< Sort/filter proxy on the tree model.
 	QFileSystemModel*     mp_listModel;       ///< Model for the list pane.
 	TeFileSortProxyModel* mp_listSortModel;   ///< Sort/filter proxy on the list model.
 

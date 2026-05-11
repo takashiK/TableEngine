@@ -108,7 +108,10 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 
 	mp_treeModel->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 	mp_treeModel->setRootPath("");
-	mp_treeView->setModel(mp_treeModel);
+	mp_treeSortModel = new TeFileSortProxyModel(this);
+	mp_treeSortModel->setSourceModel(mp_treeModel);
+	mp_treeSortModel->setShowHiddenFiles(false);
+	mp_treeView->setModel(mp_treeSortModel);
 
 	for (int i = 1; i<mp_treeView->header()->count(); i++) {
 		mp_treeView->header()->setSectionHidden(i, true);
@@ -135,8 +138,11 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 
 	//connect action that work when selected path is changed.
 	connect(mp_treeView->selectionModel(), &QItemSelectionModel::currentChanged, 
-		[this](const QModelIndex &current, const QModelIndex &/*previous*/)
-		{ setCurrentPath(mp_treeModel->filePath(current)); });
+		[this](const QModelIndex &proxyIndex, const QModelIndex &/*previous*/)
+		{ 
+			QModelIndex sourceIndex = mp_treeSortModel->mapToSource(proxyIndex);
+			setCurrentPath(mp_treeModel->filePath(sourceIndex));
+		 });
 
 	connect(mp_listView, &QListView::activated, 
 		[this](const QModelIndex &proxyIndex)
@@ -313,7 +319,7 @@ void TeFileFolderView::setRootPath(const QString & path)
 
 QString TeFileFolderView::rootPath()
 {
-	return mp_treeModel->filePath(tree()->visualRootIndex());
+	return mp_treeModel->filePath(mp_treeSortModel->mapToSource(tree()->visualRootIndex()));
 }
 
 void TeFileFolderView::setCurrentPath(const QString & path)
@@ -324,7 +330,7 @@ void TeFileFolderView::setCurrentPath(const QString & path)
 
 QString TeFileFolderView::currentPath()
 {
-	return mp_treeModel->filePath(tree()->currentIndex());
+	return mp_treeModel->filePath(mp_treeSortModel->mapToSource(tree()->currentIndex()));
 }
 
 void TeFileFolderView::moveNextPath()
@@ -360,7 +366,7 @@ void TeFileFolderView::updatePath(const QString& root, const QString& current)
 	QString absRoot = dir.absoluteFilePath(root);
 	if (rootPath() != absRoot) {
 		//Set root path to treeview.
-		QModelIndex index = mp_treeModel->index(absRoot);
+		QModelIndex index = mp_treeSortModel->mapFromSource(mp_treeModel->index(absRoot));
 		tree()->setVisualRootIndex(index);
 		tree()->setCurrentIndex(index);
 
@@ -379,7 +385,7 @@ void TeFileFolderView::updatePath(const QString& root, const QString& current)
 
 	if (!current.isEmpty()) {
 		//Set current path to listview. and current index to treeview.
-		QModelIndex index = mp_treeModel->index(current);
+		QModelIndex index = mp_treeSortModel->mapFromSource(mp_treeModel->index(current));
 		if (tree()->currentIndex() != index) {
 			tree()->clearSelection();
 			tree()->setCurrentIndex(index);
@@ -411,20 +417,30 @@ void TeFileFolderView::updatePath(const QString& root, const QString& current)
 void TeFileFolderView::setFileShowMode(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed)
 {
 	QDir::Filters filters = mp_listModel->filter();
+	QDir::Filters treeFilters = mp_treeModel->filter();
 	if (typeFlags.testFlag(TeTypes::FILETYPE_HIDDEN)) {
 		filters |= QDir::Hidden;
+		treeFilters |= QDir::Hidden;
+		mp_listSortModel->setShowHiddenFiles(true);
+		mp_treeSortModel->setShowHiddenFiles(true);
 	}
 	else {
 		filters &= ~QDir::Hidden;
+		treeFilters &= ~QDir::Hidden;
+		mp_listSortModel->setShowHiddenFiles(false);
+		mp_treeSortModel->setShowHiddenFiles(false);
 	}
 	if (typeFlags.testFlag(TeTypes::FILETYPE_SYSTEM)) {
 		filters |= QDir::System;
+		treeFilters |= QDir::System;
 	}
 	else {
 		filters &= ~QDir::System;
+		treeFilters &= ~QDir::System;
 	}
 	mp_listModel->setFilter(filters);
-
+	mp_treeModel->setFilter(treeFilters);
+	
 	mp_listSortModel->setSortType(order);
 
 	if(orderReversed){
