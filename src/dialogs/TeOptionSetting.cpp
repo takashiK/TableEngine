@@ -354,9 +354,11 @@ QWidget * TeOptionSetting::createPageFolder()
 	});
 
 	// --- Reset button ---
-	connect(resetButton, &QPushButton::clicked, [this, normal, selected, focused, updateBtnPreview](bool) {
+	connect(resetButton, &QPushButton::clicked, [this, normal, selected, focused, accent, prioritize, updateBtnPreview](bool) {
 		m_folderAppearance = loadFolderAppearance(false);
 		updateBtnPreview(m_folderAppearance);
+		accent->setStyleSheet(QString("background-color: %1").arg(m_folderAppearance.accentColor.name()));
+		prioritize->setChecked(m_folderAppearance.focusPriority == TeFolderAppearance::FocusFirst);
 	});
 
 	page->setLayout(layout);
