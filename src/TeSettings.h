@@ -76,20 +76,18 @@ SETTING_STR(SETTING_FAVORITES, "Favorites");
 // --- folder view appearance (extendable per section) ---
 SETTING_STR(SETTING_FOLDER_APPEARANCE,       "folder/appearance");
 
+SETTING_STR(SETTING_FOLDER_PRIO_STYLESHEET,  "folder/appearance/priority_stylesheet");
+
 SETTING_STR(SETTING_FOLDER_FONT_FAMILY,      "folder/appearance/font_family");
 SETTING_STR(SETTING_FOLDER_FONT_SIZE,        "folder/appearance/font_size");
 
 SETTING_STR(SETTING_FOLDER_NORMAL_FG,        "folder/appearance/normal/fg_color");
 SETTING_STR(SETTING_FOLDER_NORMAL_BG,        "folder/appearance/normal/bg_color");
-SETTING_STR(SETTING_FOLDER_NORMAL_BOLD,      "folder/appearance/normal/bold");
 
 SETTING_STR(SETTING_FOLDER_SELECTED_FG,      "folder/appearance/selected/fg_color");
 SETTING_STR(SETTING_FOLDER_SELECTED_BG,      "folder/appearance/selected/bg_color");
-SETTING_STR(SETTING_FOLDER_SELECTED_BOLD,    "folder/appearance/selected/bold");
 
-SETTING_STR(SETTING_FOLDER_FOCUS_FG,         "folder/appearance/focus/fg_color");
 SETTING_STR(SETTING_FOLDER_FOCUS_BG,         "folder/appearance/focus/bg_color");
-SETTING_STR(SETTING_FOLDER_FOCUS_BOLD,       "folder/appearance/focus/bold");
 
 // "focus" (default) → focus style wins when item is both selected and focused
 // "selected"        → selected style wins when item is both selected and focused

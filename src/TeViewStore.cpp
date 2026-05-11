@@ -60,7 +60,7 @@
 #include <QGuiApplication>
 #include <QStyleHints>
 #include <QtWidgets/QApplication>
-#include "utils/TeStyleSheetBuilder.h"
+#include "utils/TeFolderAppearance.h"
 
 TeViewStore::TeViewStore(QObject *parent)
 	: QObject(parent)

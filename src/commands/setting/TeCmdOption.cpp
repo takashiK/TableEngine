@@ -22,6 +22,8 @@
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
 #include "dialogs/TeOptionSetting.h"
+#include "widgets/TeFolderView.h"
+#include "widgets/TeFileListView.h"
 #include <QDialog>
 
 /**
@@ -68,7 +70,8 @@ QFlags<TeTypes::CmdType> TeCmdOption::type()
 
 bool TeCmdOption::execute(TeViewStore * p_store)
 {
-	TeOptionSetting dlg(p_store->mainWindow());
+	TeFolderView* fv = p_store->getFolderView();
+	TeOptionSetting dlg(p_store->mainWindow(), fv ? fv->list() : nullptr);
 	if (dlg.exec() == QDialog::Accepted) {
 		//設定を反映
 		p_store->loadSetting();

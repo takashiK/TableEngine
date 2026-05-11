@@ -18,15 +18,15 @@
 **
 ****************************************************************************/
 
-#include "TeStyleSheetBuilder.h"
+#include "TeFolderAppearance.h"
 
 #include "TeSettings.h"
 
 #include <QSettings>
 
 /**
- * @file TeStyleSheetBuilder.cpp
- * @brief Implementation of TeStyleSheetBuilder helpers.
+ * @file TeFolderAppearance.cpp
+ * @brief Implementation of TeFolderAppearance helpers.
  * @ingroup utility
  */
 
@@ -49,16 +49,10 @@ static void appendColor(QString& block, const char* prop, const QColor& color)
  * Returns an empty string when no property has a valid value (so that empty
  * rule blocks are not written into the stylesheet).
  */
-static QString buildBlock(const QString& selector,
-                          const QColor& fg, const QColor& bg, bool bold,
-                          bool boldIsSet)
+static QString buildBlock(const QString& selector, const QColor& bg)
 {
 	QString props;
-	appendColor(props, "color",            fg);
 	appendColor(props, "background-color", bg);
-	if (boldIsSet)
-		props += QStringLiteral("    font-weight: %1;\n")
-		         .arg(bold ? QStringLiteral("bold") : QStringLiteral("normal"));
 
 	if (props.isEmpty())
 		return {};
@@ -77,13 +71,14 @@ TeFolderAppearance TeFolderAppearance::fromSettings()
 	QSettings s;
 	TeFolderAppearance a;
 
-	const QString family = s.value(QLatin1String(SETTING_FOLDER_FONT_FAMILY)).toString();
-	if (!family.isEmpty())
-		a.fontFamily = family;
+    a.prio_stylesheet = s.value(QLatin1String(SETTING_FOLDER_PRIO_STYLESHEET), true).toBool();
 
+	const QString family = s.value(QLatin1String(SETTING_FOLDER_FONT_FAMILY)).toString();
 	const int size = s.value(QLatin1String(SETTING_FOLDER_FONT_SIZE), -1).toInt();
+	if (!family.isEmpty())
+		a.font.setFamily(family);
 	if (size > 0)
-		a.fontSize = size;
+		a.font.setPointSize(size);
 
 	auto readColor = [&s](const char* key) -> QColor {
 		const QString v = s.value(QLatin1String(key)).toString();
@@ -98,15 +93,11 @@ TeFolderAppearance TeFolderAppearance::fromSettings()
 
 	a.normalFg   = readColor(SETTING_FOLDER_NORMAL_FG);
 	a.normalBg   = readColor(SETTING_FOLDER_NORMAL_BG);
-	a.normalBold = hasSetting(SETTING_FOLDER_NORMAL_BOLD) ? readBool(SETTING_FOLDER_NORMAL_BOLD) : false;
 
 	a.selectedFg   = readColor(SETTING_FOLDER_SELECTED_FG);
 	a.selectedBg   = readColor(SETTING_FOLDER_SELECTED_BG);
-	a.selectedBold = hasSetting(SETTING_FOLDER_SELECTED_BOLD) ? readBool(SETTING_FOLDER_SELECTED_BOLD) : false;
 
-	a.focusFg   = readColor(SETTING_FOLDER_FOCUS_FG);
 	a.focusBg   = readColor(SETTING_FOLDER_FOCUS_BG);
-	a.focusBold = hasSetting(SETTING_FOLDER_FOCUS_BOLD) ? readBool(SETTING_FOLDER_FOCUS_BOLD) : false;
 
 	a.accentColor = readColor(SETTING_FOLDER_ACCENT_COLOR);
 
@@ -120,43 +111,36 @@ TeFolderAppearance TeFolderAppearance::fromSettings()
 
 QString TeFolderAppearance::toCss() const
 {
-	// Both QTreeView and QListView share the same rules.
-	const QStringList bases = {
-		QStringLiteral("QTreeView::item"),
-		QStringLiteral("QListView::item"),
-	};
-
-	auto sel = [&bases](const QString& pseudo) -> QString {
-		QStringList result;
-		for (const auto& base : bases)
-			result << base + pseudo;
-		return result.join(QStringLiteral(", "));
-	};
+    // If prio_stylesheet is true, this struct does not effect any styles.
+    if (prio_stylesheet) {
+        return QString();
+    }
 
 	QString css;
 
-	// ① Font (applies to the base item selector, shared by all states)
-	if (!fontFamily.isEmpty() || fontSize > 0) {
+	const QString family = font.family();
+	const int     size   = font.pointSize();
+
+	// ① Font — QListView sub-element level
+	if (!family.isEmpty() || size > 0) {
 		QString fontProps;
-		if (!fontFamily.isEmpty())
-			fontProps += QStringLiteral("    font-family: \"%1\";\n").arg(fontFamily);
-		if (fontSize > 0)
-			fontProps += QStringLiteral("    font-size: %1pt;\n").arg(fontSize);
-		if (!fontProps.isEmpty())
-			css += sel(QString{}) + QStringLiteral(" {\n") + fontProps + QStringLiteral("}\n");
+		if (!family.isEmpty())
+			fontProps += QStringLiteral("    font-family: \"%1\";\n").arg(family);
+		if (size > 0)
+			fontProps += QStringLiteral("    font-size: %1pt;\n").arg(size);
+		if (normalFg.isValid())
+			fontProps += QStringLiteral("    color: %1;\n").arg(normalFg.name());
+		if (selectedFg.isValid())
+			fontProps += QStringLiteral("    selection-color: %1;\n").arg(selectedFg.name());	
+		css += QStringLiteral("QListView {\n") + fontProps + QStringLiteral("}\n");
 	}
 
-	// ② Normal state
-	const bool hasNormalBold = normalBg.isValid() || normalFg.isValid();
-	css += buildBlock(sel(QString{}), normalFg, normalBg, normalBold, hasNormalBold && normalBold);
+	// ② Normal state — QListView::item sub-element
+	css += buildBlock(QStringLiteral("QListView::item"),normalBg);
 
-	// ③ Selected / Focus — order controlled by focusPriority
-	auto selectedBlock = buildBlock(sel(QStringLiteral(":selected")),
-	                                selectedFg, selectedBg, selectedBold,
-	                                selectedFg.isValid() || selectedBg.isValid());
-	auto focusBlock    = buildBlock(sel(QStringLiteral(":focus")),
-	                                focusFg, focusBg, focusBold,
-	                                focusFg.isValid() || focusBg.isValid());
+	// ③ Selected / Focus — QListView::item sub-element only; order controlled by focusPriority
+	auto selectedBlock = buildBlock(QStringLiteral("QListView::item:selected"), selectedBg);
+	auto focusBlock    = buildBlock(QStringLiteral("QListView::item:focus"), focusBg);
 
 	if (focusPriority == FocusFirst) {
 		// ":focus" written last → focus style wins when both active
@@ -168,16 +152,27 @@ QString TeFolderAppearance::toCss() const
 		css += selectedBlock;
 	}
 
-	// ④ Accent colour (list-mode selection marker)
-	// Exposed as a custom property that TeFileItemDelegate reads at paint time.
-	// We also set it as a QListView border-left indicator via a sub-element
-	// selector as a CSS-only approximation.
-	if (accentColor.isValid()) {
-		css += QStringLiteral("QListView {\n"
-		                      "    qproperty-accentColor: %1;\n"
-		                      "}\n").arg(accentColor.name());
+	// ④ QTreeView — widget-level rules only (same values as QListView, no sub-element selectors)
+	{
+		QString props;
+		if (!family.isEmpty())
+			props += QStringLiteral("    font-family: \"%1\";\n").arg(family);
+		if (size > 0)
+			props += QStringLiteral("    font-size: %1pt;\n").arg(size);
+		appendColor(props, "background-color", normalBg);
+		appendColor(props, "color",            normalFg);
+		appendColor(props, "selection-color",  selectedFg);
+		if (!props.isEmpty())
+			css += QStringLiteral("QTreeView {\n") + props + QStringLiteral("}\n");
 	}
 
+	// ⑤ Accent colour (list-mode selection marker)
+	// Exposed as a custom property that TeFileItemDelegate reads at paint time.
+	if (accentColor.isValid()) {
+		css += QStringLiteral("QListView {\n"
+		                      "    accent-color: %1;\n"
+		                      "}\n").arg(accentColor.name());
+	}
 	return css;
 }
 
@@ -197,4 +192,44 @@ QString buildStyleSheetFromSettings()
 	// --- Add new settings categories here in the future ---
 
 	return result;
+}
+
+// ---------------------------------------------------------------------------
+// TeFolderAppearance::toSettings
+// ---------------------------------------------------------------------------
+
+void TeFolderAppearance::toSettings() const
+{
+	QSettings s;
+	s.setValue(QLatin1String(SETTING_FOLDER_PRIO_STYLESHEET), prio_stylesheet);
+
+	const QString family = font.family();
+	const int     size   = font.pointSize();
+	if (!family.isEmpty())
+		s.setValue(QLatin1String(SETTING_FOLDER_FONT_FAMILY), family);
+	else
+		s.remove(QLatin1String(SETTING_FOLDER_FONT_FAMILY));
+	if (size > 0)
+		s.setValue(QLatin1String(SETTING_FOLDER_FONT_SIZE), size);
+	else
+		s.remove(QLatin1String(SETTING_FOLDER_FONT_SIZE));
+
+	auto writeColor = [&s](const char* key, const QColor& c) {
+		if (c.isValid()) s.setValue(QLatin1String(key), c.name());
+		else             s.remove(QLatin1String(key));
+	};
+
+	writeColor(SETTING_FOLDER_NORMAL_FG,   normalFg);
+	writeColor(SETTING_FOLDER_NORMAL_BG,   normalBg);
+
+	writeColor(SETTING_FOLDER_SELECTED_FG, selectedFg);
+	writeColor(SETTING_FOLDER_SELECTED_BG, selectedBg);
+
+	writeColor(SETTING_FOLDER_FOCUS_BG,    focusBg);
+
+	writeColor(SETTING_FOLDER_ACCENT_COLOR, accentColor);
+
+	s.setValue(QLatin1String(SETTING_FOLDER_FOCUS_PRIORITY),
+	           focusPriority == SelectedFirst
+	           ? QStringLiteral("selected") : QStringLiteral("focus"));
 }

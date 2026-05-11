@@ -33,26 +33,4 @@ QTreeView {
     color: #1e1e1e;
     selection-color: #1e1e1e;
     show-decoration-selected: 1;
-    border: 1px solid #c0c0c0;
-}
-
-QTreeView::item {
-    background-color: #ffffff;
-}
-
-QTreeView::item:focus{
-    background-color: #f0f0f0;
-}
-
-QTreeView::item:selected {
-    background-color: #cce4f7;
-}
-
-
-QTreeView::branch {
-    background-color: #ffffff;
-}
-
-QTreeView::branch:selected {
-    background-color: #cce4f7;
 }

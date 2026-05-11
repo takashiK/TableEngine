@@ -22,9 +22,10 @@
 
 #include <QString>
 #include <QColor>
+#include <QFont>
 
 /**
- * @file TeStyleSheetBuilder.h
+ * @file TeFolderAppearance.h
  * @brief Helpers that build a Qt stylesheet string from QSettings values.
  * @ingroup utility
  *
@@ -35,7 +36,7 @@
  * into the CSS — unset fields are left to the base stylesheet.
  *
  * To add a new settings category:
- *  1. Add a new struct with fromSettings() / toCss().
+ *  1. Add a new struct with fromSettings() / toSettings() / toCss().
  *  2. Call toCss() from buildStyleSheetFromSettings().
  */
 
@@ -61,17 +62,16 @@ struct TeFolderAppearance
 	 */
 	enum FocusPriority { FocusFirst, SelectedFirst };
 
-	QString fontFamily;            ///< isEmpty() means "not set"
-	int     fontSize   = -1;       ///< -1 means "not set"
+	bool    prio_stylesheet = true; ///< true = this struct holds priority styles that should be applied after the base stylesheet
+
+	QFont   font;                  ///< Shared font (family + size) across all item states.
+	                               ///  Default-constructed QFont means "not set".
 
 	QColor  normalFg,   normalBg;  ///< QColor::isValid()==false means "not set"
-	bool    normalBold   = false;
 
 	QColor  selectedFg, selectedBg;
-	bool    selectedBold = false;
 
-	QColor  focusFg,    focusBg;
-	bool    focusBold    = false;
+	QColor  focusBg;
 
 	QColor  accentColor;           ///< List-mode selection marker colour
 
@@ -79,6 +79,14 @@ struct TeFolderAppearance
 
 	/** @brief Constructs a TeFolderAppearance from the current QSettings values. */
 	static TeFolderAppearance fromSettings();
+
+	/**
+	 * @brief Persists all fields of this struct to QSettings.
+	 *
+	 * Called from TeOptionSetting::accept() after the user confirms the dialog.
+	 * Writes every field; colours are stored as hex strings (#rrggbb).
+	 */
+	void toSettings() const;
 
 	/**
 	 * @brief Serialises the appearance to a Qt stylesheet string.

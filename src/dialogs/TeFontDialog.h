@@ -23,32 +23,40 @@
 #include <QDialog>
 
 /**
- * @file TeFilterDialog.h
- * @brief Declaration of TeFilterDialog.
+ * @file TeFontDialog.h
+ * @brief Declaration of TeFontDialog.
  * @ingroup dialogs
  */
 
-
+class QFontComboBox;
+class QSpinBox;
 class QCheckBox;
+class QLabel;
+class QPushButton;
 class QLineEdit;
 
-class TeFilterDialog : public QDialog
+class TeFontDialog : public QDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	TeFilterDialog(QWidget *parent = nullptr);
-	~TeFilterDialog();
+    TeFontDialog(QWidget *parent = nullptr);
+    ~TeFontDialog();
 
-	void setForceFileOnly(bool fileOnly);
-	QString filter() const;
-	bool fileOnly() const;
-	bool caseSensitive() const;
-	bool regexp() const;
+    QFont font() const;
+    void setFont(const QFont &font);
+    QColor color() const;
+    void setColor(const QColor &color);
+    QColor backgroundColor() const;
+    void setBackgroundColor(const QColor &color);
 
 private:
-	QLineEdit *mp_filter;
-	QCheckBox* mp_fileOnly;
-	QCheckBox *mp_caseSensitive;
-	QCheckBox *mp_regexp;
+    void updatePreview();
+
+private:
+    QFontComboBox* mp_fontComboBox;
+    QSpinBox* mp_fontSize;
+    QPushButton* mp_color;
+    QPushButton* mp_bgColor;
+    QLineEdit* mp_preview;
 };

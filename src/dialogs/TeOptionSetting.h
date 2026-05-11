@@ -23,6 +23,7 @@
 #include <QDialog>
 #include <QHash>
 #include <QVariant>
+#include "../utils/TeFolderAppearance.h"
 
 /**
  * @file TeOptionSetting.h
@@ -30,15 +31,19 @@
  * @ingroup dialogs
  */
 
+class TeFileListView;
 
 class TeOptionSetting : public QDialog
 {
 	Q_OBJECT
 
-public: 
-
 public:
-	TeOptionSetting(QWidget *parent);
+	/**
+	 * @param parent    Parent widget.
+	 * @param p_listView Optional TeFileListView whose stylesheet-polished palette
+	 *                   is used as fallback when a setting has not been saved yet.
+	 */
+	TeOptionSetting(QWidget *parent, TeFileListView* p_listView = nullptr);
 	virtual ~TeOptionSetting();
 	
 	void updateSettings();
@@ -51,5 +56,8 @@ protected:
 	QWidget* createPageStartup();
 	QWidget* createPageFolder();
 	QWidget* createPageView();
+	TeFolderAppearance loadFolderAppearance(bool useSettings=true) const;
 	QHash<QString, QVariant> m_option;
+	TeFolderAppearance       m_folderAppearance;
+	TeFileListView*          mp_listView = nullptr;
 };
