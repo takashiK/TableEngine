@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QList>
 #include <QMutex>
-#include <QAtomicInt>
+#include <atomic>
 #include <QThread>
 
 #include "TeFileInfo.h"
@@ -131,7 +131,7 @@ private slots:
 private:
 	mutable QMutex    m_resultsMutex;      ///< Guards m_results.
 	QList<TeFileInfo> m_results;           ///< Accumulated search results.
-	QAtomicInt        m_cancelFlag;        ///< Set to 1 when cancellation is requested.
+	std::atomic<int>  m_cancelFlag{0};     ///< Set to 1 when cancellation is requested.
 	QThread*          m_workerThread = nullptr; ///< Worker thread running doSearch().
 	TeFolderView*     mp_relatedView = nullptr; ///< Associated folder view.
 };

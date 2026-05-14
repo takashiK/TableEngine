@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -104,7 +104,7 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 						}
 					}
 					else {
-						if (m_pressedIndex == currentIndex() && selectionModel()->isSelected(currentIndex()) && selectionModel()->selectedIndexes().count() == 1) {
+						if (m_pressedIndex == currentIndex() && selectionModel()->isSelected(currentIndex()) && selectionModel()->selectedIndexes().size() == 1) {
 							selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::Toggle);
 						}
 					}
@@ -365,8 +365,6 @@ void TeFileListView::setFileViewMode(TeTypes::FileInfoFlags infoFlags, TeTypes::
 		QListView::setIconSize(QSize(-1, -1));
 		QListView::setWordWrap(false);
 		QListView::setResizeMode(QListView::Adjust);
-		break;
-	default:
 		break;
 	}
 }

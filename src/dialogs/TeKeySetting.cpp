@@ -185,14 +185,43 @@ void TeKeySetting::storeDefaultSettings(bool force)
 
 #define SETTING( key, default_value)  settings.setValue( QKeySequence(key).toString().replace("+", "_") , settings.value( QKeySequence(key).toString().replace("+", "_") , default_value ))
 
+	SETTING(Qt::Key_N, TeTypes::CMDID_SYSTEM_FILE_NEW);
 	SETTING(Qt::Key_C, TeTypes::CMDID_SYSTEM_FILE_COPY_TO);
 	SETTING(Qt::Key_M, TeTypes::CMDID_SYSTEM_FILE_MOVE_TO);
 	SETTING(Qt::Key_D, TeTypes::CMDID_SYSTEM_FILE_DELETE);
+	SETTING(Qt::Key_R, TeTypes::CMDID_SYSTEM_FILE_RENAME);
+	SETTING(Qt::Key_F2, TeTypes::CMDID_SYSTEM_FILE_RENAME);
+	SETTING(Qt::Key_F4, TeTypes::CMDID_SYSTEM_FILE_PROPERTY);
 
+	SETTING(Qt::Key_P, TeTypes::CMDID_SYSTEM_FILE_ARCHIVE);
+	SETTING(Qt::Key_U, TeTypes::CMDID_SYSTEM_FILE_EXTRACT);
+	SETTING(Qt::Key_X, TeTypes::CMDID_SYSTEM_FILE_RUN_WITH_COMMAND);
+	SETTING(Qt::Key_Escape, TeTypes::CMDID_SYSTEM_FILE_EXIT);
+
+	SETTING(Qt::CTRL | Qt::Key_C, TeTypes::CMDID_SYSTEM_EDIT_COPY);
+	SETTING(Qt::CTRL | Qt::Key_V, TeTypes::CMDID_SYSTEM_EDIT_PASTE);
+	SETTING(Qt::CTRL | Qt::Key_X, TeTypes::CMDID_SYSTEM_EDIT_CUT);
 	SETTING(Qt::Key_A, TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL);
 	SETTING(Qt::Key_Z, TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE);
+	SETTING(Qt::Key_W, TeTypes::CMDID_SYSTEM_EDIT_SELECT_BY_FILTER);
+
+	SETTING(Qt::Key_Backspace, TeTypes::CMDID_SYSTEM_FOLDER_GOTO_PARENT);
+	SETTING(Qt::Key_Home, TeTypes::CMDID_SYSTEM_FOLDER_GOTO_ROOT);
+	SETTING(Qt::Key_G, TeTypes::CMDID_SYSTEM_FOLDER_GOTO_FOLDER);
+	SETTING(Qt::Key_F, TeTypes::CMDID_SYSTEM_FOLDER_FIND);
+	SETTING(Qt::CTRL | Qt::Key_F, TeTypes::CMDID_SYSTEM_FOLDER_FIND);
+
+	SETTING(Qt::Key_H, TeTypes::CMDID_SYSTEM_VIEW_SHOW_HIDDEN);
+	SETTING(Qt::Key_I, TeTypes::CMDID_SYSTEM_VIEW_HUGE_ICON);
+	SETTING(Qt::Key_L, TeTypes::CMDID_SYSTEM_VIEW_SMALL_ICON);
 
 	SETTING(Qt::Key_V, TeTypes::CMDID_SYSTEM_TOOL_VIEW_FILE);
+	SETTING(Qt::Key_B, TeTypes::CMDID_SYSTEM_TOOL_VIEW_BINARY);
+
+	SETTING(Qt::CTRL | Qt::Key_N, TeTypes::CMDID_SYSTEM_WINDOW_NEW_TAB);
+	SETTING(Qt::CTRL | Qt::Key_W, TeTypes::CMDID_SYSTEM_WINDOW_CLOSE_TAB);
+	SETTING(Qt::CTRL | Qt::Key_T, TeTypes::CMDID_SYSTEM_WINDOW_MOVE_TAB);
+
 
 #undef SETTING	
 	settings.endGroup();
@@ -264,10 +293,11 @@ QList<QTreeWidgetItem*> TeKeySetting::createKeyItem(const QList<int>& list)
 QList<QTreeWidgetItem*> TeKeySetting::createCmdTreeItem()
 {
 	QList<QTreeWidgetItem*> treeItem;
-	QList<QPair<QString, TeTypes::CmdId>>  list = TeCommandFactory::groupList();
+	QList<std::pair<QString, TeTypes::CmdId>>  list = TeCommandFactory::groupList();
 
-	for (auto& item : list) {
-		QTreeWidgetItem* rootItem = new QTreeWidgetItem({ item.first.replace("&","") });
+	for (const auto& item : list) {
+		auto cmdName = QString(item.first).replace("&", "");
+		QTreeWidgetItem* rootItem = new QTreeWidgetItem({ cmdName });
 		rootItem->addChildren(createCmdItem(item.second));
 		treeItem.append(rootItem);
 	}
@@ -280,7 +310,7 @@ QList<QTreeWidgetItem*> TeKeySetting::createCmdItem(TeTypes::CmdId cmdGroup)
 	TeCommandFactory* factory = TeCommandFactory::factory();
 
 	QList<const TeCommandInfoBase*>  list = factory->commandGroup(cmdGroup);
-	for (auto& info : list) {
+	for (const auto& info : list) {
 		QString name = info->name();
 		QTreeWidgetItem* item = new QTreeWidgetItem({ name.replace("&",""),info->description() });
 		item->setData(0, Qt::DecorationRole, info->icon());

@@ -83,7 +83,8 @@ QVariant TeFileSortProxyModel::data(const QModelIndex& index, int role) const
         if (!info.isFile())
             return QVariant();
 
-        if (!QImageReader::supportedImageFormats().contains(info.suffix().toLower().toUtf8()))
+        static const QList<QByteArray> supportedFormats = QImageReader::supportedImageFormats();
+        if (!supportedFormats.contains(info.suffix().toLower().toUtf8()))
             return QVariant();
 
         QDateTime lastModified = info.lastModified();
@@ -96,9 +97,9 @@ QVariant TeFileSortProxyModel::data(const QModelIndex& index, int role) const
         mp_imageLoader->requestLoad(info.absoluteFilePath(), m_pixmapSize);
         return QVariant();
     } else if (role == Qt::DecorationRole){
-        if(data(index).toString() == "..") {
+        if(QSortFilterProxyModel::data(index, Qt::DisplayRole).toString() == "..") {
             //folder up icon
-            QIcon icon(":/TableEngine/folder_up.png");
+            static const QIcon icon(":/TableEngine/folder_up.png");
             if (!icon.isNull()) {
                 return icon;
             }
@@ -218,16 +219,16 @@ bool TeFileSortProxyModel::lessThan(const QModelIndex &source_left, const QModel
     QFileInfo rightFileInfo = qvariant_cast<QFileInfo>(rightData);
 
     if (leftFileInfo.isDir() && !rightFileInfo.isDir())
-        return sortOrder() == Qt::AscendingOrder ? true : false; // Directories come before files
+        return sortOrder() == Qt::AscendingOrder; // Directories come before files
     if (!leftFileInfo.isDir() && rightFileInfo.isDir())
-        return sortOrder() == Qt::AscendingOrder ? false : true; // Files come after directories
+        return sortOrder() != Qt::AscendingOrder; // Files come after directories
     
     if (leftFileInfo.isDir() && rightFileInfo.isDir()) {
         // Both are directories, sort by name
         if (leftFileInfo.fileName() == "..")
-            return sortOrder() == Qt::AscendingOrder ? true : false; // ".." comes first
+            return sortOrder() == Qt::AscendingOrder; // ".." comes first
         if (rightFileInfo.fileName() == "..")
-            return sortOrder() == Qt::AscendingOrder ? false : true; // ".." comes first
+            return sortOrder() != Qt::AscendingOrder; // ".." comes first
         if (sortOrder() == Qt::AscendingOrder){
             return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
         } else {
@@ -256,9 +257,8 @@ bool TeFileSortProxyModel::lessThan(const QModelIndex &source_left, const QModel
             return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
         }
         return leftFileInfo.lastModified() < rightFileInfo.lastModified();
-    default:
-        return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
     }
+    return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
 }
 
 bool TeFileSortProxyModel::stringLessThan(const QString &left, const QString &right, Qt::CaseSensitivity cs, bool isLocaleAware)

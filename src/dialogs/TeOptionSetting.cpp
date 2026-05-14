@@ -70,13 +70,17 @@ static QColor colorFromCss(const QString& css,
 {
 	QColor result;
 	int pos = 0;
+	const QRegularExpression propRe(
+		QRegularExpression::escape(property) +
+		QLatin1String(R"(\s*:\s*(#[0-9a-fA-F]{3,8})\s*;?)"),
+		QRegularExpression::CaseInsensitiveOption);
 	while (true) {
 		int selPos = css.indexOf(selector, pos);
 		if (selPos == -1)
 			break;
 		// Ensure the match is a whole token (not a substring of a longer selector)
-		const int afterSel = selPos + selector.length();
-		if (afterSel < css.length()) {
+		const int afterSel = selPos + selector.size();
+		if (afterSel < css.size()) {
 			const QChar next = css.at(afterSel);
 			if (next.isLetterOrNumber() || next == QLatin1Char('_') || next == QLatin1Char('-')) {
 				pos = afterSel;
@@ -95,10 +99,6 @@ static QColor colorFromCss(const QString& css,
 		if (braceClose == -1)
 			break;
 		const QString block = css.mid(braceOpen + 1, braceClose - braceOpen - 1);
-		QRegularExpression propRe(
-			QRegularExpression::escape(property) +
-			QLatin1String(R"(\s*:\s*(#[0-9a-fA-F]{3,8})\s*;?)"),
-			QRegularExpression::CaseInsensitiveOption);
 		const auto m = propRe.match(block);
 		if (m.hasMatch()) {
 			const QColor c(m.captured(1));

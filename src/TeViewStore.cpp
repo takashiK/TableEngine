@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -248,7 +248,7 @@ void TeViewStore::loadMenu()
 			continue;
 		}
 
-		while (indent < menus.count()) {
+		while (indent < menus.size()) {
 			menus.pop();
 		}
 
@@ -294,7 +294,7 @@ void TeViewStore::loadMenu()
 	settings.endGroup();
 	settings.endGroup();
 
-	QList<QPair<QString, TeTypes::CmdId>>  list = TeCommandFactory::static_groupList();
+	QList<std::pair<QString, TeTypes::CmdId>>  list = TeCommandFactory::static_groupList();
 
 
 	for (const auto& groupItem : list) {
@@ -841,30 +841,40 @@ void TeViewStore::setDetailVisible(bool visible)
 
 void TeViewStore::setFileInfoFlags(TeTypes::FileInfoFlags flags)
 {
-	m_fileInfoFlags = flags;
-	emit fileListViewModeChanged(fileInfoFlags(), viewMode());
+	if (m_fileInfoFlags != flags) {
+		m_fileInfoFlags = flags;
+		emit fileListViewModeChanged(fileInfoFlags(), viewMode());
+	}
 }
 
 void TeViewStore::setFileTypeFlags(TeTypes::FileTypeFlags flags)
 {
-	m_fileTypeFlags = flags;
-	emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+	if (m_fileTypeFlags != flags) {
+		m_fileTypeFlags = flags;
+		emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+	}
 }
 
 void TeViewStore::setFileOrderBy(TeTypes::OrderType order)
 {
-	m_fileOrderBy = order;
-	emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+	if (m_fileOrderBy != order) {
+		m_fileOrderBy = order;
+		emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+	}
 }
 
 void TeViewStore::setFileOrderReversed(bool reversed)
 {
-	m_fileOrderReversed = reversed;
-	emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+	if (m_fileOrderReversed != reversed) {
+		m_fileOrderReversed = reversed;
+		emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
+	}
 }
 
 void TeViewStore::setViewMode(TeTypes::FileViewMode mode)
 {
-	m_viewMode = mode;
-	emit fileListViewModeChanged(fileInfoFlags(), viewMode());
+	if (m_viewMode != mode) {
+		m_viewMode = mode;
+		emit fileListViewModeChanged(fileInfoFlags(), viewMode());
+	}
 }

@@ -59,7 +59,7 @@ TeAskCreationModeDialog::TeAskCreationModeDialog(QWidget *parent)
 	flayout->addRow(tr("Path:"), mp_path);
 
 
-	mp_createMode = new QButtonGroup();
+	mp_createMode = new QButtonGroup(this);
 	QRadioButton* createFolder = new QRadioButton(tr("Create &New folder."),this);
 	createFolder->setChecked(true);
 	mp_createMode->addButton(createFolder, MODE_CREATE_FOLDER);

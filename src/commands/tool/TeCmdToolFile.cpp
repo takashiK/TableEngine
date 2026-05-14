@@ -56,7 +56,7 @@ bool TeCmdToolFile::execute(TeViewStore* p_store)
 	QStringList paths;
 
 	if (getSelectedItemList(p_store, &paths)) {
-		for (auto& path : paths) {
+		for (const auto& path : paths) {
 			TeFileType type = getFileType(path);
 			if (type == TE_FILE_TEXT){
 					TeDocViewer* docViewer = new TeDocViewer();

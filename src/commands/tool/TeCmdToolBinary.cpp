@@ -56,7 +56,7 @@ bool TeCmdToolBinary::execute(TeViewStore* p_store)
 	QStringList paths;
 
 	if (getSelectedItemList(p_store, &paths)) {
-		for (auto& path : paths) {
+		for (const auto& path : paths) {
 			TeBinaryViewer* binaryViewer = new TeBinaryViewer();
 			if (binaryViewer->open(path)) {
 				p_store->registerFloatingWidget(binaryViewer);

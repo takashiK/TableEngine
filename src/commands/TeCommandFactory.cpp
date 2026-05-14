@@ -238,9 +238,9 @@ TeCommandFactory * TeCommandFactory::factory()
 	return &factory;
 }
 
-QList<QPair<QString, TeTypes::CmdId>> TeCommandFactory::groupList()
+QList<std::pair<QString, TeTypes::CmdId>> TeCommandFactory::groupList()
 {
-	QList<QPair<QString, TeTypes::CmdId>> list = {
+	QList<std::pair<QString, TeTypes::CmdId>> list = {
 		{ tr("&File"), TeTypes::CMDID_SYSTEM_FILE },
 		{ tr("&Edit"), TeTypes::CMDID_SYSTEM_EDIT },
 		{ tr("&Folder"), TeTypes::CMDID_SYSTEM_FOLDER },
@@ -254,9 +254,9 @@ QList<QPair<QString, TeTypes::CmdId>> TeCommandFactory::groupList()
 	return list;
 }
 
-QList<QPair<QString, TeTypes::CmdId>> TeCommandFactory::custom_groupList()
+QList<std::pair<QString, TeTypes::CmdId>> TeCommandFactory::custom_groupList()
 {
-	QList<QPair<QString, TeTypes::CmdId>> list = {
+	QList<std::pair<QString, TeTypes::CmdId>> list = {
 		{ tr("&File"), TeTypes::CMDID_SYSTEM_FILE },
 		{ tr("&Edit"), TeTypes::CMDID_SYSTEM_EDIT },
 		{ tr("&Folder"), TeTypes::CMDID_SYSTEM_FOLDER },
@@ -268,9 +268,9 @@ QList<QPair<QString, TeTypes::CmdId>> TeCommandFactory::custom_groupList()
 	return list;
 }
 
-QList<QPair<QString, TeTypes::CmdId>> TeCommandFactory::static_groupList()
+QList<std::pair<QString, TeTypes::CmdId>> TeCommandFactory::static_groupList()
 {
-	QList<QPair<QString, TeTypes::CmdId>> list = {
+	QList<std::pair<QString, TeTypes::CmdId>> list = {
 		{ tr("&Setting"), TeTypes::CMDID_SYSTEM_SETTING },
 		{ tr("&Help"), TeTypes::CMDID_SYSTEM_HELP },
 	};

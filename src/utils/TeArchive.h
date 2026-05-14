@@ -94,11 +94,11 @@ public:
 	void clearCancel();
 
 	/** @brief Returns the path of the currently opened archive. */
-	const QString& path() { return m_path; }
+	const QString& path() const { return m_path; }
 	/** @brief Returns true when an archive is open and valid. */
-	bool isValid();
+	bool isValid() const;
 	/** @brief Returns the detected archive format. */
-	ArchiveType type();
+	ArchiveType type() const;
 
 public slots:
 	/**

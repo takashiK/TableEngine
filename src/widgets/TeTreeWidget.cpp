@@ -20,6 +20,7 @@
 
 #include "TeTreeWidget.h"
 
+#include <algorithm>
 #include <QDragEnterEvent>
 /**
  * @file TeTreeWidget.cpp
@@ -94,10 +95,10 @@ void TeTreeWidget::dropEvent(QDropEvent * event)
 				int r = dropRow.row() >= 0 ? dropRow.row() : row;
 				if (index.isValid()) {
 					QTreeWidgetItem* parent = itemFromIndex(index);
-					parent->insertChild(qMin(r,parent->childCount()), cloneItem);
+					parent->insertChild((std::min)(r, parent->childCount()), cloneItem);
 				}
 				else {
-					insertTopLevelItem(qMin(r, topLevelItemCount()), cloneItem);
+					insertTopLevelItem((std::min)(r, topLevelItemCount()), cloneItem);
 				}
 			}
 			event->accept();

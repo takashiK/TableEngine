@@ -48,7 +48,7 @@ public:
 	 * that will be called when the user selects that action.
 	 * @return List of (name, callback) pairs.
 	 */
-	virtual QList<QPair<QString, ActionFunc>> actions() const = 0;
+	virtual QList<std::pair<QString, ActionFunc>> actions() const = 0;
 
 	/**
 	 * @brief Attaches this accessor to @p item as custom item data.

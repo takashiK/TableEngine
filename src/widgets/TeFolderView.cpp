@@ -73,6 +73,7 @@ bool TeFolderView::isDispatchable(TeTypes::WidgetType /*type*/, QEvent *event) c
 {
 	//select target event.
 	if (event->type() == QEvent::KeyPress) {
+		qDebug() << "Key Press Event: " << static_cast<QKeyEvent*>(event)->key() << " Modifiers: " << static_cast<QKeyEvent*>(event)->modifiers();
 		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
 		if (keyEvent->modifiers() == Qt::NoModifier || keyEvent->modifiers() == Qt::ShiftModifier || keyEvent->modifiers() == Qt::ControlModifier) {
@@ -92,6 +93,7 @@ bool TeFolderView::isDispatchable(TeTypes::WidgetType /*type*/, QEvent *event) c
 			case Qt::Key_Backspace:
 			case Qt::Key_Delete:
 			case Qt::Key_Tab:
+			case Qt::Key_Escape:
 				return true;
 
 			case Qt::Key_0:

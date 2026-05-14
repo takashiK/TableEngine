@@ -1,5 +1,6 @@
 #include "TeTextView.h"
 
+#include <algorithm>
 #include <QPainter>
 #include <QTextBlock>
 
@@ -71,7 +72,7 @@ void TeTextView::setTabStopWidth(int tabStop)
 int TeTextView::lineNumberAreaWidth()
 {
     int digits = 1;
-    int max = qMax(1, blockCount());
+    int max = (std::max)(1, blockCount());
     while (max >= 10) {
         max /= 10;
         ++digits;

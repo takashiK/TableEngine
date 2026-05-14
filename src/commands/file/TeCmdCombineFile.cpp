@@ -94,17 +94,31 @@ bool TeCmdCombineFile::execute(TeViewStore* p_store)
 				}
 			}
 			//combine files
-			if (outFile.open(QIODevice::WriteOnly | QIODeviceBase::Truncate)) {
-				for (const auto& path : inputFiles) {
-					QFile inputFile( path );
-					if (inputFile.open(QIODevice::ReadOnly)) {
-						while (inputFile.bytesAvailable()) {
-							outFile.write(inputFile.read(16*1024*1024));
+			if (!outFile.open(QIODevice::WriteOnly | QIODeviceBase::Truncate)) {
+				return false;
+			}
+			for (const auto& path : inputFiles) {
+				QFile inputFile( path );
+				if (inputFile.open(QIODevice::ReadOnly)) {
+					while (inputFile.bytesAvailable()) {
+						const QByteArray chunk = inputFile.read(16*1024*1024);
+						if (outFile.write(chunk) == -1) {
+							outFile.close();
+							return false;
 						}
-						inputFile.close();
 					}
+					inputFile.close();
+				} else {
+					outFile.close();
+					QMessageBox::critical(
+						nullptr,
+						QObject::tr("Error"),
+						QObject::tr("Could not open input file:\n%1").arg(path)
+					);
+					return false;
 				}
 			}
+			outFile.close();
 		}
 	}
 	return true;

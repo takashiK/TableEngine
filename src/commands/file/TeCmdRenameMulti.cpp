@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -101,7 +101,7 @@ bool TeCmdRenameMulti::execute(TeViewStore* p_store)
 			//rename
 			for (int i = 0; i < files.size(); i++) {
 				QString newName = baseName;
-				newName += QString("%1").arg(startNum + i, digits, 10, QChar('0'));
+				newName += QString("%1").arg(startNum + i, digits, 10, u'0');
 				newName += extention;
 				QFile::rename(fileInfoList[i].filePath(), fileInfoList[i].absolutePath() + "/" +  newName);
 			}

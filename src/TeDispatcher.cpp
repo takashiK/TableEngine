@@ -45,6 +45,10 @@ TeDispatcher::TeDispatcher()
 
 TeDispatcher::~TeDispatcher()
 {
+	for (TeCommandBase* cmd : m_cmdQueue) {
+		delete cmd;
+	}
+	m_cmdQueue.clear();
 }
 
 TeTypes::WidgetType TeDispatcher::getType() const
@@ -77,7 +81,7 @@ bool TeDispatcher::dispatch(TeTypes::WidgetType type, QEvent *event)
 			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
 			//change key event to command Id.
-			TeTypes::CmdId cmdId = m_keyCmdMap.value(QPair<int,int>(keyEvent->modifiers(),keyEvent->key()));
+			TeTypes::CmdId cmdId = m_keyCmdMap.value(std::pair<int,int>{keyEvent->modifiers(),keyEvent->key()});
 
 			if (cmdId != TeTypes::CMDID_NONE) {
 				emit requestCommand(cmdId,type,event,nullptr);
@@ -143,12 +147,12 @@ void TeDispatcher::loadKeySetting()
 
 	QSettings settings;
 	settings.beginGroup(SETTING_KEY);
-	const int modifier = Qt::CTRL | Qt::SHIFT;
+	const int modifier = Qt::CTRL | Qt::SHIFT | Qt::ALT | Qt::META;
 
 	for (const auto& key : list) {
 		int cmdId = settings.value(QKeySequence(key).toString().replace("+", "_")).toInt();
 		if (cmdId != TeTypes::CMDID_NONE) {
-			m_keyCmdMap.insert(QPair<int, int>((key & modifier), (key & 0xFF)), static_cast<TeTypes::CmdId>(cmdId));
+			m_keyCmdMap.insert(std::pair<int,int>{(key & modifier), (key & (~modifier))}, static_cast<TeTypes::CmdId>(cmdId));
 		}
 	}
 }

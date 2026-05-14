@@ -23,7 +23,7 @@
 #include <QObject>
 #include <QMap>
 #include <QVariant>
-#include <QPair>
+#include <utility>
 
 /**
  * @file TeTypes.h

@@ -1,5 +1,6 @@
 #include "TeFileItemDelegate.h"
 #include "TeFileSortProxyModel.h"
+#include <algorithm>
 #include <QApplication>
 #include <QFileInfo>
 #include <QFileSystemModel>
@@ -259,13 +260,13 @@ QSize TeFileItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QMo
                 if (!line.isValid()) break;
                 line.setLineWidth(textWidth);
                 h += line.height();
-                w = qMax(w, line.naturalTextWidth());
+                w = (std::max)(w, line.naturalTextWidth());
             }
             layout.endLayout();
 
             w += focusMargin * 2; // Add horizontal margins back
 
-            baseSize.setWidth(qMax(baseSize.width(), qCeil(w)));
+            baseSize.setWidth((std::max)(baseSize.width(), qCeil(w)));
             baseSize.setHeight(baseSize.height() + qCeil(h));
         }
         return baseSize;

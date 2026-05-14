@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -62,7 +62,7 @@ TeMenuSetting::TeMenuSetting(QWidget *parent)
 
 	vbox->addWidget(combo);
 
-	for (int i = 0; i < m_itemList.count(); i++) {
+	for (int i = 0; i < m_itemList.size(); i++) {
 		combo->addItem(m_itemList[i]->windowTitle(), i);
 		vbox->addWidget(m_itemList[i]);
 		m_itemList[i]->setBuddy(cmd);
@@ -162,12 +162,12 @@ void defaultEntry(QSettings& settings, const QString& key,  const QString& value
 void menuEntry(QSettings& settings, int index, int indent, TeTypes::CmdId cmdId, QString name= QString())
 {
 	const TeCommandInfoBase*p_info = TeCommandFactory::factory()->commandInfo(cmdId);
-	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, QChar('0')), QString("%1,%2,%3").arg(indent).arg(name.isNull() ?  p_info->name() : name ).arg(p_info->cmdId()));
+	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, u'0'), QString("%1,%2,%3").arg(indent).arg(name.isNull() ?  p_info->name() : name ).arg(p_info->cmdId()));
 }
 
 void specialEntry(QSettings& settings, int index, int indent, TeTypes::CmdId cmdId, const QString& str)
 {
-	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, QChar('0')), QString("%1,%2,%3").arg(indent).arg(str).arg(cmdId));
+	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, u'0'), QString("%1,%2,%3").arg(indent).arg(str).arg(cmdId));
 }
 
 void TeMenuSetting::storeDefaultMenuSettings(QSettings& settings)
@@ -175,7 +175,7 @@ void TeMenuSetting::storeDefaultMenuSettings(QSettings& settings)
 	TeCommandFactory* factory = TeCommandFactory::factory();
 	int index = 0;
 
-	QList<QPair<QString, TeTypes::CmdId>>  list = TeCommandFactory::custom_groupList();
+	QList<std::pair<QString, TeTypes::CmdId>>  list = TeCommandFactory::custom_groupList();
 
 	QString group = QString("menuGroup00");
 	defaultEntry(settings, group, tr("Menu Bar"));
@@ -325,8 +325,8 @@ void TeMenuSetting::updateSettings()
 	int indent = 0;
 	QTreeWidgetItem* item;
 
-	for (int i = 0; i < m_itemList.count(); i++ ) {
-		QString group = QString("menuGroup%1").arg(i,2,10,QChar('0'));
+	for (int i = 0; i < m_itemList.size(); i++ ) {
+		QString group = QString("menuGroup%1").arg(i,2,10,u'0');
 		settings.setValue(group, m_itemList[i]->windowTitle());
 
 		settings.beginGroup(group);
@@ -334,7 +334,7 @@ void TeMenuSetting::updateSettings()
 
 		for (int j = 0; j < m_itemList[i]->topLevelItemCount(); j++) {
 			item = m_itemList[i]->topLevelItem(j);
-			settings.setValue(QString("menu%1").arg(index++, 3, 10, QChar('0')),
+			settings.setValue(QString("menu%1").arg(index++, 3, 10, u'0'),
 				QString("%1,%2,%3")
 				.arg(indent)
 				.arg(item->data(MENU_REGISTER, Qt::DisplayRole).toString())
@@ -354,7 +354,7 @@ int TeMenuSetting::storeMenuItemSettings(QSettings& settings, const QTreeWidgetI
 	
 	for (int i = 0; i < itemRoot->childCount(); i++) {
 		QTreeWidgetItem* item = itemRoot->child(i);
-		settings.setValue(QString("menu%1").arg(index++, 3, 10, QChar('0')), 
+		settings.setValue(QString("menu%1").arg(index++, 3, 10, u'0'), 
 			QString("%1,%2,%3")
 			.arg(indent)
 			.arg(item->data(MENU_REGISTER,Qt::DisplayRole).toString())
@@ -444,7 +444,7 @@ QTreeWidgetItem * TeMenuSetting::createSeparatorItem()
 QList<QTreeWidgetItem*> TeMenuSetting::createCmdTreeItem()
 {
 	QList<QTreeWidgetItem*> treeItem;
-	QList<QPair<QString, TeTypes::CmdId>>  list = TeCommandFactory::groupList();
+	QList<std::pair<QString, TeTypes::CmdId>>  list = TeCommandFactory::groupList();
 
 	for (const auto& item : list) {
 		QString name = item.first;

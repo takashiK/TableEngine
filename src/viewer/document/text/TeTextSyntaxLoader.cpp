@@ -1,4 +1,4 @@
-#include "TeTextSyntaxLoader.h"
+﻿#include "TeTextSyntaxLoader.h"
 
 #include "viewer/document/TeDocumentSettings.h"
 
@@ -72,17 +72,17 @@ namespace {
 
         if (format.foreground().style() != Qt::NoBrush) {
             QString rgb = QString("#%1%2%3")
-                .arg(format.foreground().color().red(), 2, 16, QChar(u'0'))
-                .arg(format.foreground().color().green(), 2, 16, QChar(u'0'))
-                .arg(format.foreground().color().blue(), 2, 16, QChar(u'0'));
+                .arg(format.foreground().color().red(), 2, 16, u'0')
+                .arg(format.foreground().color().green(), 2, 16, u'0')
+                .arg(format.foreground().color().blue(), 2, 16, u'0');
             style["color"] = rgb;
         }
 
         if (format.background().style() != Qt::NoBrush) {
             QString rgb = QString("#%1%2%3")
-                .arg(format.background().color().red(), 2, 16, QChar(u'0'))
-                .arg(format.background().color().green(), 2, 16, QChar(u'0'))
-                .arg(format.background().color().blue(), 2, 16, QChar(u'0'));
+                .arg(format.background().color().red(), 2, 16, u'0')
+                .arg(format.background().color().green(), 2, 16, u'0')
+                .arg(format.background().color().blue(), 2, 16, u'0');
             style["bgcolor"] = rgb;
         }
         return style;
@@ -99,7 +99,6 @@ TeTextSyntaxLoader::~TeTextSyntaxLoader()
 
 void TeTextSyntaxLoader::clear()
 {
-    m_isUpdateRelation = false;
     m_relations.clear();
     m_syntaxes.clear();
 }
@@ -157,32 +156,36 @@ bool TeTextSyntaxLoader::saveAll()
     }
 
     //save syntaxes
+    bool ok = true;
     for (auto itr = m_syntaxes.begin(); itr != m_syntaxes.end(); ++itr) {
         if (itr.value().isUpdate) {
-            saveSyntax(path + "/" + itr.key() + ".highlight", itr.value().textSyntax);
+            ok &= saveSyntax(path + "/" + itr.key() + ".highlight", itr.value().textSyntax);
         }
     }
 
     //save relations
     QFile file(dir.filePath(relationPath));
-    if (file.open(QIODevice::WriteOnly)) {
-
-        QJsonObject relations;
-        for (auto itr = m_relations.begin(); itr != m_relations.end(); ++itr) {
-            if (m_syntaxes.contains(itr.value())) {
-                relations[itr.key()] = itr.value();
-            }
-        }
-
-        QJsonObject json;
-        json["relation"] = relations;
-
-        QJsonDocument jsonDoc(json);
-        file.write(jsonDoc.toJson());
-        file.close();
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
     }
 
-    return true;
+    QJsonObject relations;
+    for (auto itr = m_relations.begin(); itr != m_relations.end(); ++itr) {
+        if (m_syntaxes.contains(itr.value())) {
+            relations[itr.key()] = itr.value();
+        }
+    }
+
+    QJsonObject json;
+    json["relation"] = relations;
+
+    QJsonDocument jsonDoc(json);
+    if (file.write(jsonDoc.toJson()) == -1) {
+        return false;
+    }
+    file.close();
+
+    return ok;
 }
 
 bool TeTextSyntaxLoader::loadSyntax(const QString& path, TeTextSyntax* p_textSyntax, bool append)
@@ -309,7 +312,9 @@ bool TeTextSyntaxLoader::saveSyntax(const QString& path, const TeTextSyntax& tex
     json["regions"] = regions;
 
     QJsonDocument jsonDoc(json);
-    file.write(jsonDoc.toJson());
+    if (file.write(jsonDoc.toJson()) == -1) {
+        return false;
+    }
     file.close();
 
     return true;
@@ -340,11 +345,11 @@ int TeTextSyntaxLoader::addEntry(const QString& title, const TeTextSyntax& synta
 
 		itr.value().isUpdate = true;
 		itr.value().textSyntax = syntax;
-		return m_syntaxes.count();
+		return m_syntaxes.size();
 	}
 
 	m_syntaxes.insert(title, container);
-	return m_syntaxes.count();
+	return m_syntaxes.size();
 }
 
 int TeTextSyntaxLoader::delEntry(const QString& title)
@@ -353,7 +358,7 @@ int TeTextSyntaxLoader::delEntry(const QString& title)
 	if (itr != m_syntaxes.end()) {
 		m_syntaxes.erase(itr); 
 	}
-	return m_syntaxes.count();
+	return m_syntaxes.size();
 }
 
 TeTextSyntax TeTextSyntaxLoader::entry(const QString& title)
@@ -382,7 +387,7 @@ int TeTextSyntaxLoader::addRelation(const QString& suffix, const QString& title,
 	else {
 		m_relations.insert(suffix, title);
 	}
-	return m_relations.count();
+	return m_relations.size();
 }
 
 int TeTextSyntaxLoader::delRelation(const QString& suffix)
@@ -391,7 +396,7 @@ int TeTextSyntaxLoader::delRelation(const QString& suffix)
 	if (itr != m_relations.end()) {
 		m_relations.erase(itr);
 	}
-	return m_relations.count();
+	return m_relations.size();
 }
 
 TeTextSyntax TeTextSyntaxLoader::relatedEntry(const QString& suffix)

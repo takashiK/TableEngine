@@ -1,4 +1,4 @@
-#include "TeTextSyntax.h"
+﻿#include "TeTextSyntax.h"
 
 /**
  * @file TeTextSyntax.cpp
@@ -19,7 +19,7 @@ TeTextSyntax::~TeTextSyntax()
 namespace {
     QRegularExpression listToRegularExpression(const QStringList& list) {
         QString packed;
-        if (list.length() > 0) {
+        if (list.size() > 0) {
             for (const auto& s : list) {
                 packed += s + QStringLiteral("|");
             }
@@ -56,44 +56,44 @@ void TeTextSyntax::update_keywords()
 
 int TeTextSyntax::addSyntaxKeywords(const SyntaxKeywords& keyword)
 {
-    if (keyword.keywords.length() == 0)
+    if (keyword.keywords.size() == 0)
         return -1;
 
     //validation
     for (auto&& key : keyword.keywords) {
-        if (key.length() > 30) {
+        if (key.size() > 30) {
             return -1;
         }
     }
     m_update_keywords = true;
     m_keywords.append(keyword);
-    return m_keywords.count();
+    return m_keywords.size();
 }
 
 int TeTextSyntax::addSyntaxRegex(const SyntaxRegex& regex)
 {
-    if (regex.regex.pattern().length() > 200 || !regex.regex.isValid()) {
+    if (regex.regex.pattern().size() > 200 || !regex.regex.isValid()) {
         return -1;
     }
     m_regexes.append(regex);
-    return m_regexes.count();
+    return m_regexes.size();
 }
 
 int TeTextSyntax::addSyntaxRegion(const SyntaxRegion& region)
 {
-    if (region.startRegex.pattern().length() > 200 || !region.startRegex.isValid()) {
+    if (region.startRegex.pattern().size() > 200 || !region.startRegex.isValid()) {
         return -1;
     }
-    if (region.endRegex.pattern().length() > 200 || !region.endRegex.isValid()) {
+    if (region.endRegex.pattern().size() > 200 || !region.endRegex.isValid()) {
         return -1;
     }
     m_regions.append(region);
-    return m_regions.count();
+    return m_regions.size();
 }
 
 bool TeTextSyntax::removeSyntaxKeywords(int index)
 {
-    if (index < m_keywords.count()) {
+    if (index < m_keywords.size()) {
         m_keywords.removeAt(index);
         return true;
     }
@@ -102,7 +102,7 @@ bool TeTextSyntax::removeSyntaxKeywords(int index)
 
 bool TeTextSyntax::removeSyntaxRegex(int index)
 {
-    if (index < m_regexes.count()) {
+    if (index < m_regexes.size()) {
         m_regexes.removeAt(index);
         return true;
     }
@@ -111,7 +111,7 @@ bool TeTextSyntax::removeSyntaxRegex(int index)
 
 bool TeTextSyntax::removeSyntaxRegion(int index)
 {
-    if (index < m_regions.count()) {
+    if (index < m_regions.size()) {
         m_regions.removeAt(index);
         return true;
     }

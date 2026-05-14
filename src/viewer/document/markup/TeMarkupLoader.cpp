@@ -76,26 +76,27 @@ bool TeMarkupLoader::saveAll()
 
     //save relations
     QFile file(dir.filePath(relationFile));
-    if (file.open(QIODevice::WriteOnly)) {
-
-        QJsonObject relations;
-        for (auto itr = m_relations.begin(); itr != m_relations.end(); ++itr) {
-            if(dir.exists(itr.value())) {
-                relations[itr.key()] = itr.value();
-            }
-        }
-
-        QJsonObject json;
-        json["relation"] = relations;
-
-        if (dir.exists(m_defaultContainer)) {
-			json["default"] = m_defaultContainer;
-		}
-
-        QJsonDocument jsonDoc(json);
-        file.write(jsonDoc.toJson());
-        file.close();
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
     }
+
+    QJsonObject relations;
+    for (auto itr = m_relations.begin(); itr != m_relations.end(); ++itr) {
+        if(dir.exists(itr.value())) {
+            relations[itr.key()] = itr.value();
+        }
+    }
+
+    QJsonObject json;
+    json["relation"] = relations;
+
+    if (dir.exists(m_defaultContainer)) {
+        json["default"] = m_defaultContainer;
+    }
+
+    QJsonDocument jsonDoc(json);
+    file.write(jsonDoc.toJson());
+    file.close();
 
     return true;
 }

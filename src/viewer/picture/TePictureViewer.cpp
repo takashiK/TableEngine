@@ -83,9 +83,9 @@ TePictureViewer::Strech TePictureViewer::strechMode() const
 	return m_strechMode;
 }
 
-QPair<int, Qt::SortOrder> TePictureViewer::sortOrder() const
+std::pair<int, Qt::SortOrder> TePictureViewer::sortOrder() const
 {
-	return QPair<int, Qt::SortOrder>(m_sortColumn, m_sortOrder);
+	return std::pair<int, Qt::SortOrder>{m_sortColumn, m_sortOrder};
 }
 
 void TePictureViewer::nextImage()

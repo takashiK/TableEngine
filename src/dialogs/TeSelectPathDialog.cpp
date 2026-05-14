@@ -44,7 +44,7 @@ TeSelectPathDialog::TeSelectPathDialog(QWidget *parent)
 	Qt::WindowFlags flags = windowFlags();
 	setWindowFlags(flags & ~Qt::WindowContextHelpButtonHint);
 
-	QFileSystemModel* model = new QFileSystemModel();
+	QFileSystemModel* model = new QFileSystemModel(this);
 	model->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 	model->setRootPath("");
 
@@ -102,7 +102,8 @@ TeSelectPathDialog::~TeSelectPathDialog()
 void TeSelectPathDialog::setTargetPath(const QString & path)
 {
 	QFileSystemModel* model = qobject_cast<QFileSystemModel*>(mp_tree->model());
-	Q_ASSERT(model != nullptr);
+	if (!model)
+		return;
 	QModelIndex index = model->index(path);
 	if (index.isValid()) {
 		mp_tree->setCurrentIndex(index);

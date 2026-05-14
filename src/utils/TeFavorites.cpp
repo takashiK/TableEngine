@@ -1,4 +1,4 @@
-#include "TeFavorites.h"
+﻿#include "TeFavorites.h"
 
 #include "TeSettings.h"
 #include <QSettings>
@@ -46,7 +46,7 @@ void TeFavorites::save()
 	settings.beginGroup(SETTING_FAVORITES);
 	settings.remove("");
 	for (int i = 0; i < m_favorites.size(); ++i) {
-		settings.setValue(QString("path%1").arg(i, 2, 10, QChar('0')), m_favorites.at(i));
+		settings.setValue(QString("path%1").arg(i, 2, 10, u'0'), m_favorites.at(i));
 	}
 	settings.endGroup();
 }

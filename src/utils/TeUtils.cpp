@@ -1,4 +1,4 @@
-#include "TeUtils.h"
+﻿#include "TeUtils.h"
 #include "TeViewStore.h"
 #include "TeSettings.h"
 #include "widgets/TeFileFolderView.h"
@@ -116,7 +116,7 @@ QStringList getFavorites()
 	QSettings settings;
 	QStringList favorites;
 	settings.beginGroup(SETTING_FAVORITES);
-	for (auto& key : settings.childKeys()) {
+	for (const auto& key : settings.childKeys()) {
 		favorites.append(settings.value(key).toString());
 	}
 	settings.endGroup();
@@ -129,7 +129,7 @@ void updateFavorites(const QStringList& list)
 	settings.beginGroup(SETTING_FAVORITES);
 	settings.remove("");
 	for (int i = 0; i < list.size(); i++) {
-		settings.setValue(QString("path%1").arg(i, 2, 10, QChar('0')), list.at(i));
+		settings.setValue(QString("path%1").arg(i, 2, 10, u'0'), list.at(i));
 	}
 	settings.endGroup();
 }

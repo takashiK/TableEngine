@@ -420,7 +420,7 @@ namespace {
 		info->type = TeFileInfo::EN_NONE;
 		info->size = 0;
 		info->path.clear();
-		info->lastModified = QDateTime::currentDateTime();
+		info->lastModified = QDateTime::currentDateTimeUtc();
 		info->permissions = 0x644;
 
 		while (ARCHIVE_OK == archive_read_next_header(arInfo->ar, &arInfo->entry)) {
@@ -869,7 +869,7 @@ bool Reader::copy_data(void* arPtr, QFile* ofile)
 	return false;
 }
 
-bool Reader::isValid()
+bool Reader::isValid() const
 {
 	return m_type != AR_NONE;
 }
@@ -877,7 +877,7 @@ bool Reader::isValid()
 /*!
 	Return the type of archive format.
  */
-ArchiveType Reader::type()
+ArchiveType Reader::type() const
 {
 	return m_type;
 }
@@ -925,7 +925,7 @@ Reader::const_iterator::const_iterator(Reader * ar)
 Reader::const_iterator::const_iterator(const_iterator && o) noexcept
 {
 	data = o.data;
-	info = o.info;
+	info = std::move(o.info);
 
 	o.data = Q_NULLPTR;
 }
@@ -1085,7 +1085,7 @@ bool Writer::addEntries(const QString & base, const QStringList & srcList, const
 		destPath = dest + "/";
 	}
 
-	for (auto& src : srcList) {
+	for (const auto& src : srcList) {
 		if (addEntry(basePath + src, destPath + src)) {
 			result = true;
 		}
@@ -1119,7 +1119,7 @@ bool Writer::archive(const QString & dest, ArchiveType type)
 	qint64 total = 0;
 	archive_entry* entry;
 
-	for (auto& info : m_entryList) {
+	for (const auto& info : m_entryList) {
 		if (m_cancel) break;
 
 		QFileInfo fileInfo(info.src);

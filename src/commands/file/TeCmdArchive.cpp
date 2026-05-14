@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -135,7 +135,7 @@ void TeCmdArchive::archiveItems(TeViewStore* p_store, const QStringList & list, 
 		TeArchive::Writer writer;
 		QString currentPathWithSlash = currentPath.isEmpty() ? "" : currentPath + "/";
 
-		QProgressDialog progress(QObject::tr(""), QObject::tr("Cancel"), 0, list.count(), p_store->mainWindow());
+		QProgressDialog progress(QObject::tr(""), QObject::tr("Cancel"), 0, list.size(), p_store->mainWindow());
 		progress.setWindowTitle(QObject::tr("Archive"));
 /*
 		QObject::connect(&writer, &TeArchive::Writer::addedFileInfo, [&progress,&writer](const TeArchive::FileInfo& info){
@@ -144,10 +144,10 @@ void TeCmdArchive::archiveItems(TeViewStore* p_store, const QStringList & list, 
 */
 		progress.setWindowModality(Qt::WindowModal);
 
-		progress.setMaximum(list.count());
+		progress.setMaximum(list.size());
 		for (const auto& path: list) {
 			if (path.startsWith(currentPathWithSlash)) {
-				bSuccess &= writer.addEntry(path, path.sliced(currentPathWithSlash.length()));
+				bSuccess &= writer.addEntry(path, path.sliced(currentPathWithSlash.size()));
 			}
 			else {
 				bSuccess = false;

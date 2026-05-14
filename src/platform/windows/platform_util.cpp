@@ -22,6 +22,7 @@
 #include "platform/TeNativeEvent.h"
 #include "platform/windows/TeWindowsEventFilter.h"
 
+#include <algorithm>
 #include <QMap>
 #include <QDir>
 #include <QFileInfo>
@@ -496,7 +497,7 @@ bool deleteFiles(const QStringList & files)
 
 QPixmap getThumbnail(const QString& path, const QSize& size)
 {
-	UINT nSize = qMax(size.width(), size.height());
+	UINT nSize = (std::max)(size.width(), size.height());
 	IShellItem* psi;
 	HRESULT hr = SHCreateItemFromParsingName(reinterpret_cast<PCWSTR>(QDir::toNativeSeparators(path).utf16()), NULL, IID_PPV_ARGS(&psi));
 	if (SUCCEEDED(hr))
@@ -530,7 +531,7 @@ QPixmap getThumbnail(const QString& path, const QSize& size)
 
 QPixmap getFileIcon(const QString& path, const QSize& size)
 {
-	int iconSize = qMax(size.width(), size.height());
+	int iconSize = (std::max)(size.width(), size.height());
 	int iconType = SHIL_JUMBO;
 	if (iconSize <= 16) {
 		iconType = SHIL_SMALL;

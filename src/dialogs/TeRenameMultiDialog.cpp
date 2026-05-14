@@ -1,4 +1,4 @@
-#include "TeRenameMultiDialog.h"
+﻿#include "TeRenameMultiDialog.h"
 
 #include <QLineEdit>
 #include <QButtonGroup>
@@ -63,7 +63,7 @@ TeRenameMultiDialog::TeRenameMultiDialog(QWidget *parent)
 
 	//Order
 	pGrid->addWidget(new QLabel(tr("Order")),4,0);
-	mp_order = new QButtonGroup();
+	mp_order = new QButtonGroup(this);
 	mp_order->addButton(new QRadioButton(tr("Filename")),0);
 	mp_order->addButton(new QRadioButton(tr("Datetime")),1);
 	mp_order->button(0)->setChecked(true);
@@ -118,7 +118,7 @@ int TeRenameMultiDialog::order() const
 void TeRenameMultiDialog::updateSample()
 {
 	QString sample = mp_baseName->text();
-	sample += QString("%1").arg(mp_startNum->value(), mp_digits->value(), 10, QChar('0'));
+	sample += QString("%1").arg(mp_startNum->value(), mp_digits->value(), 10, u'0');
 	sample += mp_extention->text();
 	mp_sample->setText(sample);
 }

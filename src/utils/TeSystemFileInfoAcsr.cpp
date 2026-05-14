@@ -20,9 +20,9 @@ TeSystemFileInfoAcsr::TeSystemFileInfoAcsr(QObject *parent)
 TeSystemFileInfoAcsr::~TeSystemFileInfoAcsr()
 {}
 
-QList<QPair<QString, TeFileInfoAcsr::ActionFunc>> TeSystemFileInfoAcsr::actions() const
+QList<std::pair<QString, TeFileInfoAcsr::ActionFunc>> TeSystemFileInfoAcsr::actions() const
 {
-	return QList<QPair<QString, ActionFunc>>();
+	return QList<std::pair<QString, ActionFunc>>();
 }
 
 

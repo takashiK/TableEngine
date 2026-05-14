@@ -63,6 +63,7 @@ class TeViewStore;
  */
 class TeCommandBase
 {
+	Q_DISABLE_COPY_MOVE(TeCommandBase)
 public:
 	TeCommandBase();
 	virtual ~TeCommandBase();

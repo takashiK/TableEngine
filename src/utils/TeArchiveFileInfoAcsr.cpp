@@ -19,9 +19,9 @@ TeArchiveFileInfoAcsr::TeArchiveFileInfoAcsr(QObject *parent)
 TeArchiveFileInfoAcsr::~TeArchiveFileInfoAcsr()
 {}
 
-QList<QPair<QString, TeFileInfoAcsr::ActionFunc>> TeArchiveFileInfoAcsr::actions() const
+QList<std::pair<QString, TeFileInfoAcsr::ActionFunc>> TeArchiveFileInfoAcsr::actions() const
 {
-	return QList<QPair<QString, ActionFunc>>();
+	return QList<std::pair<QString, ActionFunc>>();
 }
 
 void TeArchiveFileInfoAcsr::activate(const TeFileInfo& info)

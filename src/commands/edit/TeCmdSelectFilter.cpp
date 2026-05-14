@@ -96,6 +96,8 @@ bool TeCmdSelectFilter::execute(TeViewStore* p_store)
 			QRegularExpression tmp = QRegularExpression::fromWildcard(filter, caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
 			re.swap(tmp);
 		}
+		if (!re.isValid())
+			return true;
 
 		QModelIndex root = p_list->rootIndex();
 		for (int i = 0; i < p_list->model()->rowCount(root); i++) {

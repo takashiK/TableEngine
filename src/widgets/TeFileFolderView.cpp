@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -37,54 +37,11 @@
 #include <QMenu>
 #include <QSettings>
 #include <QStack>
-#include <QDebug>
 /**
  * @file TeFileFolderView.cpp
  * @brief Implementation of TeFileFolderView.
  * @ingroup widgets
  */
-
-class DebugItemSelectionModel : public QItemSelectionModel
-{
-public:
-	DebugItemSelectionModel(QAbstractItemModel *model) : QItemSelectionModel(model) {}
-
-	virtual void select(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) override
-	{
-		qDebug() << "select index:" << index << " command:" << command;
-		QItemSelectionModel::select(index, command);
-	}
-
-	virtual void select(const QItemSelection &selection, QItemSelectionModel::SelectionFlags command) override
-	{
-		qDebug() << "select selection:" << selection << " command:" << command;
-		QItemSelectionModel::select(selection, command);
-	}
-
-	virtual void setCurrentIndex(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) override
-	{
-		qDebug() << "setCurrentIndex index:" << index << " command:" << command;
-		QItemSelectionModel::setCurrentIndex(index, command);
-	}
-
-	virtual void clear() override
-	{
-		qDebug() << "clear";
-		QItemSelectionModel::clear();
-	}
-
-	virtual void reset() override
-	{
-		qDebug() << "reset";
-		QItemSelectionModel::reset();
-	}
-
-	virtual void clearCurrentIndex() override
-	{
-		qDebug() << "clearCurrentIndex";
-		QItemSelectionModel::clearCurrentIndex();
-	}
-};
 
 TeFileFolderView::TeFileFolderView(QWidget *parent)
 	: TeFolderView(parent)
@@ -170,7 +127,8 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	connect(mp_listModel, &QFileSystemModel::directoryLoaded,
 				[this](const QString& )
 		{ if (mp_listView->currentIndex().isValid() == false) {
-			QModelIndex index = mp_listSortModel->mapFromSource(mp_listModel->index(0,0,mp_listView->rootIndex()));
+			QModelIndex sourceRoot = mp_listSortModel->mapToSource(mp_listView->rootIndex());
+			QModelIndex index = mp_listSortModel->mapFromSource(mp_listModel->index(0, 0, sourceRoot));
 			mp_listView->setCurrentIndex(index);
 		}});
 
@@ -231,7 +189,7 @@ void TeFileFolderView::showContextMenu(const QAbstractItemView * pView, const QP
 			QStringList files;
 			if (pView->selectionModel()->hasSelection()) {
 				QModelIndexList list = pView->selectionModel()->selectedIndexes();
-				for (auto& sindex : list) {
+				for (const auto& sindex : list) {
 					QVariant var = sindex.data(QFileSystemModel::FileInfoRole);
 					if (var.isValid() && var.canConvert<QFileInfo>()) {
 						QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
@@ -285,7 +243,7 @@ void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint
 			continue;
 		}
 
-		while (indent+1 < menus.count()) {
+		while (indent+1 < menus.size()) {
 			menus.pop();
 		}
 

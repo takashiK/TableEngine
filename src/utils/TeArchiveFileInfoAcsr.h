@@ -31,7 +31,7 @@ public:
 	~TeArchiveFileInfoAcsr();
 
 	/** @brief Returns context-menu actions specific to the archive-entry type. */
-	virtual QList<QPair<QString, ActionFunc>> actions() const = 0;
+	virtual QList<std::pair<QString, ActionFunc>> actions() const = 0;
 
 public slots:
 	/**

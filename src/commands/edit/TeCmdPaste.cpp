@@ -81,7 +81,7 @@ bool TeCmdPaste::execute(TeViewStore* p_store)
 	if (mime != nullptr && mime->hasUrls() && !dstPath.isEmpty()) {
 		QList<QUrl> urls = mime->urls();
 		QStringList paths;
-		for (auto& url : urls) {
+		for (const auto& url : urls) {
 			if (url.isLocalFile()) {
 				paths.append(url.toLocalFile());
 			}

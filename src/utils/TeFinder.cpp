@@ -1,4 +1,4 @@
-#include "TeFinder.h"
+﻿#include "TeFinder.h"
 #include "widgets/TeFolderView.h"
 
 #include <QCoreApplication>
@@ -21,7 +21,7 @@ TeFinder::TeFinder(QObject* parent)
 
 TeFinder::~TeFinder()
 {
-	m_cancelFlag.storeRelaxed(1);
+	m_cancelFlag.store(1, std::memory_order_relaxed);
 	if (m_workerThread) {
 		m_workerThread->wait();
 		delete m_workerThread;
@@ -61,18 +61,21 @@ void TeFinder::startSearch(const TeSearchQuery& query)
 
 void TeFinder::cancelSearch()
 {
-	m_cancelFlag.storeRelaxed(1);
+	m_cancelFlag.store(1, std::memory_order_relaxed);
 }
 
 void TeFinder::reset()
 {
 	if (m_workerThread) {
-		m_cancelFlag.storeRelaxed(1);
+		m_cancelFlag.store(1, std::memory_order_relaxed);
 		m_workerThread->wait();
 		delete m_workerThread;
 		m_workerThread = nullptr;
+		// Remove any queued onWorkerFinished calls so they don't fire on the
+		// new thread that startSearch() is about to create.
+		QCoreApplication::removePostedEvents(this, QEvent::MetaCall);
 	}
-	m_cancelFlag.storeRelaxed(0);
+	m_cancelFlag.store(0, std::memory_order_relaxed);
 	QMutexLocker lock(&m_resultsMutex);
 	m_results.clear();
 }
@@ -93,12 +96,12 @@ QList<TeFileInfo> TeFinder::resultsSnapshot(int& count) const
 int TeFinder::resultCount() const
 {
 	QMutexLocker lock(&m_resultsMutex);
-	return m_results.count();
+	return m_results.size();
 }
 
 bool TeFinder::isCancelled() const
 {
-	return m_cancelFlag.loadRelaxed() != 0;
+	return m_cancelFlag.load(std::memory_order_relaxed) != 0;
 }
 
 void TeFinder::reportItems(const QList<TeFileInfo>& items)
@@ -117,7 +120,7 @@ void TeFinder::onWorkerFinished()
 	delete m_workerThread;
 	m_workerThread = nullptr;
 
-	if (m_cancelFlag.loadRelaxed() != 0) {
+	if (m_cancelFlag.load(std::memory_order_relaxed) != 0) {
 		emit searchCancelled();
 	} else {
 		emit searchFinished();

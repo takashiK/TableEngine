@@ -35,7 +35,7 @@ public:
 	bool open(const QString& path);
 
 	Strech strechMode() const;
-	QPair<int, Qt::SortOrder> sortOrder() const;
+	std::pair<int, Qt::SortOrder> sortOrder() const;
 
 signals:
 	void strechChanged(Strech mode);

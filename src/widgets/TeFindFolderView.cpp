@@ -1,5 +1,6 @@
 #include "TeFindFolderView.h"
 
+#include <algorithm>
 #include "TeEventFilter.h"
 #include "TeFileTreeView.h"
 #include "TeFileListView.h"
@@ -100,7 +101,7 @@ TeFindFolderView::TeFindFolderView(QWidget* parent)
 TeFindFolderView::~TeFindFolderView()
 {
 	// Cancel all running searches before destroying finders
-	for (auto& entry : m_entries) {
+	for (const auto& entry : m_entries) {
 		if (entry.finder) {
 			entry.finder->cancelSearch();
 			delete entry.finder;
@@ -235,7 +236,7 @@ void TeFindFolderView::onItemsFound(int offset, const QList<TeFileInfo>& newItem
 	if (m_entries[m_activeIndex].finder != senderFinder) return;
 
 	// Skip items that are already rendered from the initial snapshot
-	const int skipCount = qMax(0, m_snapshotCount - offset);
+	const int skipCount = (std::max)(0, m_snapshotCount - offset);
 	for (int i = skipCount; i < newItems.size(); ++i) {
 		listModel()->appendRow(makeListRow(newItems[i]));
 	}

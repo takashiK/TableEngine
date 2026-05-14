@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -99,7 +99,7 @@ public:
 		}
 		const int role = model() ? model()->sortRole() : Qt::DisplayRole;
 		const QVariant l = data(role), r = other.data(role);
-		return isVariantLessThan(l, r,Qt::CaseInsensitive,false);
+		return isVariantLessThan(l, r, Qt::CaseInsensitive, true);
 	}
 };
 
@@ -425,7 +425,7 @@ QStandardItem * TeArchiveFolderView::findPath(QStandardItem* root, const QString
 	QStandardItem* entry = root;
 	QStringList paths = path.split('/');
 
-	for (int i = 0; i < paths.count(); i++) {
+	for (int i = 0; i < paths.size(); i++) {
 		entry = findChild(entry, paths[i]);
 		if (entry == nullptr) {
 			break;
@@ -438,7 +438,7 @@ QStandardItem * TeArchiveFolderView::findPath(QStandardItem* root, const QString
 QStandardItem * TeArchiveFolderView::mkpath(const QFileIconProvider & iconProvider, QStandardItem * root, const QStringList& paths, bool bParentEntry)
 {
 	QStandardItem* parent = root;
-	for (int i = 0; i < paths.count() - 1; i++) {
+	for (int i = 0; i < paths.size() - 1; i++) {
 		QStandardItem* child = findChild(parent,paths[i]);
 		if (child != nullptr) {
 			parent = child;

@@ -73,13 +73,13 @@ public:
 	static TeCommandFactory* factory();
 
 	/** @brief Returns both built-in and user-registered command groups. */
-	static QList<QPair<QString,TeTypes::CmdId>> groupList();
+	static QList<std::pair<QString,TeTypes::CmdId>> groupList();
 
 	/** @brief Returns only user-registered (custom) command groups. */
-	static QList<QPair<QString, TeTypes::CmdId>> custom_groupList();
+	static QList<std::pair<QString, TeTypes::CmdId>> custom_groupList();
 
 	/** @brief Returns only built-in (static) command groups. */
-	static QList<QPair<QString, TeTypes::CmdId>> static_groupList();
+	static QList<std::pair<QString, TeTypes::CmdId>> static_groupList();
 
 	/**
 	 * @brief Returns metadata for all commands in @p groupId.

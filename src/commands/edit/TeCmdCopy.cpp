@@ -79,7 +79,7 @@ bool TeCmdCopy::execute(TeViewStore* p_store)
 
 	if (getSelectedItemList(p_store,&paths)) {
 		QList<QUrl> urls;
-		for (auto& path : paths) {
+		for (const auto& path : paths) {
 			urls.append(QUrl::fromLocalFile(path));
 		}
 		QMimeData* mime = new QMimeData();

@@ -29,7 +29,7 @@ public:
 	~TeSystemFileInfoAcsr();
 
 	/** @brief Returns the local file-system context-menu actions. */
-	virtual QList<QPair<QString, ActionFunc>> actions() const;
+	virtual QList<std::pair<QString, ActionFunc>> actions() const;
 
 public slots:
 	/**

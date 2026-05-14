@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 #include <QHash>
-#include <QPair>
+#include <utility>
 #include <QList>
 #include "TeTypes.h"
 #include "TeDispatchable.h"
@@ -134,7 +134,7 @@ private:
 	TeViewStore* mp_store = nullptr;
 
 	/** @brief Key-modifier + key-code to command ID mapping. */
-	QHash< QPair<int,int>, TeTypes::CmdId> m_keyCmdMap;
+	QHash<std::pair<int,int>, TeTypes::CmdId> m_keyCmdMap;
 
 	/** @brief Serial execution queue for asynchronous commands. */
 	QList<TeCommandBase*> m_cmdQueue;

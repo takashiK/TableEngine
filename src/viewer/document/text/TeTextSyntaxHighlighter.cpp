@@ -1,4 +1,4 @@
-#include "TeTextSyntaxHighlighter.h"
+﻿#include "TeTextSyntaxHighlighter.h"
 #include "TeTextSyntaxLoader.h"
 
 #include <QDebug>
@@ -59,7 +59,7 @@ void TeTextSyntaxHighlighter::highlightBlock(const QString& text)
     int startIndex = 0;
     int previous = previousBlockState();
     while (1) {
-        int current = m_syntax.regions().length();
+        int current = m_syntax.regions().size();
         for (; current > 0 && current > previous; current--) {
             QRegularExpressionMatch match = m_syntax.regions().at(current - 1).startRegex.match(text, startIndex);
             if (match.hasMatch()) {
@@ -85,7 +85,7 @@ void TeTextSyntaxHighlighter::highlightBlock(const QString& text)
             else {
                 //couldn't found end statemate for current sate.
                 setCurrentBlockState(current);
-                commentLength = text.length() - startIndex;
+                commentLength = text.size() - startIndex;
                 setFormat(startIndex, commentLength, region.format);
                 break;
             }

@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -68,7 +68,7 @@ TeFilePathDialog::TeFilePathDialog(QWidget *parent, const QStringList& extraFlag
 
 	//ExtraFlags
 	QVBoxLayout* extra = new QVBoxLayout();
-	for (int i = 0; i < extraFlags.count(); i++) {
+	for (int i = 0; i < extraFlags.size(); i++) {
 		QCheckBox* check = new QCheckBox(extraFlags.at(i));
 		m_extraFlags.append(check);
 		extra->addWidget(check);
@@ -122,14 +122,14 @@ QString TeFilePathDialog::targetPath()
 
 void TeFilePathDialog::setExtraFlag(int index, bool flag)
 {
-	if (index < m_extraFlags.count()) {
+	if (index < m_extraFlags.size()) {
 		m_extraFlags[index]->setChecked(flag);
 	}
 }
 
 bool TeFilePathDialog::getExtraFlag(int index)
 {
-	if (index < m_extraFlags.count()) {
+	if (index < m_extraFlags.size()) {
 		return m_extraFlags[index]->isChecked();
 	}
 	return false;

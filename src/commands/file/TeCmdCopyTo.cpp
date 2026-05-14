@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -116,7 +116,7 @@ void TeCmdCopyTo::copyItems(TeViewStore* p_store, const QStringList & list, cons
 	}
 	else {
 		QFileInfo info(path);
-		if (list.count() == 1 && info.dir().exists()) {
+		if (list.size() == 1 && info.dir().exists()) {
 			//Rename or CreateFolder
 			TeAskCreationModeDialog dlg(p_store->mainWindow());
 			dlg.setTargetPath(path);

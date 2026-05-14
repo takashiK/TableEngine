@@ -23,7 +23,6 @@
 #include "TeTypes.h"
 
 #include <QIcon>
-#include <QPair>
 #include <QFlags>
 
 /**

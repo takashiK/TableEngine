@@ -112,6 +112,8 @@ void TeDocViewer::findNext(const QString& text, bool caseSensitive, bool regex, 
             QRegularExpression::PatternOptions option;
             if (!caseSensitive) option |= QRegularExpression::CaseInsensitiveOption;
             QRegularExpression regexp(text, option);
+            if (!regexp.isValid())
+                return;
             mp_textView->find(regexp, flags);
         }
         else {

@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include <QList>
-#include <QPair>
+#include <utility>
 
 /**
  * @file TeHistory.h
@@ -27,7 +27,7 @@ class TeHistory  : public QObject
 	Q_OBJECT
 
 public:
-	typedef QPair<QString, QString> PathPair; ///< (root path, current path) pair.
+	using PathPair = std::pair<QString, QString>; ///< (root path, current path) pair.
 
 	TeHistory(QObject *parent = nullptr);
 	~TeHistory();
@@ -44,7 +44,7 @@ public:
 	 * @brief Removes and returns the current entry.
 	 * @return The removed PathPair.
 	 */
-	QPair<QString,QString> pop();
+	std::pair<QString,QString> pop();
 
 	/** @brief Clears all history entries. */
 	void clear();

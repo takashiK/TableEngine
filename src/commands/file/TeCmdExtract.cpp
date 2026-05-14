@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2021 Takashi Kuwabara.
 ** Contact: laffile@gmail.com
@@ -136,12 +136,12 @@ void TeCmdExtract::extractItems(TeViewStore* p_store, const QStringList & list, 
 
 	if (bSuccess) {
 		//start extract
-		QProgressDialog progress(QObject::tr(""), QObject::tr("Cancel"), 0, list.count(), p_store->mainWindow());
+		QProgressDialog progress(QObject::tr(""), QObject::tr("Cancel"), 0, list.size(), p_store->mainWindow());
 		progress.setWindowTitle(QObject::tr("Extract"));
 		progress.setWindowModality(Qt::WindowModal);
 
 
-		for (int i = 0; i < list.count(); i++) {
+		for (int i = 0; i < list.size(); i++) {
 			QString basePath = targetPath;
 			QFileInfo info(list[i]);
 			if (createArchiveFolder) {
@@ -149,7 +149,7 @@ void TeCmdExtract::extractItems(TeViewStore* p_store, const QStringList & list, 
 			}
 			TeArchive::Reader reader(list[i]);
 
-			QString targetInfo = QObject::tr("Extact ") + QString::asprintf("(%d/%d) : ",i,list.count()) + info.fileName() + "\n";
+			QString targetInfo = QObject::tr("Extact ") + QString::asprintf("(%d/%d) : ",i,list.size()) + info.fileName() + "\n";
 
 			QObject::connect(&reader, &TeArchive::Reader::maximumValue, &progress, &QProgressDialog::setMaximum);
 			QObject::connect(&reader, &TeArchive::Reader::valueChanged, &progress, &QProgressDialog::setValue);
