@@ -51,7 +51,7 @@ public:
 	 */
 	void setRelatedView(TeFolderView* view);
 	/** @brief Returns the associated folder view. */
-	TeFolderView* relatedView() const;
+	TeFolderView* relatedView() const noexcept;
 
 	/**
 	 * @brief Starts an asynchronous search.
@@ -66,7 +66,7 @@ public:
 	 *
 	 * Returns immediately; wait for searchCancelled() to confirm.
 	 */
-	void cancelSearch();
+	void cancelSearch() noexcept;
 
 	/** @brief Clears accumulated results.  Safe to call only when no search is running. */
 	void reset();
@@ -90,10 +90,12 @@ public:
 
 signals:
 	/**
-	 * @brief Emitted in the GUI thread for each directory batch of matching entries.
+	 * @brief Emitted for each directory batch of matching entries.
 	 *
-	 * @param offset  Index of the first item of this batch within results().
-	 *                Use with resultsSnapshot() to avoid race-condition gaps.
+	 * @note This signal is emitted from the worker thread.  Under the default
+	 *       Qt::AutoConnection, slots are queued and invoked on the receiver's
+	 *       thread.  Never connect with Qt::DirectConnection — doing so would
+	 *       run the slot on the worker thread.
 	 * @param newItems The newly found items in this batch.
 	 */
 	void itemsFound(int offset, const QList<TeFileInfo>& newItems);
@@ -114,7 +116,7 @@ protected:
 	virtual void doSearch(const TeSearchQuery& query) = 0;
 
 	/** @brief Returns true when cancelSearch() has been requested. */
-	bool isCancelled() const;
+	bool isCancelled() const noexcept;
 
 	/**
 	 * @brief Appends items to the result list and emits itemsFound().
@@ -129,6 +131,7 @@ private slots:
 	void onWorkerFinished();
 
 private:
+	Q_DISABLE_COPY_MOVE(TeFinder)
 	mutable QMutex    m_resultsMutex;      ///< Guards m_results.
 	QList<TeFileInfo> m_results;           ///< Accumulated search results.
 	std::atomic<int>  m_cancelFlag{0};     ///< Set to 1 when cancellation is requested.
