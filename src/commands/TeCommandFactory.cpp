@@ -81,6 +81,9 @@
 #include "setting/TeCmdKeySetting.h"
 #include "setting/TeCmdMenuSetting.h"
 
+#include "help/TeCmdHelp.h"
+#include "help/TeCmdVersion.h"
+
 /**
  * @file TeCommandFactory.cpp
  * @brief Implementation of TeCommandFactory.
@@ -213,6 +216,8 @@ TeCommandFactory::TeCommandFactory()
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_HELP);
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_HELP_SHOW, TeCmdHelp, tr("&Help"), tr("Show help by default browser."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/help.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_HELP_VERSION, TeCmdVersion, tr("&Version"), tr("Show version information."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/version.png")));
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_USER);

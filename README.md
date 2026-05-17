@@ -83,7 +83,7 @@ Please build the support libraries yourself and copy them into the `support_pack
 
 ## Usage
 
-This software is developping yet. so it not working now.
+https://takashiK.github.io/TableEngine/
 
 ## Licence
 

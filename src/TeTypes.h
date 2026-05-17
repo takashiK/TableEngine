@@ -227,8 +227,8 @@ public:
 		CMDID_SYSTEM_SETTING_STYLE,                       // Style Setting
 
 		CMDID_SYSTEM_HELP    = CMDID_SYSTEM + 0x8000,     // Menu item : Help
-		CMDID_SYSTEM_HELP_SHOW,
-		CMDID_SYSTEM_HELP_VERSION,
+		CMDID_SYSTEM_HELP_SHOW,                           // #Show Help by default browser
+		CMDID_SYSTEM_HELP_VERSION,                        // #Show version information
 		
 		CMDID_USER        = 0xD000,                       // User registed commands
 		CMDID_USER_REGIST_COMMAND,                        // Regist user commands

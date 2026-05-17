@@ -26,6 +26,8 @@
 #include <dialogs/TeKeySetting.h>
 #include <dialogs/TeMenuSetting.h>
 
+#include "version.h"
+
 #include <QtWidgets/QApplication>
 #include <QTranslator>
 
@@ -36,6 +38,8 @@
 int main(int argc, char *argv[])
 {
 	QApplication::setOrganizationName("TableWare");
+	QApplication::setApplicationName("TableEngine");
+	QApplication::setApplicationVersion(APP_VERSION_STR);
 
 	QApplication a(argc, argv);
 	//Load translation file.
