@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第11章 ダイアログ一覧 - TableEngine 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .dialog-section {
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .dialog-section h3 {
+      margin-top: 0;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 8px;
+    }
+    .dialog-img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 12px 0 16px 0;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      box-shadow: 2px 3px 8px rgba(0,0,0,0.12);
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html">8. ツール</a></li>
+      <li><a href="09_window_ja.html">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html" class="active">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_ja.html">目次</a> &rsaquo; 第11章</div>
+    <h1>第11章 ダイアログ一覧</h1>
+  </div>
+
+  <p>
+    TableEngine で使用される各ダイアログの操作方法を説明します。
+  </p>
+
+  <!-- パス入力ダイアログ -->
+  <div class="dialog-section" id="dialog-path-input">
+    <h3>パス入力ダイアログ</h3>
+    <p>コピー・移動先などのパスを入力するダイアログです。</p>
+    <img src="image/dialog_path_input.png" alt="パス入力ダイアログ" class="dialog-img">
+    <table>
+      <thead><tr><th>操作</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>パス入力欄</td><td>宛先のパスを直接入力します。パス補完が有効です</td></tr>
+        <tr><td><kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>フォルダツリー選択ダイアログを開きます</td></tr>
+        <tr><td><kbd>↑</kbd></td><td>移動履歴の一覧を表示します</td></tr>
+        <tr><td><kbd>↓</kbd></td><td>お気に入りフォルダの一覧を表示します</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- フォルダ選択ダイアログ -->
+  <div class="dialog-section" id="dialog-folder-select">
+    <h3>フォルダ選択ダイアログ</h3>
+    <p>
+      フォルダツリーとパス入力欄を使ってフォルダを選択するダイアログです。
+      パス入力ダイアログで <kbd>Shift</kbd>+<kbd>Enter</kbd> を押すと表示されます。
+    </p>
+    <img src="image/dialog_folder_select.png" alt="フォルダ選択ダイアログ" class="dialog-img">
+    <ul>
+      <li>ツリービューでフォルダをクリックすると、入力欄にパスが自動入力されます</li>
+      <li>入力欄に直接パスを入力するとツリーがスクロールして該当フォルダを表示します</li>
+      <li>入力欄でパス補完が使えます</li>
+    </ul>
+  </div>
+
+  <!-- 検索ダイアログ -->
+  <div class="dialog-section" id="dialog-find">
+    <h3>検索ダイアログ（Find）</h3>
+    <p>
+      ファイルを検索するダイアログです。
+      <span class="menu-path">フォルダ &rsaquo; 検索</span> で表示されます。
+    </p>
+    <img src="image/dialog_find.png" alt="検索ダイアログ" class="dialog-img">
+    <table>
+      <thead><tr><th>項目</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>検索ボックス</td><td>ファイル名のパターンを入力（例: <code>*.txt</code>）</td></tr>
+        <tr><td>Advanced ボタン</td><td>詳細条件パネルを展開・折りたたみます</td></tr>
+        <tr><td>ファイル名 / ワイルドカード</td><td><code>*</code>・<code>?</code> を使ったパターンマッチ</td></tr>
+        <tr><td>ファイル名 / 正規表現</td><td>正規表現によるパターンマッチ</td></tr>
+        <tr><td>大文字小文字を区別</td><td>大文字・小文字を区別してマッチ</td></tr>
+        <tr><td>日付 / 種別</td><td>なし・更新日時・作成日時から選択</td></tr>
+        <tr><td>日付 / 期間</td><td>カレンダーポップアップで開始日〜終了日を指定</td></tr>
+        <tr><td>サイズ / 値</td><td>比較するファイルサイズ（0〜999999）</td></tr>
+        <tr><td>サイズ / 単位</td><td>KB または MB</td></tr>
+        <tr><td>サイズ / 条件</td><td>「以上」または「以下」</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- フィルタダイアログ -->
+  <div class="dialog-section" id="dialog-filter">
+    <h3>フィルタダイアログ</h3>
+    <p>
+      ファイルリストの表示を絞り込むダイアログです。
+      <span class="menu-path">表示 &rsaquo; フィルタ</span> で表示されます。
+    </p>
+    <img src="image/dialog_filter.png" alt="フィルタダイアログ" class="dialog-img">
+    <table>
+      <thead><tr><th>項目</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>フィルタ</td><td>ファイル名のパターンを入力</td></tr>
+        <tr><td>ファイルのみ</td><td>フォルダを除外してファイルのみを表示</td></tr>
+        <tr><td>大文字小文字を区別</td><td>大文字・小文字を区別してフィルタリング</td></tr>
+        <tr><td>正規表現</td><td>正規表現として入力を解釈</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 一括リネームダイアログ -->
+  <div class="dialog-section" id="dialog-rename-multi">
+    <h3>一括リネームダイアログ</h3>
+    <p>
+      複数ファイルを連番付きの名前に一括変更するダイアログです。
+      <span class="menu-path">ファイル &rsaquo; 一括リネーム</span> で表示されます。
+    </p>
+    <img src="image/dialog_rename_multi.png" alt="一括リネームダイアログ" class="dialog-img">
+    <table>
+      <thead><tr><th>項目</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>サンプル</td><td>設定に基づいた変更後のファイル名プレビュー（読み取り専用）</td></tr>
+        <tr><td>ベース名</td><td>ファイル名の基本文字列</td></tr>
+        <tr><td>拡張子</td><td>変更後の拡張子（ドットなし、省略可）</td></tr>
+        <tr><td>桁数</td><td>連番の桁数（1〜4）</td></tr>
+        <tr><td>開始番号</td><td>連番の開始値（0〜9999）</td></tr>
+        <tr><td>順序 / ファイル名順</td><td>ファイル名のアルファベット順で番号付け</td></tr>
+        <tr><td>順序 / 更新日時順</td><td>更新日時の古い順で番号付け</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ファイル分割ダイアログ -->
+  <div class="dialog-section" id="dialog-divide">
+    <h3>ファイル分割ダイアログ</h3>
+    <p>
+      ファイルを指定サイズで分割するダイアログです。
+      <span class="menu-path">ファイル &rsaquo; 分割 &rsaquo; ファイルを分割</span> で表示されます。
+    </p>
+    <img src="image/dialog_divide.png" alt="ファイル分割ダイアログ" class="dialog-img">
+    <table>
+      <thead><tr><th>項目</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>ファイルパス</td><td>分割対象のファイル名（読み取り専用）</td></tr>
+        <tr><td>出力先</td><td>分割ファイルの保存先フォルダ</td></tr>
+        <tr><td>分割サイズ</td><td>1 ファイルあたりのサイズ（1〜1024 MB）</td></tr>
+        <tr><td>分割数</td><td>自動計算された分割数（読み取り専用）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ファイル結合ダイアログ -->
+  <div class="dialog-section" id="dialog-combine">
+    <h3>ファイル結合ダイアログ</h3>
+    <p>
+      分割されたファイルを結合するダイアログです。
+      <span class="menu-path">ファイル &rsaquo; 分割 &rsaquo; ファイルを結合</span> で表示されます。
+    </p>
+    <img src="image/dialog_combine.png" alt="ファイル結合ダイアログ" class="dialog-img">
+    <table>
+      <thead><tr><th>項目</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>出力ファイル</td><td>結合後のファイル名（相対パスまたは絶対パス）</td></tr>
+        <tr><td>... ボタン</td><td>ファイル保存ダイアログで出力先を選択</td></tr>
+        <tr><td>拡張選択</td><td>同一ベース名の関連ファイル（.000、.001…）を自動追加</td></tr>
+        <tr><td>入力ファイル一覧</td><td>結合対象のファイル一覧（ファイル名順）</td></tr>
+        <tr><td>結合サイズ</td><td>結合後の合計サイズ（自動計算、読み取り専用）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- コマンド実行ダイアログ -->
+  <div class="dialog-section" id="dialog-run-command">
+    <h3>コマンド実行ダイアログ</h3>
+    <p>
+      任意のコマンドラインを実行するダイアログです。
+      <span class="menu-path">ファイル &rsaquo; コマンドを実行</span> で表示されます。
+    </p>
+    <img src="image/dialog_run_command.png" alt="コマンド実行ダイアログ" class="dialog-img">
+    <table>
+      <thead><tr><th>項目</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>コマンド入力欄</td><td>実行するコマンドライン文字列</td></tr>
+        <tr><td>Shell</td><td>チェック時は <code>cmd.exe /c</code> 経由で実行します</td></tr>
+        <tr><td>出力を表示</td><td>チェック時はコマンドの標準出力をウィンドウに表示します</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- パスリストダイアログ -->
+  <div class="dialog-section" id="dialog-path-list">
+    <h3>パスリストダイアログ</h3>
+    <p>
+      お気に入りなどのパスリストを編集するダイアログです。
+    </p>
+    <img src="image/dialog_path_list.png" alt="パスリストダイアログ" class="dialog-img">
+    <ul>
+      <li><span class="ui-label">追加</span> ボタン（フォルダアイコン）: リストにパスを追加します</li>
+      <li><span class="ui-label">削除</span> ボタン（ゴミ箱アイコン）: 選択中のパスを削除します</li>
+      <li><span class="ui-label">上へ</span> ボタン: 選択中のパスを上に移動します</li>
+      <li><span class="ui-label">下へ</span> ボタン: 選択中のパスを下に移動します</li>
+      <li>右クリックで「追加」「削除」のコンテキストメニューも使用できます</li>
+    </ul>
+  </div>
+
+  <!-- フォント設定ダイアログ -->
+  <div class="dialog-section" id="dialog-font">
+    <h3>フォント設定ダイアログ</h3>
+    <p>フォント・文字色・背景色を設定するダイアログです。</p>
+    <img src="image/dialog_font.png" alt="フォント設定ダイアログ" class="dialog-img">
+    <table>
+      <thead><tr><th>項目</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>フォント</td><td>フォントファミリーを選択します</td></tr>
+        <tr><td>サイズ</td><td>フォントのポイントサイズ（1〜200）</td></tr>
+        <tr><td>文字色</td><td>クリックするとカラーピッカーが開きます</td></tr>
+        <tr><td>背景色</td><td>クリックするとカラーピッカーが開きます</td></tr>
+        <tr><td>サンプル</td><td>設定を反映したプレビューが表示されます</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-nav">
+    <a href="10_settings_ja.html">&larr; 第10章 設定</a>
+    <a href="12_shortcuts_ja.html">第12章 キーボードショートカット &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

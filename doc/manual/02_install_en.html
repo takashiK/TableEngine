@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 2: Installation &amp; Launch - TableEngine User Manual</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>User Manual</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_en.html">🏠 Contents</a></li>
+    </ul>
+    <div class="nav-section">Introduction</div>
+    <ul>
+      <li><a href="01_overview_en.html">1. Overview</a></li>
+      <li><a href="02_install_en.html" class="active">2. Installation &amp; Launch</a></li>
+      <li><a href="03_mainwindow_en.html">3. Main Window</a></li>
+    </ul>
+    <div class="nav-section">Features</div>
+    <ul>
+      <li><a href="04_file_en.html">4. File Operations</a></li>
+      <li><a href="05_edit_en.html">5. Selection &amp; Editing</a></li>
+      <li><a href="06_folder_en.html">6. Folder Operations</a></li>
+      <li><a href="07_view_en.html">7. View Settings</a></li>
+      <li><a href="08_tool_en.html">8. Tools</a></li>
+      <li><a href="09_window_en.html">9. Window</a></li>
+    </ul>
+    <div class="nav-section">Advanced</div>
+    <ul>
+      <li><a href="10_settings_en.html">10. Settings</a></li>
+      <li><a href="11_dialogs_en.html">11. Dialog Reference</a></li>
+      <li><a href="12_shortcuts_en.html">12. Keyboard Shortcuts</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_en.html">Contents</a> &rsaquo; Chapter 2</div>
+    <h1>Chapter 2: Installation &amp; Launch</h1>
+  </div>
+
+  <h2>Required Files</h2>
+  <p>The following files must be placed in the same folder as <code>TableEngine.exe</code>.</p>
+
+  <table>
+    <thead>
+      <tr><th>File</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>TableEngine.exe</code></td><td>Main executable</td></tr>
+      <tr><td><code>archive.dll</code></td><td>libarchive (compression/extraction library)</td></tr>
+      <tr><td><code>libmagic.dll</code></td><td>File type detection library</td></tr>
+      <tr><td><code>magic.mgc</code></td><td>libmagic database file</td></tr>
+      <tr><td>Qt DLLs</td><td>Qt6Core.dll, Qt6Gui.dll, Qt6Widgets.dll, etc.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    Qt DLLs can be collected from your Qt installation folder or by running the
+    <code>windeployqt</code> tool.
+  </div>
+
+  <h2>Installation</h2>
+  <p>TableEngine has no installer. Follow these steps to set it up:</p>
+  <ol>
+    <li>Create a folder of your choice (e.g., <code>C:\Tools\TableEngine\</code>).</li>
+    <li>Copy the built <code>TableEngine.exe</code> into that folder.</li>
+    <li>Copy the dependency DLLs (<code>archive.dll</code>, <code>libmagic.dll</code>, <code>magic.mgc</code>) into the same folder.</li>
+    <li>Copy the required Qt DLLs into the same folder.<br>
+        You can collect them automatically from a command prompt:
+        <pre>windeployqt.exe TableEngine.exe</pre>
+    </li>
+  </ol>
+
+  <h2>Uninstallation</h2>
+  <p>
+    TableEngine does not use the Windows registry.
+    Settings are saved in the user's application data folder.<br>
+    To completely remove it, delete the installation folder and the settings folder below.
+  </p>
+  <pre>%APPDATA%\TableEngine\</pre>
+
+  <h2>Launching</h2>
+  <p>
+    Double-click <code>TableEngine.exe</code>, or run it from the command line:
+  </p>
+  <pre>TableEngine.exe</pre>
+
+  <div class="tip">
+    Pin it to the Start menu or taskbar for quick access.
+  </div>
+
+  <h2>Building from Source (Developers)</h2>
+  <p>To build from source, follow these steps.</p>
+
+  <h3>Prerequisites</h3>
+  <ul>
+    <li>Qt 6.10 or later (specified via <code>Qt6_DIR</code> or <code>CMAKE_PREFIX_PATH</code>)</li>
+    <li>CMake 3.19 or later</li>
+    <li>Microsoft Visual C++ 2022</li>
+    <li>Support libraries (libarchive, libmagic, valijson) placed under <code>support_package/</code></li>
+  </ul>
+
+  <h3>Build Steps</h3>
+  <pre>cmake --preset "Visual Studio Community 2022 Release - amd64"
+cmake --build out/build/"Visual Studio Community 2022 Release - amd64" --config Release</pre>
+
+  <p>To open in Visual Studio:</p>
+  <pre>cmake --preset "Visual Studio Community 2022 Release - amd64"
+start out/build/"Visual Studio Community 2022 Release - amd64"/TableEngine.sln</pre>
+
+  <div class="page-nav">
+    <a href="01_overview_en.html">&larr; Chapter 1: Overview</a>
+    <a href="03_mainwindow_en.html">Chapter 3: Main Window &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

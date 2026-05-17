@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 4: File Operations - TableEngine User Manual</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>User Manual</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_en.html">🏠 Contents</a></li>
+    </ul>
+    <div class="nav-section">Introduction</div>
+    <ul>
+      <li><a href="01_overview_en.html">1. Overview</a></li>
+      <li><a href="02_install_en.html">2. Installation &amp; Launch</a></li>
+      <li><a href="03_mainwindow_en.html">3. Main Window</a></li>
+    </ul>
+    <div class="nav-section">Features</div>
+    <ul>
+      <li><a href="04_file_en.html" class="active">4. File Operations</a></li>
+      <li><a href="05_edit_en.html">5. Selection &amp; Editing</a></li>
+      <li><a href="06_folder_en.html">6. Folder Operations</a></li>
+      <li><a href="07_view_en.html">7. View Settings</a></li>
+      <li><a href="08_tool_en.html">8. Tools</a></li>
+      <li><a href="09_window_en.html">9. Window</a></li>
+    </ul>
+    <div class="nav-section">Advanced</div>
+    <ul>
+      <li><a href="10_settings_en.html">10. Settings</a></li>
+      <li><a href="11_dialogs_en.html">11. Dialog Reference</a></li>
+      <li><a href="12_shortcuts_en.html">12. Keyboard Shortcuts</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_en.html">Contents</a> &rsaquo; Chapter 4</div>
+    <h1>Chapter 4: File Operations</h1>
+  </div>
+
+  <p>
+    File operation commands are accessible from the <span class="menu-path">File</span> menu.
+    You can also right-click in the file list to use the context menu.
+  </p>
+
+  <h2>New File</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; New File</span> &nbsp; <kbd>N</kbd><br>
+    Creates an empty file in the current folder.
+    Enter the file name in the dialog that appears.
+  </p>
+
+  <h2>Open</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Open</span><br>
+    Opens the selected file with the associated Windows shell application.
+  </p>
+  <div class="tip">
+    Double-clicking a file performs the same action.
+  </div>
+
+  <h2>Copy To</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Copy To</span> &nbsp; <kbd>C</kbd><br>
+    Copies the selected files/folders to a specified destination folder.
+    A path input dialog will appear.
+  </p>
+  <ul>
+    <li>Type the destination path directly, or select a folder from the tree view.</li>
+    <li>Press <kbd>Shift</kbd>+<kbd>Enter</kbd> to open the folder tree selection dialog.</li>
+    <li>Press <kbd>&uarr;</kbd> to show history, <kbd>&darr;</kbd> to show favorites.</li>
+  </ul>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-path-input">Path Input Dialog</a>, <a href="11_dialogs_en.html#dialog-folder-select">Folder Select Dialog</a>
+  </div>
+
+  <h2>Move To</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Move To</span> &nbsp; <kbd>M</kbd><br>
+    Moves the selected files/folders to a specified destination folder.
+    The operation is the same as Copy To.
+  </p>
+  <div class="warning">
+    If the destination does not exist, you will be asked whether to create a new folder
+    or rename the file on copy.
+  </div>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-path-input">Path Input Dialog</a>, <a href="11_dialogs_en.html#dialog-folder-select">Folder Select Dialog</a>
+  </div>
+
+  <h2>Delete</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Delete</span> &nbsp; <kbd>D</kbd> / <kbd>Delete</kbd><br>
+    Deletes the selected files/folders. A confirmation dialog will appear.
+  </p>
+  <div class="warning">
+    Deleted files are <strong>not</strong> sent to the Recycle Bin. Please verify before proceeding.
+  </div>
+
+  <h2>Rename</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Rename</span> &nbsp; <kbd>R</kbd> / <kbd>F2</kbd><br>
+    Renames the selected file.
+  </p>
+
+  <h2>Bulk Rename</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Bulk Rename</span><br>
+    Renames multiple selected files at once using a sequential number pattern.
+  </p>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-rename-multi">Bulk Rename Dialog</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Field</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Base Name</td><td>The base string for the new file names</td></tr>
+      <tr><td>Extension</td><td>New file extension (optional)</td></tr>
+      <tr><td>Digits</td><td>Number of digits in the sequential number (1&ndash;4)</td></tr>
+      <tr><td>Start Number</td><td>First value in the sequence</td></tr>
+      <tr><td>Order</td><td>By file name / by modification date</td></tr>
+    </tbody>
+  </table>
+  <p>Example: Base=<code>photo</code>, Digits=<code>3</code>, Start=<code>1</code> &rarr; <code>photo001.jpg</code>, <code>photo002.jpg</code>&hellip;</p>
+
+  <h2>Split File</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Split &rsaquo; Split File</span><br>
+    Splits a single file into multiple parts of the specified size.
+  </p>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-divide">File Split Dialog</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Field</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Split Size</td><td>Size per output file (in MB)</td></tr>
+      <tr><td>Output Folder</td><td>Destination folder for the split files</td></tr>
+      <tr><td>Part Count</td><td>Calculated automatically (read-only)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Combine Files</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Split &rsaquo; Combine Files</span><br>
+    Combines previously split files (e.g., <code>file.000</code>, <code>file.001</code>&hellip;) into a single file.
+  </p>
+  <ul>
+    <li>Enabling "Extended Selection" automatically finds related files that share the same base name.</li>
+    <li>Specify the output file name to complete the combine.</li>
+  </ul>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-combine">File Combine Dialog</a>
+  </div>
+
+  <h2>Archive (Compress)</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Archive &rsaquo; Compress</span> &nbsp; <kbd>P</kbd><br>
+    Compresses the selected files/folders into an archive.
+    Supported formats depend on libarchive (zip, tar.gz, 7z, etc.).
+  </p>
+
+  <h2>Extract</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Archive &rsaquo; Extract</span> &nbsp; <kbd>U</kbd><br>
+    Extracts the selected archive file. You can specify the destination folder.
+  </p>
+
+  <h2>Properties</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Properties</span> &nbsp; <kbd>F4</kbd><br>
+    Displays detailed information (size, date, attributes, MIME type, etc.) for the selected file.
+  </p>
+
+  <h2>Run Command</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Run Command</span> &nbsp; <kbd>X</kbd><br>
+    Executes an arbitrary command line.
+  </p>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-run-command">Run Command Dialog</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Option</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Run via Shell</td><td>Executes through the shell (<code>cmd.exe</code>)</td></tr>
+      <tr><td>Show Output</td><td>Displays the command's standard output in a window</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Exit</h2>
+  <p>
+    <span class="menu-path">File &rsaquo; Exit</span> &nbsp; <kbd>Escape</kbd><br>
+    Exits TableEngine.
+  </p>
+
+  <div class="page-nav">
+    <a href="03_mainwindow_en.html">&larr; Chapter 3: Main Window</a>
+    <a href="05_edit_en.html">Chapter 5: Selection &amp; Editing &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

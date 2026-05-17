@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第5章 選択・編集 - TableEngine 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html" class="active">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html">8. ツール</a></li>
+      <li><a href="09_window_ja.html">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_ja.html">目次</a> &rsaquo; 第5章</div>
+    <h1>第5章 選択・編集</h1>
+  </div>
+
+  <p>
+    ファイルの選択操作とクリップボード操作について説明します。
+    これらのコマンドは <span class="menu-path">編集</span> メニューからアクセスできます。
+  </p>
+
+  <h2>クリップボード操作</h2>
+
+  <h3>切り取り（Cut）</h3>
+  <p>
+    <span class="menu-path">編集 &rsaquo; 切り取り</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>X</kbd><br>
+    選択中のファイル・フォルダをクリップボードに切り取ります。
+    貼り付け（Paste）を実行すると元の場所から削除されます。
+  </p>
+
+  <h3>コピー（Copy）</h3>
+  <p>
+    <span class="menu-path">編集 &rsaquo; コピー</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>C</kbd><br>
+    選択中のファイル・フォルダをクリップボードにコピーします。
+  </p>
+
+  <h3>貼り付け（Paste）</h3>
+  <p>
+    <span class="menu-path">編集 &rsaquo; 貼り付け</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>V</kbd><br>
+    クリップボードのファイル・フォルダを現在のフォルダに貼り付けます。
+    Windows エクスプローラーとクリップボードを共有しています。
+  </p>
+
+  <h2>選択操作</h2>
+
+  <h3>すべて選択</h3>
+  <p>
+    <span class="menu-path">編集 &rsaquo; すべて選択</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>A</kbd><br>
+    現在のフォルダのすべてのファイル・フォルダを選択します。
+  </p>
+
+  <h3>選択の反転</h3>
+  <p>
+    <span class="menu-path">編集 &rsaquo; 選択の反転</span><br>
+    現在の選択状態を反転します（選択中 → 非選択、非選択 → 選択中）。
+  </p>
+
+  <h3>フィルタで選択</h3>
+  <p>
+    <span class="menu-path">編集 &rsaquo; フィルタで選択</span><br>
+    ファイル名のパターンや条件を指定して、一致するファイルを選択します。
+  </p>
+  <div class="note">
+    &rarr; ダイアログの詳細: <a href="11_dialogs.html#dialog-filter">フィルタダイアログ</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>オプション</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>フィルタ</td><td>ワイルドカードまたは正規表現でファイル名を指定</td></tr>
+      <tr><td>ファイルのみ</td><td>フォルダを除外してファイルのみを対象にする</td></tr>
+      <tr><td>大文字小文字を区別</td><td>大文字・小文字を区別して照合する</td></tr>
+      <tr><td>正規表現</td><td>フィルタを正規表現として扱う</td></tr>
+    </tbody>
+  </table>
+
+  <h2>選択スタイル</h2>
+  <p>
+    TableEngine は 2 種類の選択スタイルをサポートしています。
+    <span class="menu-path">編集 &rsaquo; 選択スタイル</span> から切り替えられます。
+  </p>
+
+  <h3>エクスプローラースタイル</h3>
+  <p>
+    Windows エクスプローラーと同様の選択動作です。
+  </p>
+  <ul>
+    <li>クリックで単一選択（他の選択解除）</li>
+    <li><kbd>Ctrl</kbd>+クリックで複数選択の追加・解除</li>
+    <li><kbd>Shift</kbd>+クリックで範囲選択</li>
+  </ul>
+
+  <h3>TableEngine スタイル</h3>
+  <p>
+    FD / 卓駆☆ のような独自の選択動作です。
+  </p>
+  <ul>
+    <li>スペースキーでカーソル位置のファイルを選択・解除してカーソルを次に移動</li>
+    <li>複数ファイルの連続選択がキーボードのみで行いやすい設計</li>
+  </ul>
+
+  <div class="tip">
+    大量のファイルをキーボードだけで選択する場合は TableEngine スタイルが効率的です。
+  </div>
+
+  <div class="page-nav">
+    <a href="04_file_ja.html">&larr; 第4章 ファイル操作</a>
+    <a href="06_folder_ja.html">第6章 フォルダ操作 &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

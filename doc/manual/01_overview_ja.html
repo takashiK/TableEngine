@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第1章 概要 - TableEngine 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html" class="active">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html">8. ツール</a></li>
+      <li><a href="09_window_ja.html">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_ja.html">目次</a> &rsaquo; 第1章</div>
+    <h1>第1章 概要</h1>
+  </div>
+
+  <h2>TableEngine とは</h2>
+  <p>
+    TableEngine は、Windows 上で動作するオープンソースのファイルマネージャーです。
+    MS-DOS 時代のキーボード操作ファイラー <strong>FD</strong>、および Windows 向けの
+    <strong>卓駆☆</strong> にインスパイアされ、これらが Windows 10/11 に対応していないことを
+    きっかけに開発が始まりました。
+  </p>
+  <p>
+    従来のキーボード操作中心のファイラーの使い勝手を継承しつつ、
+    現代の Windows 環境で快適に動作することを目標としています。
+  </p>
+
+  <h2>主な特徴</h2>
+  <ul>
+    <li>デュアルペイン型のファイル管理（フォルダツリー + ファイルリスト）</li>
+    <li>タブ機能による複数フォルダの同時管理</li>
+    <li>ファイルの圧縮・展開（libarchive 対応）</li>
+    <li>ファイルの分割・結合</li>
+    <li>テキスト・バイナリビューア内蔵</li>
+    <li>ファイル名の一括リネーム</li>
+    <li>ファイル検索（名前・更新日・サイズ）</li>
+    <li>キーボードショートカットのカスタマイズ</li>
+    <li>メニュー構成のカスタマイズ</li>
+    <li>お気に入りフォルダ登録</li>
+    <li>複数の選択スタイル（エクスプローラー風 / TableEngine 風）</li>
+  </ul>
+
+  <h2>動作環境</h2>
+  <table>
+    <thead>
+      <tr><th>項目</th><th>要件</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>OS</td><td>Windows 10 / 11 (64bit)</td></tr>
+      <tr><td>Qt</td><td>Qt 6.10 以降</td></tr>
+      <tr><td>コンパイラ</td><td>Microsoft Visual C++ 2022</td></tr>
+      <tr><td>依存ライブラリ</td><td>libarchive、libmagic、ICU libs</td></tr>
+    </tbody>
+  </table>
+
+  <h2>ライセンス</h2>
+  <p>
+    TableEngine は <strong>GNU General Public License v2 (GPLv2)</strong> のもとで公開されています。
+    ソースコードは自由に利用・改変・再配布できますが、改変したソフトウェアを配布する場合は
+    同じライセンスで公開する必要があります。
+  </p>
+  <p>詳細は同梱の <code>LICENSE</code> ファイルを参照してください。</p>
+
+  <h2>作者</h2>
+  <p>Takashi Kuwabara &lt;laffile@gmail.com&gt;</p>
+
+  <div class="page-nav">
+    <a href="index_ja.html">&larr; 目次</a>
+    <a href="02_install_ja.html">第2章 インストールと起動 &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

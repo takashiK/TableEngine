@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第8章 ツール - TableEngine 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html" class="active">8. ツール</a></li>
+      <li><a href="09_window_ja.html">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_ja.html">目次</a> &rsaquo; 第8章</div>
+    <h1>第8章 ツール</h1>
+  </div>
+
+  <p>
+    TableEngine にはファイルの内容を確認するためのビューアが内蔵されています。
+    これらは <span class="menu-path">ツール</span> メニューからアクセスできます。
+  </p>
+
+  <h2>テキストビューア</h2>
+  <p>
+    <span class="menu-path">ツール &rsaquo; ファイルを表示</span><br>
+    選択中のファイルを内蔵のテキストビューアで表示します。
+    テキストファイル・HTML・Markdown などのマークアップファイルに対応しています。
+  </p>
+  <ul>
+    <li>シンタックスハイライト対応（コードファイル）</li>
+    <li>文字コードの自動判別</li>
+    <li>折り返し表示の切り替え</li>
+    <li>Markdown などのマークアップはレンダリング表示</li>
+  </ul>
+
+  <div class="tip">
+    ファイルリストでファイルを選択し、<span class="menu-path">ツール &rsaquo; ファイルを表示</span> を実行するか、
+    割り当てたショートカットキーで素早く開けます。
+  </div>
+
+  <h2>バイナリビューア</h2>
+  <p>
+    <span class="menu-path">ツール &rsaquo; バイナリを表示</span><br>
+    選択中のファイルを 16進数ダンプ形式で表示します。
+    バイナリファイルや、テキストビューアでは正しく表示できないファイルの内容確認に使用します。
+  </p>
+  <ul>
+    <li>16進数表示 + ASCII 表示の並列表示</li>
+    <li>オフセット（アドレス）表示</li>
+  </ul>
+
+  <div class="note">
+    ビューアは読み取り専用です。ファイルの内容を変更することはできません。
+  </div>
+
+  <div class="page-nav">
+    <a href="07_view_ja.html">&larr; 第7章 表示設定</a>
+    <a href="09_window_ja.html">第9章 ウィンドウ &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

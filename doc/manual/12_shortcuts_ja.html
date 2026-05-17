@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第12章 キーボードショートカット - TableEngine 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .shortcut-table td:first-child {
+      white-space: nowrap;
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html">8. ツール</a></li>
+      <li><a href="09_window_ja.html">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html" class="active">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_ja.html">目次</a> &rsaquo; 第12章</div>
+    <h1>第12章 キーボードショートカット</h1>
+  </div>
+
+  <p>
+    TableEngine のデフォルトのキーボードショートカット一覧です。
+    ショートカットは <span class="menu-path">設定 &rsaquo; キー設定</span> でカスタマイズできます。
+  </p>
+
+  <div class="note">
+    以下のショートカットはデフォルト設定です（<code>TeKeySetting::storeDefaultSettings</code> で定義）。
+    カスタマイズにより変更されている場合があります。
+  </div>
+
+  <h2>ファイル操作（修飾キーなし）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>N</kbd></td><td>新規作成</td><td>空のファイルを現在のフォルダに作成</td></tr>
+      <tr><td><kbd>C</kbd></td><td>コピー先にコピー</td><td>選択ファイルを指定フォルダにコピー</td></tr>
+      <tr><td><kbd>M</kbd></td><td>移動先に移動</td><td>選択ファイルを指定フォルダに移動</td></tr>
+      <tr><td><kbd>D</kbd></td><td>削除</td><td>選択ファイルを削除</td></tr>
+      <tr><td><kbd>R</kbd> / <kbd>F2</kbd></td><td>名前の変更</td><td>選択ファイルの名前を変更</td></tr>
+      <tr><td><kbd>F4</kbd></td><td>プロパティ</td><td>選択ファイルのプロパティを表示</td></tr>
+      <tr><td><kbd>P</kbd></td><td>圧縮</td><td>選択ファイルを圧縮アーカイブにまとめる</td></tr>
+      <tr><td><kbd>U</kbd></td><td>展開</td><td>圧縮ファイルを展開する</td></tr>
+      <tr><td><kbd>X</kbd></td><td>コマンドを実行</td><td>コマンド実行ダイアログを開く</td></tr>
+      <tr><td><kbd>Escape</kbd></td><td>終了</td><td>TableEngine を終了する</td></tr>
+    </tbody>
+  </table>
+
+  <h2>選択・編集（修飾キーなし）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>A</kbd></td><td>すべて選択</td><td>現在フォルダの全ファイルを選択</td></tr>
+      <tr><td><kbd>Z</kbd></td><td>選択の反転</td><td>選択状態を反転する</td></tr>
+      <tr><td><kbd>W</kbd></td><td>フィルタで選択</td><td>フィルタ条件に一致するファイルを選択</td></tr>
+    </tbody>
+  </table>
+
+  <h2>選択・編集（Ctrl キー）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>コピー（クリップボード）</td><td>選択ファイルをクリップボードにコピー</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>V</kbd></td><td>貼り付け</td><td>クリップボードのファイルを現在フォルダに貼り付け</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>X</kbd></td><td>切り取り</td><td>選択ファイルをクリップボードに切り取り</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>すべて選択</td><td>現在フォルダの全ファイルを選択</td></tr>
+    </tbody>
+  </table>
+
+  <h2>フォルダ操作・ナビゲーション（修飾キーなし）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Backspace</kbd></td><td>親フォルダに移動</td><td>1つ上のフォルダへ移動</td></tr>
+      <tr><td><kbd>Home</kbd></td><td>ルートフォルダに移動</td><td>ドライブのルート（例: C:\）へ移動</td></tr>
+      <tr><td><kbd>G</kbd></td><td>フォルダに移動</td><td>パス入力ダイアログを開く</td></tr>
+      <tr><td><kbd>F</kbd></td><td>検索</td><td>検索ダイアログを開く</td></tr>
+    </tbody>
+  </table>
+
+  <h2>フォルダ操作（Ctrl キー）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>検索</td><td>検索ダイアログを開く</td></tr>
+    </tbody>
+  </table>
+
+  <h2>表示（修飾キーなし）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>H</kbd></td><td>隠しファイルを表示</td><td>隠しファイルの表示・非表示を切り替え</td></tr>
+      <tr><td><kbd>I</kbd></td><td>特大アイコン表示</td><td>ファイルリストを特大アイコン表示に切り替え</td></tr>
+      <tr><td><kbd>L</kbd></td><td>小アイコン表示</td><td>ファイルリストを小アイコン表示に切り替え</td></tr>
+    </tbody>
+  </table>
+
+  <h2>ツール（修飾キーなし）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>V</kbd></td><td>ファイルを表示</td><td>内蔵テキストビューアで開く</td></tr>
+      <tr><td><kbd>B</kbd></td><td>バイナリを表示</td><td>内蔵バイナリビューアで開く</td></tr>
+    </tbody>
+  </table>
+
+  <h2>ウィンドウ（Ctrl キー）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td><td>新規タブ</td><td>新しいタブを開く</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>タブを閉じる</td><td>現在のタブを閉じる</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>タブを別ウィンドウに移動</td><td>現在のタブを新しいウィンドウとして切り離す</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip">
+    ショートカットは <span class="menu-path">設定 &rsaquo; キー設定</span> から自由にカスタマイズできます。
+    よく使う操作に使いやすいキーを割り当てて、操作効率を高めましょう。
+  </div>
+
+  <div class="page-nav">
+    <a href="11_dialogs_ja.html">&larr; 第11章 ダイアログ一覧</a>
+    <a href="index_ja.html">目次に戻る &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

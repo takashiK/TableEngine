@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 3: Main Window - TableEngine User Manual</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .window-diagram {
+      border: 2px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 12px;
+      margin: 20px 0;
+      background: #fff;
+    }
+    .win-titlebar {
+      background: var(--color-primary-dark);
+      color: #fff;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    .win-menubar {
+      background: #f0f2f5;
+      border-bottom: 1px solid var(--color-border);
+      padding: 4px 12px;
+      color: #333;
+    }
+    .win-toolbar {
+      background: #f7f8fa;
+      border-bottom: 1px solid var(--color-border);
+      padding: 6px 12px;
+      color: #555;
+    }
+    .win-drivebar {
+      background: #eef2f7;
+      border-bottom: 1px solid var(--color-border);
+      padding: 5px 12px;
+      color: #444;
+    }
+    .win-tabs {
+      background: #e8ecf2;
+      border-bottom: 1px solid var(--color-border);
+      padding: 5px 12px;
+      color: #444;
+    }
+    .win-body {
+      display: flex;
+      min-height: 200px;
+    }
+    .win-nav {
+      width: 180px;
+      border-right: 1px solid var(--color-border);
+      background: #fafbfc;
+      padding: 10px;
+      color: #555;
+      flex-shrink: 0;
+    }
+    .win-main {
+      flex: 1;
+      padding: 10px;
+      color: #555;
+    }
+    .win-detail {
+      width: 160px;
+      border-left: 1px solid var(--color-border);
+      background: #fafbfc;
+      padding: 10px;
+      color: #555;
+      flex-shrink: 0;
+    }
+    .win-statusbar {
+      background: #f0f2f5;
+      border-top: 1px solid var(--color-border);
+      padding: 4px 12px;
+      color: #666;
+    }
+    .area-label {
+      display: inline-block;
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>User Manual</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_en.html">🏠 Contents</a></li>
+    </ul>
+    <div class="nav-section">Introduction</div>
+    <ul>
+      <li><a href="01_overview_en.html">1. Overview</a></li>
+      <li><a href="02_install_en.html">2. Installation &amp; Launch</a></li>
+      <li><a href="03_mainwindow_en.html" class="active">3. Main Window</a></li>
+    </ul>
+    <div class="nav-section">Features</div>
+    <ul>
+      <li><a href="04_file_en.html">4. File Operations</a></li>
+      <li><a href="05_edit_en.html">5. Selection &amp; Editing</a></li>
+      <li><a href="06_folder_en.html">6. Folder Operations</a></li>
+      <li><a href="07_view_en.html">7. View Settings</a></li>
+      <li><a href="08_tool_en.html">8. Tools</a></li>
+      <li><a href="09_window_en.html">9. Window</a></li>
+    </ul>
+    <div class="nav-section">Advanced</div>
+    <ul>
+      <li><a href="10_settings_en.html">10. Settings</a></li>
+      <li><a href="11_dialogs_en.html">11. Dialog Reference</a></li>
+      <li><a href="12_shortcuts_en.html">12. Keyboard Shortcuts</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_en.html">Contents</a> &rsaquo; Chapter 3</div>
+    <h1>Chapter 3: Main Window</h1>
+  </div>
+
+  <h2>Screen Layout</h2>
+  <p>The TableEngine main window consists of the following areas.</p>
+
+  <!-- Window Diagram -->
+  <div class="window-diagram">
+    <div class="win-titlebar">📁 TableEngine</div>
+    <div class="win-menubar">
+      <span class="area-label">Menu Bar</span>
+      &nbsp; File(F) &nbsp; Edit(E) &nbsp; Folder(O) &nbsp; View(V) &nbsp; Tools(T) &nbsp; Window(W) &nbsp; Settings(S) &nbsp; Help(H)
+    </div>
+    <div class="win-toolbar">
+      <span class="area-label">Toolbar</span>
+      &nbsp; [New] [Open] [Copy] [Move] [Delete] [Rename] …
+    </div>
+    <div class="win-drivebar">
+      <span class="area-label">Drive Bar</span>
+      &nbsp; [C:] [D:] [E:] …
+    </div>
+    <div class="win-tabs">
+      <span class="area-label">Tab Bar</span>
+      &nbsp; [Tab 1 - C:\Users] &nbsp; [Tab 2 - D:\] &nbsp; [+]
+    </div>
+    <div class="win-body">
+      <div class="win-nav">
+        <div class="area-label">Navigation<br>Pane</div><br>
+        ▶ C:\<br>
+        &nbsp; ▼ Users<br>
+        &nbsp; &nbsp; ▶ Public<br>
+        &nbsp; &nbsp; ▼ Me<br>
+        &nbsp; &nbsp; &nbsp; Documents<br>
+        &nbsp; &nbsp; &nbsp; Downloads
+      </div>
+      <div class="win-main">
+        <div class="area-label">File List</div><br>
+        📁 Documents<br>
+        📁 Downloads<br>
+        📄 readme.txt &nbsp; 1.2 KB &nbsp; 2025/01/10<br>
+        📄 report.xlsx &nbsp; 45 KB &nbsp; 2025/03/22
+      </div>
+      <div class="win-detail">
+        <div class="area-label">Detail Pane</div><br>
+        Name: readme.txt<br><br>
+        Size: 1,234 Bytes<br><br>
+        Modified: 2025/01/10<br><br>
+        Attr: A
+      </div>
+    </div>
+    <div class="win-statusbar">
+      <span class="area-label">Status Bar</span>
+      &nbsp; 32 items &nbsp;|&nbsp; 2 selected &nbsp;|&nbsp; Total 46.2 KB
+    </div>
+  </div>
+
+  <h2>Area Descriptions</h2>
+
+  <h3>Menu Bar</h3>
+  <p>
+    Provides access to all features via menus:
+    <span class="menu-path">File</span> /
+    <span class="menu-path">Edit</span> /
+    <span class="menu-path">Folder</span> /
+    <span class="menu-path">View</span> /
+    <span class="menu-path">Tools</span> /
+    <span class="menu-path">Window</span> /
+    <span class="menu-path">Settings</span> /
+    <span class="menu-path">Help</span>.
+    The menu layout can be customized in Settings.
+  </p>
+
+  <h3>Toolbar</h3>
+  <p>
+    Quick-access buttons for frequently used commands.
+    Toggle visibility with <span class="menu-path">Window &rsaquo; Show Toolbar</span>.
+  </p>
+
+  <h3>Drive Bar</h3>
+  <p>
+    Displays available drives (C:, D:, etc.) as buttons.
+    Clicking a drive button navigates to its root folder.
+    Toggle with <span class="menu-path">Window &rsaquo; Show Drive Bar</span>.
+  </p>
+
+  <h3>Tab Bar</h3>
+  <p>
+    Manage multiple folders simultaneously with tabs.
+    Press <kbd>Ctrl</kbd>+<kbd>N</kbd> to open a new tab and <kbd>Ctrl</kbd>+<kbd>W</kbd> to close the current tab.
+    Tabs can also be moved to a separate window.
+  </p>
+
+  <h3>Navigation Pane</h3>
+  <p>
+    Shows a folder tree. Click a folder to navigate to it, updating the file list.
+    Toggle with <span class="menu-path">Window &rsaquo; Show Navigation</span>.
+  </p>
+
+  <h3>File List</h3>
+  <p>
+    The main area showing files and folders in the current directory.
+    The display mode can be changed between small icons, large icons, huge icons, or detail list.
+    All file operations (select, copy, delete, etc.) are performed here.
+  </p>
+
+  <h3>Detail Pane</h3>
+  <p>
+    Shows detailed information (name, size, modification date, attributes, etc.) for the selected file.
+    Toggle with <span class="menu-path">Window &rsaquo; Show Details</span>.
+  </p>
+
+  <h3>Status Bar</h3>
+  <p>
+    Displays item count, selection count, and total size for the current folder.
+    Toggle with <span class="menu-path">Window &rsaquo; Show Status Bar</span>.
+  </p>
+
+  <h2>Basic Mouse Operations</h2>
+  <table>
+    <thead>
+      <tr><th>Action</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Single click</td><td>Select a file</td></tr>
+      <tr><td>Double click</td><td>Open a file / navigate into a folder</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + click</td><td>Toggle selection (add or remove)</td></tr>
+      <tr><td><kbd>Shift</kbd> + click</td><td>Range selection</td></tr>
+      <tr><td>Right click</td><td>Show context menu</td></tr>
+      <tr><td>Drag</td><td>Move or copy files</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-nav">
+    <a href="02_install_en.html">&larr; Chapter 2: Installation &amp; Launch</a>
+    <a href="04_file_en.html">Chapter 4: File Operations &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

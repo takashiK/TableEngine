@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 5: Selection &amp; Editing - TableEngine User Manual</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>User Manual</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_en.html">🏠 Contents</a></li>
+    </ul>
+    <div class="nav-section">Introduction</div>
+    <ul>
+      <li><a href="01_overview_en.html">1. Overview</a></li>
+      <li><a href="02_install_en.html">2. Installation &amp; Launch</a></li>
+      <li><a href="03_mainwindow_en.html">3. Main Window</a></li>
+    </ul>
+    <div class="nav-section">Features</div>
+    <ul>
+      <li><a href="04_file_en.html">4. File Operations</a></li>
+      <li><a href="05_edit_en.html" class="active">5. Selection &amp; Editing</a></li>
+      <li><a href="06_folder_en.html">6. Folder Operations</a></li>
+      <li><a href="07_view_en.html">7. View Settings</a></li>
+      <li><a href="08_tool_en.html">8. Tools</a></li>
+      <li><a href="09_window_en.html">9. Window</a></li>
+    </ul>
+    <div class="nav-section">Advanced</div>
+    <ul>
+      <li><a href="10_settings_en.html">10. Settings</a></li>
+      <li><a href="11_dialogs_en.html">11. Dialog Reference</a></li>
+      <li><a href="12_shortcuts_en.html">12. Keyboard Shortcuts</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_en.html">Contents</a> &rsaquo; Chapter 5</div>
+    <h1>Chapter 5: Selection &amp; Editing</h1>
+  </div>
+
+  <p>
+    This chapter covers file selection and clipboard operations.
+    These commands are accessible from the <span class="menu-path">Edit</span> menu.
+  </p>
+
+  <h2>Clipboard Operations</h2>
+
+  <h3>Cut</h3>
+  <p>
+    <span class="menu-path">Edit &rsaquo; Cut</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>X</kbd><br>
+    Cuts the selected files/folders to the clipboard.
+    They are removed from the original location when Paste is executed.
+  </p>
+
+  <h3>Copy</h3>
+  <p>
+    <span class="menu-path">Edit &rsaquo; Copy</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>C</kbd><br>
+    Copies the selected files/folders to the clipboard.
+  </p>
+
+  <h3>Paste</h3>
+  <p>
+    <span class="menu-path">Edit &rsaquo; Paste</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>V</kbd><br>
+    Pastes files/folders from the clipboard into the current folder.
+    The clipboard is shared with Windows Explorer.
+  </p>
+
+  <h2>Selection Operations</h2>
+
+  <h3>Select All</h3>
+  <p>
+    <span class="menu-path">Edit &rsaquo; Select All</span> &nbsp; <kbd>A</kbd> / <kbd>Ctrl</kbd>+<kbd>A</kbd><br>
+    Selects all files and folders in the current folder.
+  </p>
+
+  <h3>Invert Selection</h3>
+  <p>
+    <span class="menu-path">Edit &rsaquo; Invert Selection</span> &nbsp; <kbd>Z</kbd><br>
+    Inverts the current selection (selected &rarr; unselected, unselected &rarr; selected).
+  </p>
+
+  <h3>Select by Filter</h3>
+  <p>
+    <span class="menu-path">Edit &rsaquo; Select by Filter</span> &nbsp; <kbd>W</kbd><br>
+    Selects files that match a specified name pattern or condition.
+  </p>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-filter">Filter Dialog</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Option</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Filter</td><td>Wildcard or regex pattern to match file names</td></tr>
+      <tr><td>Files Only</td><td>Exclude folders; match files only</td></tr>
+      <tr><td>Case Sensitive</td><td>Distinguish upper and lower case when matching</td></tr>
+      <tr><td>Regular Expression</td><td>Treat the filter as a regular expression</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Selection Style</h2>
+  <p>
+    TableEngine supports two selection styles, switchable from
+    <span class="menu-path">Edit &rsaquo; Selection Style</span>.
+  </p>
+
+  <h3>Explorer Style</h3>
+  <p>
+    Same selection behavior as Windows Explorer.
+  </p>
+  <ul>
+    <li>Click to select a single item (deselects others)</li>
+    <li><kbd>Ctrl</kbd>+click to add or remove from selection</li>
+    <li><kbd>Shift</kbd>+click for range selection</li>
+  </ul>
+
+  <h3>TableEngine Style</h3>
+  <p>
+    A unique selection style inspired by FD / Takuchu☆.
+  </p>
+  <ul>
+    <li>Press <kbd>Space</kbd> to toggle selection on the cursor item and advance the cursor</li>
+    <li>Designed for efficient multi-file selection using only the keyboard</li>
+  </ul>
+
+  <div class="tip">
+    The TableEngine style is more efficient when selecting a large number of files
+    using only the keyboard.
+  </div>
+
+  <div class="page-nav">
+    <a href="04_file_en.html">&larr; Chapter 4: File Operations</a>
+    <a href="06_folder_en.html">Chapter 6: Folder Operations &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

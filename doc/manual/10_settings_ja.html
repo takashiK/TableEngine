@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第10章 設定 - TableEngine 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html">8. ツール</a></li>
+      <li><a href="09_window_ja.html">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html" class="active">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_ja.html">目次</a> &rsaquo; 第10章</div>
+    <h1>第10章 設定</h1>
+  </div>
+
+  <p>
+    TableEngine の動作をカスタマイズするための設定画面です。
+    <span class="menu-path">設定</span> メニューから各設定ダイアログを開けます。
+  </p>
+
+  <h2>オプション</h2>
+  <p>
+    <span class="menu-path">設定 &rsaquo; オプション</span><br>
+    アプリケーション全般の設定を行います。
+  </p>
+  <p>設定項目の例:</p>
+  <ul>
+    <li>起動時のフォルダ</li>
+    <li>フォント・カラーの設定（フォント選択ダイアログを使用）</li>
+    <li>お気に入りリストの管理 &mdash; 詳細: <a href="11_dialogs.html#dialog-path-list">パスリストダイアログ</a></li>
+    <li>履歴の保持件数</li>
+  </ul>
+
+  <h3>フォント・カラー設定</h3>
+  <p>フォント設定ダイアログでは以下を変更できます。</p>
+  <div class="note">
+    &rarr; ダイアログの詳細: <a href="11_dialogs.html#dialog-font">フォント設定ダイアログ</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>項目</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>フォント</td><td>表示に使用するフォントファミリー</td></tr>
+      <tr><td>サイズ</td><td>フォントのポイントサイズ（1〜200）</td></tr>
+      <tr><td>文字色</td><td>テキストの前景色</td></tr>
+      <tr><td>背景色</td><td>テキストの背景色</td></tr>
+    </tbody>
+  </table>
+
+  <h2>キー設定</h2>
+  <p>
+    <span class="menu-path">設定 &rsaquo; キー設定</span><br>
+    コマンドに割り当てるキーボードショートカットをカスタマイズします。
+  </p>
+  <ul>
+    <li>各コマンドに最大 2 つまでショートカットを割り当てられます</li>
+    <li>既存の割り当てを削除して独自のキーに変更できます</li>
+    <li>デフォルト設定へのリセット機能があります</li>
+  </ul>
+  <div class="note">
+    キー設定は設定ファイルに保存されます。TableEngine の更新後もカスタム設定は維持されます。
+  </div>
+
+  <h2>メニュー設定</h2>
+  <p>
+    <span class="menu-path">設定 &rsaquo; メニュー設定</span><br>
+    メニューバーやコンテキストメニューのコマンド構成をカスタマイズします。
+  </p>
+  <ul>
+    <li>コマンドの表示順を変更できます</li>
+    <li>使用しないコマンドを非表示にできます</li>
+    <li>ユーザー定義コマンドグループを作成できます</li>
+  </ul>
+
+  <div class="tip">
+    よく使うコマンドをメニューの上位に配置しておくと、操作が速くなります。
+  </div>
+
+  <div class="page-nav">
+    <a href="09_window_ja.html">&larr; 第9章 ウィンドウ</a>
+    <a href="11_dialogs_ja.html">第11章 ダイアログ一覧 &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

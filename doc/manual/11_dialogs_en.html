@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 11: Dialog Reference - TableEngine User Manual</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .dialog-section {
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .dialog-section h3 {
+      margin-top: 0;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 8px;
+    }
+    .dialog-img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 12px 0 16px 0;
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      box-shadow: 2px 3px 8px rgba(0,0,0,0.12);
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>User Manual</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_en.html">🏠 Contents</a></li>
+    </ul>
+    <div class="nav-section">Introduction</div>
+    <ul>
+      <li><a href="01_overview_en.html">1. Overview</a></li>
+      <li><a href="02_install_en.html">2. Installation &amp; Launch</a></li>
+      <li><a href="03_mainwindow_en.html">3. Main Window</a></li>
+    </ul>
+    <div class="nav-section">Features</div>
+    <ul>
+      <li><a href="04_file_en.html">4. File Operations</a></li>
+      <li><a href="05_edit_en.html">5. Selection &amp; Editing</a></li>
+      <li><a href="06_folder_en.html">6. Folder Operations</a></li>
+      <li><a href="07_view_en.html">7. View Settings</a></li>
+      <li><a href="08_tool_en.html">8. Tools</a></li>
+      <li><a href="09_window_en.html">9. Window</a></li>
+    </ul>
+    <div class="nav-section">Advanced</div>
+    <ul>
+      <li><a href="10_settings_en.html">10. Settings</a></li>
+      <li><a href="11_dialogs_en.html" class="active">11. Dialog Reference</a></li>
+      <li><a href="12_shortcuts_en.html">12. Keyboard Shortcuts</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_en.html">Contents</a> &rsaquo; Chapter 11</div>
+    <h1>Chapter 11: Dialog Reference</h1>
+  </div>
+
+  <p>
+    This chapter explains how to use each dialog in TableEngine.
+  </p>
+
+  <!-- Path Input Dialog -->
+  <div class="dialog-section" id="dialog-path-input">
+    <h3>Path Input Dialog</h3>
+    <p>A dialog for entering a destination path for operations such as Copy or Move.</p>
+    <img src="image/dialog_path_input.png" alt="Path Input Dialog" class="dialog-img">
+    <table>
+      <thead><tr><th>Control</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Path Input Field</td><td>Type the destination path directly. Path completion is supported.</td></tr>
+        <tr><td><kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Opens the folder tree selection dialog</td></tr>
+        <tr><td><kbd>&uarr;</kbd></td><td>Displays the navigation history list</td></tr>
+        <tr><td><kbd>&darr;</kbd></td><td>Displays the favorites folder list</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Folder Select Dialog -->
+  <div class="dialog-section" id="dialog-folder-select">
+    <h3>Folder Select Dialog</h3>
+    <p>
+      A dialog for selecting a folder using a tree view and path input field.
+      Opened by pressing <kbd>Shift</kbd>+<kbd>Enter</kbd> in the Path Input Dialog.
+    </p>
+    <img src="image/dialog_folder_select.png" alt="Folder Select Dialog" class="dialog-img">
+    <ul>
+      <li>Clicking a folder in the tree automatically fills the input field with its path.</li>
+      <li>Typing a path in the input field scrolls the tree to show the corresponding folder.</li>
+      <li>Path completion is available in the input field.</li>
+    </ul>
+  </div>
+
+  <!-- Find Dialog -->
+  <div class="dialog-section" id="dialog-find">
+    <h3>Find Dialog</h3>
+    <p>
+      A dialog for searching files.
+      Opened via <span class="menu-path">Folder &rsaquo; Search</span>.
+    </p>
+    <img src="image/dialog_find.png" alt="Find Dialog" class="dialog-img">
+    <table>
+      <thead><tr><th>Item</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Search Box</td><td>Enter a file name pattern (e.g., <code>*.txt</code>)</td></tr>
+        <tr><td>Advanced Button</td><td>Expands or collapses the detailed search panel</td></tr>
+        <tr><td>Name / Wildcard</td><td>Match using <code>*</code> and <code>?</code> patterns</td></tr>
+        <tr><td>Name / Regular Expression</td><td>Match using a regular expression</td></tr>
+        <tr><td>Case Sensitive</td><td>Distinguish upper and lower case when matching</td></tr>
+        <tr><td>Date / Type</td><td>None / Modified / Created</td></tr>
+        <tr><td>Date / Range</td><td>Specify start and end dates with a calendar popup</td></tr>
+        <tr><td>Size / Value</td><td>File size to compare against (0&ndash;999999)</td></tr>
+        <tr><td>Size / Unit</td><td>KB or MB</td></tr>
+        <tr><td>Size / Condition</td><td>&ldquo;At least&rdquo; or &ldquo;At most&rdquo;</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Filter Dialog -->
+  <div class="dialog-section" id="dialog-filter">
+    <h3>Filter Dialog</h3>
+    <p>
+      A dialog for narrowing the file list display.
+      Opened via <span class="menu-path">View &rsaquo; Filter</span>.
+    </p>
+    <img src="image/dialog_filter.png" alt="Filter Dialog" class="dialog-img">
+    <table>
+      <thead><tr><th>Item</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Filter</td><td>Enter a file name pattern to filter by</td></tr>
+        <tr><td>Files Only</td><td>Exclude folders; show files only</td></tr>
+        <tr><td>Case Sensitive</td><td>Distinguish upper and lower case when filtering</td></tr>
+        <tr><td>Regular Expression</td><td>Treat the input as a regular expression</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bulk Rename Dialog -->
+  <div class="dialog-section" id="dialog-rename-multi">
+    <h3>Bulk Rename Dialog</h3>
+    <p>
+      A dialog for renaming multiple files at once using sequential numbering.
+      Opened via <span class="menu-path">File &rsaquo; Bulk Rename</span>.
+    </p>
+    <img src="image/dialog_rename_multi.png" alt="Bulk Rename Dialog" class="dialog-img">
+    <table>
+      <thead><tr><th>Item</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Sample</td><td>Preview of the new file name based on current settings (read-only)</td></tr>
+        <tr><td>Base Name</td><td>The base string for the new file names</td></tr>
+        <tr><td>Extension</td><td>New extension without leading dot (optional)</td></tr>
+        <tr><td>Digits</td><td>Number of digits in the sequential number (1&ndash;4)</td></tr>
+        <tr><td>Start Number</td><td>First value in the sequence (0&ndash;9999)</td></tr>
+        <tr><td>Order / By Name</td><td>Assign numbers in alphabetical order of file name</td></tr>
+        <tr><td>Order / By Date</td><td>Assign numbers in ascending order of modification date</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- File Split Dialog -->
+  <div class="dialog-section" id="dialog-divide">
+    <h3>File Split Dialog</h3>
+    <p>
+      A dialog for splitting a file into parts of a specified size.
+      Opened via <span class="menu-path">File &rsaquo; Split &rsaquo; Split File</span>.
+    </p>
+    <img src="image/dialog_divide.png" alt="File Split Dialog" class="dialog-img">
+    <table>
+      <thead><tr><th>Item</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>File Path</td><td>The file to split (read-only)</td></tr>
+        <tr><td>Output Folder</td><td>Destination folder for the split files</td></tr>
+        <tr><td>Split Size</td><td>Size per output file (1&ndash;1024 MB)</td></tr>
+        <tr><td>Part Count</td><td>Calculated number of parts (read-only)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- File Combine Dialog -->
+  <div class="dialog-section" id="dialog-combine">
+    <h3>File Combine Dialog</h3>
+    <p>
+      A dialog for combining split files into a single file.
+      Opened via <span class="menu-path">File &rsaquo; Split &rsaquo; Combine Files</span>.
+    </p>
+    <img src="image/dialog_combine.png" alt="File Combine Dialog" class="dialog-img">
+    <table>
+      <thead><tr><th>Item</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Output File</td><td>Name of the combined output file (relative or absolute path)</td></tr>
+        <tr><td>&hellip; Button</td><td>Opens a save dialog to browse for the output location</td></tr>
+        <tr><td>Extended Selection</td><td>Automatically adds related files with the same base name (.000, .001&hellip;)</td></tr>
+        <tr><td>Input File List</td><td>List of files to combine (in file name order)</td></tr>
+        <tr><td>Combined Size</td><td>Total size after combining (auto-calculated, read-only)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Run Command Dialog -->
+  <div class="dialog-section" id="dialog-run-command">
+    <h3>Run Command Dialog</h3>
+    <p>
+      A dialog for executing an arbitrary command line.
+      Opened via <span class="menu-path">File &rsaquo; Run Command</span>.
+    </p>
+    <img src="image/dialog_run_command.png" alt="Run Command Dialog" class="dialog-img">
+    <table>
+      <thead><tr><th>Item</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Command Input Field</td><td>The command line string to execute</td></tr>
+        <tr><td>Shell</td><td>When checked, runs via <code>cmd.exe /c</code></td></tr>
+        <tr><td>Show Output</td><td>When checked, displays the command's standard output in a window</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Path List Dialog -->
+  <div class="dialog-section" id="dialog-path-list">
+    <h3>Path List Dialog</h3>
+    <p>
+      A dialog for editing path lists such as the favorites.
+    </p>
+    <img src="image/dialog_path_list.png" alt="Path List Dialog" class="dialog-img">
+    <ul>
+      <li><span class="ui-label">Add</span> button (folder icon): Adds a path to the list</li>
+      <li><span class="ui-label">Delete</span> button (trash icon): Removes the selected path</li>
+      <li><span class="ui-label">Up</span> button: Moves the selected path up</li>
+      <li><span class="ui-label">Down</span> button: Moves the selected path down</li>
+      <li>Right-clicking the list also provides Add and Delete via a context menu</li>
+    </ul>
+  </div>
+
+  <!-- Font Settings Dialog -->
+  <div class="dialog-section" id="dialog-font">
+    <h3>Font Settings Dialog</h3>
+    <p>A dialog for configuring the font, text color, and background color.</p>
+    <img src="image/dialog_font.png" alt="Font Settings Dialog" class="dialog-img">
+    <table>
+      <thead><tr><th>Item</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Font</td><td>Select the font family</td></tr>
+        <tr><td>Size</td><td>Font point size (1&ndash;200)</td></tr>
+        <tr><td>Text Color</td><td>Click to open a color picker</td></tr>
+        <tr><td>Background Color</td><td>Click to open a color picker</td></tr>
+        <tr><td>Sample</td><td>Live preview reflecting the current settings</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-nav">
+    <a href="10_settings_en.html">&larr; Chapter 10: Settings</a>
+    <a href="12_shortcuts_en.html">Chapter 12: Keyboard Shortcuts &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

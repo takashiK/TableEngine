@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 12: Keyboard Shortcuts - TableEngine User Manual</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .shortcut-table td:first-child {
+      white-space: nowrap;
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>User Manual</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_en.html">🏠 Contents</a></li>
+    </ul>
+    <div class="nav-section">Introduction</div>
+    <ul>
+      <li><a href="01_overview_en.html">1. Overview</a></li>
+      <li><a href="02_install_en.html">2. Installation &amp; Launch</a></li>
+      <li><a href="03_mainwindow_en.html">3. Main Window</a></li>
+    </ul>
+    <div class="nav-section">Features</div>
+    <ul>
+      <li><a href="04_file_en.html">4. File Operations</a></li>
+      <li><a href="05_edit_en.html">5. Selection &amp; Editing</a></li>
+      <li><a href="06_folder_en.html">6. Folder Operations</a></li>
+      <li><a href="07_view_en.html">7. View Settings</a></li>
+      <li><a href="08_tool_en.html">8. Tools</a></li>
+      <li><a href="09_window_en.html">9. Window</a></li>
+    </ul>
+    <div class="nav-section">Advanced</div>
+    <ul>
+      <li><a href="10_settings_en.html">10. Settings</a></li>
+      <li><a href="11_dialogs_en.html">11. Dialog Reference</a></li>
+      <li><a href="12_shortcuts_en.html" class="active">12. Keyboard Shortcuts</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_en.html">Contents</a> &rsaquo; Chapter 12</div>
+    <h1>Chapter 12: Keyboard Shortcuts</h1>
+  </div>
+
+  <p>
+    Default keyboard shortcut reference for TableEngine.
+    Shortcuts can be customized via <span class="menu-path">Settings &rsaquo; Key Settings</span>.
+  </p>
+
+  <div class="note">
+    The shortcuts below are the defaults (defined in <code>TeKeySetting::storeDefaultSettings</code>).
+    They may differ if you have customized your key settings.
+  </div>
+
+  <h2>File Operations (No Modifier)</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>Key</th><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>N</kbd></td><td>New File</td><td>Create an empty file in the current folder</td></tr>
+      <tr><td><kbd>C</kbd></td><td>Copy To</td><td>Copy selected files to a specified folder</td></tr>
+      <tr><td><kbd>M</kbd></td><td>Move To</td><td>Move selected files to a specified folder</td></tr>
+      <tr><td><kbd>D</kbd></td><td>Delete</td><td>Delete selected files</td></tr>
+      <tr><td><kbd>R</kbd> / <kbd>F2</kbd></td><td>Rename</td><td>Rename the selected file</td></tr>
+      <tr><td><kbd>F4</kbd></td><td>Properties</td><td>Show properties of the selected file</td></tr>
+      <tr><td><kbd>P</kbd></td><td>Archive (Compress)</td><td>Compress selected files into an archive</td></tr>
+      <tr><td><kbd>U</kbd></td><td>Extract</td><td>Extract a compressed archive</td></tr>
+      <tr><td><kbd>X</kbd></td><td>Run Command</td><td>Open the Run Command dialog</td></tr>
+      <tr><td><kbd>Escape</kbd></td><td>Exit</td><td>Exit TableEngine</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Selection &amp; Editing (No Modifier)</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>Key</th><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>A</kbd></td><td>Select All</td><td>Select all files in the current folder</td></tr>
+      <tr><td><kbd>Z</kbd></td><td>Invert Selection</td><td>Invert the current selection</td></tr>
+      <tr><td><kbd>W</kbd></td><td>Select by Filter</td><td>Select files matching a filter condition</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Selection &amp; Editing (Ctrl Key)</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>Key</th><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>Copy (Clipboard)</td><td>Copy selected files to the clipboard</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>V</kbd></td><td>Paste</td><td>Paste clipboard files into the current folder</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>X</kbd></td><td>Cut</td><td>Cut selected files to the clipboard</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>Select All</td><td>Select all files in the current folder</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Folder Navigation (No Modifier)</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>Key</th><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Backspace</kbd></td><td>Go to Parent Folder</td><td>Move up to the parent folder</td></tr>
+      <tr><td><kbd>Home</kbd></td><td>Go to Root Folder</td><td>Navigate to the drive root (e.g., C:\)</td></tr>
+      <tr><td><kbd>G</kbd></td><td>Go to Folder</td><td>Open the path input dialog</td></tr>
+      <tr><td><kbd>F</kbd></td><td>Search</td><td>Open the search dialog</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Folder Navigation (Ctrl Key)</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>Key</th><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>Search</td><td>Open the search dialog</td></tr>
+    </tbody>
+  </table>
+
+  <h2>View (No Modifier)</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>Key</th><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>H</kbd></td><td>Show Hidden Files</td><td>Toggle hidden file visibility</td></tr>
+      <tr><td><kbd>I</kbd></td><td>Huge Icon View</td><td>Switch file list to huge icon layout</td></tr>
+      <tr><td><kbd>L</kbd></td><td>Small Icon View</td><td>Switch file list to small icon layout</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Tools (No Modifier)</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>Key</th><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>V</kbd></td><td>View File</td><td>Open the selected file in the text viewer</td></tr>
+      <tr><td><kbd>B</kbd></td><td>View Binary</td><td>Open the selected file in the binary viewer</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Window (Ctrl Key)</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>Key</th><th>Command</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td><td>New Tab</td><td>Open a new tab</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Close Tab</td><td>Close the current tab</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>Move Tab to New Window</td><td>Detach the current tab into a new window</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip">
+    Shortcuts can be freely customized from <span class="menu-path">Settings &rsaquo; Key Settings</span>.
+    Assign your most-used operations to convenient keys to maximize efficiency.
+  </div>
+
+  <div class="page-nav">
+    <a href="11_dialogs_en.html">&larr; Chapter 11: Dialog Reference</a>
+    <a href="index_en.html">Back to Contents &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

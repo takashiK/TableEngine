@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TableEngine - 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+    .toc-card { background: #fff; border: 1px solid var(--color-border); border-radius: 8px; padding: 18px 20px; text-decoration: none; color: inherit; transition: box-shadow 0.15s, border-color 0.15s; }
+    .toc-card:hover { box-shadow: 0 4px 12px rgba(44,95,138,0.12); border-color: var(--color-primary); }
+    .toc-card h3 { margin: 0 0 6px; font-size: 14px; color: var(--color-primary-dark); }
+    .toc-card p { margin: 0; font-size: 12px; color: #666; }
+    .toc-card .num { font-size: 11px; color: #aaa; font-weight: 600; margin-bottom: 4px; }
+    @media (max-width: 640px) { .toc-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html" class="active">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html">8. ツール</a></li>
+      <li><a href="09_window_ja.html">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb">TableEngine 取り扱い説明書</div>
+    <h1>TableEngine 取り扱い説明書</h1>
+  </div>
+
+  <p>
+    TableEngine は Windows 上で動作する、キーボード操作を重視したファイルマネージャーです。
+    MS-DOS 時代の <strong>FD</strong> や Windows 向けの <strong>卓駆☆</strong> にインスパイアされ、
+    現代の Windows 10/11 環境に対応させることを目的として開発されています。
+  </p>
+
+  <div class="note">
+    本ソフトウェアは現在開発中です。一部の機能は動作しない場合があります。
+  </div>
+
+  <h2>目次</h2>
+
+  <div class="toc-grid">
+    <a class="toc-card" href="01_overview_ja.html">
+      <div class="num">第 1 章</div>
+      <h3>概要</h3>
+      <p>TableEngine の特徴・動作環境・ライセンスについて</p>
+    </a>
+    <a class="toc-card" href="02_install_ja.html">
+      <div class="num">第 2 章</div>
+      <h3>インストールと起動</h3>
+      <p>必要なファイルの配置・起動方法</p>
+    </a>
+    <a class="toc-card" href="03_mainwindow_ja.html">
+      <div class="num">第 3 章</div>
+      <h3>メインウィンドウ</h3>
+      <p>画面構成・各部位の名称と役割</p>
+    </a>
+    <a class="toc-card" href="04_file_ja.html">
+      <div class="num">第 4 章</div>
+      <h3>ファイル操作</h3>
+      <p>新規作成・コピー・移動・削除・圧縮・展開など</p>
+    </a>
+    <a class="toc-card" href="05_edit_ja.html">
+      <div class="num">第 5 章</div>
+      <h3>選択・編集</h3>
+      <p>ファイルの選択方法・クリップボード操作</p>
+    </a>
+    <a class="toc-card" href="06_folder_ja.html">
+      <div class="num">第 6 章</div>
+      <h3>フォルダ操作</h3>
+      <p>フォルダの展開・移動・お気に入り・検索</p>
+    </a>
+    <a class="toc-card" href="07_view_ja.html">
+      <div class="num">第 7 章</div>
+      <h3>表示設定</h3>
+      <p>表示列・並び替え・レイアウト・フィルタ</p>
+    </a>
+    <a class="toc-card" href="08_tool_ja.html">
+      <div class="num">第 8 章</div>
+      <h3>ツール</h3>
+      <p>テキストビューア・バイナリビューア</p>
+    </a>
+    <a class="toc-card" href="09_window_ja.html">
+      <div class="num">第 9 章</div>
+      <h3>ウィンドウ</h3>
+      <p>タブ操作・各バーの表示切替</p>
+    </a>
+    <a class="toc-card" href="10_settings_ja.html">
+      <div class="num">第 10 章</div>
+      <h3>設定</h3>
+      <p>オプション・キー割り当て・メニューカスタマイズ</p>
+    </a>
+    <a class="toc-card" href="11_dialogs_ja.html">
+      <div class="num">第 11 章</div>
+      <h3>ダイアログ一覧</h3>
+      <p>各ダイアログの操作方法リファレンス</p>
+    </a>
+    <a class="toc-card" href="12_shortcuts_ja.html">
+      <div class="num">第 12 章</div>
+      <h3>キーボードショートカット</h3>
+      <p>ショートカットキー一覧</p>
+    </a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

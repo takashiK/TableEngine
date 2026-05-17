@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TableEngine - User Manual</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+    .toc-card { background: #fff; border: 1px solid var(--color-border); border-radius: 8px; padding: 18px 20px; text-decoration: none; color: inherit; transition: box-shadow 0.15s, border-color 0.15s; }
+    .toc-card:hover { box-shadow: 0 4px 12px rgba(44,95,138,0.12); border-color: var(--color-primary); }
+    .toc-card h3 { margin: 0 0 6px; font-size: 14px; color: var(--color-primary-dark); }
+    .toc-card p { margin: 0; font-size: 12px; color: #666; }
+    .toc-card .num { font-size: 11px; color: #aaa; font-weight: 600; margin-bottom: 4px; }
+    @media (max-width: 640px) { .toc-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>User Manual</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_en.html" class="active">🏠 Contents</a></li>
+    </ul>
+    <div class="nav-section">Introduction</div>
+    <ul>
+      <li><a href="01_overview_en.html">1. Overview</a></li>
+      <li><a href="02_install_en.html">2. Installation &amp; Launch</a></li>
+      <li><a href="03_mainwindow_en.html">3. Main Window</a></li>
+    </ul>
+    <div class="nav-section">Features</div>
+    <ul>
+      <li><a href="04_file_en.html">4. File Operations</a></li>
+      <li><a href="05_edit_en.html">5. Selection &amp; Editing</a></li>
+      <li><a href="06_folder_en.html">6. Folder Operations</a></li>
+      <li><a href="07_view_en.html">7. View Settings</a></li>
+      <li><a href="08_tool_en.html">8. Tools</a></li>
+      <li><a href="09_window_en.html">9. Window</a></li>
+    </ul>
+    <div class="nav-section">Advanced</div>
+    <ul>
+      <li><a href="10_settings_en.html">10. Settings</a></li>
+      <li><a href="11_dialogs_en.html">11. Dialog Reference</a></li>
+      <li><a href="12_shortcuts_en.html">12. Keyboard Shortcuts</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb">TableEngine User Manual</div>
+    <h1>TableEngine User Manual</h1>
+  </div>
+
+  <p>
+    TableEngine is a keyboard-centric file manager for Windows.
+    Inspired by the MS-DOS file manager <strong>FD</strong> and the Windows application
+    <strong>Takuchu☆</strong>, it was developed to bring that style of keyboard-driven file
+    management to modern Windows 10/11.
+  </p>
+
+  <div class="note">
+    This software is currently under development. Some features may not be fully functional.
+  </div>
+
+  <h2>Table of Contents</h2>
+
+  <div class="toc-grid">
+    <a class="toc-card" href="01_overview_en.html">
+      <div class="num">Chapter 1</div>
+      <h3>Overview</h3>
+      <p>Features, system requirements, and license</p>
+    </a>
+    <a class="toc-card" href="02_install_en.html">
+      <div class="num">Chapter 2</div>
+      <h3>Installation &amp; Launch</h3>
+      <p>Required files and how to start the application</p>
+    </a>
+    <a class="toc-card" href="03_mainwindow_en.html">
+      <div class="num">Chapter 3</div>
+      <h3>Main Window</h3>
+      <p>Screen layout and the role of each area</p>
+    </a>
+    <a class="toc-card" href="04_file_en.html">
+      <div class="num">Chapter 4</div>
+      <h3>File Operations</h3>
+      <p>Create, copy, move, delete, archive, extract, and more</p>
+    </a>
+    <a class="toc-card" href="05_edit_en.html">
+      <div class="num">Chapter 5</div>
+      <h3>Selection &amp; Editing</h3>
+      <p>File selection methods and clipboard operations</p>
+    </a>
+    <a class="toc-card" href="06_folder_en.html">
+      <div class="num">Chapter 6</div>
+      <h3>Folder Operations</h3>
+      <p>Expand, navigate, favorites, and search</p>
+    </a>
+    <a class="toc-card" href="07_view_en.html">
+      <div class="num">Chapter 7</div>
+      <h3>View Settings</h3>
+      <p>Columns, sorting, layout, and filter</p>
+    </a>
+    <a class="toc-card" href="08_tool_en.html">
+      <div class="num">Chapter 8</div>
+      <h3>Tools</h3>
+      <p>Text viewer and binary viewer</p>
+    </a>
+    <a class="toc-card" href="09_window_en.html">
+      <div class="num">Chapter 9</div>
+      <h3>Window</h3>
+      <p>Tab management and bar visibility</p>
+    </a>
+    <a class="toc-card" href="10_settings_en.html">
+      <div class="num">Chapter 10</div>
+      <h3>Settings</h3>
+      <p>Options, key bindings, and menu customization</p>
+    </a>
+    <a class="toc-card" href="11_dialogs_en.html">
+      <div class="num">Chapter 11</div>
+      <h3>Dialog Reference</h3>
+      <p>Operation guide for each dialog</p>
+    </a>
+    <a class="toc-card" href="12_shortcuts_en.html">
+      <div class="num">Chapter 12</div>
+      <h3>Keyboard Shortcuts</h3>
+      <p>Complete shortcut key reference</p>
+    </a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

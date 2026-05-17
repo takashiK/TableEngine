@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第3章 メインウィンドウ - TableEngine 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .window-diagram {
+      border: 2px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 12px;
+      margin: 20px 0;
+      background: #fff;
+    }
+    .win-titlebar {
+      background: var(--color-primary-dark);
+      color: #fff;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    .win-menubar {
+      background: #f0f2f5;
+      border-bottom: 1px solid var(--color-border);
+      padding: 4px 12px;
+      color: #333;
+    }
+    .win-toolbar {
+      background: #f7f8fa;
+      border-bottom: 1px solid var(--color-border);
+      padding: 6px 12px;
+      color: #555;
+    }
+    .win-drivebar {
+      background: #eef2f7;
+      border-bottom: 1px solid var(--color-border);
+      padding: 5px 12px;
+      color: #444;
+    }
+    .win-tabs {
+      background: #e8ecf2;
+      border-bottom: 1px solid var(--color-border);
+      padding: 5px 12px;
+      color: #444;
+    }
+    .win-body {
+      display: flex;
+      min-height: 200px;
+    }
+    .win-nav {
+      width: 180px;
+      border-right: 1px solid var(--color-border);
+      background: #fafbfc;
+      padding: 10px;
+      color: #555;
+      flex-shrink: 0;
+    }
+    .win-main {
+      flex: 1;
+      padding: 10px;
+      color: #555;
+    }
+    .win-detail {
+      width: 160px;
+      border-left: 1px solid var(--color-border);
+      background: #fafbfc;
+      padding: 10px;
+      color: #555;
+      flex-shrink: 0;
+    }
+    .win-statusbar {
+      background: #f0f2f5;
+      border-top: 1px solid var(--color-border);
+      padding: 4px 12px;
+      color: #666;
+    }
+    .area-label {
+      display: inline-block;
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html" class="active">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html">8. ツール</a></li>
+      <li><a href="09_window_ja.html">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_ja.html">目次</a> &rsaquo; 第3章</div>
+    <h1>第3章 メインウィンドウ</h1>
+  </div>
+
+  <h2>画面構成</h2>
+  <p>TableEngine のメインウィンドウは以下の部位で構成されています。</p>
+
+  <!-- Window Diagram -->
+  <div class="window-diagram">
+    <div class="win-titlebar">📁 TableEngine</div>
+    <div class="win-menubar">
+      <span class="area-label">メニューバー</span>
+      &nbsp; ファイル(F) &nbsp; 編集(E) &nbsp; フォルダ(O) &nbsp; 表示(V) &nbsp; ツール(T) &nbsp; ウィンドウ(W) &nbsp; 設定(S) &nbsp; ヘルプ(H)
+    </div>
+    <div class="win-toolbar">
+      <span class="area-label">ツールバー</span>
+      &nbsp; [新規] [開く] [コピー] [移動] [削除] [リネーム] …
+    </div>
+    <div class="win-drivebar">
+      <span class="area-label">ドライブバー</span>
+      &nbsp; [C:] [D:] [E:] …
+    </div>
+    <div class="win-tabs">
+      <span class="area-label">タブバー</span>
+      &nbsp; [Tab 1 - C:\Users] &nbsp; [Tab 2 - D:\] &nbsp; [+]
+    </div>
+    <div class="win-body">
+      <div class="win-nav">
+        <div class="area-label">ナビゲーション<br>ペイン</div><br>
+        ▶ C:\<br>
+        &nbsp; ▼ Users<br>
+        &nbsp; &nbsp; ▶ Public<br>
+        &nbsp; &nbsp; ▼ 自分<br>
+        &nbsp; &nbsp; &nbsp; Documents<br>
+        &nbsp; &nbsp; &nbsp; Downloads
+      </div>
+      <div class="win-main">
+        <div class="area-label">ファイルリスト</div><br>
+        📁 Documents<br>
+        📁 Downloads<br>
+        📄 readme.txt &nbsp; 1.2 KB &nbsp; 2025/01/10<br>
+        📄 report.xlsx &nbsp; 45 KB &nbsp; 2025/03/22
+      </div>
+      <div class="win-detail">
+        <div class="area-label">詳細ペイン</div><br>
+        名前: readme.txt<br><br>
+        サイズ: 1,234 Byte<br><br>
+        更新: 2025/01/10<br><br>
+        属性: A
+      </div>
+    </div>
+    <div class="win-statusbar">
+      <span class="area-label">ステータスバー</span>
+      &nbsp; 32 個のアイテム &nbsp;|&nbsp; 2 個選択中 &nbsp;|&nbsp; 合計 46.2 KB
+    </div>
+  </div>
+
+  <h2>各部位の説明</h2>
+
+  <h3>メニューバー</h3>
+  <p>
+    全機能にアクセスできるメニューバーです。
+    <span class="menu-path">ファイル</span> /
+    <span class="menu-path">編集</span> /
+    <span class="menu-path">フォルダ</span> /
+    <span class="menu-path">表示</span> /
+    <span class="menu-path">ツール</span> /
+    <span class="menu-path">ウィンドウ</span> /
+    <span class="menu-path">設定</span> /
+    <span class="menu-path">ヘルプ</span>
+    の各メニューを持ちます。
+    メニュー構成は設定でカスタマイズできます。
+  </p>
+
+  <h3>ツールバー</h3>
+  <p>
+    よく使う操作をボタンで素早く実行できます。
+    <span class="menu-path">ウィンドウ &rsaquo; ツールバーを表示</span> で表示・非表示を切り替えられます。
+  </p>
+
+  <h3>ドライブバー</h3>
+  <p>
+    利用可能なドライブ（C:、D: など）をボタンで表示します。
+    ドライブボタンをクリックすると、そのドライブのルートに移動します。
+    <span class="menu-path">ウィンドウ &rsaquo; ドライブバーを表示</span> で切り替えられます。
+  </p>
+
+  <h3>タブバー</h3>
+  <p>
+    複数のフォルダをタブで同時に管理できます。
+    <kbd>Ctrl</kbd>+<kbd>T</kbd> で新規タブを開き、<kbd>Ctrl</kbd>+<kbd>W</kbd> でタブを閉じます。
+    タブを別ウィンドウに移動することも可能です。
+  </p>
+
+  <h3>ナビゲーションペイン</h3>
+  <p>
+    フォルダツリーを表示します。クリックすると対応するフォルダに移動し、
+    ファイルリストが更新されます。
+    <span class="menu-path">ウィンドウ &rsaquo; ナビゲーションを表示</span> で切り替えられます。
+  </p>
+
+  <h3>ファイルリスト</h3>
+  <p>
+    現在のフォルダに含まれるファイルとフォルダを表示するメインエリアです。
+    表示形式はアイコンサイズ（小・中・大）または詳細リストから選べます。
+    ファイルの選択・コピー・削除などの操作はここで行います。
+  </p>
+
+  <h3>詳細ペイン</h3>
+  <p>
+    選択中のファイルの詳細情報（名前・サイズ・更新日時・属性など）を表示します。
+    <span class="menu-path">ウィンドウ &rsaquo; 詳細を表示</span> で切り替えられます。
+  </p>
+
+  <h3>ステータスバー</h3>
+  <p>
+    現在のフォルダのアイテム数・選択数・合計サイズなどを表示します。
+    <span class="menu-path">ウィンドウ &rsaquo; ステータスバーを表示</span> で切り替えられます。
+  </p>
+
+  <h2>マウス操作の基本</h2>
+  <table>
+    <thead>
+      <tr><th>操作</th><th>動作</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>シングルクリック</td><td>ファイルを選択</td></tr>
+      <tr><td>ダブルクリック</td><td>ファイルを開く / フォルダに移動</td></tr>
+      <tr><td><kbd>Ctrl</kbd> + クリック</td><td>複数選択（追加・解除）</td></tr>
+      <tr><td><kbd>Shift</kbd> + クリック</td><td>範囲選択</td></tr>
+      <tr><td>右クリック</td><td>コンテキストメニューを表示</td></tr>
+      <tr><td>ドラッグ</td><td>ファイルの移動・コピー</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-nav">
+    <a href="02_install_ja.html">&larr; 第2章 インストールと起動</a>
+    <a href="04_file_ja.html">第4章 ファイル操作 &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

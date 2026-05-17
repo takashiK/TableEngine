@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第9章 ウィンドウ - TableEngine 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html">8. ツール</a></li>
+      <li><a href="09_window_ja.html" class="active">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_ja.html">目次</a> &rsaquo; 第9章</div>
+    <h1>第9章 ウィンドウ</h1>
+  </div>
+
+  <p>
+    タブ管理と各 UI 要素の表示・非表示を制御します。
+    これらのコマンドは <span class="menu-path">ウィンドウ</span> メニューからアクセスできます。
+  </p>
+
+  <h2>タブ操作</h2>
+  <p>
+    TableEngine は複数のフォルダをタブで同時に開くことができます。
+    タブバーのタブをクリックして切り替えます。
+  </p>
+
+  <h3>新規タブを開く</h3>
+  <p>
+    <span class="menu-path">ウィンドウ &rsaquo; 新規タブ</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>N</kbd><br>
+    現在表示中のフォルダを複製した新規タブを開きます。
+  </p>
+
+  <h3>タブを閉じる</h3>
+  <p>
+    <span class="menu-path">ウィンドウ &rsaquo; タブを閉じる</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>W</kbd><br>
+    現在のタブを閉じます。最後の 1 枚のタブは閉じられません。
+  </p>
+
+  <h3>タブを別ウィンドウに移動</h3>
+  <p>
+    <span class="menu-path">ウィンドウ &rsaquo; タブを移動</span> &nbsp; <kbd>Ctrl</kbd>+<kbd>T</kbd><br>
+    現在のタブを新しいウィンドウとして独立させます。
+    2 つのウィンドウを並べてファイルをコピーしたいときに便利です。
+  </p>
+
+  <h2>バーの表示切り替え</h2>
+  <p>各バーはメニューのチェック状態（ON/OFF）で表示・非表示を切り替えます。</p>
+
+  <table>
+    <thead>
+      <tr><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="menu-path">ウィンドウ &rsaquo; ツールバーを表示</span></td>
+        <td>ツールバーの表示・非表示</td>
+      </tr>
+      <tr>
+        <td><span class="menu-path">ウィンドウ &rsaquo; ドライブバーを表示</span></td>
+        <td>ドライブバーの表示・非表示</td>
+      </tr>
+      <tr>
+        <td><span class="menu-path">ウィンドウ &rsaquo; ステータスバーを表示</span></td>
+        <td>ステータスバーの表示・非表示</td>
+      </tr>
+      <tr>
+        <td><span class="menu-path">ウィンドウ &rsaquo; ナビゲーションを表示</span></td>
+        <td>左側のフォルダツリー（ナビゲーションペイン）の表示・非表示</td>
+      </tr>
+      <tr>
+        <td><span class="menu-path">ウィンドウ &rsaquo; 詳細を表示</span></td>
+        <td>右側の詳細ペインの表示・非表示</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip">
+    画面を広く使いたい場合は、ナビゲーションペインと詳細ペインを非表示にすると
+    ファイルリストのスペースを最大化できます。
+  </div>
+
+  <div class="page-nav">
+    <a href="08_tool_ja.html">&larr; 第8章 ツール</a>
+    <a href="10_settings_ja.html">第10章 設定 &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

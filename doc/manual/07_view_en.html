@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter 7: View Settings - TableEngine User Manual</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ===== View-mode illustration styles ===== */
+    .viewmode-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 16px 0 24px;
+    }
+    .viewmode-card {
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      overflow: hidden;
+      flex: 1 1 260px;
+      min-width: 220px;
+      max-width: 340px;
+    }
+    .viewmode-card-title {
+      background: var(--color-primary-dark);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+    }
+    .viewmode-pane {
+      background: #fafafa;
+      padding: 8px;
+      min-height: 120px;
+    }
+    .vml-small {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px 4px;
+      align-content: flex-start;
+    }
+    .vml-small-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-size: 11px;
+      color: #333;
+      white-space: nowrap;
+      min-width: 130px;
+    }
+    .vml-small-item.sel { background: #0078d4; color: #fff; }
+    .vml-icon16 {
+      width: 16px; height: 16px;
+      border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; flex-shrink: 0;
+    }
+    .vml-large {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+    }
+    .vml-large-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 80px;
+      padding: 4px 2px;
+      border-radius: 3px;
+      font-size: 10px;
+      color: #333;
+      text-align: center;
+    }
+    .vml-large-item.sel { background: #cde5ff; }
+    .vml-icon64 {
+      width: 48px; height: 48px;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin-bottom: 4px;
+    }
+    .vml-huge {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+    }
+    .vml-huge-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 104px;
+      padding: 4px 2px;
+      border-radius: 3px;
+      font-size: 10px;
+      color: #333;
+      text-align: center;
+    }
+    .vml-huge-item.sel { background: #cde5ff; }
+    .vml-icon192 {
+      width: 96px; height: 72px;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; margin-bottom: 4px;
+      background: #e8e8e8;
+      border: 1px solid #ccc;
+      overflow: hidden;
+      position: relative;
+    }
+    .vml-thumb-inner {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+    }
+    .vml-detail { display: flex; flex-direction: column; gap: 1px; }
+    .vml-detail-item {
+      display: flex;
+      align-items: center;
+      padding: 3px 4px;
+      border-radius: 2px;
+      font-size: 11px;
+      color: #333;
+      position: relative;
+    }
+    .vml-detail-item.sel {
+      background: #0078d4;
+      color: #fff;
+    }
+    .vml-detail-item.sel .vml-accent { background: #5bbcff; }
+    .vml-accent {
+      width: 2px;
+      height: 60%;
+      background: #0078d4;
+      border-radius: 1px;
+      margin-right: 5px;
+      align-self: center;
+      flex-shrink: 0;
+    }
+    .vml-detail-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .vml-detail-size { width: 58px; text-align: right; flex-shrink: 0; font-size: 10px; opacity: 0.85; }
+    .vml-detail-date { width: 120px; text-align: right; flex-shrink: 0; font-size: 10px; opacity: 0.85; }
+    .vml-detail-item.sel .vml-detail-size,
+    .vml-detail-item.sel .vml-detail-date { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>User Manual</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_en.html">🏠 Contents</a></li>
+    </ul>
+    <div class="nav-section">Introduction</div>
+    <ul>
+      <li><a href="01_overview_en.html">1. Overview</a></li>
+      <li><a href="02_install_en.html">2. Installation &amp; Launch</a></li>
+      <li><a href="03_mainwindow_en.html">3. Main Window</a></li>
+    </ul>
+    <div class="nav-section">Features</div>
+    <ul>
+      <li><a href="04_file_en.html">4. File Operations</a></li>
+      <li><a href="05_edit_en.html">5. Selection &amp; Editing</a></li>
+      <li><a href="06_folder_en.html">6. Folder Operations</a></li>
+      <li><a href="07_view_en.html" class="active">7. View Settings</a></li>
+      <li><a href="08_tool_en.html">8. Tools</a></li>
+      <li><a href="09_window_en.html">9. Window</a></li>
+    </ul>
+    <div class="nav-section">Advanced</div>
+    <ul>
+      <li><a href="10_settings_en.html">10. Settings</a></li>
+      <li><a href="11_dialogs_en.html">11. Dialog Reference</a></li>
+      <li><a href="12_shortcuts_en.html">12. Keyboard Shortcuts</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_en.html">Contents</a> &rsaquo; Chapter 7</div>
+    <h1>Chapter 7: View Settings</h1>
+  </div>
+
+  <p>
+    You can finely control how the file list is displayed.
+    These commands are accessible from the <span class="menu-path">View</span> menu.
+    Settings work as toggles (ON/OFF).
+  </p>
+
+  <h2>Column Visibility</h2>
+
+  <h3>Show File Size</h3>
+  <p>
+    <span class="menu-path">View &rsaquo; File Size</span><br>
+    Toggles the file size column in the file list.
+  </p>
+
+  <h3>Show Modified Date</h3>
+  <p>
+    <span class="menu-path">View &rsaquo; Modified Date</span><br>
+    Toggles the last modified date column in the file list.
+  </p>
+
+  <h2>Hidden and System Files</h2>
+
+  <h3>Show Hidden Files</h3>
+  <p>
+    <span class="menu-path">View &rsaquo; Hidden Files</span> &nbsp; <kbd>H</kbd><br>
+    Toggles the display of files and folders with the Hidden attribute.
+    When shown, they appear with a dimmed icon.
+  </p>
+
+  <h3>Show System Files</h3>
+  <p>
+    <span class="menu-path">View &rsaquo; System Files</span><br>
+    Toggles the display of files and folders with the System attribute.
+  </p>
+
+  <div class="warning">
+    Accidentally modifying system files may destabilize the OS. Handle with care.
+  </div>
+
+  <h2>Filter</h2>
+  <p>
+    <span class="menu-path">View &rsaquo; Filter</span><br>
+    Narrows the file list display by file name pattern.
+    Folders are not affected (unless the "Files Only" option is used).
+  </p>
+  <table>
+    <thead>
+      <tr><th>Option</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Filter String</td><td>Wildcard or regex pattern to match file names</td></tr>
+      <tr><td>Files Only</td><td>Exclude folders from the results</td></tr>
+      <tr><td>Case Sensitive</td><td>Distinguish upper and lower case when matching</td></tr>
+      <tr><td>Regular Expression</td><td>Treat the input as a regular expression</td></tr>
+    </tbody>
+  </table>
+  <div class="note">
+    The filter only affects what is displayed; it does not delete or move any files.
+  </div>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-filter">Filter Dialog</a>
+  </div>
+
+  <h2>Sort</h2>
+  <p>
+    Select a sort criterion from the <span class="menu-path">View &rsaquo; Sort</span> submenu.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Sort By</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Name</td><td>Alphabetical order by file name</td></tr>
+      <tr><td>Size</td><td>By file size</td></tr>
+      <tr><td>Extension</td><td>Alphabetical order by extension</td></tr>
+      <tr><td>Modified Date</td><td>By last modified date</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Ascending / Descending</h3>
+  <p>
+    <span class="menu-path">View &rsaquo; Order &rsaquo; Ascending</span><br>
+    <span class="menu-path">View &rsaquo; Order &rsaquo; Descending</span><br>
+    Choose the sort direction.
+  </p>
+
+  <h2>Layout</h2>
+  <p>
+    Select a display layout from the <span class="menu-path">View &rsaquo; Layout</span> submenu.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Layout</th><th>Icon Size</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Small Icons</td>
+        <td>16&times;16 px (default)</td>
+        <td>Small icons in a multi-column list</td>
+      </tr>
+      <tr>
+        <td>Large Icons</td>
+        <td>64&times;64 px</td>
+        <td>Large icons in a grid layout</td>
+      </tr>
+      <tr>
+        <td>Huge Icons</td>
+        <td>192&times;192 px</td>
+        <td>Huge icons in a grid layout.<br>
+            Image files are displayed as thumbnails.</td>
+      </tr>
+      <tr>
+        <td>Detail List</td>
+        <td>16&times;16 px (default)</td>
+        <td>Single-column list showing name, size, and modified date</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Layout Preview</h3>
+  <p>The illustrations below reflect the rendering behavior of <code>TeFileItemDelegate</code> for each layout.</p>
+
+  <div class="viewmode-grid">
+    <!-- Small Icons -->
+    <div class="viewmode-card">
+      <div class="viewmode-card-title">Small Icons (ListMode / 16&times;16)</div>
+      <div class="viewmode-pane">
+        <div class="vml-small">
+          <div class="vml-small-item sel">
+            <div class="vml-icon16" style="background:#ffd54f">📁</div>Documents
+          </div>
+          <div class="vml-small-item">
+            <div class="vml-icon16" style="background:#90caf9">📄</div>readme.txt
+          </div>
+          <div class="vml-small-item">
+            <div class="vml-icon16" style="background:#a5d6a7">📄</div>config.ini
+          </div>
+          <div class="vml-small-item">
+            <div class="vml-icon16" style="background:#ffd54f">📁</div>Downloads
+          </div>
+          <div class="vml-small-item">
+            <div class="vml-icon16" style="background:#ef9a9a">📄</div>photo.jpg
+          </div>
+          <div class="vml-small-item">
+            <div class="vml-icon16" style="background:#ce93d8">📄</div>data.csv
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Large Icons -->
+    <div class="viewmode-card">
+      <div class="viewmode-card-title">Large Icons (IconMode / 64&times;64)</div>
+      <div class="viewmode-pane">
+        <div class="vml-large">
+          <div class="vml-large-item sel">
+            <div class="vml-icon64" style="background:#fff9c4">📁</div>
+            Documents
+          </div>
+          <div class="vml-large-item">
+            <div class="vml-icon64" style="background:#e3f2fd">📄</div>
+            readme.txt
+          </div>
+          <div class="vml-large-item">
+            <div class="vml-icon64" style="background:#fce4ec">🖼</div>
+            photo.jpg
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Huge Icons -->
+    <div class="viewmode-card">
+      <div class="viewmode-card-title">Huge Icons (IconMode / 192&times;192)</div>
+      <div class="viewmode-pane">
+        <div class="vml-huge">
+          <div class="vml-huge-item sel">
+            <div class="vml-icon192">
+              <div class="vml-thumb-inner">📁</div>
+            </div>
+            Documents
+          </div>
+          <div class="vml-huge-item">
+            <div class="vml-icon192" style="background:linear-gradient(135deg,#e3f2fd,#bbdefb)">
+              <div class="vml-thumb-inner" style="font-size:14px;color:#555">🖼<br><span style="font-size:9px">thumbnail</span></div>
+            </div>
+            photo.jpg
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail List -->
+    <div class="viewmode-card" style="max-width:100%;flex-basis:100%">
+      <div class="viewmode-card-title">Detail List (ListMode / 16&times;16) &mdash; Name + Size + Modified Date</div>
+      <div class="viewmode-pane" style="padding:4px 8px">
+        <div class="vml-detail">
+          <div class="vml-detail-item sel">
+            <div class="vml-accent"></div>
+            <div class="vml-icon16" style="background:#ffd54f;margin-right:5px">📁</div>
+            <div class="vml-detail-name">Documents</div>
+            <div class="vml-detail-size"></div>
+            <div class="vml-detail-date">2025/03/15 14:22:00</div>
+          </div>
+          <div class="vml-detail-item">
+            <div class="vml-accent"></div>
+            <div class="vml-icon16" style="background:#90caf9;margin-right:5px">📄</div>
+            <div class="vml-detail-name">readme.txt</div>
+            <div class="vml-detail-size">3 KB</div>
+            <div class="vml-detail-date">2025/01/10 09:05:33</div>
+          </div>
+          <div class="vml-detail-item">
+            <div class="vml-accent"></div>
+            <div class="vml-icon16" style="background:#ef9a9a;margin-right:5px">🖼</div>
+            <div class="vml-detail-name">photo.jpg</div>
+            <div class="vml-detail-size">2,048 KB</div>
+            <div class="vml-detail-date">2024/12/24 18:30:00</div>
+          </div>
+          <div class="vml-detail-item">
+            <div class="vml-accent"></div>
+            <div class="vml-icon16" style="background:#ce93d8;margin-right:5px">📄</div>
+            <div class="vml-detail-name">data.csv</div>
+            <div class="vml-detail-size">128 KB</div>
+            <div class="vml-detail-date">2025/02/28 11:00:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-nav">
+    <a href="06_folder_en.html">&larr; Chapter 6: Folder Operations</a>
+    <a href="08_tool_en.html">Chapter 8: Tools &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

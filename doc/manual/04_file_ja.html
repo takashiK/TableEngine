@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第4章 ファイル操作 - TableEngine 取り扱い説明書</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>TableEngine</h1>
+    <p>取り扱い説明書</p>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="index_ja.html">🏠 目次</a></li>
+    </ul>
+    <div class="nav-section">はじめに</div>
+    <ul>
+      <li><a href="01_overview_ja.html">1. 概要</a></li>
+      <li><a href="02_install_ja.html">2. インストールと起動</a></li>
+      <li><a href="03_mainwindow_ja.html">3. メインウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">機能説明</div>
+    <ul>
+      <li><a href="04_file_ja.html" class="active">4. ファイル操作</a></li>
+      <li><a href="05_edit_ja.html">5. 選択・編集</a></li>
+      <li><a href="06_folder_ja.html">6. フォルダ操作</a></li>
+      <li><a href="07_view_ja.html">7. 表示設定</a></li>
+      <li><a href="08_tool_ja.html">8. ツール</a></li>
+      <li><a href="09_window_ja.html">9. ウィンドウ</a></li>
+    </ul>
+    <div class="nav-section">詳細設定</div>
+    <ul>
+      <li><a href="10_settings_ja.html">10. 設定</a></li>
+      <li><a href="11_dialogs_ja.html">11. ダイアログ一覧</a></li>
+      <li><a href="12_shortcuts_ja.html">12. キーボードショートカット</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div id="content">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="index_ja.html">目次</a> &rsaquo; 第4章</div>
+    <h1>第4章 ファイル操作</h1>
+  </div>
+
+  <p>
+    ファイル操作コマンドは <span class="menu-path">ファイル</span> メニューから実行できます。
+    また、ファイルリストで右クリックしてコンテキストメニューから実行することもできます。
+  </p>
+
+  <h2>新規作成</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; 新規作成</span><br>
+    空のファイルを現在のフォルダに作成します。
+    ダイアログでファイル名を入力してください。
+  </p>
+
+  <h2>ファイルを開く</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; 開く</span><br>
+    選択中のファイルを、Windows のシェル（関連付けられたアプリケーション）で開きます。
+  </p>
+  <div class="tip">
+    ファイルをダブルクリックしても同じ動作をします。
+  </div>
+
+  <h2>コピー先にコピー</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; コピー先にコピー</span><br>
+    選択中のファイル・フォルダを、指定したフォルダにコピーします。
+    コピー先を指定するダイアログが表示されます。
+  </p>
+  <ul>
+    <li>パス入力欄に直接パスを入力するか、ツリービューからフォルダを選択します。</li>
+    <li><kbd>Shift</kbd>+<kbd>Enter</kbd> でフォルダツリー選択ダイアログを表示します。</li>
+    <li><kbd>↑</kbd> キーで履歴、<kbd>↓</kbd> キーでお気に入りを表示します。</li>
+  </ul>
+  <div class="note">
+    &rarr; ダイアログの詳細: <a href="11_dialogs.html#dialog-path-input">パス入力ダイアログ</a>、<a href="11_dialogs.html#dialog-folder-select">フォルダ選択ダイアログ</a>
+  </div>
+
+  <h2>移動先に移動</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; 移動先に移動</span><br>
+    選択中のファイル・フォルダを、指定したフォルダに移動します。
+    操作方法はコピーと同様です。
+  </p>
+  <div class="warning">
+    移動先が存在しない場合、新規フォルダを作成するか、ファイル名を変更してコピーするかを選択するダイアログが表示されます。
+  </div>
+  <div class="note">
+    &rarr; ダイアログの詳細: <a href="11_dialogs.html#dialog-path-input">パス入力ダイアログ</a>、<a href="11_dialogs.html#dialog-folder-select">フォルダ選択ダイアログ</a>
+  </div>
+
+  <h2>削除</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; 削除</span><br>
+    選択中のファイル・フォルダを削除します。確認ダイアログが表示されます。
+  </p>
+  <div class="warning">
+    削除したファイルはごみ箱には入りません。操作前に十分ご確認ください。
+  </div>
+
+  <h2>名前の変更</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; 名前の変更</span><br>
+    選択中のファイルの名前を変更します。
+  </p>
+
+  <h2>一括リネーム</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; 一括リネーム</span><br>
+    選択中の複数ファイルを、連番付きの名前に一括変更します。
+  </p>
+  <div class="note">
+    &rarr; ダイアログの詳細: <a href="11_dialogs.html#dialog-rename-multi">一括リネームダイアログ</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>項目</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ベース名</td><td>ファイル名の基本となる文字列</td></tr>
+      <tr><td>拡張子</td><td>変更後の拡張子（省略可）</td></tr>
+      <tr><td>桁数</td><td>連番の桁数（1〜4桁）</td></tr>
+      <tr><td>開始番号</td><td>連番の開始値</td></tr>
+      <tr><td>順序</td><td>ファイル名順 / 更新日時順</td></tr>
+    </tbody>
+  </table>
+  <p>例: ベース名=<code>photo</code>、桁数=<code>3</code>、開始=<code>1</code> → <code>photo001.jpg</code>、<code>photo002.jpg</code>…</p>
+
+  <h2>ファイルの分割</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; 分割 &rsaquo; ファイルを分割</span><br>
+    1つのファイルを指定したサイズで複数のファイルに分割します。
+  </p>
+  <div class="note">
+    &rarr; ダイアログの詳細: <a href="11_dialogs.html#dialog-divide">ファイル分割ダイアログ</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>項目</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>分割サイズ</td><td>1ファイルあたりのサイズ（MB単位）</td></tr>
+      <tr><td>出力先</td><td>分割ファイルの保存先フォルダ</td></tr>
+      <tr><td>分割数</td><td>自動計算して表示（読み取り専用）</td></tr>
+    </tbody>
+  </table>
+
+  <h2>ファイルの結合</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; 分割 &rsaquo; ファイルを結合</span><br>
+    分割されたファイル（例: <code>file.000</code>、<code>file.001</code>…）を1つのファイルに結合します。
+  </p>
+  <ul>
+    <li>「拡張選択」を有効にすると、選択ファイルと同じベース名を持つ関連ファイルを自動検索して追加します。</li>
+    <li>出力ファイル名を指定して結合します。</li>
+  </ul>
+  <div class="note">
+    &rarr; ダイアログの詳細: <a href="11_dialogs.html#dialog-combine">ファイル結合ダイアログ</a>
+  </div>
+
+  <h2>圧縮</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; アーカイブ &rsaquo; ファイルを圧縮</span><br>
+    選択中のファイル・フォルダを圧縮ファイルにまとめます。
+    対応形式は libarchive のサポートに準じます（zip、tar.gz、7z など）。
+  </p>
+
+  <h2>展開</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; アーカイブ &rsaquo; ファイルを展開</span><br>
+    選択中の圧縮ファイルを展開します。展開先フォルダを指定できます。
+  </p>
+
+  <h2>プロパティ</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; プロパティ</span><br>
+    選択中のファイルの詳細情報（サイズ・日時・属性・MIMEタイプなど）を表示します。
+  </p>
+
+  <h2>コマンドを実行</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; コマンドを実行</span><br>
+    任意のコマンドラインを実行します。
+  </p>
+  <div class="note">
+    &rarr; ダイアログの詳細: <a href="11_dialogs.html#dialog-run-command">コマンド実行ダイアログ</a>
+  </div>
+  <table>
+    <thead>
+      <tr><th>オプション</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Shell で実行</td><td>シェル（cmd.exe）経由で実行します</td></tr>
+      <tr><td>出力を表示</td><td>コマンドの標準出力をウィンドウに表示します</td></tr>
+    </tbody>
+  </table>
+
+  <h2>終了</h2>
+  <p>
+    <span class="menu-path">ファイル &rsaquo; 終了</span><br>
+    TableEngine を終了します。
+  </p>
+
+  <div class="page-nav">
+    <a href="03_mainwindow_ja.html">&larr; 第3章 メインウィンドウ</a>
+    <a href="05_edit_ja.html">第5章 選択・編集 &rarr;</a>
+  </div>
+
+  <footer>
+    <p>TableEngine &copy; Takashi Kuwabara &mdash; GPLv2 License</p>
+  </footer>
+</div>
+
+</body>
+</html>

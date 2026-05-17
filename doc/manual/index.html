@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>TableEngine Manual</title>
+  <!--
+    Language dispatch page.
+    Redirects to index_ja.html for Japanese browsers,
+    index_en.html for all other languages.
+    Fallback (no JS): meta refresh → index_en.html
+  -->
+  <meta http-equiv="refresh" content="0;url=index_en.html">
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 60px 20px; color: #333; }
+    a { color: #0060c0; text-decoration: none; margin: 0 12px; font-size: 1.1em; }
+    a:hover { text-decoration: underline; }
+    p { margin-top: 32px; font-size: 0.9em; color: #888; }
+  </style>
+  <script>
+    (function () {
+      var langs = (navigator.languages && navigator.languages.length)
+                    ? navigator.languages
+                    : [navigator.language || 'en'];
+      for (var i = 0; i < langs.length; i++) {
+        if (langs[i].toLowerCase().startsWith('ja')) {
+          location.replace('index_ja.html');
+          return;
+        }
+      }
+      location.replace('index_en.html');
+    })();
+  </script>
+</head>
+<body>
+  <h2>TableEngine &mdash; User Manual</h2>
+  <a href="index_en.html">English</a>
+  <a href="index_ja.html">日本語</a>
+  <p>Redirecting&hellip; (JavaScript required for automatic language detection)</p>
+</body>
+</html>
