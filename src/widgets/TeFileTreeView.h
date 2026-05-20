@@ -64,6 +64,12 @@ public:
 	/** @brief Returns the current visual root model index. */
 	QModelIndex visualRootIndex();
 
+	/**
+	 * @brief Overridden to connect layoutChanged signal for VisualRootIndex maintenance.
+	 * @param model The model to set on this view.
+	 */
+	void setModel(QAbstractItemModel* model) override;
+
 	/** @brief Returns the owning TeFolderView. */
 	virtual TeFolderView* folderView();
 
@@ -72,6 +78,16 @@ public:
 	 * @param view The parent TeFolderView.
 	 */
 	void setFolderView(TeFolderView* view);
+
+private slots:
+	/**
+	 * @brief Re-applies row-hiding after a model layout change.
+	 *
+	 * Called when the model emits layoutChanged (e.g. after invalidateFilter()).
+	 * The QPersistentModelIndex m_rootIndex remains valid across layout changes,
+	 * but QTreeView resets its internal row-hidden state, so we reapply it here.
+	 */
+	void reapplyVisualRoot();
 
 protected slots:
 	/**

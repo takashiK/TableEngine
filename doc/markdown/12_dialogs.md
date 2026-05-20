@@ -25,6 +25,8 @@
 | `TeKeySetting` | `TeCmdKeySetting` | キーボードショートカット設定 |
 | `TeMenuSetting` | `TeCmdMenuSetting` | メニュー / ポップアップメニューのカスタマイズ |
 | `TeOptionSetting` | `TeCmdOption` | グローバル設定（起動オプション等） |
+| `TeToolbarSetting` | `TeCmdToolbarSetting` | ツールバーに配置するボタンとコマンドのカスタマイズ |
+| `TeFontDialog` | `TeToolbarSetting` や外観設定 | フォント・文字色・背景色の入力 |
 
 ---
 

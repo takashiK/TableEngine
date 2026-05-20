@@ -39,6 +39,7 @@
 - 左右の `QTabWidget` は `QSplitter` で分割されており、サイズを任意に変更できます。
 - 右ペインは非表示にすることも可能です（シングルペインモード）。
 - `TeFolderView` の派生クラス（`TeFileFolderView` / `TeArchiveFolderView` / `TeFindFolderView`）が各タブのコンテンツになります。
+- `TeDetailView` は `QSplitter` の一番右側に配置され、デフォルト非表示です。表示切替は `detailVisible` プロパティで制御します。
 
 ---
 
@@ -61,6 +62,7 @@ classDiagram
         -mp_tab[2]: QTabWidget*
         -mp_split: QSplitter*
         -mp_driveBar: TeDriveBar*
+        -mp_detailView: TeDetailView*
         -mp_dispatcher: TeDispatcher*
     }
     class TeDispatchable {
@@ -77,11 +79,17 @@ classDiagram
     class TeFileFolderView
     class TeArchiveFolderView
     class TeFindFolderView
+    class TeDetailView {
+        +registerSection(section)
+        +setFileInfo(info) slot
+        +clear() slot
+    }
 
     TeViewStore ..|> TeDispatchable
     TeViewStore --> TeDispatcher
     TeViewStore --> TeMainWindow
     TeViewStore --> TeFolderView
+    TeViewStore --> TeDetailView
     TeFolderView <|-- TeFileFolderView
     TeFolderView <|-- TeArchiveFolderView
     TeFolderView <|-- TeFindFolderView

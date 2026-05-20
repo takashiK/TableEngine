@@ -24,7 +24,7 @@
 | Tool | `0x5000〜` | `commands/tool/` | ツール・ビューワ起動 |
 | Window | `0x6000〜` | `commands/window/` | ウィンドウ・タブ操作 |
 | Setting | `0x7000〜` | `commands/setting/` | 設定ダイアログ |
-| Help | `0x8000〜` | — | ヘルプ（未実装） |
+| Help | `0x8000〜` | `commands/help/` | ヘルプ・バージョン情報 |
 | User | `0xD000〜` | — | ユーザー登録コマンド（拡張用） |
 | Special | `0xE000〜` | — | メニュー区切り・フォルダ等の特殊 ID |
 
@@ -114,8 +114,18 @@
 | `CMDID_SYSTEM_SETTING_OPTION` | `TeCmdOption` | グローバル設定 |
 | `CMDID_SYSTEM_SETTING_KEY` | `TeCmdKeySetting` | キー割り当て設定 |
 | `CMDID_SYSTEM_SETTING_MENU` | `TeCmdMenuSetting` | メニュー設定 |
+| `CMDID_SYSTEM_SETTING_TOOLBAR` | `TeCmdToolbarSetting` | ツールバー設定 |
 
-### Tool Commands (`commands/tool/`)
+### Help Commands (`commands/help/`)
+
+| CmdId | クラス | 説明 |
+|---|---|---|
+| `CMDID_SYSTEM_HELP_HELP` | `TeCmdHelp` | ヘルプドキュメントを開く |
+| `CMDID_SYSTEM_HELP_VERSION` | `TeCmdVersion` | バージョン情報ダイアログを表示 |
+
+---
+
+## CmdType Flags
 
 | CmdId | クラス | 説明 |
 |---|---|---|

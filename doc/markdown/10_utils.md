@@ -188,3 +188,53 @@ Platform API（`getThumbnail()`）を経由して OS のサムネイルキャッ
 | `getFavorites()` / `updateFavorites()` | お気に入りの取得 / 更新 |
 | `getFileType(path)` | ファイルの種別（フォルダ / テキスト / 画像 / アーカイブ等）を判定する |
 | `detectTextCodec(data, codecList)` | バイト列からテキストエンコーディングを検出する |
+
+---
+
+## 追加ユーティリティクラス
+
+### TeExifReader
+
+EXIF メタデータ読み込みの戦略インタフェースです。
+
+```cpp
+virtual QMap<QString, QString> read(const QString& path) const = 0;
+```
+
+`TeDetailExifSection` が保持し、`setExifReader()` でバックエンドを差し替えられます。
+
+### TeQImageExifReader
+
+`TeExifReader` のデフォルト実装です。
+
+- JPEG APP1 マーカー (`FF E1`) から TIFF IFD をバイナリパース
+- リトルエンディアン (`II`) ・ビッグエンディアン (`MM`) 両対応
+- 先頭 64 KB のみ読んで無駄な I/O を排除
+- `QImageReader::size()` / `::text()` で PNG 等の汎用メタデータも取得
+
+exいv2 などの外部ライブラリを利用する場合は `TeExifReader` を実装したクラスを作成して `setExifReader()` で注入します。
+
+### TeFolderAppearance
+
+`QSettings` の `"folder/appearance"` グループに保存された設定値から Qt スタイルシート文字列を構築するヘルパー群です。
+
+| 構造体 / 関数 | 説明 |
+|---|---|
+| `FolderViewAppearance` | フォント・色・フォーカス優先度の設定値を保持 |
+| `fromSettings()` | `QSettings` から値を読み込む |
+| `toSettings()` | `QSettings` に値を書き戻す |
+| `toCss()` | CSS 文字列を生成 |
+| `buildStyleSheetFromSettings()` | 全設定を読み込んで完全なスタイルシートを生成 |
+
+`TeViewStore::applyStyleSheet()` が呼び出し、フォルダビューの外観設定を動的に適用します。
+
+### TeAdaptiveIconEngine
+
+`QIconEngine` のサブクラスで、OS のカラースキーム（ライト / ダーク）に応じてアイコンを自動的に重彩色するエンジンです。
+
+- ライトモード: 元のリソースピクセルをそのまま使用
+- ダークモード: アルファチャンネルをマスクにして指定色（デフォルト `#c8c8c8`）で塩山なし重彩色
+
+```cpp
+QIcon icon(new TeAdaptiveIconEngine(":/icons/my_icon.svg"));
+```

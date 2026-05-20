@@ -38,6 +38,29 @@ TeFileTreeView::~TeFileTreeView()
 {
 }
 
+void TeFileTreeView::setModel(QAbstractItemModel* model)
+{
+	if (this->model()) {
+		disconnect(this->model(), &QAbstractItemModel::layoutChanged,
+		           this, &TeFileTreeView::reapplyVisualRoot);
+	}
+	QTreeView::setModel(model);
+	if (model) {
+		connect(model, &QAbstractItemModel::layoutChanged,
+		        this, &TeFileTreeView::reapplyVisualRoot);
+	}
+}
+
+void TeFileTreeView::reapplyVisualRoot()
+{
+	if (!m_rootIndex.isValid())
+		return;
+	for (int i = 0; i < model()->rowCount(m_rootIndexParent); i++) {
+		QModelIndex sibling = model()->index(i, 0, m_rootIndexParent);
+		setRowHidden(i, m_rootIndexParent, sibling != m_rootIndex);
+	}
+}
+
 void TeFileTreeView::setVisualRootIndex(const QModelIndex & index)
 {
 	QModelIndex rootIndex = index.parent();
