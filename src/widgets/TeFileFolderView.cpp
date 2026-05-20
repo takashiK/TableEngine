@@ -49,6 +49,7 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 
 	mp_treeView = new TeFileTreeView;
 	mp_treeView->setFolderView(this);
+	mp_treeView->setMaximumWidth(300);
 	mp_listView = new TeFileListView;
 	mp_listView->setFolderView(this);
 
@@ -100,6 +101,18 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 			QModelIndex sourceIndex = mp_treeSortModel->mapToSource(proxyIndex);
 			setCurrentPath(mp_treeModel->filePath(sourceIndex));
 		 });
+
+	// Notify the detail panel when the focused list item changes
+	connect(mp_listView->selectionModel(), &QItemSelectionModel::currentChanged,
+		[this](const QModelIndex& current, const QModelIndex&) {
+			if (!current.isValid()) {
+				emit currentFileChanged(QFileInfo());
+				return;
+			}
+			QVariant var = current.data(QFileSystemModel::FileInfoRole);
+			if (var.isValid() && var.canConvert<QFileInfo>())
+				emit currentFileChanged(qvariant_cast<QFileInfo>(var));
+		});
 
 	connect(mp_listView, &QListView::activated, 
 		[this](const QModelIndex &proxyIndex)

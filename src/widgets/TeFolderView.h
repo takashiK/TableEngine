@@ -21,6 +21,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QFileInfo>
 #include "TeDispatchable.h"
 
 /**
@@ -137,6 +138,16 @@ signals:
 	 * application's "current folder view" pointer.
 	 */
 	void focusIn();
+
+	/**
+	 * @brief Emitted when the user moves to a different item in the list view.
+	 *
+	 * Connected to TeDetailView::setFileInfo() so the detail panel stays in
+	 * sync with the focused item.  @p info is a default-constructed QFileInfo
+	 * when no item is selected.
+	 * @param info Metadata of the newly focused item.
+	 */
+	void currentFileChanged(const QFileInfo& info);
 
 protected:
 	/**

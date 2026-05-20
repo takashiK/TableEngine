@@ -41,6 +41,7 @@ class TeFolderView;
 class TeFileFolderView;
 class TeArchiveFolderView;
 class TeFindFolderView;
+class TeDetailView;
 class TeEventEmitter;
 class QTabWidget;
 class TeDispatcher;
@@ -322,6 +323,7 @@ private:
 	TeDriveBar*    mp_driveBar = nullptr;
 	QSplitter*     mp_split = nullptr;
 	QToolBar*	   mp_toolBar = nullptr;
+	TeDetailView*  mp_detailView = nullptr;
 	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE;
 
 	int  m_currentTabPlace = TAB_LEFT;

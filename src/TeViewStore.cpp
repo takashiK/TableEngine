@@ -26,6 +26,11 @@
 #include "widgets/TeArchiveFolderView.h"
 #include "widgets/TeFindFolderView.h"
 #include "widgets/TeDriveBar.h"
+#include "widgets/TeDetailView.h"
+#include "widgets/detail/TeDetailThumbnailSection.h"
+#include "widgets/detail/TeDetailFileInfoSection.h"
+#include "widgets/detail/TeDetailExifSection.h"
+#include "widgets/detail/TeDetailTextPreviewSection.h"
 #include "TeDispatcher.h"
 #include "TeSettings.h"
 
@@ -185,6 +190,15 @@ void TeViewStore::initialize()
 	//Splitter
 	mp_split = new QSplitter();
 	mp_split->addWidget(folder_widget);
+
+	//Detail View
+	mp_detailView = new TeDetailView();
+	mp_detailView->registerSection(new TeDetailThumbnailSection());
+	mp_detailView->registerSection(new TeDetailFileInfoSection());
+	mp_detailView->registerSection(new TeDetailExifSection());
+	mp_detailView->registerSection(new TeDetailTextPreviewSection());
+	mp_split->addWidget(mp_detailView);
+	mp_detailView->setVisible(false);
 
 	mp_mainWindow->setCentralWidget(mp_split);
 
@@ -463,6 +477,18 @@ QWidget * TeViewStore::mainWindow()
 	return mp_mainWindow;
 }
 
+bool TeViewStore::isDetailVisible() const
+{
+	return mp_detailView && mp_detailView->isVisible();
+}
+
+void TeViewStore::setDetailVisible(bool visible)
+{
+	if (mp_detailView) {
+		mp_detailView->setVisible(visible);
+	}
+}
+
 int TeViewStore::currentTabPlace()
 {
 	//qDebug() << "currentTabPlace:" << m_currentTabPlace;
@@ -598,6 +624,11 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	folderView->setFileShowMode(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	connect(this, &TeViewStore::fileListViewModeChanged, folderView->list(), &TeFileListView::setFileViewMode);
 	connect(this, &TeViewStore::fileListShowModeChanged, folderView, &TeFileFolderView::setFileShowMode);
+
+	if (mp_detailView) {
+		connect(folderView, &TeFolderView::currentFileChanged,
+				mp_detailView, &TeDetailView::setFileInfo);
+	}
 
 	addFolderView(folderView, place);
 
@@ -879,18 +910,7 @@ void TeViewStore::setNavigationVisible(bool visible)
 	}
 }
 
-bool TeViewStore::isDetailVisible() const
-{
-	//return mp_tab[TAB_RIGHT] && !mp_tab[TAB_RIGHT]->isHidden();
-	return false; //Detailは今のところ実装しない。常に非表示。
-}
 
-void TeViewStore::setDetailVisible(bool visible)
-{
-	//if (mp_tab[TAB_RIGHT]) {
-	//	mp_tab[TAB_RIGHT]->setHidden(!visible);
-	//}
-}
 
 void TeViewStore::setFileInfoFlags(TeTypes::FileInfoFlags flags)
 {
