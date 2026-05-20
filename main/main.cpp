@@ -25,6 +25,7 @@
 #include <dialogs/TeOptionSetting.h>
 #include <dialogs/TeKeySetting.h>
 #include <dialogs/TeMenuSetting.h>
+#include <dialogs/TeToolbarSetting.h>
 
 #include "version.h"
 
@@ -54,6 +55,7 @@ int main(int argc, char *argv[])
 	TeOptionSetting::storeDefaultSettings();
 	TeKeySetting::storeDefaultSettings();
 	TeMenuSetting::storeDefaultSettings();
+	TeToolbarSetting::storeDefaultSettings();
 	
 	//initialize com thread. it use for windows shell.
 	threadInitialize(&a);

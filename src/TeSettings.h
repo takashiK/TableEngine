@@ -66,6 +66,7 @@ SETTING_STR(SETTING_STARTUP_InitialFolderMode, "startup/initial_folder_mode");
 SETTING_STR(SETTING_STARTUP_InitialFolder, "startup/initial_folder");
 
 SETTING_STR(SETTING_KEY, "command_key");
+SETTING_STR(SETTING_TOOLBAR, "toolbar");
 SETTING_STR(SETTING_MENU, "menu");
 SETTING_STR(SETTING_MENUBAR_GROUP, "menuGroup00");
 SETTING_STR(SETTING_TREEPOPUP_GROUP, "menuGroup01");

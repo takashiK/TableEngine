@@ -47,6 +47,7 @@ class TeDispatcher;
 class QMainWindow;
 class TeDriveBar;
 class QSplitter;
+class QToolBar;
 
 /**
  * @class TeViewStore
@@ -113,6 +114,9 @@ public:
 
 	/** @brief (Re-)loads the menu structure from QSettings. */
 	void loadMenu();
+
+	/** @brief (Re-)loads the toolbar structure from QSettings. */
+	void loadToolbar();
 
 	/** @brief Loads general settings (window geometry, visibility flags) from QSettings. */
 	void loadSetting();
@@ -313,10 +317,11 @@ signals:
 	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);
 
 private:
-	TeMainWindow*        mp_mainWindow = nullptr;
-	QTabWidget*          mp_tab[TAB_MAX] = {}; ///< Left and right tab panels.
-	TeDriveBar*  mp_driveBar = nullptr;
+	TeMainWindow*  mp_mainWindow = nullptr;
+	QTabWidget*    mp_tab[TAB_MAX] = {}; ///< Left and right tab panels.
+	TeDriveBar*    mp_driveBar = nullptr;
 	QSplitter*     mp_split = nullptr;
+	QToolBar*	   mp_toolBar = nullptr;
 	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE;
 
 	int  m_currentTabPlace = TAB_LEFT;

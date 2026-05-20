@@ -153,6 +153,13 @@ void TeViewStore::initialize()
 	QLabel *labelL = new QLabel(u8"Left Text");
 	mp_mainWindow->statusBar()->addWidget(labelL);
 
+	//Toolbar
+	mp_toolBar = new QToolBar("Toolbar");
+	mp_mainWindow->addToolBar(mp_toolBar);
+
+
+	//Detail View
+
 	//Add Tabs
 	mp_tab[TAB_LEFT] = new QTabWidget();
 	mp_tab[TAB_LEFT]->setMovable(true);
@@ -218,6 +225,7 @@ void TeViewStore::initialize()
 
 	//load settings
 	loadMenu();
+	loadToolbar();
 	loadSetting();
 	loadStatus();
 }
@@ -308,6 +316,45 @@ void TeViewStore::loadMenu()
 }
 
 /*!
+ * Store toolbar item from settings.
+ */
+void TeViewStore::loadToolbar()
+{
+	mp_toolBar->clear();
+
+	QSettings settings;
+	TeCommandFactory* p_factory = TeCommandFactory::factory();
+
+	settings.beginGroup(SETTING_TOOLBAR);
+	for (const auto& key : settings.childKeys()) {
+		QStringList values = settings.value(key).toString().split(',');
+		// indent, register name, cmdId
+		int indent = values[0].toInt();
+		TeTypes::CmdId cmdId = static_cast<TeTypes::CmdId>(values[2].toInt());
+		if (cmdId != TeTypes::CMDID_SPECIAL_SEPARATOR) {
+			const TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
+			if (p_info) {
+				QAction* action = new QAction(p_info->icon(), p_info->name());
+				connect(action, &QAction::triggered, [this, cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
+				mp_toolBar->addAction(action);
+			}
+		}
+		else {
+			mp_toolBar->addSeparator();
+		}
+	}
+	settings.endGroup();
+
+	QList<QAction*> actions = mp_toolBar->actions();
+	for (const auto& action : actions){
+		auto widget = mp_toolBar->widgetForAction(action);
+		if (widget) {
+			widget->setStyleSheet("QToolButton{padding-left: 5px; padding-right: 5px;}");
+		}
+	}
+}
+
+/*!
 	Store Application settings
  */
 void TeViewStore::loadSetting()
@@ -353,6 +400,13 @@ void TeViewStore::applyStyleSheet(Qt::ColorScheme scheme)
 
 	if (!merged.isEmpty())
 		qApp->setStyleSheet(merged);
+	
+	QPalette pal = qApp->palette();
+	pal.setColor(QPalette::Highlight,
+		dark ? QColor("#264f78") : QColor("#cce4f7"));
+	pal.setColor(QPalette::HighlightedText,
+		dark ? QColor("#ffffff") : QColor("#1e1e1e"));
+	qApp->setPalette(pal);
 }
 
 void TeViewStore::applyStyleSheet()
@@ -799,15 +853,14 @@ void TeViewStore::setStatusBarVisible(bool visible)
 
 bool TeViewStore::isToolBarVisible() const
 {
-	//return mp_mainWindow && !mp_mainWindow->toolBar()->isHidden();
-	return false; //ToolBarは今のところ実装しない。常に非表示。
+	return mp_mainWindow && !mp_toolBar->isHidden();
 }
 
 void TeViewStore::setToolBarVisible(bool visible)
 {
-	//if (mp_mainWindow) {
-	//	mp_mainWindow->toolBar()->setHidden(!visible);
-	//}
+	if (mp_mainWindow) {
+		mp_toolBar->setHidden(!visible);
+	}
 }
 
 bool TeViewStore::isNavigationVisible() const

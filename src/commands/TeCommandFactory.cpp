@@ -80,6 +80,7 @@
 #include "setting/TeCmdOption.h"
 #include "setting/TeCmdKeySetting.h"
 #include "setting/TeCmdMenuSetting.h"
+#include "setting/TeCmdToolbarSetting.h"
 
 #include "help/TeCmdHelp.h"
 #include "help/TeCmdVersion.h"
@@ -130,9 +131,9 @@ TeCommandFactory::TeCommandFactory()
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_EDIT);
-		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_CUT, TeCmdCut, tr("Cut"), tr("Select all files."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/cut.png")));
-		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_COPY, TeCmdCopy, tr("Copy"), tr("Select all files."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/copy.png")));
-		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_PASTE, TeCmdPaste, tr("Paste"), tr("Select all files."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/paste.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_CUT, TeCmdCut, tr("Cut"), tr("Clipboard Cut operation."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/cut.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_COPY, TeCmdCopy, tr("Copy"), tr("Clipboard Copy operation."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/copy.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_PASTE, TeCmdPaste, tr("Paste"), tr("Clipboard Paste operation."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/paste.png")));
 		SEPARATOR();
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL, TeCmdSelectAll, tr("Select &All"), tr("Select all files."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/selectAll.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE, TeCmdSelectToggle, tr("&Toggle"), tr("Toggle selection."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/selectToggle.png")));
@@ -212,6 +213,7 @@ TeCommandFactory::TeCommandFactory()
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_SETTING);
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_OPTION, TeCmdOption, tr("&Option"), tr("General options."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/settings.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_KEY, TeCmdKeySetting, tr("&Key"), tr("Customize key oparations."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/keyboard.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_TOOLBAR, TeCmdToolbarSetting, tr("&Toolbar"), tr("Customize Toolbar."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/toolBar.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_MENU, TeCmdMenuSetting, tr("&Menu"), tr("Customize Menu item."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/menu.png")));
 	END_GROUP();
 
