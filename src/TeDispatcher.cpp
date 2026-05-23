@@ -77,13 +77,14 @@ bool TeDispatcher::dispatch(TeTypes::WidgetType type, QEvent *event)
 {
 	//For ListView & TreeView
 	if (type == TeTypes::WT_LISTVIEW || type == TeTypes::WT_TREEVIEW) {
-		if (event->type() == QEvent::KeyPress) {
+		if (event->type() == QEvent::ShortcutOverride) {
 			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
 			//change key event to command Id.
 			TeTypes::CmdId cmdId = m_keyCmdMap.value(std::pair<int,int>{keyEvent->modifiers(),keyEvent->key()});
 
 			if (cmdId != TeTypes::CMDID_NONE) {
+				event->accept();
 				emit requestCommand(cmdId,type,event,nullptr);
 			}
 		}
