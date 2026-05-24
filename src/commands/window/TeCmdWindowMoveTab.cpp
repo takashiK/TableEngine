@@ -36,12 +36,6 @@ TeCmdWindowMoveTab::~TeCmdWindowMoveTab()
 {
 }
 
-bool TeCmdWindowMoveTab::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdWindowMoveTab::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);

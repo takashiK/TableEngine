@@ -36,12 +36,6 @@ TeCmdSelectionStyle::~TeCmdSelectionStyle()
 {
 }
 
-bool TeCmdSelectionStyle::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdSelectionStyle::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	if (!p_cmdParam || !p_cmdParam->contains("SELECTION"))

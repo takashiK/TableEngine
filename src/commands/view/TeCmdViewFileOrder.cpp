@@ -36,12 +36,6 @@ TeCmdViewFileOrder::~TeCmdViewFileOrder()
 {
 }
 
-bool TeCmdViewFileOrder::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdViewFileOrder::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	if (p_cmdParam && p_store) {

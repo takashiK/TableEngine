@@ -36,12 +36,6 @@ TeCmdWindowCloseTab::~TeCmdWindowCloseTab()
 {
 }
 
-bool TeCmdWindowCloseTab::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdWindowCloseTab::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);

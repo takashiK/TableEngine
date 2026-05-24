@@ -85,6 +85,16 @@
 #include "help/TeCmdHelp.h"
 #include "help/TeCmdVersion.h"
 
+#include "navi/TeCmdNaviUp.h"
+#include "navi/TeCmdNaviDown.h"
+#include "navi/TeCmdNaviLeft.h"
+#include "navi/TeCmdNaviRight.h"
+#include "navi/TeCmdNaviDriveBar.h"
+#include "navi/TeCmdNaviToggleFolderLR.h"
+#include "navi/TeCmdNaviToggleFolderTree.h"
+#include "navi/TeCmdNaviDetailScrollUp.h"
+#include "navi/TeCmdNaviDetailScrollDown.h"
+
 /**
  * @file TeCommandFactory.cpp
  * @brief Implementation of TeCommandFactory.
@@ -220,6 +230,18 @@ TeCommandFactory::TeCommandFactory()
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_HELP);
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_HELP_SHOW, TeCmdHelp, tr("&Help"), tr("Show help by default browser."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/help.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_HELP_VERSION, TeCmdVersion, tr("&Version"), tr("Show version information."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/version.png")));
+	END_GROUP();
+
+	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_NAVI);
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_UP, TeCmdNaviUp, tr("Cursor Up"), tr("Cursor up."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/cursorUp.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_DOWN, TeCmdNaviDown, tr("Cursor Down"), tr("Cursor down."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/cursorDown.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_LEFT, TeCmdNaviLeft, tr("Cursor Left"), tr("Cursor left."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/cursorLeft.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_RIGHT, TeCmdNaviRight, tr("Cursor Right"), tr("Cursor right."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/cursorRight.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_DRIVEBAR, TeCmdNaviDriveBar, tr("Navigate DriveBar"), tr("Focus to drive bar."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviDriveBar.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_LR, TeCmdNaviToggleFolderLR, tr("Toggle Folder Left/Right"), tr("Toggle focus folder between left and right side."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviToggleFolderLR.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE, TeCmdNaviToggleFolderTree, tr("Toggle Folder/Tree"), tr("Toggle focus between folder and tree view."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviToggleFolderTree.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_DETAIL_SCROLL_UP, TeCmdNaviDetailScrollUp, tr("Scroll Detail Up"), tr("Scroll detail view up."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviDetailUp.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN, TeCmdNaviDetailScrollDown, tr("Scroll Detail Down"), tr("Scroll detail view down."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviDetailDown.png")));
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_USER);

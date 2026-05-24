@@ -42,15 +42,10 @@ TeCmdFind::~TeCmdFind()
 {
 }
 
-bool TeCmdFind::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdFind::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
+	NOT_USED(p_cmdParam);
 	return false;
 }
 

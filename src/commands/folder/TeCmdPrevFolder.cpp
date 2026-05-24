@@ -37,15 +37,10 @@ TeCmdPrevFolder::~TeCmdPrevFolder()
 {
 }
 
-bool TeCmdPrevFolder::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdPrevFolder::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
+	NOT_USED(p_cmdParam);
 	return false;
 }
 

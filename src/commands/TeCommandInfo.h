@@ -67,12 +67,6 @@ public:
 	void setCommandInfo(TeTypes::CmdId cmdId, const QString& name, const QString& description, const QIcon& icon);
 
 	/**
-	 * @brief Returns true when the command can be executed in the current state.
-	 * @param p_store The current view store.
-	 */
-	virtual bool isActive(TeViewStore* p_store ) const = 0;
-
-	/**
 	 * @brief Returns true when the command is currently in its "selected" state.
 	 *
 	 * Used for toggle commands (e.g. show hidden files) to reflect checked state
@@ -113,7 +107,6 @@ protected:
  *
  * @details The template parameter T must be a TeCommandBase subclass that
  * exposes the following static members:
- * - @c bool isActive(TeViewStore*)
  * - @c bool isSelected(TeViewStore*, const TeCmdParam*)
  * - @c QFlags<TeTypes::CmdType> type()
  *
@@ -126,8 +119,6 @@ public:
 		: TeCommandInfoBase(type, name, description, icon), m_cmdParam(cmdParam) {}
 	virtual ~TeCommandInfo() {}
 
-	/** @brief Delegates to T::isActive(). */
-	virtual bool isActive( TeViewStore* p_store ) const { return T::isActive(p_store); }
 	/** @brief Delegates to T::isSelected(). */
 	virtual bool isSelected( TeViewStore* p_store ) const { return T::isSelected(p_store, &m_cmdParam); }
 	/** @brief Delegates to T::type(). */

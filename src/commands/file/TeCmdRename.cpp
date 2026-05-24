@@ -40,15 +40,10 @@ TeCmdRename::~TeCmdRename()
 {
 }
 
-bool TeCmdRename::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdRename::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
+	NOT_USED(p_cmdParam);
 	return false;
 }
 

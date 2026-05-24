@@ -36,12 +36,6 @@ TeCmdWindowBar::~TeCmdWindowBar()
 {
 }
 
-bool TeCmdWindowBar::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdWindowBar::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	if (p_store && p_cmdParam) {

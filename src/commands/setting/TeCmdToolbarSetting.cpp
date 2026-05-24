@@ -39,12 +39,6 @@ TeCmdToolbarSetting::~TeCmdToolbarSetting()
 {
 }
 
-bool TeCmdToolbarSetting::isActive( TeViewStore* p_store )
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdToolbarSetting::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);

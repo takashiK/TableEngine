@@ -45,15 +45,10 @@ TeCmdAddFavorite::~TeCmdAddFavorite()
 {
 }
 
-bool TeCmdAddFavorite::isActive(TeViewStore* p_store)
-{
-	NOT_USED(p_store);
-	return false;
-}
-
 bool TeCmdAddFavorite::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
+	NOT_USED(p_cmdParam);
 	return false;
 }
 

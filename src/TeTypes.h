@@ -230,6 +230,17 @@ public:
 		CMDID_SYSTEM_HELP_SHOW,                           // #Show Help by default browser
 		CMDID_SYSTEM_HELP_VERSION,                        // #Show version information
 		
+		CMDID_SYSTEM_NAVI = CMDID_SYSTEM + 0x9000,        // Menu item : Navigation (for future use)
+		CMDID_SYSTEM_NAVI_UP,                             // #Navigate cursor up
+		CMDID_SYSTEM_NAVI_DOWN,                           // #Navigate cursor down
+		CMDID_SYSTEM_NAVI_LEFT,                           // #Navigate cursor left
+		CMDID_SYSTEM_NAVI_RIGHT,                          // #Navigate cursor right
+		CMDID_SYSTEM_NAVI_DRIVEBAR,                       // #Navigate focus to drive bar
+		CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_LR,              // #Navigate toggle focus folder left/right
+		CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE,            // #Navigate toggle focus folder tree view
+		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_UP,              // #Navigate scroll detail view up
+		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN,            // #Navigate scroll detail view down
+
 		CMDID_USER        = 0xD000,                       // User registed commands
 		CMDID_USER_REGIST_COMMAND,                        // Regist user commands
 		CMDID_USER_EXECUTE,                               // Execute User registed command with parameters
