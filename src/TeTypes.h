@@ -198,6 +198,7 @@ public:
 		CMDID_SYSTEM_VIEW_ORDERBY_MODIFIED,				  // #Order by modified date
 		CMDID_SYSTEM_VIEW_ORDER_ASCENDING,				  // #Order ascending
 		CMDID_SYSTEM_VIEW_ORDER_DESCENDING,		          // #Order descending
+		CMDID_SYSTEM_VIEW_SORT_SETTING,                   // Sort setting dialog
 		CMDID_SYSTEM_VIEW_SMALL_ICON,					  // #Show small icon
 		CMDID_SYSTEM_VIEW_LARGE_ICON,					  // #Show large icon
 		CMDID_SYSTEM_VIEW_HUGE_ICON,					  // #Show huge icon
@@ -206,6 +207,8 @@ public:
 		CMDID_SYSTEM_TOOL    = CMDID_SYSTEM + 0x5000,     // Menu item : Tool
 		CMDID_SYSTEM_TOOL_VIEW_FILE,					  // #View file
 		CMDID_SYSTEM_TOOL_VIEW_BINARY,					  // #View binary
+		CMDID_SYSTEM_TOOL_EDIT_FILE,                      // Edit file
+		CMDID_SYSTEM_TOOL_EDIT_BINARY,                    // Edit binary
 		CMDID_SYSTEM_TOOL_SETUP,                          // Setup Tools
 		CMDID_SYSTEM_TOOL_EXECUTE,                        // Execute Tool with parameters
 
@@ -218,13 +221,15 @@ public:
 		CMDID_SYSTEM_WINDOW_NEW_TAB,		              // #New Tab
 		CMDID_SYSTEM_WINDOW_CLOSE_TAB,                    // #Close Tab
 		CMDID_SYSTEM_WINDOW_MOVE_TAB,                     // #Move Tab
+		CMDID_SYSTEM_WINDOW_NEXT_TAB,                     // #Next Tab
+		CMDID_SYSTEM_WINDOW_PREV_TAB,                     // #Previous Tab
 
 		CMDID_SYSTEM_SETTING = CMDID_SYSTEM + 0x7000,     // Menu item : Setting
 		CMDID_SYSTEM_SETTING_OPTION,                      // #Global Setting
 		CMDID_SYSTEM_SETTING_KEY,                         // #Key Setting
-		CMDID_SYSTEM_SETTING_TOOLBAR,                     // Toolber setting
+		CMDID_SYSTEM_SETTING_TOOLBAR,                     // #Toolbar setting
 		CMDID_SYSTEM_SETTING_MENU,                        // #Popup & menu setting
-		CMDID_SYSTEM_SETTING_STYLE,                       // Style Setting
+		CMDID_SYSTEM_SETTING_STYLE,                       // #Style Setting
 
 		CMDID_SYSTEM_HELP    = CMDID_SYSTEM + 0x8000,     // Menu item : Help
 		CMDID_SYSTEM_HELP_SHOW,                           // #Show Help by default browser
@@ -236,10 +241,10 @@ public:
 		CMDID_SYSTEM_NAVI_LEFT,                           // #Navigate cursor left
 		CMDID_SYSTEM_NAVI_RIGHT,                          // #Navigate cursor right
 		CMDID_SYSTEM_NAVI_DRIVEBAR,                       // #Navigate focus to drive bar
-		CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_LR,              // #Navigate toggle focus folder left/right
-		CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE,            // #Navigate toggle focus folder tree view
-		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_UP,              // #Navigate scroll detail view up
-		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN,            // #Navigate scroll detail view down
+		CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_LR,               // #Navigate toggle focus folder left/right
+		CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE,             // #Navigate toggle focus folder tree view
+		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_UP,               // #Navigate scroll detail view up
+		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN,             // #Navigate scroll detail view down
 
 		CMDID_USER        = 0xD000,                       // User registed commands
 		CMDID_USER_REGIST_COMMAND,                        // Regist user commands

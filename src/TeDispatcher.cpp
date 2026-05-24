@@ -20,11 +20,8 @@
 
 #include <QWidget>
 #include <QKeyEvent>
-#include <QSettings>
-#include <QKeySequence>
-#include "TeSettings.h"
-
 #include "TeDispatcher.h"
+#include "TeKeyMap.h"
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandBase.h"
 
@@ -126,36 +123,7 @@ void TeDispatcher::requestCommandFinalize(TeCommandBase * cmdBase)
 
 void TeDispatcher::loadKeySetting()
 {
-	m_keyCmdMap.clear();
-
-	QList<int> list;
-	for (uint32_t key = Qt::Key_A; key <= Qt::Key_Z; key++) {
-		list.append(key);
-		list.append((int)Qt::CTRL + key);
-	}
-	for (uint32_t key = Qt::Key_0; key <= Qt::Key_9; key++) {
-		list.append(key);
-		list.append((int)Qt::CTRL + key);
-	}
-	for (uint32_t key = Qt::Key_F1; key <= Qt::Key_F12; key++) {
-		list.append(key);
-		list.append((int)Qt::CTRL + key);
-		list.append((int)Qt::SHIFT + key);
-	}
-	list.append(Qt::Key_Escape);
-	list.append(Qt::Key_Backspace);
-	list.append(Qt::Key_Delete);
-
-	QSettings settings;
-	settings.beginGroup(SETTING_KEY);
-	const int modifier = Qt::CTRL | Qt::SHIFT | Qt::ALT | Qt::META;
-
-	for (const auto& key : list) {
-		int cmdId = settings.value(QKeySequence(key).toString().replace("+", "_")).toInt();
-		if (cmdId != TeTypes::CMDID_NONE) {
-			m_keyCmdMap.insert(std::pair<int,int>{(key & modifier), (key & (~modifier))}, static_cast<TeTypes::CmdId>(cmdId));
-		}
-	}
+	m_keyCmdMap = TeKeyMap::loadKeyMap();
 }
 
 /**

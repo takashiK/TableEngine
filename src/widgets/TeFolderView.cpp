@@ -31,7 +31,6 @@
 
 #include <QLayout>
 #include <QHeaderView>
-#include <QKeyEvent>
 #include <QStorageInfo>
 
 
@@ -67,82 +66,4 @@ void TeFolderView::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, Q
 	if (mp_dispatcher != nullptr) {
 		mp_dispatcher->execCommand(cmdId, type, event, p_param);
 	}
-}
-
-bool TeFolderView::isDispatchable(TeTypes::WidgetType type, QEvent *event) const
-{
-	//select target event.
-	if (event->type() == QEvent::ShortcutOverride) {
-		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-
-		if (keyEvent->modifiers() == Qt::NoModifier || keyEvent->modifiers() == Qt::ShiftModifier || keyEvent->modifiers() == Qt::ControlModifier) {
-			switch (keyEvent->key()) {
-			case Qt::Key_F1:
-			case Qt::Key_F2:
-			case Qt::Key_F3:
-			case Qt::Key_F4:
-			case Qt::Key_F5:
-			case Qt::Key_F6:
-			case Qt::Key_F7:
-			case Qt::Key_F8:
-			case Qt::Key_F9:
-			case Qt::Key_F10:
-			case Qt::Key_F11:
-			case Qt::Key_F12:
-			case Qt::Key_Backspace:
-			case Qt::Key_Delete:
-			case Qt::Key_Tab:
-			case Qt::Key_Escape:
-				return true;
-
-			case Qt::Key_0:
-			case Qt::Key_1:
-			case Qt::Key_2:
-			case Qt::Key_3:
-			case Qt::Key_4:
-			case Qt::Key_5:
-			case Qt::Key_6:
-			case Qt::Key_7:
-			case Qt::Key_8:
-			case Qt::Key_9:
-
-			case Qt::Key_A:
-			case Qt::Key_B:
-			case Qt::Key_C:
-			case Qt::Key_D:
-			case Qt::Key_E:
-			case Qt::Key_F:
-			case Qt::Key_G:
-			case Qt::Key_H:
-			case Qt::Key_I:
-			case Qt::Key_J:
-			case Qt::Key_K:
-			case Qt::Key_L:
-			case Qt::Key_M:
-			case Qt::Key_N:
-			case Qt::Key_O:
-			case Qt::Key_P:
-			case Qt::Key_Q:
-			case Qt::Key_R:
-			case Qt::Key_S:
-			case Qt::Key_T:
-			case Qt::Key_U:
-			case Qt::Key_V:
-			case Qt::Key_W:
-			case Qt::Key_X:
-			case Qt::Key_Y:
-			case Qt::Key_Z:
-				if (keyEvent->modifiers().testFlag(Qt::ShiftModifier)) {
-					//Use Shift key to file selection.
-					return false;
-				}
-				else {
-					return true;
-				}
-			default:
-				break;
-			}
-		}
-	}
-	return false;
 }

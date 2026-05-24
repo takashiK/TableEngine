@@ -21,6 +21,7 @@
 #include "TeKeySetting.h"
 #include "TeCmdTreeWidget.h"
 #include "TeKeyTreeWidget.h"
+#include "TeKeyMap.h"
 #include "TeTypes.h"
 #include "TeSettings.h"
 #include "commands/TeCommandFactory.h"
@@ -137,10 +138,16 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 	layout->addLayout(hbox);
 
 	//Register OK and Cancel.
-	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Reset);
 	buttonBox->setCenterButtons(true);
 	connect(buttonBox, &QDialogButtonBox::accepted, this, &TeKeySetting::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, this, &TeKeySetting::reject);
+	connect(buttonBox, &QDialogButtonBox::clicked, [this,buttonBox](QAbstractButton *button) {
+		if (buttonBox->standardButton(button) == QDialogButtonBox::Reset) {
+			storeDefaultSettings(true);
+			QDialog::accept();
+		}
+	});
 	layout->addWidget(buttonBox);
 
 	setLayout(layout);
@@ -176,7 +183,7 @@ void TeKeySetting::storeDefaultSettings(bool force)
 {
 	QSettings settings;
 
-	if (settings.contains(SETTING_KEY)) {
+	if (settings.childGroups().contains(SETTING_KEY)) {
 		if (!force) {
 			return;
 		}
@@ -188,6 +195,7 @@ void TeKeySetting::storeDefaultSettings(bool force)
 #define SETTING( key, default_value)  settings.setValue( QKeySequence(key).toString().replace("+", "_") , settings.value( QKeySequence(key).toString().replace("+", "_") , default_value ))
 
 	SETTING(Qt::Key_N, TeTypes::CMDID_SYSTEM_FILE_NEW);
+	SETTING(Qt::CTRL | Qt::Key_N, TeTypes::CMDID_SYSTEM_FOLDER_CREATE_FOLDER);
 	SETTING(Qt::Key_C, TeTypes::CMDID_SYSTEM_FILE_COPY_TO);
 	SETTING(Qt::Key_M, TeTypes::CMDID_SYSTEM_FILE_MOVE_TO);
 	SETTING(Qt::Key_D, TeTypes::CMDID_SYSTEM_FILE_DELETE);
@@ -215,16 +223,28 @@ void TeKeySetting::storeDefaultSettings(bool force)
 	SETTING(Qt::Key_F, TeTypes::CMDID_SYSTEM_FOLDER_FIND);
 	SETTING(Qt::CTRL | Qt::Key_F, TeTypes::CMDID_SYSTEM_FOLDER_FIND);
 
-	SETTING(Qt::Key_H, TeTypes::CMDID_SYSTEM_VIEW_SHOW_HIDDEN);
-	SETTING(Qt::Key_I, TeTypes::CMDID_SYSTEM_VIEW_HUGE_ICON);
-	SETTING(Qt::Key_L, TeTypes::CMDID_SYSTEM_VIEW_SMALL_ICON);
+	SETTING(Qt::Key_O, TeTypes::CMDID_SYSTEM_VIEW_SHOW_HIDDEN);
+	SETTING(Qt::CTRL | Qt::Key_I, TeTypes::CMDID_SYSTEM_VIEW_HUGE_ICON);
+	SETTING(Qt::CTRL | Qt::Key_L, TeTypes::CMDID_SYSTEM_VIEW_SMALL_ICON);
+	SETTING(Qt::Key_Y, TeTypes::CMDID_SYSTEM_VIEW_FILTER);
 
 	SETTING(Qt::Key_V, TeTypes::CMDID_SYSTEM_TOOL_VIEW_FILE);
 	SETTING(Qt::Key_B, TeTypes::CMDID_SYSTEM_TOOL_VIEW_BINARY);
 
-	SETTING(Qt::CTRL | Qt::Key_N, TeTypes::CMDID_SYSTEM_WINDOW_NEW_TAB);
+	SETTING(Qt::CTRL | Qt::Key_T, TeTypes::CMDID_SYSTEM_WINDOW_NEW_TAB);
 	SETTING(Qt::CTRL | Qt::Key_W, TeTypes::CMDID_SYSTEM_WINDOW_CLOSE_TAB);
-	SETTING(Qt::CTRL | Qt::Key_T, TeTypes::CMDID_SYSTEM_WINDOW_MOVE_TAB);
+	SETTING(Qt::CTRL | Qt::Key_M, TeTypes::CMDID_SYSTEM_WINDOW_MOVE_TAB);
+	SETTING(Qt::CTRL | Qt::Key_J, TeTypes::CMDID_SYSTEM_WINDOW_NEXT_TAB);
+	SETTING(Qt::CTRL | Qt::Key_K, TeTypes::CMDID_SYSTEM_WINDOW_PREV_TAB);
+
+	SETTING(Qt::Key_J, TeTypes::CMDID_SYSTEM_NAVI_DOWN);
+	SETTING(Qt::Key_K, TeTypes::CMDID_SYSTEM_NAVI_UP);
+	SETTING(Qt::Key_H, TeTypes::CMDID_SYSTEM_NAVI_LEFT);
+	SETTING(Qt::Key_L, TeTypes::CMDID_SYSTEM_NAVI_RIGHT);
+
+	SETTING(Qt::Key_Q, TeTypes::CMDID_SYSTEM_NAVI_DRIVEBAR);
+	SETTING(Qt::Key_Tab, TeTypes::CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_LR);
+	SETTING(Qt::CTRL | Qt::Key_Tab, TeTypes::CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE);
 
 
 #undef SETTING	
@@ -234,22 +254,13 @@ void TeKeySetting::storeDefaultSettings(bool force)
 QList<QTreeWidgetItem*> TeKeySetting::createKeyTreeItem()
 {
 	QList<int> normal, ctrl, shift;
-	for (uint32_t key = Qt::Key_A; key <= Qt::Key_Z; key++) {
-		normal.append(key);
-		ctrl.append((int)Qt::CTRL + key);
+	const int modifierMask = Qt::CTRL | Qt::SHIFT | Qt::ALT | Qt::META;
+	for (const int key : TeKeyMap::assignableKeys()) {
+		const int mod = key & modifierMask;
+		if      (mod == (int)Qt::CTRL)  ctrl.append(key);
+		else if (mod == (int)Qt::SHIFT) shift.append(key);
+		else                            normal.append(key);
 	}
-	for (uint32_t key = Qt::Key_0; key <= Qt::Key_9; key++) {
-		normal.append(key);
-		ctrl.append((int)Qt::CTRL + key);
-	}
-	for (uint32_t key = Qt::Key_F1; key <= Qt::Key_F12; key++) {
-		normal.append(key);
-		ctrl.append((int)Qt::CTRL + key);
-		shift.append((int)Qt::SHIFT + key);
-	}
-	normal.append(Qt::Key_Escape);
-	normal.append(Qt::Key_Backspace);
-	normal.append(Qt::Key_Delete);
 
 	QList<QTreeWidgetItem*> treeItem;
 	//Normal Key

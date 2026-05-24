@@ -23,6 +23,7 @@
 #include "utils/TeUtils.h"
 #include "dialogs/TeToolbarSetting.h"
 
+
 /**
  * @file TeCmdToolbarSetting.cpp
  * @brief Implementation of TeCmdToolbarSetting.
@@ -64,6 +65,9 @@ QFlags<TeTypes::CmdType> TeCmdToolbarSetting::type()
 bool TeCmdToolbarSetting::execute(TeViewStore * p_store)
 {
 	TeToolbarSetting dlg(p_store->mainWindow());
-	dlg.exec();
+	if(dlg.exec() == QDialog::Accepted) {
+		// Handle accepted case if needed
+		p_store->loadToolbar(); // Reload toolbar settings after changes
+	}
 	return true;
 }

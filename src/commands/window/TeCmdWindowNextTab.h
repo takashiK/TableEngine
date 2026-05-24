@@ -18,56 +18,41 @@
 **
 ****************************************************************************/
 
-#include "TeCmdNaviDriveBar.h"
-#include "utils/TeUtils.h"
-#include "TeViewStore.h"
-#include "widgets/TeDriveBar.h"
+#pragma once
+
+#include "commands/TeCommandBase.h"
+
+#include <QList>
+#include <QFlags>
 
 /**
- * @file TeCmdNaviDriveBar.cpp
- * @brief Declaration of TeCmdNaviDriveBar.
+ * @file TeCmdWindowNextTab.h
+ * @brief Declaration of TeCmdWindowNextTab.
  * @ingroup commands
  */
 
 
-TeCmdNaviDriveBar::TeCmdNaviDriveBar()
+class TeViewStore;
+
+class TeCmdWindowNextTab :
+    public TeCommandBase
 {
-}
-
-TeCmdNaviDriveBar::~TeCmdNaviDriveBar()
-{
-}
-
-bool TeCmdNaviDriveBar::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
-{
-	NOT_USED(p_store);
-	NOT_USED(p_cmdParam);
-	return false;
-}
-
-QFlags<TeTypes::CmdType> TeCmdNaviDriveBar::type()
-{
-	return QFlags<TeTypes::CmdType>(
-		TeTypes::CMD_TRIGGER_NORMAL
-		// TeTypes::CMD_TRIGGER_SELECT
-
-		| TeTypes::CMD_CATEGORY_TREE
-		| TeTypes::CMD_CATEGORY_LIST
-		| TeTypes::CMD_CATEGORY_OTHER
-
-		| TeTypes::CMD_TARGET_FILE
-		| TeTypes::CMD_TARGET_DIRECTORY
-	);
-}
+public:
+	TeCmdWindowNextTab();
+	virtual ~TeCmdWindowNextTab();
 
 
-bool TeCmdNaviDriveBar::execute(TeViewStore* p_store)
-{
-	if (p_store) {
-		TeDriveBar* driveBar = p_store->driveBar();
-		if (driveBar) {
-			driveBar->setFocus();
-		}
-	}
-	return true;
-}
+	// Check if this command is selected when item is selected.
+	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
+
+	// type of command
+	static QFlags<TeTypes::CmdType> type();
+
+protected:
+	// Execute command.
+	// return
+	//   true  : command is finished. after execute, this command is deleted.
+	//   false : command is still processing. after finish. you must call finish() to delete this command.
+	virtual bool execute(TeViewStore* p_store);
+};
+

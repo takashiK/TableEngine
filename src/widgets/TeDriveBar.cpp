@@ -28,6 +28,8 @@
 #include <QStyle>
 #include <QSettings>
 #include <QMenu>
+#include <QKeyEvent>
+
 /**
  * @file TeDriveBar.cpp
  * @brief Implementation of TeDriveBar.
@@ -241,3 +243,20 @@ void TeDriveBar::selectDrive(const QString& path)
 	}
 }
 
+void TeDriveBar::keyPressEvent(QKeyEvent *event)
+{
+	QString s = event->text().toUpper();
+
+	if (s.isEmpty() || !s[0].isLetter())
+		return QToolBar::keyPressEvent(event);
+	
+	for (QAction* action : actions()) {
+		if (!action->isSeparator() && action->text().toUpper().startsWith(s)) {
+			action->trigger();
+			event->accept();
+			return;
+		}
+	}
+
+	QToolBar::keyPressEvent(event);
+}

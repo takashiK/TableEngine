@@ -49,6 +49,7 @@ class QMainWindow;
 class TeDriveBar;
 class QSplitter;
 class QToolBar;
+class TeFileTreeView;
 
 /**
  * @class TeViewStore
@@ -182,6 +183,15 @@ public:
 
 	/** @brief Returns the TeFolderView that currently has keyboard focus. */
 	TeFolderView* currentFolderView();
+
+	/** @brief Returns the TeFileTreeView that currently has keyboard focus, or nullptr if none. */
+	TeFileTreeView* navTreeView();
+
+	/** @brief Returns the TeDetailView that currently has keyboard focus, or nullptr if none. */
+	TeDetailView* detailView();
+
+	/** @brief Returns the TeDriveBar instance. */
+	TeDriveBar* driveBar();
 
 	/**
 	 * @brief Programmatically sets the focused folder view.

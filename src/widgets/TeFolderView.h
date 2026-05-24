@@ -149,15 +149,6 @@ signals:
 	 */
 	void currentFileChanged(const QFileInfo& info);
 
-protected:
-	/**
-	 * @brief Returns true when the event should be forwarded to the dispatcher.
-	 *
-	 * Navigation keys (arrows, Enter, etc.) are excluded; function keys and
-	 * alphanumeric keys with optional Ctrl/Shift modifiers pass through.
-	 */
-	bool isDispatchable(TeTypes::WidgetType type, QEvent *event) const;
-
 private:
 	TeDispatchable* mp_dispatcher = nullptr;
 };

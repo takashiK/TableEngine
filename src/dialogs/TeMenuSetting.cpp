@@ -145,11 +145,11 @@ void TeMenuSetting::storeDefaultSettings(bool force)
 	}
 
 	settings.beginGroup(SETTING_MENU);
-	if (!settings.contains("menuGroup00"))
+	if (!settings.childGroups().contains("menuGroup00"))
 		storeDefaultMenuSettings(settings);
-	if (!settings.contains("menuGroup01"))
+	if (!settings.childGroups().contains("menuGroup01"))
 		storeDefaultTreeMenuSettings(settings);
-	if (!settings.contains("menuGroup02"))
+	if (!settings.childGroups().contains("menuGroup02"))
 		storeDefaultListMenuSettings(settings);
 	settings.endGroup();
 }

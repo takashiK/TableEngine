@@ -149,6 +149,10 @@ void TeViewStore::initialize()
 		TeCmdParam param;
 		param.insert(TeCmdFolderChangeRoot::PARAM_ROOT_PATH, path);
 		emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT,TeTypes::WT_DRIVEBAR,nullptr,&param);
+		auto folder = currentFolderView();
+		if (folder) {
+			folder->list()->viewport()->setFocus();
+		}
 		});
 	mp_mainWindow->addToolBar(mp_driveBar);
 
@@ -170,11 +174,13 @@ void TeViewStore::initialize()
 	mp_tab[TAB_LEFT]->setMovable(true);
 	mp_tab[TAB_LEFT]->setTabBarAutoHide(true);
 	mp_tab[TAB_LEFT]->setTabsClosable(true);
+	mp_tab[TAB_LEFT]->tabBar()->setFocusPolicy(Qt::NoFocus);
 
 	mp_tab[TAB_RIGHT] = new QTabWidget();
 	mp_tab[TAB_RIGHT]->setMovable(true);
 	mp_tab[TAB_RIGHT]->setHidden(true);
 	mp_tab[TAB_RIGHT]->setTabsClosable(true);
+	mp_tab[TAB_RIGHT]->tabBar()->setFocusPolicy(Qt::NoFocus);
 
 	QHBoxLayout *hbox = new QHBoxLayout();
 	hbox->setContentsMargins(0, 0, 0, 0);
@@ -557,6 +563,21 @@ QList<TeFolderView*> TeViewStore::getFolderViews(int place)
 TeFolderView * TeViewStore::currentFolderView()
 {
 	return getFolderView(currentTabPlace());
+}
+
+TeFileTreeView *TeViewStore::navTreeView()
+{
+    return qobject_cast<TeFileTreeView*>(mp_split->widget(0));
+}
+
+TeDetailView *TeViewStore::detailView()
+{
+    return mp_detailView;
+}
+
+TeDriveBar *TeViewStore::driveBar()
+{
+    return mp_driveBar;
 }
 
 void TeViewStore::setCurrentFolderView(TeFolderView * view)

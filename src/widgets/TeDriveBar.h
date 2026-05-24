@@ -111,6 +111,8 @@ protected:
 	 */
 	void selectDrive(const QString& path);
 
+	virtual void keyPressEvent(QKeyEvent* event) override;
+
 private:
 	QChar    m_key;               ///< Current drive letter (unused after init).
 	QAction* mp_driveStart;       ///< Separator marking the start of the drive section.

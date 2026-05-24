@@ -76,6 +76,8 @@
 #include "window/TeCmdWindowNewTab.h"
 #include "window/TeCmdWindowCloseTab.h"
 #include "window/TeCmdWindowMoveTab.h"
+#include "window/TeCmdWindowPrevTab.h"
+#include "window/TeCmdWindowNextTab.h"
 
 #include "setting/TeCmdOption.h"
 #include "setting/TeCmdKeySetting.h"
@@ -201,6 +203,7 @@ TeCommandFactory::TeCommandFactory()
 			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_HUGE_ICON, TeCmdViewLayout, TeCmdViewLayout::HUGE_ICON, tr("Huge Icon"), tr("Show huge icons."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/hugeIcon.png")));
 			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_DETAIL_LIST, TeCmdViewLayout, TeCmdViewLayout::DETAIL_LIST, tr("Detail List"), tr("Show detail list."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/detailList.png")));
 		END_FOLDER();
+	
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_TOOL);
@@ -212,6 +215,8 @@ TeCommandFactory::TeCommandFactory()
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_WINDOW_NEW_TAB, TeCmdWindowNewTab, tr("New Tab"), tr("Open new tab."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/newTab.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_WINDOW_CLOSE_TAB, TeCmdWindowCloseTab, tr("Close Tab"), tr("Close current tab."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/closeTab.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_WINDOW_MOVE_TAB, TeCmdWindowMoveTab, tr("Move Tab"), tr("Move current tab to other window."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/moveTab.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_WINDOW_NEXT_TAB, TeCmdWindowNextTab, tr("Next Tab"), tr("Move to next tab."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/nextTab.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_WINDOW_PREV_TAB, TeCmdWindowPrevTab, tr("Previous Tab"), tr("Move to previous tab."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/prevTab.png")));
 		SEPARATOR();
 		MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_WINDOW_TOOLBAR, TeCmdWindowBar, TeCmdWindowBar::ToolBar, tr("Show ToolBar"), tr("Show or hide ToolBar."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/toolBar.png")));
 		MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_WINDOW_DRIVEBAR, TeCmdWindowBar, TeCmdWindowBar::DriveBar, tr("Show DriveBar"), tr("Show or hide DriveBar."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/driveBar.png")));
@@ -222,7 +227,7 @@ TeCommandFactory::TeCommandFactory()
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_SETTING);
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_OPTION, TeCmdOption, tr("&Option"), tr("General options."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/settings.png")));
-		MENU_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_KEY, TeCmdKeySetting, tr("&Key"), tr("Customize key oparations."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/keyboard.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_KEY, TeCmdKeySetting, tr("&Key"), tr("Customize key operations."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/keyboard.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_TOOLBAR, TeCmdToolbarSetting, tr("&Toolbar"), tr("Customize Toolbar."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/toolBar.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_SETTING_MENU, TeCmdMenuSetting, tr("&Menu"), tr("Customize Menu item."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/menu.png")));
 	END_GROUP();

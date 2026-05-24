@@ -72,6 +72,8 @@ public:
      */
     void registerSection(TeDetailSection* section);
 
+    QScrollArea* scrollArea() const { return mp_scroll; }
+    
 public slots:
     /**
      * @brief Updates the panel to show information for @p info.

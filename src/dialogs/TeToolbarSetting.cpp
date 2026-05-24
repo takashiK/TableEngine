@@ -116,7 +116,7 @@ TeToolbarSetting::~TeToolbarSetting()
 void TeToolbarSetting::storeDefaultSettings(bool force)
 {
 	QSettings settings;
-	if (settings.contains(SETTING_TOOLBAR)) {
+	if (settings.childGroups().contains(SETTING_TOOLBAR)) {
 		if (!force) {
 			return;
 		}

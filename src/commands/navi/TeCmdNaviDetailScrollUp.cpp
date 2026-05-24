@@ -20,6 +20,11 @@
 
 #include "TeCmdNaviDetailScrollUp.h"
 #include "utils/TeUtils.h"
+#include "TeViewStore.h"
+#include "widgets/TeDetailView.h"
+
+#include <QScrollArea>
+#include <QScrollBar>
 
 /**
  * @file TeCmdNaviDetailScrollUp.cpp
@@ -61,5 +66,15 @@ QFlags<TeTypes::CmdType> TeCmdNaviDetailScrollUp::type()
 
 bool TeCmdNaviDetailScrollUp::execute(TeViewStore* p_store)
 {
+	if (p_store && p_store->isDetailVisible()) {
+		QScrollArea* detailScrollArea = p_store->detailView()->scrollArea();
+		if (detailScrollArea) {
+			QScrollBar* vScrollBar = detailScrollArea->verticalScrollBar();
+			if (vScrollBar) {
+				vScrollBar->setValue(vScrollBar->value() - vScrollBar->singleStep());
+				return true;
+			}
+		}
+	}
 	return true;
 }

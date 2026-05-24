@@ -81,5 +81,17 @@ public:
 	 * @param p_param Optional extra parameters for the command.
 	 */
 	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param) = 0;
+
+	/**
+	 * @brief Returns true if @p event should be forwarded to the dispatcher.
+	 *
+	 * The default implementation accepts QEvent::ShortcutOverride events whose
+	 * key combination is listed in TeKeyMap::assignableKeys().  Subclasses may
+	 * override to add widget-specific exclusions.
+	 *
+	 * @param type  Widget type of the event source.
+	 * @param event The candidate event.
+	 */
+	virtual bool isDispatchable(TeTypes::WidgetType type, QEvent* event) const;
 };
 

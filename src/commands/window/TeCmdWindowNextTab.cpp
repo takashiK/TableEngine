@@ -18,37 +18,36 @@
 **
 ****************************************************************************/
 
-#include "TeCmdNaviToggleFolderLR.h"
+#include "TeCmdWindowNextTab.h"
 #include "utils/TeUtils.h"
 
 #include "TeViewStore.h"
 #include "widgets/TeFolderView.h"
 #include "widgets/TeFileListView.h"
-#include "widgets/TeFileTreeView.h"
 
 /**
- * @file TeCmdNaviToggleFolderLR.cpp
- * @brief Declaration of TeCmdNaviToggleFolderLR.
+ * @file TeCmdWindowNextTab.cpp
+ * @brief Declaration of TeCmdWindowNextTab.
  * @ingroup commands
  */
 
 
-TeCmdNaviToggleFolderLR::TeCmdNaviToggleFolderLR()
+TeCmdWindowNextTab::TeCmdWindowNextTab()
 {
 }
 
-TeCmdNaviToggleFolderLR::~TeCmdNaviToggleFolderLR()
+TeCmdWindowNextTab::~TeCmdWindowNextTab()
 {
 }
 
-bool TeCmdNaviToggleFolderLR::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+bool TeCmdWindowNextTab::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
 	NOT_USED(p_cmdParam);
 	return false;
 }
 
-QFlags<TeTypes::CmdType> TeCmdNaviToggleFolderLR::type()
+QFlags<TeTypes::CmdType> TeCmdWindowNextTab::type()
 {
 	return QFlags<TeTypes::CmdType>(
 		TeTypes::CMD_TRIGGER_NORMAL
@@ -64,29 +63,25 @@ QFlags<TeTypes::CmdType> TeCmdNaviToggleFolderLR::type()
 }
 
 
-bool TeCmdNaviToggleFolderLR::execute(TeViewStore* p_store)
+bool TeCmdWindowNextTab::execute(TeViewStore* p_store)
 {
-	TeFolderView* folder = p_store->currentFolderView();
-	if (folder != nullptr) {
-		if (folder->list()->hasFocus()) {
-			// switch focus to another side of splitter
-			if (p_store->currentTabPlace() == TeViewStore::TAB_LEFT) {
-				TeFolderView* nextfolder = p_store->getFolderView(TeViewStore::TAB_RIGHT);
-				if (nextfolder != nullptr) {
-					p_store->setCurrentFolderView(nextfolder);
-					nextfolder->list()->viewport()->setFocus();
-				}
-			} else {
-				TeFolderView* nextfolder = p_store->getFolderView(TeViewStore::TAB_LEFT);
-				if (nextfolder != nullptr) {
-					p_store->setCurrentFolderView(nextfolder);
-					nextfolder->list()->viewport()->setFocus();
-				}
-			}
-		}else{
-			// switch focus to this side of splitter
-			folder->list()->viewport()->setFocus();
-		}
+	if (p_store == nullptr) return true;
+
+	auto pos = p_store->currentTabPlace();
+	auto index = p_store->currentTabIndex();
+	auto folders = p_store->getFolderViews(pos);
+	if (folders.isEmpty()) return true;
+
+	if (index < 0) {
+		index = 0;
 	}
+	else if (index >= folders.size() - 1) {
+		index = 0;
+	}
+	else {
+		index++;
+	}
+	p_store->setCurrentFolderView(folders.at(index));
+
 	return true;
 }

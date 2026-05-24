@@ -21,6 +21,12 @@
 #include "TeCmdNaviToggleFolderTree.h"
 #include "utils/TeUtils.h"
 
+#include "TeViewStore.h"
+#include "widgets/TeFolderView.h"
+#include "widgets/TeFileListView.h"
+#include "widgets/TeFileTreeView.h"
+
+
 /**
  * @file TeCmdNaviToggleFolderTree.cpp
  * @brief Declaration of TeCmdNaviToggleFolderTree.
@@ -61,5 +67,24 @@ QFlags<TeTypes::CmdType> TeCmdNaviToggleFolderTree::type()
 
 bool TeCmdNaviToggleFolderTree::execute(TeViewStore* p_store)
 {
+	TeFolderView* p_folderView = p_store->currentFolderView();
+	if (p_folderView == nullptr) {
+		return true;
+	}
+
+	TeFileTreeView* p_naviTree = p_store->navTreeView();
+	if (p_naviTree != nullptr && !p_naviTree->isHidden()) {
+		if( p_naviTree->hasFocus() ){
+			p_folderView->list()->viewport()->setFocus();
+		}
+		else {
+			p_naviTree->viewport()->setFocus();
+		}
+	}
+	else{
+		p_folderView->list()->viewport()->setFocus();
+	}
+
+	
 	return true;
 }

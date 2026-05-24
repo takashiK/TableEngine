@@ -157,7 +157,7 @@ void TeOptionSetting::updateSettings()
 void TeOptionSetting::storeDefaultSettings(bool force)
 {
 	QSettings settings;
-	if (settings.contains(SETTING_STARTUP)) {
+	if (settings.childGroups().contains(SETTING_STARTUP)) {
 		if (!force) {
 			return;
 		}
