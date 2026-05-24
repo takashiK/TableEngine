@@ -20,6 +20,12 @@
 
 #include "TeCmdNaviLeft.h"
 #include "utils/TeUtils.h"
+#include "TeViewStore.h"
+#include "widgets/TeFolderView.h"
+#include "widgets/TeFileListView.h"
+#include "widgets/TeFileTreeView.h"
+#include <QKeyEvent>
+#include <QCoreApplication>
 
 /**
  * @file TeCmdNaviLeft.cpp
@@ -61,5 +67,33 @@ QFlags<TeTypes::CmdType> TeCmdNaviLeft::type()
 
 bool TeCmdNaviLeft::execute(TeViewStore* p_store)
 {
+	switch(srcType()) {
+	case TeTypes::WT_TREEVIEW:
+		{
+			//move left cusor in the tree view
+			auto folderview = p_store->currentFolderView();
+			if (folderview) {
+				auto tree = folderview->tree();
+				// send left key event to tree view
+				QKeyEvent leftEvent(QEvent::KeyPress, Qt::Key_Left, Qt::NoModifier);
+				QCoreApplication::sendEvent(tree, &leftEvent);
+			}
+			break;
+		}
+	case TeTypes::WT_LISTVIEW:
+		{
+			//move left cusor in the list view
+			auto folderview = p_store->currentFolderView();
+			if (folderview) {
+				auto list = folderview->list();
+				// send left key event to list view
+				QKeyEvent leftEvent(QEvent::KeyPress, Qt::Key_Left, Qt::NoModifier);
+				QCoreApplication::sendEvent(list, &leftEvent);
+			}
+			break;
+		}
+	default:
+		break;
+	}
 	return true;
 }

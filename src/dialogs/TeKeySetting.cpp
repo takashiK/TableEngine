@@ -19,6 +19,8 @@
 ****************************************************************************/
 
 #include "TeKeySetting.h"
+#include "TeCmdTreeWidget.h"
+#include "TeKeyTreeWidget.h"
 #include "TeTypes.h"
 #include "TeSettings.h"
 #include "commands/TeCommandFactory.h"
@@ -83,7 +85,7 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 
 	QVBoxLayout* vbox = new QVBoxLayout();
 
-	mp_list = new QTreeWidget();
+	mp_list = new TeKeyTreeWidget();
 
 	mp_list->setColumnCount(2);
 	mp_list->setIndentation(1);
@@ -112,7 +114,7 @@ TeKeySetting::TeKeySetting(QWidget *parent)
 
 	hbox->addLayout(vbox);
 
-	QTreeWidget* cmd = new QTreeWidget();
+	TeCmdTreeWidget* cmd = new TeCmdTreeWidget();
 
 	cmd->setColumnCount(2);
 	cmd->setIndentation(10);

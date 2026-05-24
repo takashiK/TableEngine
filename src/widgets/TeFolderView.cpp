@@ -71,12 +71,8 @@ void TeFolderView::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, Q
 
 bool TeFolderView::isDispatchable(TeTypes::WidgetType type, QEvent *event) const
 {
-	qDebug() << "TeFolderView::isDispatchable: event type = " << event->type();
-	qDebug() << "Widget type = " << type;
-
 	//select target event.
 	if (event->type() == QEvent::ShortcutOverride) {
-		qDebug() << "Key Press Event: " << static_cast<QKeyEvent*>(event)->key() << " Modifiers: " << static_cast<QKeyEvent*>(event)->modifiers();
 		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
 		if (keyEvent->modifiers() == Qt::NoModifier || keyEvent->modifiers() == Qt::ShiftModifier || keyEvent->modifiers() == Qt::ControlModifier) {

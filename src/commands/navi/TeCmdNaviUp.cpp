@@ -20,6 +20,12 @@
 
 #include "TeCmdNaviUp.h"
 #include "utils/TeUtils.h"
+#include "TeViewStore.h"
+#include "widgets/TeFolderView.h"
+#include "widgets/TeFileListView.h"
+#include "widgets/TeFileTreeView.h"
+
+#include <QKeyEvent>
 
 /**
  * @file TeCmdNaviUp.cpp
@@ -61,5 +67,33 @@ QFlags<TeTypes::CmdType> TeCmdNaviUp::type()
 
 bool TeCmdNaviUp::execute(TeViewStore* p_store)
 {
+	switch(srcType()) {
+	case TeTypes::WT_TREEVIEW:
+		{
+			//move up cusor in the tree view
+			auto folderview = p_store->currentFolderView();
+			if (folderview) {
+				auto tree = folderview->tree();
+				// send up key event to tree view
+				QKeyEvent upEvent(QEvent::KeyPress, Qt::Key_Up, Qt::NoModifier);
+				QCoreApplication::sendEvent(tree, &upEvent);
+			}
+			break;
+		}
+	case TeTypes::WT_LISTVIEW:
+		{
+			//move up cusor in the list view
+			auto folderview = p_store->currentFolderView();
+			if (folderview) {
+				auto list = folderview->list();
+				// send up key event to list view
+				QKeyEvent upEvent(QEvent::KeyPress, Qt::Key_Up, Qt::NoModifier);
+				QCoreApplication::sendEvent(list, &upEvent);
+			}
+			break;
+		}
+	default:
+		break;
+	}
 	return true;
 }

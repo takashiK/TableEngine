@@ -20,41 +20,22 @@
 
 #pragma once
 
-#include "TeTypes.h"
-
-#include <QDialog>
-#include <QList>
+#include <QTreeWidget>
 
 /**
- * @file TeKeySetting.h
- * @brief Declaration of TeKeySetting.
+ * @file TeKeyTreeWidget.h
+ * @brief QTreeWidget subclass used as drop target for the key assignment list.
  * @ingroup dialogs
  */
 
-
-class TeKeyTreeWidget;
-class QTreeWidgetItem;
-
-class TeKeySetting : public QDialog
+class TeKeyTreeWidget : public QTreeWidget
 {
-	Q_OBJECT
 
 public:
-	TeKeySetting(QWidget *parent);
-	virtual ~TeKeySetting();
-
-	void updateSettings();
-	static void storeDefaultSettings(bool force=false);
-
-public slots:
-	void accept();
+	explicit TeKeyTreeWidget(QWidget* parent = nullptr);
 
 protected:
-	QList<QTreeWidgetItem*> createKeyTreeItem();
-	QList<QTreeWidgetItem*> createKeyItem( const QList<int>& list);
-	QList<QTreeWidgetItem*> createCmdTreeItem();
-	QList<QTreeWidgetItem*> createCmdItem( TeTypes::CmdId cmdGroup );
-
-private:
-	TeKeyTreeWidget* mp_list;
+	void dragEnterEvent(QDragEnterEvent* event) override;
+	void dragMoveEvent(QDragMoveEvent* event) override;
+	void dropEvent(QDropEvent* event) override;
 };

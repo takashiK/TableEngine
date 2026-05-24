@@ -279,6 +279,7 @@ QList<std::pair<QString, TeTypes::CmdId>> TeCommandFactory::groupList()
 		{ tr("&Setting"), TeTypes::CMDID_SYSTEM_SETTING },
 		{ tr("&Help"), TeTypes::CMDID_SYSTEM_HELP },
 		{ tr("&User"), TeTypes::CMDID_USER },
+		{ tr("&Navigation"), TeTypes::CMDID_SYSTEM_NAVI },
 	};
 	return list;
 }

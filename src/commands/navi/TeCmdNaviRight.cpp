@@ -20,6 +20,12 @@
 
 #include "TeCmdNaviRight.h"
 #include "utils/TeUtils.h"
+#include "TeViewStore.h"
+#include "widgets/TeFolderView.h"
+#include "widgets/TeFileListView.h"
+#include "widgets/TeFileTreeView.h"
+#include <QKeyEvent>
+#include <QCoreApplication>
 
 /**
  * @file TeCmdNaviRight.cpp
@@ -61,5 +67,33 @@ QFlags<TeTypes::CmdType> TeCmdNaviRight::type()
 
 bool TeCmdNaviRight::execute(TeViewStore* p_store)
 {
+	switch(srcType()) {
+	case TeTypes::WT_TREEVIEW:
+		{
+			//move right cusor in the tree view
+			auto folderview = p_store->currentFolderView();
+			if (folderview) {
+				auto tree = folderview->tree();
+				// send right key event to tree view
+				QKeyEvent rightEvent(QEvent::KeyPress, Qt::Key_Right, Qt::NoModifier);
+				QCoreApplication::sendEvent(tree, &rightEvent);
+			}
+			break;
+		}
+	case TeTypes::WT_LISTVIEW:
+		{
+			//move right cusor in the list view
+			auto folderview = p_store->currentFolderView();
+			if (folderview) {
+				auto list = folderview->list();
+				// send right key event to list view
+				QKeyEvent rightEvent(QEvent::KeyPress, Qt::Key_Right, Qt::NoModifier);
+				QCoreApplication::sendEvent(list, &rightEvent);
+			}
+			break;
+		}
+	default:
+		break;
+	}
 	return true;
 }
