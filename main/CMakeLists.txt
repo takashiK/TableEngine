@@ -40,4 +40,59 @@ add_custom_command(TARGET TableEngine POST_BUILD
     "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/$<IF:$<CONFIG:Debug>,debug/libmagic.dll,release/libmagic.dll>"
     "$<TARGET_FILE_DIR:TableEngine>/"
 )
+
+# magic.mgc is only needed at runtime (not build-time); copy it alongside the exe
+add_custom_command(TARGET TableEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/magic.mgc"
+    "$<TARGET_FILE_DIR:TableEngine>/"
+)
+endif(WIN32)
+
+# --- Installation rules (used by cmake --install and CPack) ---
+if(WIN32)
+    install(TARGETS TableEngine RUNTIME DESTINATION .)
+
+    install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/archive.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/libmagic.dll"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/magic.mgc"
+        DESTINATION .
+    )
+
+    install(FILES
+        "${CMAKE_SOURCE_DIR}/LICENSE"
+        "${CMAKE_SOURCE_DIR}/README.md"
+        DESTINATION .
+    )
+
+    # Run windeployqt6 after installing the exe to collect all Qt runtime DLLs
+    find_program(WINDEPLOYQT6_EXECUTABLE
+        NAMES windeployqt6 windeployqt
+        PATHS "${Qt6_DIR}/../../../bin"
+        NO_DEFAULT_PATH
+    )
+    if(WINDEPLOYQT6_EXECUTABLE)
+        install(CODE "
+            message(STATUS \"Running windeployqt6 to collect Qt runtime files...\")
+            execute_process(
+                COMMAND \"${WINDEPLOYQT6_EXECUTABLE}\"
+                    --release
+                    --no-translations
+                    --no-quick-import
+                    --no-opengl-sw
+                    --no-ffmpeg
+                    --skip-plugin-types qmltooling
+                    --exclude-plugins qtposition_nmea
+                    --dir \"\${CMAKE_INSTALL_PREFIX}\"
+                    \"\${CMAKE_INSTALL_PREFIX}/TableEngine.exe\"
+                RESULT_VARIABLE _wdq_result
+            )
+            if(NOT _wdq_result EQUAL 0)
+                message(WARNING \"windeployqt6 returned: \${_wdq_result}\")
+            endif()
+        ")
+    else()
+        message(WARNING "windeployqt6 not found - Qt runtime DLLs will not be collected automatically")
+    endif()
 endif(WIN32)

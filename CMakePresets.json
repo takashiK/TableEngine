@@ -22,6 +22,21 @@
             "displayName": "Visual Studio Community 2022 Release - amd64 - Debug",
             "configurePreset": "Visual Studio Community 2022 Release - amd64",
             "configuration": "Debug"
+        },
+        {
+            "name": "Visual Studio Community 2022 Release - amd64-release",
+            "displayName": "Visual Studio Community 2022 Release - amd64 - Release",
+            "configurePreset": "Visual Studio Community 2022 Release - amd64",
+            "configuration": "Release"
+        }
+    ],
+    "packagePresets": [
+        {
+            "name": "win64-zip",
+            "displayName": "Windows 64-bit ZIP",
+            "configurePreset": "Visual Studio Community 2022 Release - amd64",
+            "generators": ["ZIP"],
+            "configurations": ["Release"]
         }
     ]
 }

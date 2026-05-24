@@ -16,6 +16,17 @@ add_subdirectory(tests)
 add_subdirectory(viewer_tests)
 add_subdirectory(support_package/src/QHexView-5.0)
 
+# --- CPack packaging ---
+set(CPACK_PACKAGE_NAME              "TableEngine")
+set(CPACK_PACKAGE_VENDOR            "Takashi Kuwabara")
+set(CPACK_PACKAGE_VERSION           "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME         "TableEngine-${PROJECT_VERSION}-win64")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "TableEngine file manager")
+set(CPACK_RESOURCE_FILE_LICENSE     "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_GENERATOR                 "ZIP")
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
+include(CPack)
+
 #find_package(Qt6 REQUIRED COMPONENTS Core)
 #target_link_libraries(mytarget PRIVATE Qt6::Core)
 #find_package(Qt6 REQUIRED COMPONENTS Gui)
