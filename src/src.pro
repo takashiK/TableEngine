@@ -4,7 +4,7 @@
 
 TEMPLATE = lib
 CONFIG += staticlib
-QT += core gui widgets webenginecore webenginewidgets webchannel core5compat
+QT += core gui widgets
 
 CONFIG(debug, debug|release){
     TARGET = tengined

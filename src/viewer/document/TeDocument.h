@@ -10,7 +10,7 @@
  */
 
 
-class QTextCodec;
+class QStringDecoder;
 
 class TeDocument :
     public QObject

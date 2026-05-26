@@ -6,7 +6,7 @@
 #include <QFile>
 
 #include <QByteArray>
-#include <QTextCodec>
+#include <QStringDecoder>
 #include <QFontDialog>
 #include <QHBoxLayout>
 #include <QPushButton>

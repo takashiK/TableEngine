@@ -24,7 +24,7 @@
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QFile>
-#include <QTextCodec>
+#include <QStringDecoder>
 #include <QThreadPool>
 #include <QMetaObject>
 #include <QFontDatabase>
@@ -71,11 +71,11 @@ void TeTextPreviewTask::run()
     };
     const QString codecName = detectTextCodec(raw, kCodecList);
     const QByteArray codecNameBytes = codecName.isEmpty() ? QByteArray("UTF-8") : codecName.toLatin1();
-    QTextCodec* codec = QTextCodec::codecForName(codecNameBytes);
-    if (!codec)
-        codec = QTextCodec::codecForName("UTF-8");
-
-    const QString text = codec->toUnicode(raw);
+        QStringDecoder decoder(codecNameBytes.constData());
+        if (!decoder.isValid()) {
+            decoder = QStringDecoder("UTF-8");
+        }
+        const QString text = decoder(raw);
 
     // Keep only the first m_maxLines lines
     const QStringList lines = text.split(QLatin1Char('\n'));

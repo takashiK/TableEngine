@@ -1,6 +1,6 @@
 INCLUDEPATH += $${PWD}
 DEPENDPATH += $${PWD}
-QT += core gui widgets webenginecore webenginewidgets webchannel core5compat
+QT += core gui widgets
 
 win32-msvc {
     INCLUDEPATH += ../support_package/include

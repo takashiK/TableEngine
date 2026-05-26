@@ -28,7 +28,7 @@
 #include <QPlainTextEdit>
 #include <QByteArray>
 #include <QString>
-#include <QTextCodec>
+#include <QStringDecoder>
 
 /**
  * @file TeCmdRunCommand.cpp
@@ -131,13 +131,11 @@ bool TeCmdRunCommand::execute(TeViewStore* p_store)
 
 				QByteArray out = process.readAllStandardOutput();
 				QString codecName = detectTextCodec(out, QStringList({ "UTF-8","Shift_JIS","EUC-JP","ISO-2022-JP" }));
-				QTextCodec* codec = QTextCodec::codecForName(codecName.toLatin1());
-				if (!codec) {
-					codecName = "UTF-8";
-					codec = QTextCodec::codecForName(codecName.toLatin1());
+				QStringDecoder decoder(codecName.toLatin1().constData());
+				if (!decoder.isValid()) {
+					decoder = QStringDecoder("UTF-8");
 				}
-
-				QString outText = codec->toUnicode(out);
+				QString outText = decoder(out);
 
 				edit->setPlainText(outText);
 				edit->setReadOnly(true);

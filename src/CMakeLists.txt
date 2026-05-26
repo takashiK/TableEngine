@@ -59,7 +59,7 @@ qt_add_library(tablelibs STATIC
     ${HEADERS_UTILS}
 )
 
-target_link_libraries(tablelibs QHexView Qt6::Widgets Qt6::Gui Qt6::Core5Compat)
+target_link_libraries(tablelibs QHexView Qt6::Widgets Qt6::Gui)
 target_include_directories(tablelibs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${SUPPORT_INCLUDE_DIR})
 
 if(WIN32)

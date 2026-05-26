@@ -3,7 +3,7 @@
 #include "utils/TeUtils.h"
 
 #include <QFile>
-#include <QTextCodec>
+#include <QStringDecoder>
 #include <QSettings>
 
 /**
@@ -30,15 +30,16 @@ bool TeDocument::load(const QString& path, QString codecName)
 		if(codecName.isEmpty()) {
 			codecName = detectTextCodec(data,m_codecList);
 		}
-		QTextCodec* codec = QTextCodec::codecForName(codecName.toLatin1());
-		if (!codec) {
-			codecName = "UTF-8";
-			codec = QTextCodec::codecForName(codecName.toLatin1());
+		QStringDecoder decoder(codecName.toLatin1().constData());
+		if (!decoder.isValid()) {
+			decoder = QStringDecoder("UTF-8");
+			m_codecName = "UTF-8";
+			emit codecChanged(m_codecName);
+		} else {
+			m_codecName = codecName;
+			emit codecChanged(codecName);
 		}
-		m_codecName = codecName;
-		emit codecChanged(codecName);
-
-		m_content = codec->toUnicode(data);
+		m_content = decoder(data);
 		m_fileInfo.setFile(path);
 		
 		return true;
@@ -60,8 +61,8 @@ const QStringList& TeDocument::setCodecList(const QStringList& codecList)
 {
 	QStringList tmpList;
 	for (const QString& codecName : codecList) {
-		QTextCodec* codec = QTextCodec::codecForName(codecName.toLatin1());
-		if (codec) {
+		QStringDecoder decoder(codecName.toLatin1().constData());
+		if (decoder.isValid()) {
 			tmpList.append(codecName);
 		}
 	}
