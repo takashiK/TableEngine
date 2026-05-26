@@ -4,9 +4,6 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QFile>
-#include <QWebChannel>
-#include <QWebEngineView>
-#include <QWebChannel>
 
 #include <QByteArray>
 #include <QTextCodec>
@@ -21,12 +18,10 @@
 #include "text/TeTextSyntaxHighlighter.h"
 #include "text/TeTextSyntaxLoader.h"
 #include "text/TeTextSyntaxDialog.h"
-#include "markup/TeMarkupPage.h"
-#include "markup/TeMarkupLoader.h"
-#include "markup/TeMarkupContainerDialog.h"
 
 #include <QApplication>
 #include <QStyle>
+#include <QTextEdit>
 
 #include <QDir>
 #include <QDebug>
@@ -46,9 +41,6 @@ TeDocViewer::TeDocViewer(QWidget* parent)
     mp_syntaxLoader = new TeTextSyntaxLoader();
     mp_syntaxLoader->loadAll();
 
-    mp_markupLoader = new TeMarkupLoader();
-    mp_markupLoader->loadAll();
-
     setupViewer();
     setupMenu();
 
@@ -62,12 +54,10 @@ TeDocViewer::~TeDocViewer()
 {
     delete mp_document;
     delete mp_syntaxLoader;
-    delete mp_channel;
     delete mp_textHighlighter;
 
     delete mp_textView;
-    delete mp_page;
-    delete mp_webView;
+    delete mp_markupView;
 }
 
 bool TeDocViewer::open(const QString& filepath)
@@ -79,7 +69,7 @@ bool TeDocViewer::open(const QString& filepath)
     }
 
     if (mp_document->load(filepath)) {
-        if (centralWidget() == mp_webView) {
+        if (centralWidget() == mp_markupView) {
             markupMode();
         }
         else {
@@ -93,7 +83,7 @@ bool TeDocViewer::open(const QString& filepath)
 void TeDocViewer::reopen(const QString& codecName)
 {
     mp_document->reload(codecName);
-    if (centralWidget() == mp_webView) {
+    if (centralWidget() == mp_markupView) {
         markupMode();
     }
     else {
@@ -103,36 +93,37 @@ void TeDocViewer::reopen(const QString& codecName)
 
 void TeDocViewer::findNext(const QString& text, bool caseSensitive, bool regex, bool backward)
 {
-    if (centralWidget() == mp_textView) {
-        QTextDocument::FindFlags flags;
-        if (backward) flags |= QTextDocument::FindBackward;
-        if (caseSensitive) flags |= QTextDocument::FindCaseSensitively;
+    QTextDocument::FindFlags flags;
+    if (backward) flags |= QTextDocument::FindBackward;
+    if (caseSensitive) flags |= QTextDocument::FindCaseSensitively;
 
-        if (regex) {
-            QRegularExpression::PatternOptions option;
-            if (!caseSensitive) option |= QRegularExpression::CaseInsensitiveOption;
-            QRegularExpression regexp(text, option);
-            if (!regexp.isValid())
-                return;
+    if (regex) {
+        QRegularExpression::PatternOptions option;
+        if (!caseSensitive) option |= QRegularExpression::CaseInsensitiveOption;
+        QRegularExpression regexp(text, option);
+        if (!regexp.isValid())
+            return;
+
+        if (centralWidget() == mp_textView) {
             mp_textView->find(regexp, flags);
+        }else{
+            mp_markupView->find(regexp, flags);
         }
-        else {
-            mp_textView->find(text, flags);
-        }
-	}
+    }
     else {
-        QWebEnginePage::FindFlags flags;
-        if (backward) flags |= QWebEnginePage::FindBackward;
-        if (caseSensitive) flags |= QWebEnginePage::FindCaseSensitively;
-        mp_webView->findText(text, flags);
-	}
+        if (centralWidget() == mp_textView) {
+            mp_textView->find(text, flags);
+        }else{
+            mp_markupView->find(text, flags);
+        }
+    }
 }
 
 void TeDocViewer::textViewMode()
 {
-    if (centralWidget() == mp_webView) {
+    if (centralWidget() == mp_markupView) {
         takeCentralWidget();
-        mp_webView->page()->action(QWebEnginePage::WebAction::Stop);
+        mp_markupView->clear();
     }
 
     if (mp_document->fileinfo().exists()) {
@@ -158,36 +149,27 @@ void TeDocViewer::markupMode()
         mp_textView->clear();
     }
 
-    QPoint position = pos();
-
-    delete mp_page;
-    mp_page = new TeMarkupPage();
-    mp_page->setWebChannel(mp_channel);
-    mp_webView->setPage(mp_page);
-
     if (mp_document->fileinfo().exists()) {
-        QString container = mp_markupLoader->relatedContainer(mp_document->fileinfo().suffix());
-        if (container.isEmpty()) {
-            mp_webView->page()->setHtml(mp_document->content());
+        auto suffix = mp_document->fileinfo().suffix();
+        if (suffix == "html" || suffix == "htm") {
+            mp_markupView->setHtml(mp_document->content());
+        }
+        else if(suffix == "md"){
+            mp_markupView->setMarkdown(mp_document->content());
         }
         else {
-            mp_webView->page()->setHtml(container);
+            mp_markupView->setPlainText(mp_document->content());
         }
     }
-
     setWindowTitle(tr("MarkupView"));
 
-    if (centralWidget() != mp_webView) {
-        setCentralWidget(mp_webView);
+    if (centralWidget() != mp_markupView) {
+        setCentralWidget(mp_markupView);
     }
 
     for (auto action : mp_textActions) {
         action->setEnabled(false);
     }
-
-    //turn back to the original position
-    //this is correction for the bug of QtWebEngine at initialazing.
-    move(position);
 }
 
 void TeDocViewer::showFindDialog()
@@ -239,15 +221,6 @@ void TeDocViewer::showFindDialog()
         layout->addWidget(btBack);
         layout->addWidget(btForward);
         lineEdit->setFocus();
-        
-        //clear text selection when dialog is closed.
-        connect(mp_findDialog, &QDialog::finished, [this]() {
-            if (centralWidget() == mp_webView) {
-                mp_webView->findText(QString());
-            }});
-    }
-    else {
-        mp_findDialog->show();
     }
     
     QPoint pos = mapToGlobal(rect().topRight()-QPoint(mp_findDialog->sizeHint().width(),0));
@@ -287,13 +260,6 @@ void TeDocViewer::showGotoLineDialog()
 	mp_gotoLineDialog->show();
 }
 
-void TeDocViewer::closeEvent(QCloseEvent* )
-{
-    mp_channel->deregisterObject(mp_document);
-    mp_webView->close();
-}
-
-
 void TeDocViewer::setupViewer()
 {
     QFont font;
@@ -306,10 +272,8 @@ void TeDocViewer::setupViewer()
     mp_textView->setFont(font);
     mp_textView->setReadOnly(true);
 
-    mp_webView = new QWebEngineView();
-    mp_channel = new QWebChannel();
-
-    mp_channel->registerObject("document", mp_document);
+    mp_markupView = new QTextEdit();
+    mp_markupView->setReadOnly(true);
 }
 
 void TeDocViewer::setupMenu()
@@ -384,15 +348,15 @@ void TeDocViewer::setupMenu()
     menu->addAction(action);
 
     action = new QAction(tr("&Go to top"));
-    action->setEnabled(centralWidget() == mp_textView);
-    mp_textActions.append(action);
-    connect(action, &QAction::triggered, [this](bool /*checked*/) { mp_textView->moveCursor(QTextCursor::Start); });
+    connect(action, &QAction::triggered, [this](bool /*checked*/) {
+        mp_textView->moveCursor(QTextCursor::Start); mp_markupView->moveCursor(QTextCursor::Start);
+        });
     menu->addAction(action);
 
     action = new QAction(tr("&Go to end"));
-    action->setEnabled(centralWidget() == mp_textView);
-    mp_textActions.append(action);
-    connect(action, &QAction::triggered, [this](bool /*checked*/) { mp_textView->moveCursor(QTextCursor::End); });
+    connect(action, &QAction::triggered, [this](bool /*checked*/) {
+        mp_textView->moveCursor(QTextCursor::End); mp_markupView->moveCursor(QTextCursor::End);
+        });
     menu->addAction(action);
 
     /////////////////////
@@ -413,11 +377,6 @@ void TeDocViewer::setupMenu()
     // Highlight
     action = new QAction(tr("&Highlight"));
     connect(action, &QAction::triggered, [this](bool /*checked*/) { highlightSettings(); });
-    menu->addAction(action);
-
-    // Markup container
-    action = new QAction(tr("&Markup container"));
-    connect(action, &QAction::triggered, [this](bool /*checked*/) { markupContainerSettings(); });
     menu->addAction(action);
 
     // Word wrap
@@ -475,13 +434,6 @@ void TeDocViewer::highlightSettings()
 {
     //ToDo : highlight settings
     TeTextSyntaxDialog dialog(this);
-	dialog.exec();
-}
-
-void TeDocViewer::markupContainerSettings()
-{
-    //ToDo : markup container settings
-    TeMarkupContainerDialog dialog(this);
 	dialog.exec();
 }
 

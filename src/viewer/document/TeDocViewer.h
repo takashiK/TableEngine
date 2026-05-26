@@ -9,16 +9,12 @@
  */
 
 
-class QWebEngineView;
-class QWebChannel;
-
 class TeTextView;
-class TeMarkupPage;
-class TeMarkupLoader;
 class TeTextSyntaxHighlighter;
 class TeTextSyntaxLoader;
 class TeDocument;
 
+class QTextEdit;
 
 class TeDocViewer :
     public QMainWindow
@@ -41,15 +37,12 @@ protected:
     void showFindDialog();
     void showGotoLineDialog();
 
-    virtual void	closeEvent(QCloseEvent* event);
-
 private:
     void setupViewer();
     void setupMenu();
     void setupEncodingMenu(QMenu* menu);
     void updateEncodingMenu(QMenu* menu, const QString& codecName);
     void highlightSettings();
-    void markupContainerSettings();
     void setupTabStopMenu(QMenu* menu);
     void updateTabStopMenu(QMenu* menu, int tabStop);
 
@@ -57,13 +50,10 @@ private:
     void fontSettings();
 
     TeTextView* mp_textView = nullptr;
-    QWebChannel* mp_channel = nullptr;
-    TeMarkupPage* mp_page = nullptr;
-    QWebEngineView* mp_webView = nullptr;
+    QTextEdit* mp_markupView = nullptr;
     TeDocument* mp_document;
     TeTextSyntaxHighlighter* mp_textHighlighter = nullptr;
     TeTextSyntaxLoader* mp_syntaxLoader;
-    TeMarkupLoader* mp_markupLoader;
     QList<QAction*> mp_textActions;
     QDialog* mp_findDialog = nullptr;
     QDialog* mp_gotoLineDialog = nullptr;
