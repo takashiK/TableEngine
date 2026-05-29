@@ -67,9 +67,7 @@ target_compile_options(tablelibs PRIVATE /MP )
 
 target_link_libraries(tablelibs
     debug ${CMAKE_CURRENT_SOURCE_DIR}/../support_package/debug/archive.lib
-    debug ${CMAKE_CURRENT_SOURCE_DIR}/../support_package/debug/libmagic.lib
     optimized ${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/archive.lib
-    optimized ${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/libmagic.lib
     icu.lib
 )
 endif(WIN32)

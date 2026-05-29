@@ -34,19 +34,6 @@ add_custom_command(TARGET TableEngine POST_BUILD
     "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/$<IF:$<CONFIG:Debug>,debug/archive.dll,release/archive.dll>"
     "$<TARGET_FILE_DIR:TableEngine>/"
 )
-
-add_custom_command(TARGET TableEngine POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/$<IF:$<CONFIG:Debug>,debug/libmagic.dll,release/libmagic.dll>"
-    "$<TARGET_FILE_DIR:TableEngine>/"
-)
-
-# magic.mgc is only needed at runtime (not build-time); copy it alongside the exe
-add_custom_command(TARGET TableEngine POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/magic.mgc"
-    "$<TARGET_FILE_DIR:TableEngine>/"
-)
 endif(WIN32)
 
 # --- Installation rules (used by cmake --install and CPack) ---
@@ -55,8 +42,6 @@ if(WIN32)
 
     install(FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/archive.dll"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/libmagic.dll"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/magic.mgc"
         DESTINATION .
     )
 

@@ -14,8 +14,8 @@
 
 #include <QDebug>
 #include <QSettings>
+#include <QMimeDatabase>
 
-#include <magic.h>
 #include <icu.h>
 
 /**
@@ -32,7 +32,7 @@
 
 
 namespace {
-	const QSet<const QString> txtSuffixes{ "txt","html","htm","md","h","c","cpp","ini","py","json","ts","js","sh","csv" };
+	const QSet<const QString> txtSuffixes{ "txt","html","htm","md","h","c","cpp","ini","py","json","ts","js","sh"};
 	const QSet<const QString> imageSuffixes{ "jpg","jpeg","png","gif","bmp","tiff","svg" };
 	const QSet<const QString> archiveSuffixes{ "zip","lzh","cab","7z","rar","tar","gz","bz2","xz","tgz","cpio" };
 }
@@ -175,24 +175,13 @@ TeFileType getFileType(const QString& path)
 	}
 
 	if (fileInfo.isFile() && fileInfo.size() > 0) {
-		// Initialize the magic library
-		static magic_t magic = nullptr;
-		if (magic == nullptr) {
-			magic = magic_open(MAGIC_MIME_TYPE);
-			if (magic == nullptr) {
-				qDebug() << "unable to initialize magic library";
-				return TE_FILE_UNKNOWN;
-			}
-			if (magic_load(magic, nullptr) != 0) {
-				qDebug() << "unable to load magic database - " << magic_error(magic);
-				magic_close(magic);
-				magic = nullptr;
-				return TE_FILE_UNKNOWN;
-			}
-		}
+		QMimeDatabase db;
 
-		//get file type
-		QString typeStr = magic_file(magic, path.toLocal8Bit().data());
+		QMimeType mime = db.mimeTypeForFile(fileInfo);
+		QString typeStr = mime.name();
+		if (mime.inherits("text/plain")) {
+			// The file is plain text, we can display it in a QTextEdit
+		}
 
 		if (typeStr.startsWith("text/")) {
 			type = TE_FILE_TEXT;
