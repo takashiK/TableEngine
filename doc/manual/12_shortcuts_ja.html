@@ -72,7 +72,7 @@
       <tr><td><kbd>N</kbd></td><td>新規作成</td><td>空のファイルを現在のフォルダに作成</td></tr>
       <tr><td><kbd>C</kbd></td><td>コピー先にコピー</td><td>選択ファイルを指定フォルダにコピー</td></tr>
       <tr><td><kbd>M</kbd></td><td>移動先に移動</td><td>選択ファイルを指定フォルダに移動</td></tr>
-      <tr><td><kbd>D</kbd></td><td>削除</td><td>選択ファイルを削除</td></tr>
+      <tr><td><kbd>D</kbd> / <kbd>Delete</kbd></td><td>削除</td><td>選択ファイルを削除</td></tr>
       <tr><td><kbd>R</kbd> / <kbd>F2</kbd></td><td>名前の変更</td><td>選択ファイルの名前を変更</td></tr>
       <tr><td><kbd>F4</kbd></td><td>プロパティ</td><td>選択ファイルのプロパティを表示</td></tr>
       <tr><td><kbd>P</kbd></td><td>圧縮</td><td>選択ファイルを圧縮アーカイブにまとめる</td></tr>
@@ -126,6 +126,7 @@
       <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
     </thead>
     <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td><td>新規フォルダ</td><td>現在の場所に新しいフォルダを作成</td></tr>
       <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>検索</td><td>検索ダイアログを開く</td></tr>
     </tbody>
   </table>
@@ -136,9 +137,19 @@
       <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
     </thead>
     <tbody>
-      <tr><td><kbd>H</kbd></td><td>隠しファイルを表示</td><td>隠しファイルの表示・非表示を切り替え</td></tr>
-      <tr><td><kbd>I</kbd></td><td>特大アイコン表示</td><td>ファイルリストを特大アイコン表示に切り替え</td></tr>
-      <tr><td><kbd>L</kbd></td><td>小アイコン表示</td><td>ファイルリストを小アイコン表示に切り替え</td></tr>
+      <tr><td><kbd>O</kbd></td><td>隠しファイルを表示</td><td>隠しファイルの表示・非表示を切り替え</td></tr>
+      <tr><td><kbd>Y</kbd></td><td>フィルタ</td><td>ファイル名でフィルタリング</td></tr>
+    </tbody>
+  </table>
+
+  <h2>表示（Ctrl キー）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td><td>特大アイコン表示</td><td>ファイルリストを特大アイコン表示に切り替え</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd></td><td>小アイコン表示</td><td>ファイルリストを小アイコン表示に切り替え</td></tr>
     </tbody>
   </table>
 
@@ -159,9 +170,36 @@
       <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
     </thead>
     <tbody>
-      <tr><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td><td>新規タブ</td><td>新しいタブを開く</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>新規タブ</td><td>新しいタブを開く</td></tr>
       <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>タブを閉じる</td><td>現在のタブを閉じる</td></tr>
-      <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>タブを別ウィンドウに移動</td><td>現在のタブを新しいウィンドウとして切り離す</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>M</kbd></td><td>タブを別ウィンドウに移動</td><td>現在のタブを新しいウィンドウとして切り離す</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td><td>次のタブ</td><td>次のタブに切り替える</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd></td><td>前のタブ</td><td>前のタブに切り替える</td></tr>
+    </tbody>
+  </table>
+
+  <h2>ナビゲーション（修飾キーなし）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>J</kbd></td><td>カーソル下</td><td>カーソルを下に移動</td></tr>
+      <tr><td><kbd>K</kbd></td><td>カーソル上</td><td>カーソルを上に移動</td></tr>
+      <tr><td><kbd>H</kbd></td><td>カーソル左</td><td>カーソルを左に移動</td></tr>
+      <tr><td><kbd>L</kbd></td><td>カーソル右</td><td>カーソルを右に移動</td></tr>
+      <tr><td><kbd>Q</kbd></td><td>ドライブバーにフォーカス</td><td>ドライブバーにフォーカスを移動</td></tr>
+      <tr><td><kbd>Tab</kbd></td><td>左右フォルダ切り替え</td><td>左右のフォルダペイン間でフォーカスを切り替え</td></tr>
+    </tbody>
+  </table>
+
+  <h2>ナビゲーション（Ctrl キー）</h2>
+  <table class="shortcut-table">
+    <thead>
+      <tr><th>キー</th><th>コマンド</th><th>説明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>Tab</kbd></td><td>フォルダ/ツリー切り替え</td><td>フォルダペインとツリービュー間でフォーカスを切り替え</td></tr>
     </tbody>
   </table>
 

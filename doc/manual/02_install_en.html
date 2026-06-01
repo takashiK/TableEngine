@@ -47,37 +47,12 @@
     <h1>Chapter 2: Installation &amp; Launch</h1>
   </div>
 
-  <h2>Required Files</h2>
-  <p>The following files must be placed in the same folder as <code>TableEngine.exe</code>.</p>
-
-  <table>
-    <thead>
-      <tr><th>File</th><th>Description</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>TableEngine.exe</code></td><td>Main executable</td></tr>
-      <tr><td><code>archive.dll</code></td><td>libarchive (compression/extraction library)</td></tr>
-      <tr><td><code>libmagic.dll</code></td><td>File type detection library</td></tr>
-      <tr><td><code>magic.mgc</code></td><td>libmagic database file</td></tr>
-      <tr><td>Qt DLLs</td><td>Qt6Core.dll, Qt6Gui.dll, Qt6Widgets.dll, etc.</td></tr>
-    </tbody>
-  </table>
-
-  <div class="note">
-    Qt DLLs can be collected from your Qt installation folder or by running the
-    <code>windeployqt</code> tool.
-  </div>
-
   <h2>Installation</h2>
-  <p>TableEngine has no installer. Follow these steps to set it up:</p>
+  <p>TableEngine has no installer. Simply extract the distribution package (ZIP file) to complete the installation.</p>
   <ol>
-    <li>Create a folder of your choice (e.g., <code>C:\Tools\TableEngine\</code>).</li>
-    <li>Copy the built <code>TableEngine.exe</code> into that folder.</li>
-    <li>Copy the dependency DLLs (<code>archive.dll</code>, <code>libmagic.dll</code>, <code>magic.mgc</code>) into the same folder.</li>
-    <li>Copy the required Qt DLLs into the same folder.<br>
-        You can collect them automatically from a command prompt:
-        <pre>windeployqt.exe TableEngine.exe</pre>
-    </li>
+    <li>Download the distribution package (e.g., <code>TableEngine-0.1.0-win64.zip</code>).</li>
+    <li>Extract the ZIP file to a folder of your choice (e.g., <code>C:\TableEngine</code>).</li>
+    <li>Once extracted, run <code>TableEngine.exe</code> from that folder to launch the application.</li>
   </ol>
 
   <h2>Uninstallation</h2>
@@ -103,19 +78,27 @@
 
   <h3>Prerequisites</h3>
   <ul>
-    <li>Qt 6.10 or later (specified via <code>Qt6_DIR</code> or <code>CMAKE_PREFIX_PATH</code>)</li>
+    <li>Qt 6.11 or later (MSVC 2022 64-bit kit; includes Ninja)</li>
     <li>CMake 3.19 or later</li>
     <li>Microsoft Visual C++ 2022</li>
-    <li>Support libraries (libarchive, libmagic, valijson) placed under <code>support_package/</code></li>
+    <li>Git (required to fetch submodules)</li>
   </ul>
 
   <h3>Build Steps</h3>
-  <pre>cmake --preset "Visual Studio Community 2022 Release - amd64"
-cmake --build out/build/"Visual Studio Community 2022 Release - amd64" --config Release</pre>
+  <p>1. Clone the repository and initialize submodules:</p>
+  <pre>git clone &lt;repo-url&gt; TableEngine
+cd TableEngine
+git submodule update --init --recursive</pre>
 
-  <p>To open in Visual Studio:</p>
-  <pre>cmake --preset "Visual Studio Community 2022 Release - amd64"
-start out/build/"Visual Studio Community 2022 Release - amd64"/TableEngine.sln</pre>
+  <p>2. Bootstrap vcpkg (first time only):</p>
+  <pre>support\vcpkg\bootstrap-vcpkg.bat -disableMetrics</pre>
+
+  <p>3. Configure and build using the CMake preset:</p>
+  <pre>cmake --preset Qt-MSVC2022-amd64-Ninja
+cmake --build out/build/Qt-MSVC2022-amd64-Ninja --config Release</pre>
+
+  <p>4. Create the distribution package:</p>
+  <pre>.\scripts\package-release.ps1</pre>
 
   <div class="page-nav">
     <a href="01_overview_en.html">&larr; Chapter 1: Overview</a>
