@@ -14,7 +14,7 @@ add_subdirectory(main)
 add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(viewer_tests)
-add_subdirectory(support_package/src/QHexView-5.1.0)
+add_subdirectory(support/QHexView)
 
 # --- CPack packaging ---
 set(CPACK_PACKAGE_NAME              "TableEngine")

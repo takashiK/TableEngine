@@ -68,3 +68,7 @@ doc/html/*
 .vscode/*
 viewer_tests/debug
 viewer_tests/release
+
+# vcpkg build outputs
+vcpkg_installed/
+support/vcpkg/downloads/

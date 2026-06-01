@@ -1,4 +1,6 @@
 # CMakeLists.txt for tablelibs
+find_package(LibArchive REQUIRED)
+
 file(GLOB SOURCES_BASE             RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
 file(GLOB SOURCES_PLATFORM         RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/*.cpp")
 file(GLOB_RECURSE SOURCES_COMMANDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "commands/*.cpp")
@@ -33,7 +35,7 @@ if(WIN32)
     list(APPEND SOURCES_PLATFORM ${SOURCES_WIN})    
     list(APPEND HEADERS_PLATFORM ${HEADERS_WIN})    
 
-    list(APPEND SUPPORT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../support_package/include)
+    list(APPEND SUPPORT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../support/valijson/include)
     
 endif(WIN32)
 
@@ -66,8 +68,7 @@ if(WIN32)
 target_compile_options(tablelibs PRIVATE /MP )
 
 target_link_libraries(tablelibs
-    debug ${CMAKE_CURRENT_SOURCE_DIR}/../support_package/debug/archive.lib
-    optimized ${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/archive.lib
+    LibArchive::LibArchive
     icu.lib
 )
 endif(WIN32)

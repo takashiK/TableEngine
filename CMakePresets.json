@@ -2,31 +2,31 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "Visual Studio Community 2022 Release - amd64",
-            "displayName": "Visual Studio Community 2022 Release - amd64",
-            "description": "Using compilers for Visual Studio 17 2022 (x64 architecture)",
-            "generator": "Visual Studio 17 2022",
-            "toolset": "host=x64",
-            "architecture": "x64",
+            "name": "Qt-MSVC2022-amd64-Ninja",
+            "displayName": "Qt MSVC2022 64bit - Ninja Multi-Config",
+            "description": "Ninja Multi-Config generator using Qt's bundled ninja and MSVC2022",
+            "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/support/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
             }
         }
     ],
     "buildPresets": [
         {
-            "name": "Visual Studio Community 2022 Release - amd64-debug",
-            "displayName": "Visual Studio Community 2022 Release - amd64 - Debug",
-            "configurePreset": "Visual Studio Community 2022 Release - amd64",
+            "name": "Qt-MSVC2022-amd64-Ninja-debug",
+            "displayName": "Qt MSVC2022 Ninja - Debug",
+            "configurePreset": "Qt-MSVC2022-amd64-Ninja",
             "configuration": "Debug"
         },
         {
-            "name": "Visual Studio Community 2022 Release - amd64-release",
-            "displayName": "Visual Studio Community 2022 Release - amd64 - Release",
-            "configurePreset": "Visual Studio Community 2022 Release - amd64",
+            "name": "Qt-MSVC2022-amd64-Ninja-release",
+            "displayName": "Qt MSVC2022 Ninja - Release",
+            "configurePreset": "Qt-MSVC2022-amd64-Ninja",
             "configuration": "Release"
         }
     ],
@@ -34,7 +34,7 @@
         {
             "name": "win64-zip",
             "displayName": "Windows 64-bit ZIP",
-            "configurePreset": "Visual Studio Community 2022 Release - amd64",
+            "configurePreset": "Qt-MSVC2022-amd64-Ninja",
             "generators": ["ZIP"],
             "configurations": ["Release"]
         }

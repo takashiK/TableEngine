@@ -1,0 +1,9 @@
+[submodule "support/vcpkg"]
+	path = support/vcpkg
+	url = https://github.com/microsoft/vcpkg
+[submodule "support/QHexView"]
+	path = support/QHexView
+	url = https://github.com/Dax89/QHexView
+[submodule "support/valijson"]
+	path = support/valijson
+	url = https://github.com/tristanpenman/valijson

@@ -28,22 +28,9 @@ set_target_properties(TableEngine PROPERTIES
     MACOSX_BUNDLE ON
 )
 
-if(WIN32)
-add_custom_command(TARGET TableEngine POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/$<IF:$<CONFIG:Debug>,debug/archive.dll,release/archive.dll>"
-    "$<TARGET_FILE_DIR:TableEngine>/"
-)
-endif(WIN32)
-
 # --- Installation rules (used by cmake --install and CPack) ---
 if(WIN32)
     install(TARGETS TableEngine RUNTIME DESTINATION .)
-
-    install(FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/../support_package/release/archive.dll"
-        DESTINATION .
-    )
 
     install(FILES
         "${CMAKE_SOURCE_DIR}/LICENSE"
