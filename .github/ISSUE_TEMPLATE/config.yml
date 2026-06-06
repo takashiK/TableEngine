@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: TableEngine documentation
+    url: https://takashiK.github.io/TableEngine/
+    about: Read the public documentation before filing an issue.

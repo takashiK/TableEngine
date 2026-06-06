@@ -1,0 +1,32 @@
+name: Pull Request Policy
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  validate-branch-policy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check source and target branches
+        shell: pwsh
+        run: |
+          $baseBranch = "${{ github.base_ref }}"
+          $headBranch = "${{ github.head_ref }}"
+
+          if ($baseBranch -eq "master") {
+            if ($headBranch -ne "develop") {
+              throw "Pull requests to master must come from develop. Current source: $headBranch"
+            }
+          }
+          elseif ($baseBranch -eq "develop") {
+            if ($headBranch -in @("master", "develop")) {
+              throw "Pull requests to develop must come from a work branch. Current source: $headBranch"
+            }
+          }
+          else {
+            throw "Unsupported target branch: $baseBranch"
+          }

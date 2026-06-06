@@ -69,6 +69,11 @@ bool TeCmdFileCreate::execute(TeViewStore* p_store)
 	//Ask the user for the file name.
 	QString fileName = QInputDialog::getText(p_store->mainWindow(), QObject::tr("Create File"), QObject::tr("Enter the file name:"));
 
+	if(fileName.isEmpty())
+	{
+		return true; // User cancelled the dialog.
+	}
+	
 	QDir currentDir(getCurrentFolder(p_store));
 	QFileInfo fileInfo(currentDir,fileName);
 	if(fileInfo.absolutePath() != getCurrentFolder(p_store))
