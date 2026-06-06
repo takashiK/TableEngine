@@ -3,7 +3,7 @@
 ## Overview
 
 `src/viewer/` はファイルの内容を表示する内蔵ビューワモジュールです。  
-テキスト・マークアップ・画像・バイナリの 3 種類のビューワを提供します。  
+テキスト/マークアップ・画像・バイナリの 3 種類のビューワを提供します。  
 各ビューワは独立した `QMainWindow` サブクラスとして実装されており、フローティングウィンドウとして表示されます。
 
 対応するコマンド: `TeCmdToolFile`（テキスト・マークアップ）/ `TeCmdToolBinary`（バイナリ）/ 画像は自動判定で `TePictureViewer` が起動
@@ -20,7 +20,7 @@ graph TD
     FILE -->|画像| PIC["TePictureViewer\n(src/viewer/picture/)"]
 
     DOC -->|プレーンテキスト| TV["TeTextView\n+ TeTextSyntaxHighlighter"]
-    DOC -->|マークアップ形式| WEB["QWebEngineView\n+ TeMarkupPage"]
+    DOC -->|マークアップ形式| MK["QTextEdit\n(setHtml / setMarkdown)"]
     DOC --> DM["TeDocument\n(ファイル読み込み・エンコーディング管理)"]
 ```
 
@@ -37,10 +37,9 @@ graph TD
 | `TeDocViewer` | ビューワのメインウィンドウ。テキストモードとマークアップモードを切り替える |
 | `TeDocument` | ファイルの読み込みとエンコーディング管理を担うデータモデル |
 | `TeTextView` | `QPlainTextEdit` を継承したテキスト表示ウィジェット。行番号表示・タブ幅設定付き |
-| `TeMarkupPage` | `QWebEnginePage` を継承。WebEngine でマークアップをレンダリングする |
+| `QTextEdit` | マークアップ表示ウィジェット（HTML/Markdown/PlainText を切替表示） |
 | `TeTextSyntaxHighlighter` | シンタックスハイライターの実装（`QSyntaxHighlighter` 継承） |
 | `TeTextSyntaxLoader` | JSON 形式のシンタックス定義ファイルを読み込む |
-| `TeMarkupLoader` | ファイル拡張子とマークアップコンテナ（HTML テンプレート等）の対応を管理する |
 
 ### Viewer Mode Selection
 
@@ -49,13 +48,12 @@ graph TD
 | モード | 用途 | 使用ウィジェット |
 |---|---|---|
 | テキストモード | プレーンテキスト・コードファイル | `TeTextView` + `TeTextSyntaxHighlighter` |
-| マークアップモード | HTML / Markdown 等 | `QWebEngineView` + `TeMarkupPage` + `QWebChannel` |
+| マークアップモード | HTML / Markdown 等 | `QTextEdit` (`setHtml()` / `setMarkdown()`) |
 
-マークアップモードでは `QWebChannel` を介して JavaScript ← Qt 間の通信が行われます。  
-`TeMarkupLoader` がファイル拡張子に対応するコンテナ（HTML ラッパーテンプレート）を決定し、  
-コンテンツをコンテナに注入してレンダリングします。
+現行実装ではファイル拡張子に応じて `TeDocViewer::markupMode()` が描画方法を切り替えます。  
+`.html/.htm` は `setHtml()`、`.md` は `setMarkdown()`、それ以外は `setPlainText()` で表示します。
 
-詳細は [viewer/TeDocument.md](viewer/TeDocument.md) および [viewer/TeMarkupLoader.md](viewer/TeMarkupLoader.md) を参照してください。
+詳細は [viewer/TeDocument.md](viewer/TeDocument.md) を参照してください。
 
 ### Text Syntax Highlighting
 
@@ -68,7 +66,7 @@ graph TD
 ## Binary Viewer (TeBinaryViewer)
 
 バイナリファイルのビューワです。  
-`QHexView`（`support_package/src/QHexView-5.0`）を使用してヘキサダンプ表示を行います。
+`QHexView`（`support/QHexView/`）を使用してヘキサダンプ表示を行います。
 
 | クラス | 役割 |
 |---|---|

@@ -3,7 +3,7 @@
 ## Overview
 
 `TeArchive` はアーカイブファイルの読み書きを提供する名前空間です。  
-外部ライブラリ（support_package 内の archive.dll）をラップし、  
+外部ライブラリ（libarchive）をラップし、  
 ZIP / 7zip / tar 等の形式を統一インタフェースで扱えるようにします。
 
 ---
@@ -94,5 +94,10 @@ classDiagram
 
 ## Dependencies
 
-`TeArchive::Reader` / `Writer` の実装は `support_package/` 内の外部ライブラリ（`archive.dll` 等）に依存します。  
-ソースは `support_package/src/` にあり、ビルド済みバイナリが `support_package/release/` `support_package/debug/` に配置されます。
+`TeArchive::Reader` / `Writer` は libarchive に依存します。  
+現行の CMake ビルドでは `find_package(LibArchive REQUIRED)` と `LibArchive::LibArchive` でリンクされ、
+依存ライブラリは vcpkg（`x64-windows-static-md`）経由で解決されます。
+
+補足:
+- qmake 用の旧設定（`src/lib.pri`）には `support_package` 参照が残っています
+- ただし本プロジェクトの推奨ビルドは CMake であり、qmake は非サポートです

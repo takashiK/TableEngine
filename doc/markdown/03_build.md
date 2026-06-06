@@ -79,7 +79,7 @@ cmake --build out/build/Qt-MSVC2022-amd64-Ninja --config Release
 
 | パラメータ | デフォルト | 説明 |
 |---|---|---|
-| `-QtDir` | `C:\Qt\6.10.2\msvc2022_64` | Qt MSVC64 キットのルート |
+| `-QtDir` | `C:\Qt\6.11.1\msvc2022_64` | Qt MSVC64 キットのルート |
 | `-SkipConfigure` | (なし) | configure をスキップしてビルドのみ実行 |
 
 ---
@@ -98,8 +98,7 @@ cmake --build out/build/Qt-MSVC2022-amd64-Ninja --config Release
 ## Running Tests
 
 ```powershell
-cd out/build/Qt-MSVC2022-amd64-Ninja
-ctest --build-config Debug
+ctest --preset Qt-MSVC2022-amd64-Ninja-debug
 ```
 
 ---

@@ -36,8 +36,7 @@ classDiagram
 |---|---|---|
 | `content` | `QString` | 現在読み込まれているファイルの全テキスト内容 |
 
-`content` は `QWebEngineView` 経由で `TeMarkupPage` に渡され、マークアップレンダリングに使用されます。  
-テキストモード（`TeTextView`）では直接 `setPlainText()` に渡されます。
+`content` は `TeDocViewer` 側で描画モードに応じて `TeTextView` / `QTextEdit` に渡されます。
 
 ---
 
@@ -47,7 +46,7 @@ classDiagram
 
 1. ファイルを読み込み `m_fileInfo` に記録する
 2. `codecName` が空の場合は `TeUtils::detectTextCodec()` で文字コードを自動検出する
-3. `QTextCodec` でファイルバイト列を QString に変換して `m_content` に格納する
+3. `QStringDecoder` でファイルバイト列を `QString` に変換して `m_content` に格納する
 4. `codecName` が変更されていれば `codecChanged()` シグナルを発行する
 
 `reload(codecName)` は既に読み込んだファイルを別の文字コードで再読み込みします。  
