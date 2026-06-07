@@ -25,7 +25,7 @@ jobs:
       - name: Install Qt 6.11.1 (MSVC 2022 x64)
         shell: pwsh
         run: |
-          pip install "git+https://github.com/miurahr/aqtinstall.git@7e5a5c3d95cf962cfc2f36c86ffa0d2c07f1a0d4" "py7zr==1.0.*"
+          python -m pip install "git+https://github.com/miurahr/aqtinstall.git@7e5a5c3d95cf962cfc2f36c86ffa0d2c07f1a0d4" "py7zr==1.0.*"
           aqt install-qt windows desktop 6.11.1 win64_msvc2022_64 -O C:\Qt
           $qtDir = "C:\Qt\6.11.1\msvc2022_64"
           "Qt6_DIR=$qtDir\lib\cmake\Qt6" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
