@@ -22,11 +22,25 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Cache Qt 6.11.1 (MSVC 2022 x64)
+        id: cache-qt
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\Qt\6.11.1\msvc2022_64
+            C:\Qt\Tools\Ninja
+          key: ${{ runner.os }}-qt-6.11.1-msvc2022_64
+
       - name: Install Qt 6.11.1 (MSVC 2022 x64)
+        if: steps.cache-qt.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           python -m pip install "git+https://github.com/miurahr/aqtinstall.git@7e5a5c3d95cf962cfc2f36c86ffa0d2c07f1a0d4" "py7zr==1.0.*"
           aqt install-qt windows desktop 6.11.1 win64_msvc2022_64 -O C:\Qt
+
+      - name: Set Qt environment
+        shell: pwsh
+        run: |
           $qtDir = "C:\Qt\6.11.1\msvc2022_64"
           "Qt6_DIR=$qtDir\lib\cmake\Qt6" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "$qtDir\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
@@ -68,7 +82,7 @@ jobs:
       - name: Run tests (CTest)
         shell: pwsh
         run: |
-          $qtRoot = Split-Path -Parent (Split-Path -Parent $env:Qt6_DIR)
+          $qtRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $env:Qt6_DIR))
           # Add Qt bin to PATH so DLLs are found at test runtime
           $env:PATH = "$qtRoot\bin;$env:PATH"
           ctest --test-dir out/build/Qt-MSVC2022-amd64-Ninja `
