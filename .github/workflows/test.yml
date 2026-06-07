@@ -23,6 +23,7 @@ jobs:
           version: '6.11.1'
           host: 'windows'
           target: 'desktop'
+          dir: '${{ github.workspace }}/Qt'
           arch: 'win64_msvc2022_64'
           cache: true
 
