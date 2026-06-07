@@ -30,6 +30,7 @@ jobs:
           $qtDir = "C:\Qt\6.11.1\msvc2022_64"
           "Qt6_DIR=$qtDir\lib\cmake\Qt6" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "$qtDir\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          "C:\Qt\Tools\Ninja" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
 
       # ── MSVC environment ─────────────────────────────────────────────────────
       - name: Set up MSVC developer environment
