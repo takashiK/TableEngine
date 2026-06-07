@@ -13,9 +13,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with: 
+        with:  
           submodules: recursive
-
+          
       # ── Qt ──────────────────────────────────────────────────────────────────
       - name: Install Qt 6.11.1 (MSVC 2022 x64)
         uses: jurplel/install-qt-action@v4
