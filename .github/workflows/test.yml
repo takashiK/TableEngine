@@ -53,8 +53,8 @@ jobs:
           VCPKG_ROOT: ${{ github.workspace }}\support\vcpkg
           VCPKG_DEFAULT_TRIPLET: x64-windows-static-md
         run: |
-          $qtRoot = Split-Path -Parent (Split-Path -Parent $env:Qt6_DIR)
-          cmake --preset Qt-MSVC2022-amd64-Ninja --fresh `
+          $qtRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $env:Qt6_DIR))
+          cmake --preset Qt-MSVC2022-amd64-Ninja `
             -DCMAKE_PREFIX_PATH="$qtRoot"
 
       # ── Build ────────────────────────────────────────────────────────────────
