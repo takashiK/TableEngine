@@ -15,21 +15,17 @@ jobs:
         uses: actions/checkout@v4
         with:  
           submodules: recursive
-          
-      # ── Qt ──────────────────────────────────────────────────────────────────
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
 
+      # ── Qt ──────────────────────────────────────────────────────────────────
       - name: Install Qt 6.11.1 (MSVC 2022 x64)
-        shell: pwsh
-        run: |
-          pip install "aqtinstall==3.3.*" "py7zr==1.0.*"
-          aqt install-qt windows desktop 6.11.1 win64_msvc2022_64 -O C:\Qt
-          $qtDir = "C:\Qt\6.11.1\msvc2022_64"
-          "Qt6_DIR=$qtDir\lib\cmake\Qt6" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "$qtDir\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.11.1'
+          host: 'windows'
+          target: 'desktop'
+          dir: '${{ github.workspace }}/Qt'
+          arch: 'win64_msvc2022_64'
+          cache: true
 
       # ── MSVC environment ─────────────────────────────────────────────────────
       - name: Set up MSVC developer environment
