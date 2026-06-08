@@ -22,6 +22,13 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Cache pip (aqtinstall)
+        id: cache-pip
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-aqt-7e5a5c3d95cf962cfc2f36c86ffa0d2c07f1a0d4-py7zr-1.0
+
       - name: Cache Qt 6.11.1 (MSVC 2022 x64)
         id: cache-qt
         uses: actions/cache@v4
@@ -50,27 +57,37 @@ jobs:
           "C:\Qt\Tools\Ninja" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
 
       # ── MSVC environment ─────────────────────────────────────────────────────
-      - name: Set up MSVC developer environment
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
+      - name: Set up MSVC developer environment (GitHub-hosted)
+        shell: pwsh
+        run: |
+          .\scripts\setup-msvc-env.ps1 -Arch x64
 
       # ── vcpkg ───────────────────────────────────────────────────────────────
+      - name: Cache vcpkg
+        id: cache-vcpkg
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}\support\vcpkg\downloads
+            ${{ github.workspace }}\support\vcpkg\packages
+            ${{ github.workspace }}\support\vcpkg\buildtrees
+            ${{ github.workspace }}\support\vcpkg\installed
+            ${{ github.workspace }}\support\vcpkg\vcpkg.exe
+          key: ${{ runner.os }}-vcpkg-x64-windows-static-md-${{ hashFiles('vcpkg.json', 'support/vcpkg/ports/**', 'support/vcpkg/triplets/**', 'support/vcpkg/versions/**') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-x64-windows-static-md-
+
       - name: Bootstrap vcpkg
         shell: pwsh
         env:
           VCPKG_ROOT: ${{ github.workspace }}\support\vcpkg
           VCPKG_DEFAULT_TRIPLET: x64-windows-static-md
         run: |
+          if (Test-Path ".\support\vcpkg\vcpkg.exe") {
+            Write-Host "vcpkg.exe already exists. Skipping bootstrap."
+            exit 0
+          }
           .\support\vcpkg\bootstrap-vcpkg.bat -disableMetrics
-
-      - name: Cache vcpkg
-        id: cache-vcpkg
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ github.workspace }}\support\vcpkg
-          key: ${{ runner.os }}-vcpkg-2026.06.01
 
       # ── CMake configure ──────────────────────────────────────────────────────
       - name: Configure (CMake)

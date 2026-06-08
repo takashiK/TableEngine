@@ -21,6 +21,11 @@ concurrency:
 jobs:
   build-and-publish:
     runs-on: windows-latest
+    env:
+      QT_VERSION: 6.11.1
+      QT_ARCH: win64_msvc2022_64
+      QT_DIR: C:\Qt\6.11.1\msvc2022_64
+      VCPKG_DEFAULT_TRIPLET: x64-windows-static-md
 
     steps:
       - name: Checkout repository
@@ -28,25 +33,81 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref }}
+          submodules: recursive
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Cache pip (aqtinstall)
+        id: cache-pip
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-aqt-7e5a5c3d95cf962cfc2f36c86ffa0d2c07f1a0d4-py7zr-1.0
+
+      - name: Cache Qt 6.11.1 (MSVC 2022 x64)
+        id: cache-qt
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\Qt\6.11.1\msvc2022_64
+            C:\Qt\Tools\Ninja
+          key: ${{ runner.os }}-qt-6.11.1-msvc2022_64
 
       - name: Install Qt 6.11.1 (MSVC 2022 x64)
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.11.1'
-          host: 'windows'
-          target: 'desktop'
-          arch: 'win64_msvc2022_64'
-          cache: true
+        shell: pwsh
+        run: |
+          if (Test-Path "${env:QT_DIR}") {
+            Write-Host "Qt ${env:QT_VERSION} already exists. Skipping install."
+            exit 0
+          }
+          python -m pip install "git+https://github.com/miurahr/aqtinstall.git@7e5a5c3d95cf962cfc2f36c86ffa0d2c07f1a0d4" "py7zr==1.0.*"
+          aqt install-qt windows desktop $env:QT_VERSION $env:QT_ARCH -O C:\Qt
 
-      - name: Set up MSVC developer environment
-        uses: ilammy/msvc-dev-cmd@v1
+      - name: Set Qt environment
+        shell: pwsh
+        run: |
+          "Qt6_DIR=${env:QT_DIR}\lib\cmake\Qt6" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "${env:QT_DIR}\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          "C:\Qt\Tools\Ninja" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Set up MSVC developer environment (GitHub-hosted)
+        shell: pwsh
+        run: |
+          .\scripts\setup-msvc-env.ps1 -Arch x64
+
+      - name: Cache vcpkg
+        id: cache-vcpkg
+        uses: actions/cache@v4
         with:
-          arch: x64
+          path: |
+            ${{ github.workspace }}\support\vcpkg\downloads
+            ${{ github.workspace }}\support\vcpkg\packages
+            ${{ github.workspace }}\support\vcpkg\buildtrees
+            ${{ github.workspace }}\support\vcpkg\installed
+            ${{ github.workspace }}\support\vcpkg\vcpkg.exe
+          key: ${{ runner.os }}-vcpkg-x64-windows-static-md-${{ hashFiles('vcpkg.json', 'support/vcpkg/ports/**', 'support/vcpkg/triplets/**', 'support/vcpkg/versions/**') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-x64-windows-static-md-
+
+      - name: Bootstrap vcpkg
+        shell: pwsh
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}\support\vcpkg
+          VCPKG_DEFAULT_TRIPLET: ${{ env.VCPKG_DEFAULT_TRIPLET }}
+        run: |
+          if (Test-Path ".\support\vcpkg\vcpkg.exe") {
+            Write-Host "vcpkg.exe already exists. Skipping bootstrap."
+            exit 0
+          }
+          .\support\vcpkg\bootstrap-vcpkg.bat -disableMetrics
 
       - name: Package release ZIP
         shell: pwsh
         run: |
-          $qtRoot = Split-Path -Parent (Split-Path -Parent $env:Qt6_DIR)
+          $qtRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $env:Qt6_DIR))
           .\scripts\package-release.ps1 -QtDir $qtRoot
 
       - name: Upload GitHub Release asset
