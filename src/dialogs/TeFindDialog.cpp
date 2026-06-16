@@ -1,4 +1,5 @@
 #include "TeFindDialog.h"
+#include "TeSettings.h"
 
 #include <QLineEdit>
 #include <QLabel>
@@ -24,7 +25,7 @@ TeFindDialog::TeFindDialog(QWidget *parent)
 	: QDialog(parent)
 {
 	setWindowTitle(tr("Find"));
-	setMinimumWidth(550);
+	setMinimumWidth(qMax(550, TeSettings::dialogMinimumWidth()));
 
 	// Main layout
 	QVBoxLayout *mainLayout = new QVBoxLayout(this);

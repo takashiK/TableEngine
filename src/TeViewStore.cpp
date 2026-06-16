@@ -62,6 +62,7 @@
 #include <QDir>
 #include <QFile>
 #include <QTextStream>
+#include <QCoreApplication>
 #include <QGuiApplication>
 #include <QStyleHints>
 #include <QtWidgets/QApplication>
@@ -106,6 +107,7 @@ void TeViewStore::initialize()
 {
 	//Main window
 	mp_mainWindow = new TeMainWindow;
+	connect(qApp, &QCoreApplication::aboutToQuit, this, [this]() { storeWindowSizeIfNeeded(); });
 
 	//Drive bar
 	mp_driveBar = new TeDriveBar("Drive Bar");
@@ -381,6 +383,7 @@ void TeViewStore::loadSetting()
 {
 	setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
 	applyStyleSheet();
+	applyLayoutSettings();
 }
 
 void TeViewStore::loadKeySetting()
@@ -455,6 +458,7 @@ void TeViewStore::show()
 
 void TeViewStore::close()
 {
+	storeWindowSizeIfNeeded();
 	if (mp_mainWindow) mp_mainWindow->close();
 }
 
@@ -619,6 +623,83 @@ void TeViewStore::setCurrentFolderView(TeFolderView * view)
 			}
 			tree = view->tree();
 		}
+	}
+
+	applyLayoutSettings();
+}
+
+void TeViewStore::applyLayoutSettings()
+{
+	QSettings settings;
+	const int mode = settings.value(SETTING_LAYOUT_WINDOW_SIZE_MODE, TeSettings::WINDOW_SIZE_MODE_REMEMBER).toInt();
+	const int fixedWidth = qBound(640, settings.value(SETTING_LAYOUT_WINDOW_FIXED_WIDTH, 1280).toInt(), 8192);
+	const int fixedHeight = qBound(480, settings.value(SETTING_LAYOUT_WINDOW_FIXED_HEIGHT, 800).toInt(), 8192);
+	const int lastWidth = qBound(640, settings.value(SETTING_LAYOUT_WINDOW_LAST_WIDTH, fixedWidth).toInt(), 8192);
+	const int lastHeight = qBound(480, settings.value(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, fixedHeight).toInt(), 8192);
+
+	if (mp_mainWindow && !mp_mainWindow->isVisible()) {
+		const QSize startupSize = (mode == TeSettings::WINDOW_SIZE_MODE_FIXED)
+			? QSize(fixedWidth, fixedHeight)
+			: QSize(lastWidth, lastHeight);
+		mp_mainWindow->resize(startupSize);
+	}
+
+	const int treeMinWidth = qBound(120, settings.value(SETTING_LAYOUT_TREE_MIN_WIDTH, 200).toInt(), 2400);
+	const int treeMaxWidth = qBound(treeMinWidth, settings.value(SETTING_LAYOUT_TREE_MAX_WIDTH, 400).toInt(), 3200);
+	const int treeRatio = qBound(10, settings.value(SETTING_LAYOUT_TREE_LIST_RATIO, 25).toInt(), 90);
+	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 3200);
+	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 4200);
+
+	if (mp_detailView) {
+		mp_detailView->setMinimumWidth(detailMinWidth);
+		mp_detailView->setMaximumWidth(detailMaxWidth);
+	}
+
+	TeFileTreeView* tree = nullptr;
+	if (mp_split) {
+		tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
+	}
+	if (tree) {
+		tree->setMinimumWidth(treeMinWidth);
+		tree->setMaximumWidth(treeMaxWidth);
+	}
+
+	if (mp_split && tree && (!mp_mainWindow || !mp_mainWindow->isVisible())) {
+		QList<int> sizes = mp_split->sizes();
+		if (sizes.size() >= 2) {
+			int treeSize = sizes.at(0);
+			int listSize = sizes.at(1);
+			int total = treeSize + listSize;
+			if (total <= 0) {
+				total = qMax(800, mp_mainWindow ? mp_mainWindow->width() : 800);
+			}
+			const int wantedTreeSize = qBound(treeMinWidth, (total * treeRatio) / 100, treeMaxWidth);
+			const int wantedListSize = qMax(200, total - wantedTreeSize);
+			sizes[0] = wantedTreeSize;
+			sizes[1] = wantedListSize;
+			mp_split->setSizes(sizes);
+		}
+	}
+}
+
+void TeViewStore::storeWindowSizeIfNeeded()
+{
+	if (!mp_mainWindow) {
+		return;
+	}
+
+	QSettings settings;
+	const int mode = settings.value(SETTING_LAYOUT_WINDOW_SIZE_MODE, TeSettings::WINDOW_SIZE_MODE_REMEMBER).toInt();
+	if (mode != TeSettings::WINDOW_SIZE_MODE_REMEMBER) {
+		return;
+	}
+
+	const QSize size = mp_mainWindow->isMaximized()
+		? mp_mainWindow->normalGeometry().size()
+		: mp_mainWindow->size();
+	if (size.isValid() && size.width() > 0 && size.height() > 0) {
+		settings.setValue(SETTING_LAYOUT_WINDOW_LAST_WIDTH, size.width());
+		settings.setValue(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, size.height());
 	}
 }
 

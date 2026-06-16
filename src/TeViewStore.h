@@ -328,6 +328,8 @@ signals:
 	void requestCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);
 
 private:
+	void applyLayoutSettings();
+	void storeWindowSizeIfNeeded();
 	TeMainWindow*  mp_mainWindow = nullptr;
 	QTabWidget*    mp_tab[TAB_MAX] = {}; ///< Left and right tab panels.
 	TeDriveBar*    mp_driveBar = nullptr;

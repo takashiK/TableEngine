@@ -21,6 +21,9 @@
 #define _STTING_STR_DEF_
 #include "TeSettings.h"
 
+#include <QSettings>
+#include <QtGlobal>
+
 /**
  * @file TeSettings.cpp
  * @brief Defines QSettings key-path string constants.
@@ -30,3 +33,13 @@
  * SETTING_STR macro to emit const-char* definitions instead of extern
  * declarations.
  */
+
+namespace TeSettings {
+
+int dialogMinimumWidth()
+{
+	QSettings settings;
+	return qMax(200, settings.value(SETTING_LAYOUT_DIALOG_MIN_WIDTH, 300).toInt());
+}
+
+} // namespace TeSettings
