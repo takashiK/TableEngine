@@ -600,7 +600,7 @@ void TeViewStore::setDetailVisible(bool visible)
 		}
 	}
 
-	if (isPaneAdjustWindowEnabled() && mp_split) {
+	if (mp_split) {
 		QList<int> sizes = mp_split->sizes();
 		if (folderIndex >= 0 && folderIndex < sizes.size()) {
 			sizes[folderIndex] = prevFolderWidth;
@@ -1155,28 +1155,21 @@ void TeViewStore::setNavigationVisible(bool visible)
 		}
 	}
 
-	if (isPaneAdjustWindowEnabled()) {
-		const int delta = visible ? targetNavWidth : -targetNavWidth;
-		adjustWindowGeometryForPane(mp_mainWindow, delta, true);
-	}
-
 	m_isNavigationVisible = visible;
 	tree->setHidden(!visible);
 
-	if (isPaneAdjustWindowEnabled()) {
-		QList<int> sizes = mp_split->sizes();
-		const int newNavIndex = mp_split->indexOf(tree);
-		if (folderIndex >= 0 && folderIndex < sizes.size()) {
-			sizes[folderIndex] = prevFolderWidth;
-		}
-		if (detailIndex >= 0 && detailIndex < sizes.size() && isDetailVisible()) {
-			sizes[detailIndex] = prevDetailWidth;
-		}
-		if (newNavIndex >= 0 && newNavIndex < sizes.size()) {
-			sizes[newNavIndex] = visible ? targetNavWidth : 0;
-		}
-		mp_split->setSizes(sizes);
+	QList<int> sizes = mp_split->sizes();
+	const int newNavIndex = mp_split->indexOf(tree);
+	if (folderIndex >= 0 && folderIndex < sizes.size()) {
+		sizes[folderIndex] = prevFolderWidth;
 	}
+	if (detailIndex >= 0 && detailIndex < sizes.size() && isDetailVisible()) {
+		sizes[detailIndex] = prevDetailWidth;
+	}
+	if (newNavIndex >= 0 && newNavIndex < sizes.size()) {
+		sizes[newNavIndex] = visible ? targetNavWidth : 0;
+	}
+	mp_split->setSizes(sizes);
 }
 
 

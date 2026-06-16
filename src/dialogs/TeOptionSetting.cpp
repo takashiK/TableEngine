@@ -129,7 +129,8 @@ TeOptionSetting::TeOptionSetting(QWidget *parent, TeFileListView* p_listView)
 	QTabWidget* tab = new QTabWidget();
 	tab->addTab(createPageStartup(), tr("Startup"));
 	tab->addTab(createPageFolder(), tr("Folder"));
-	tab->addTab(createPageView(), tr("Layout"));
+	tab->addTab(createPageWindow(), tr("Window"));
+	tab->addTab(createPagePanel(), tr("Panel"));
 
 	layout->addWidget(tab);
 
@@ -382,7 +383,7 @@ QWidget * TeOptionSetting::createPageFolder()
 	return page;
 }
 
-QWidget * TeOptionSetting::createPageView()
+QWidget * TeOptionSetting::createPageWindow()
 {
 	QSettings settings;
 	QWidget* page = new QWidget();
@@ -391,13 +392,7 @@ QWidget * TeOptionSetting::createPageView()
 	const int mode = settings.value(SETTING_LAYOUT_WINDOW_SIZE_MODE, TeSettings::WINDOW_SIZE_MODE_REMEMBER).toInt();
 	const int fixedWidth = qBound(640, settings.value(SETTING_LAYOUT_WINDOW_FIXED_WIDTH, 1280).toInt(), 8192);
 	const int fixedHeight = qBound(480, settings.value(SETTING_LAYOUT_WINDOW_FIXED_HEIGHT, 800).toInt(), 8192);
-	const int treeMinWidth = qBound(120, settings.value(SETTING_LAYOUT_TREE_MIN_WIDTH, 200).toInt(), 1600);
-	const int treeMaxWidth = qBound(treeMinWidth, settings.value(SETTING_LAYOUT_TREE_MAX_WIDTH, 400).toInt(), 2400);
-	const int treeRatio = qBound(10, settings.value(SETTING_LAYOUT_TREE_LIST_RATIO, 25).toInt(), 90);
-	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 2400);
-	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 3200);
 	const int dialogMinWidth = qBound(200, settings.value(SETTING_LAYOUT_DIALOG_MIN_WIDTH, 300).toInt(), 2400);
-	const bool paneAdjustWindow = settings.value(SETTING_LAYOUT_PANE_ADJUST_WINDOW, false).toBool();
 
 	QGroupBox* startupGroup = new QGroupBox(tr("Startup Window Size"));
 	QGridLayout* startupLayout = new QGridLayout();
@@ -449,6 +444,39 @@ QWidget * TeOptionSetting::createPageView()
 	});
 	startupGroup->setLayout(startupLayout);
 	layout->addWidget(startupGroup);
+
+	QGroupBox* dialogGroup = new QGroupBox(tr("Dialogs"));
+	QGridLayout* dialogLayout = new QGridLayout();
+	QLabel* dialogMinLabel = new QLabel(tr("Dialog minimum width:"));
+	QSpinBox* dialogMinSpin = new QSpinBox();
+	dialogMinSpin->setRange(200, 2400);
+	dialogMinSpin->setValue(dialogMinWidth);
+	dialogLayout->addWidget(dialogMinLabel, 0, 0);
+	dialogLayout->addWidget(dialogMinSpin, 0, 1);
+	connect(dialogMinSpin, &QSpinBox::valueChanged, [this](int value) {
+		m_option[SETTING_LAYOUT_DIALOG_MIN_WIDTH] = value;
+	});
+	dialogGroup->setLayout(dialogLayout);
+	layout->addWidget(dialogGroup);
+
+	layout->addStretch();
+
+	page->setLayout(layout);
+	return page;
+}
+
+QWidget * TeOptionSetting::createPagePanel()
+{
+	QSettings settings;
+	QWidget* page = new QWidget();
+	QVBoxLayout* layout = new QVBoxLayout();
+
+	const int treeMinWidth = qBound(120, settings.value(SETTING_LAYOUT_TREE_MIN_WIDTH, 200).toInt(), 1600);
+	const int treeMaxWidth = qBound(treeMinWidth, settings.value(SETTING_LAYOUT_TREE_MAX_WIDTH, 400).toInt(), 2400);
+	const int treeRatio = qBound(10, settings.value(SETTING_LAYOUT_TREE_LIST_RATIO, 25).toInt(), 90);
+	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 2400);
+	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 3200);
+	const bool paneAdjustWindow = settings.value(SETTING_LAYOUT_PANE_ADJUST_WINDOW, false).toBool();
 
 	QGroupBox* paneGroup = new QGroupBox(tr("Pane Widths"));
 	QGridLayout* paneLayout = new QGridLayout();
@@ -510,7 +538,7 @@ QWidget * TeOptionSetting::createPageView()
 		}
 		m_option[SETTING_LAYOUT_DETAIL_MAX_WIDTH] = value;
 	});
-	QCheckBox* paneAdjustWindowCheck = new QCheckBox(tr("Adjust window size when showing/hiding Navigation and Detail panes"));
+	QCheckBox* paneAdjustWindowCheck = new QCheckBox(tr("Adjust window size when showing/hiding Detail pane"));
 	paneAdjustWindowCheck->setChecked(paneAdjustWindow);
 	connect(paneAdjustWindowCheck, &QCheckBox::toggled, [this](bool checked) {
 		m_option[SETTING_LAYOUT_PANE_ADJUST_WINDOW] = checked;
@@ -518,21 +546,6 @@ QWidget * TeOptionSetting::createPageView()
 	paneLayout->addWidget(paneAdjustWindowCheck, 5, 0, 1, 2);
 	paneGroup->setLayout(paneLayout);
 	layout->addWidget(paneGroup);
-
-	QGroupBox* dialogGroup = new QGroupBox(tr("Dialogs"));
-	QGridLayout* dialogLayout = new QGridLayout();
-	QLabel* dialogMinLabel = new QLabel(tr("Dialog minimum width:"));
-	QSpinBox* dialogMinSpin = new QSpinBox();
-	dialogMinSpin->setRange(200, 2400);
-	dialogMinSpin->setValue(dialogMinWidth);
-	dialogLayout->addWidget(dialogMinLabel, 0, 0);
-	dialogLayout->addWidget(dialogMinSpin, 0, 1);
-	connect(dialogMinSpin, &QSpinBox::valueChanged, [this](int value) {
-		m_option[SETTING_LAYOUT_DIALOG_MIN_WIDTH] = value;
-	});
-	dialogGroup->setLayout(dialogLayout);
-	layout->addWidget(dialogGroup);
-
 	layout->addStretch();
 
 	page->setLayout(layout);
