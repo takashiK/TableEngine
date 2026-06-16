@@ -1,4 +1,5 @@
 #include "TeCommandInputDialog.h"
+#include "TeSettings.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -18,6 +19,7 @@
 TeCommandInputDialog::TeCommandInputDialog(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	QVBoxLayout* layout = new QVBoxLayout();
 
 	mp_command = new QLineEdit();

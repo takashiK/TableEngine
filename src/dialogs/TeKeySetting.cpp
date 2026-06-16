@@ -81,6 +81,7 @@ static void changeKeyTree(int key, QCheckBox* ctrl, QCheckBox* shift, QTreeWidge
 TeKeySetting::TeKeySetting(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	QVBoxLayout* layout = new QVBoxLayout();
 	QHBoxLayout*  hbox = new QHBoxLayout();
 

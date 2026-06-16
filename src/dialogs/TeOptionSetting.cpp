@@ -236,6 +236,7 @@ QWidget * TeOptionSetting::createPageStartup()
 
 	groupBox->setLayout(boxLayout);
 	layout->addWidget(groupBox);
+	layout->addStretch();
 
 	page->setLayout(layout);
 	return page;
@@ -373,6 +374,8 @@ QWidget * TeOptionSetting::createPageFolder()
 		accent->setStyleSheet(QString("background-color: %1").arg(m_folderAppearance.accentColor.name()));
 		prioritize->setChecked(m_folderAppearance.focusPriority == TeFolderAppearance::FocusFirst);
 	});
+
+	layout->addStretch();
 
 	page->setLayout(layout);
 	return page;

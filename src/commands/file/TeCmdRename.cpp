@@ -21,6 +21,7 @@
 #include "TeCmdRename.h"
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
+#include "TeSettings.h"
 
 #include <QStringList>
 #include <QInputDialog>
@@ -69,7 +70,13 @@ bool TeCmdRename::execute(TeViewStore* p_store)
 		for (const auto& path : paths) {
 			QFileInfo info(path);
 			bool ok;
-			QString newName = QInputDialog::getText(p_store->mainWindow(), QObject::tr("Rename"), QObject::tr("New name"), QLineEdit::Normal,  info.fileName(),&ok);
+			QInputDialog inputDlg(p_store->mainWindow());
+			inputDlg.setWindowTitle(QObject::tr("Rename"));
+			inputDlg.setLabelText(QObject::tr("New name"));
+			inputDlg.setTextValue(info.fileName());
+			inputDlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
+			ok = (inputDlg.exec() == QDialog::Accepted);
+			const QString newName = inputDlg.textValue();
 			if (newName.isEmpty() || !ok) {
 				return true;
 			}

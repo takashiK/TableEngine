@@ -1,4 +1,5 @@
 #include "TeCombineDialog.h"
+#include "TeSettings.h"
 
 #include <QLineEdit>
 #include <QCheckBox>
@@ -72,6 +73,7 @@ namespace {
 TeCombineDialog::TeCombineDialog(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	QVBoxLayout* pVLayout = new QVBoxLayout();
 	QGridLayout* pGrid = new QGridLayout();
 

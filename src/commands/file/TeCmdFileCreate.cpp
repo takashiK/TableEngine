@@ -21,6 +21,7 @@
 #include "TeCmdFileCreate.h"
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
+#include "TeSettings.h"
 
 #include <QInputDialog>
 #include <QMessageBox>
@@ -67,12 +68,14 @@ QFlags<TeTypes::CmdType> TeCmdFileCreate::type()
 bool TeCmdFileCreate::execute(TeViewStore* p_store)
 {
 	//Ask the user for the file name.
-	QString fileName = QInputDialog::getText(p_store->mainWindow(), QObject::tr("Create File"), QObject::tr("Enter the file name:"));
-
-	if(fileName.isEmpty())
-	{
+	QInputDialog inputDlg(p_store->mainWindow());
+	inputDlg.setWindowTitle(QObject::tr("Create File"));
+	inputDlg.setLabelText(QObject::tr("Enter the file name:"));
+	inputDlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
+	if (inputDlg.exec() != QDialog::Accepted) {
 		return true; // User cancelled the dialog.
 	}
+	const QString fileName = inputDlg.textValue();
 	
 	QDir currentDir(getCurrentFolder(p_store));
 	QFileInfo fileInfo(currentDir,fileName);

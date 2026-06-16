@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 #include "TeFontDialog.h"
+#include "TeSettings.h"
 
 #include <QFontComboBox>
 #include <QSpinBox>
@@ -36,6 +37,7 @@
 TeFontDialog::TeFontDialog(QWidget *parent)
     : QDialog(parent)
 {
+    setMinimumWidth(TeSettings::dialogMinimumWidth());
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     QHBoxLayout *fontLayout = new QHBoxLayout();
     fontLayout->addWidget(new QLabel(tr("Font:"), this));

@@ -20,6 +20,7 @@
 
 #include "TeSelectPathDialog.h"
 #include "widgets/TeFileTreeView.h"
+#include "TeSettings.h"
 
 #include <QFileSystemModel>
 #include <QVBoxLayout>
@@ -40,6 +41,7 @@
 TeSelectPathDialog::TeSelectPathDialog(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	//Except Help Button
 	Qt::WindowFlags flags = windowFlags();
 	setWindowFlags(flags & ~Qt::WindowContextHelpButtonHint);

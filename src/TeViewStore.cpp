@@ -496,6 +496,25 @@ void TeViewStore::setDetailVisible(bool visible)
 {
 	if (mp_detailView) {
 		mp_detailView->setVisible(visible);
+		if (visible && mp_split) {
+			const int idx = mp_split->indexOf(mp_detailView);
+			if (idx >= 0) {
+				QList<int> sizes = mp_split->sizes();
+				if (idx < sizes.size() && sizes[idx] < mp_detailView->minimumWidth()) {
+					QSettings settings;
+					const int wantedWidth = qBound(
+						mp_detailView->minimumWidth(),
+						settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(),
+						3200);
+					const int prevIdx = idx - 1;
+					if (prevIdx >= 0 && sizes[prevIdx] > wantedWidth) {
+						sizes[prevIdx] -= wantedWidth;
+						sizes[idx] = wantedWidth;
+						mp_split->setSizes(sizes);
+					}
+				}
+			}
+		}
 	}
 }
 
