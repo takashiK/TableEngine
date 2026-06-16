@@ -182,6 +182,7 @@ void TeOptionSetting::storeDefaultSettings(bool force)
 	SETTING(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300);
 	SETTING(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900);
 	SETTING(SETTING_LAYOUT_DIALOG_MIN_WIDTH, 300);
+	SETTING(SETTING_LAYOUT_PANE_ADJUST_WINDOW, false);
 
 #undef SETTING
 }
@@ -396,6 +397,7 @@ QWidget * TeOptionSetting::createPageView()
 	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 2400);
 	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 3200);
 	const int dialogMinWidth = qBound(200, settings.value(SETTING_LAYOUT_DIALOG_MIN_WIDTH, 300).toInt(), 2400);
+	const bool paneAdjustWindow = settings.value(SETTING_LAYOUT_PANE_ADJUST_WINDOW, false).toBool();
 
 	QGroupBox* startupGroup = new QGroupBox(tr("Startup Window Size"));
 	QGridLayout* startupLayout = new QGridLayout();
@@ -508,6 +510,12 @@ QWidget * TeOptionSetting::createPageView()
 		}
 		m_option[SETTING_LAYOUT_DETAIL_MAX_WIDTH] = value;
 	});
+	QCheckBox* paneAdjustWindowCheck = new QCheckBox(tr("Adjust window size when showing/hiding Navigation and Detail panes"));
+	paneAdjustWindowCheck->setChecked(paneAdjustWindow);
+	connect(paneAdjustWindowCheck, &QCheckBox::toggled, [this](bool checked) {
+		m_option[SETTING_LAYOUT_PANE_ADJUST_WINDOW] = checked;
+	});
+	paneLayout->addWidget(paneAdjustWindowCheck, 5, 0, 1, 2);
 	paneGroup->setLayout(paneLayout);
 	layout->addWidget(paneGroup);
 

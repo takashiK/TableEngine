@@ -88,6 +88,7 @@ SETTING_STR(SETTING_LAYOUT_TREE_LIST_RATIO, "layout/tree_list_ratio");
 SETTING_STR(SETTING_LAYOUT_DETAIL_MIN_WIDTH, "layout/detail_min_width");
 SETTING_STR(SETTING_LAYOUT_DETAIL_MAX_WIDTH, "layout/detail_max_width");
 SETTING_STR(SETTING_LAYOUT_DIALOG_MIN_WIDTH, "layout/dialog_min_width");
+SETTING_STR(SETTING_LAYOUT_PANE_ADJUST_WINDOW, "layout/pane_adjust_window");
 
 SETTING_STR(SETTING_KEY, "command_key");
 SETTING_STR(SETTING_TOOLBAR, "toolbar");
