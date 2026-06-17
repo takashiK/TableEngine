@@ -1,4 +1,5 @@
 #include "TeDivideDialog.h"
+#include "TeSettings.h"
 
 #include <QLineEdit>
 #include <QSpinBox>
@@ -19,6 +20,7 @@
 TeDivideDialog::TeDivideDialog(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	QVBoxLayout* pVLayout = new QVBoxLayout();
 	QGridLayout* pGrid = new QGridLayout();
 	int gridRow = 0;

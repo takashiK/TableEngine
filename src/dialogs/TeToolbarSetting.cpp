@@ -47,6 +47,7 @@ TeToolbarSetting::TeToolbarSetting(QWidget *parent)
 	, mp_toolbar(nullptr)
 {
 	setWindowTitle(tr("Toolbar Setting"));
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 
 	QVBoxLayout* layout = new QVBoxLayout();
 	QHBoxLayout* hbox   = new QHBoxLayout();

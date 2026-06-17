@@ -51,6 +51,17 @@ namespace TeSettings {
 		INIT_FOLDER_MODE_PREVIOUS, ///< Restore last-used folder on startup.
 		INIT_FOLDER_MODE_SELECTED, ///< Use the configured initial folder on startup.
 	};
+
+	/**
+	 * @brief Startup window size handling mode.
+	 */
+	enum WindowSizeMode {
+		WINDOW_SIZE_MODE_REMEMBER = 0, ///< Reuse the last window size at startup.
+		WINDOW_SIZE_MODE_FIXED    = 1, ///< Always use the configured fixed size.
+	};
+
+	/** @brief Returns shared minimum width used by dialogs. */
+	int dialogMinimumWidth();
 };
 
 #ifdef _STTING_STR_DEF_
@@ -64,6 +75,20 @@ SETTING_STR(SETTING_STARTUP, "startup");
 SETTING_STR(SETTING_STARTUP_MultiInstance , "startup/multi_instance" );
 SETTING_STR(SETTING_STARTUP_InitialFolderMode, "startup/initial_folder_mode");
 SETTING_STR(SETTING_STARTUP_InitialFolder, "startup/initial_folder");
+
+SETTING_STR(SETTING_LAYOUT, "layout");
+SETTING_STR(SETTING_LAYOUT_WINDOW_SIZE_MODE, "layout/window_size_mode");
+SETTING_STR(SETTING_LAYOUT_WINDOW_FIXED_WIDTH, "layout/window_fixed_width");
+SETTING_STR(SETTING_LAYOUT_WINDOW_FIXED_HEIGHT, "layout/window_fixed_height");
+SETTING_STR(SETTING_LAYOUT_WINDOW_LAST_WIDTH, "layout/window_last_width");
+SETTING_STR(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, "layout/window_last_height");
+SETTING_STR(SETTING_LAYOUT_TREE_MIN_WIDTH, "layout/tree_min_width");
+SETTING_STR(SETTING_LAYOUT_TREE_MAX_WIDTH, "layout/tree_max_width");
+SETTING_STR(SETTING_LAYOUT_TREE_LIST_RATIO, "layout/tree_list_ratio");
+SETTING_STR(SETTING_LAYOUT_DETAIL_MIN_WIDTH, "layout/detail_min_width");
+SETTING_STR(SETTING_LAYOUT_DETAIL_MAX_WIDTH, "layout/detail_max_width");
+SETTING_STR(SETTING_LAYOUT_DIALOG_MIN_WIDTH, "layout/dialog_min_width");
+SETTING_STR(SETTING_LAYOUT_PANE_ADJUST_WINDOW, "layout/pane_adjust_window");
 
 SETTING_STR(SETTING_KEY, "command_key");
 SETTING_STR(SETTING_TOOLBAR, "toolbar");

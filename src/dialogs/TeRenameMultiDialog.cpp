@@ -1,4 +1,5 @@
 ﻿#include "TeRenameMultiDialog.h"
+#include "TeSettings.h"
 
 #include <QLineEdit>
 #include <QButtonGroup>
@@ -20,6 +21,7 @@
 TeRenameMultiDialog::TeRenameMultiDialog(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	QVBoxLayout* pVLayout = new QVBoxLayout();
 	QGridLayout* pGrid = new QGridLayout();
 	QHBoxLayout* pHLayout;

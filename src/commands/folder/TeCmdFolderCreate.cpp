@@ -20,6 +20,7 @@
 
 #include "TeCmdFolderCreate.h"
 #include "utils/TeUtils.h"
+#include "TeSettings.h"
 
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
@@ -98,6 +99,7 @@ bool TeCmdFolderCreate::execute(TeViewStore * p_store)
 		if (!path.isEmpty()) {
 			QInputDialog dlg(p_store->mainWindow());
 			dlg.setLabelText(QInputDialog::tr("Enter Folder name."));
+			dlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
 			if (dlg.exec() == QInputDialog::Accepted) {
 				QDir dir;
 				if (!dir.mkdir(path + "/" + dlg.textValue())) {

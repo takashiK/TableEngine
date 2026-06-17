@@ -49,7 +49,6 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 
 	mp_treeView = new TeFileTreeView;
 	mp_treeView->setFolderView(this);
-	mp_treeView->setMaximumWidth(300);
 	mp_listView = new TeFileListView;
 	mp_listView->setFolderView(this);
 

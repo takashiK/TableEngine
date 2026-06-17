@@ -55,7 +55,8 @@ public slots:
 protected:
 	QWidget* createPageStartup();
 	QWidget* createPageFolder();
-	QWidget* createPageView();
+	QWidget* createPageWindow();
+	QWidget* createPagePanel();
 	TeFolderAppearance loadFolderAppearance(bool useSettings=true) const;
 	QHash<QString, QVariant> m_option;
 	TeFolderAppearance       m_folderAppearance;
