@@ -62,6 +62,7 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <QString>
+#include <QWindow>
 
 #include "widgets/TeFileListView.h"
 
@@ -661,6 +662,55 @@ TEST_F(tst_TeFileListView, key_shift_space)
     EXPECT_TRUE(view.selectionModel()->isSelected(view.model()->index(view.model()->rowCount() - 2, 0)));
     EXPECT_EQ(2, view.selectionModel()->selectedRows().count());
 
+}
+
+TEST_F(tst_TeFileListView, key_shift_inline_search)
+{
+    // Shift + character must trigger the incremental inline search
+    // (QAbstractItemView::keyboardSearch) and move the cursor to the matched
+    // item WITHOUT changing the selection.
+    //
+    // Regression test: holding Shift while typing the search string previously
+    // selected the jumped-to item. keyboardSearch() calls setCurrentIndex()
+    // which invokes selectionCommand() with event == nullptr; the old code
+    // read the live keyboard modifiers there and returned SelectCurrent while
+    // Shift was physically held, overlapping with the Shift+arrow behavior.
+    //
+    // Note: the QWindow overload of keyClick routes through
+    // QWindowSystemInterface so that QGuiApplication::keyboardModifiers()
+    // reflects the held Shift key, reproducing the real-world condition.
+    // (The QWidget overload would not update the live modifier state.)
+
+    TeFileListView view;
+    setupView(view);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+    QWindow* window = view.windowHandle();
+    ASSERT_NE(nullptr, window);
+
+    // --- inline search from an unselected cursor, with Shift held ---
+    QModelIndex start = view.model()->index(5, 0);
+    view.setCurrentIndex(start);
+    view.clearSelection();
+
+    // All items are "itemNN"; typing 'i' matches and moves the cursor.
+    QTest::keyClick(window, Qt::Key_I, Qt::ShiftModifier);
+
+    EXPECT_NE(start, view.currentIndex());                                  // cursor moved (search worked)
+    EXPECT_EQ(0, view.selectionModel()->selectedRows().count());           // nothing selected
+    EXPECT_FALSE(view.selectionModel()->isSelected(start));                // source item not selected
+    EXPECT_FALSE(view.selectionModel()->isSelected(view.currentIndex()));  // matched item not selected
+
+    // --- a pre-existing selection must be preserved unchanged ---
+    QModelIndex selected = view.model()->index(2, 0);
+    view.setCurrentIndex(view.model()->index(8, 0));
+    view.clearSelection();
+    view.selectionModel()->select(selected, QItemSelectionModel::Select);
+
+    QTest::keyClick(window, Qt::Key_I, Qt::ShiftModifier);
+
+    EXPECT_EQ(1, view.selectionModel()->selectedRows().count());
+    EXPECT_TRUE(view.selectionModel()->isSelected(selected));
 }
 
 TEST_F(tst_TeFileListView, key_ctrl_move)

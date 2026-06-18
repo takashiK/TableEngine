@@ -293,12 +293,27 @@ QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QMode
 			return QItemSelectionModel::NoUpdate;
         }
 
-		if (modifiers & Qt::ShiftModifier){
-			//qDebug() << "KeyPress ShiftModifier SelectCurrent";
+		// event == nullptr means the selection flags are requested for a
+		// programmatic current-index change made through
+		// QAbstractItemView::setCurrentIndex(). This happens in two distinct
+		// situations that must behave differently:
+		//
+		//  1. Mouse Shift+click range selection. While the left button is held
+		//     the view extends the selection from the anchor to the clicked
+		//     item, so SelectCurrent must be returned (legacy behavior).
+		//  2. Incremental inline search (QAbstractItemView::keyboardSearch),
+		//     triggered by typing characters. The Shift key is often physically
+		//     held while typing, but the cursor jump must NOT alter the
+		//     selection.
+		//
+		// No mouse button is pressed during keyboard search, so the live mouse
+		// button state distinguishes the two cases reliably.
+		if ((modifiers & Qt::ShiftModifier) && (QGuiApplication::mouseButtons() != Qt::NoButton)) {
+			//qDebug() << "Programmatic mouse Shift change SelectCurrent";
 			return QItemSelectionModel::SelectCurrent;
 		}
 
-		//qDebug() << "Default No Modifier NoUpdate";
+		//qDebug() << "Programmatic current change NoUpdate";
 		return QItemSelectionModel::NoUpdate;
 	}
 
