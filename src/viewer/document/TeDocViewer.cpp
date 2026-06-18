@@ -11,9 +11,12 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QSettings>
+#include <QCloseEvent>
 
 
 #include "TeDocument.h"
+#include "TeDocumentSettings.h"
 #include "text/TeTextView.h"
 #include "text/TeTextSyntaxHighlighter.h"
 #include "text/TeTextSyntaxLoader.h"
@@ -25,6 +28,17 @@
 
 #include <QDir>
 #include <QDebug>
+
+namespace {
+    void applyMarkupFont(QTextEdit* markupView, const QFont& font)
+    {
+        markupView->setFont(font);
+        markupView->document()->setDefaultFont(font);
+        markupView->document()->setDefaultStyleSheet(
+            QStringLiteral("body, p, li, pre, blockquote, h1, h2, h3, h4, h5, h6 { line-height: 1.35; }")
+        );
+    }
+}
 
 /**
  * @file TeDocViewer.cpp
@@ -68,7 +82,7 @@ bool TeDocViewer::open(const QString& filepath)
         return false;
     }
 
-    if (mp_document->load(filepath)) {
+    if (mp_document->load(filepath, m_textCodec)) {
         if (centralWidget() == mp_markupView) {
             markupMode();
         }
@@ -82,6 +96,10 @@ bool TeDocViewer::open(const QString& filepath)
 
 void TeDocViewer::reopen(const QString& codecName)
 {
+    m_textCodec = codecName;
+	QSettings settings;
+	settings.setValue(SETTING_DOC_VIEWER_TEXT_CODEC, m_textCodec);
+
     mp_document->reload(codecName);
     if (centralWidget() == mp_markupView) {
         markupMode();
@@ -119,6 +137,18 @@ void TeDocViewer::findNext(const QString& text, bool caseSensitive, bool regex, 
     }
 }
 
+void TeDocViewer::closeEvent(QCloseEvent* event)
+{
+    QSettings settings;
+    const QSize size = isMaximized() ? normalGeometry().size() : this->size();
+    if (size.isValid() && size.width() > 0 && size.height() > 0) {
+        settings.setValue(SETTING_DOC_VIEWER_WINDOW_WIDTH, size.width());
+        settings.setValue(SETTING_DOC_VIEWER_WINDOW_HEIGHT, size.height());
+    }
+
+    QMainWindow::closeEvent(event);
+}
+
 void TeDocViewer::textViewMode()
 {
     if (centralWidget() == mp_markupView) {
@@ -148,6 +178,8 @@ void TeDocViewer::markupMode()
         takeCentralWidget();
         mp_textView->clear();
     }
+
+    applyMarkupFont(mp_markupView, mp_textView->font());
 
     if (mp_document->fileinfo().exists()) {
         auto suffix = mp_document->fileinfo().suffix();
@@ -383,14 +415,22 @@ void TeDocViewer::setupMenu()
     action = new QAction(tr("&Word wrap"));
     action->setCheckable(true);
     action->setChecked(mp_textView->wordWrapMode() != QTextOption::NoWrap);
-    connect(action, &QAction::triggered, [this](bool checked) { mp_textView->setWordWrapMode(checked ? QTextOption::WrapAtWordBoundaryOrAnywhere : QTextOption::NoWrap); });
+    connect(action, &QAction::triggered, [this](bool checked) {
+        mp_textView->setWordWrapMode(checked ? QTextOption::WrapAtWordBoundaryOrAnywhere : QTextOption::NoWrap);
+		QSettings settings;
+		settings.setValue(SETTING_DOC_VIEWER_WORD_WRAP, checked);
+    });
     menu->addAction(action);
 
     // Line number
     action = new QAction(tr("&Line number"));
     action->setCheckable(true);
     action->setChecked(mp_textView->isLineNumberVisible());
-    connect(action, &QAction::triggered, [this](bool checked) { mp_textView->setLineNumberVisible(checked); });
+    connect(action, &QAction::triggered, [this](bool checked) {
+        mp_textView->setLineNumberVisible(checked);
+		QSettings settings;
+		settings.setValue(SETTING_DOC_VIEWER_LINE_NUMBER, checked);
+    });
     menu->addAction(action);
 
     // Tab space
@@ -407,7 +447,7 @@ void TeDocViewer::setupEncodingMenu(QMenu* menu)
     QAction* action = NULL;
     for (const auto& codec : mp_document->codecList()) {
         action = new QAction(codec);
-        if (mp_document->codecName() == codec) {
+        if ((m_textCodec.isEmpty() && mp_document->codecName() == codec) || m_textCodec == codec) {
             action->setCheckable(true);
             action->setChecked(true);
         }
@@ -447,7 +487,11 @@ void TeDocViewer::setupTabStopMenu(QMenu* menu)
 			action->setCheckable(true);
 			action->setChecked(true);
 		}
-		connect(action, &QAction::triggered, [this, tabStop](bool /*checked*/) { mp_textView->setTabStopWidth(tabStop); });
+        connect(action, &QAction::triggered, [this, tabStop](bool /*checked*/) {
+            mp_textView->setTabStopWidth(tabStop);
+            QSettings settings;
+            settings.setValue(SETTING_DOC_VIEWER_TAB_STOP, tabStop);
+        });
 		menu->addAction(action);
 	}
 }
@@ -468,7 +512,46 @@ void TeDocViewer::updateTabStopMenu(QMenu* menu, int tabStop)
 
 void TeDocViewer::loadSettings()
 {
-    //ToDo : load settings
+    QSettings settings;
+
+    auto updateCheckState = [this](const QString& actionText, bool checked) {
+        for (QAction* menuAction : menuBar()->actions()) {
+            if (QMenu* subMenu = menuAction->menu()) {
+                for (QAction* action : subMenu->actions()) {
+                    if (action->text() == actionText && action->isCheckable()) {
+                        action->setChecked(checked);
+                        return;
+                    }
+                }
+            }
+        }
+    };
+
+    const int windowWidth = qBound(480, settings.value(SETTING_DOC_VIEWER_WINDOW_WIDTH, 700).toInt(), 8192);
+    const int windowHeight = qBound(480, settings.value(SETTING_DOC_VIEWER_WINDOW_HEIGHT, 700).toInt(), 8192);
+    resize(windowWidth, windowHeight);
+
+    const bool wordWrap = settings.value(SETTING_DOC_VIEWER_WORD_WRAP, true).toBool();
+    mp_textView->setWordWrapMode(wordWrap ? QTextOption::WrapAtWordBoundaryOrAnywhere : QTextOption::NoWrap);
+    updateCheckState(tr("&Word wrap"), wordWrap);
+
+    const bool lineNumber = settings.value(SETTING_DOC_VIEWER_LINE_NUMBER, true).toBool();
+    mp_textView->setLineNumberVisible(lineNumber);
+    updateCheckState(tr("&Line number"), lineNumber);
+
+    int tabStop = settings.value(SETTING_DOC_VIEWER_TAB_STOP, 4).toInt();
+    if (tabStop != 2 && tabStop != 4 && tabStop != 8) {
+        tabStop = 4;
+    }
+    mp_textView->setTabStopWidth(tabStop);
+
+    QFont font = mp_textView->font();
+    font.setFamily(settings.value(SETTING_DOC_VIEWER_FONT_FAMILY, font.family()).toString());
+    font.setPointSize(settings.value(SETTING_DOC_VIEWER_FONT_SIZE, font.pointSize()).toInt());
+    mp_textView->setFont(font);
+    applyMarkupFont(mp_markupView, font);
+
+    m_textCodec = settings.value(SETTING_DOC_VIEWER_TEXT_CODEC, QString()).toString();
 }
 
 void TeDocViewer::fontSettings()
@@ -477,6 +560,10 @@ void TeDocViewer::fontSettings()
 	QFont font = QFontDialog::getFont(&ok, mp_textView->font(), this);
     if (ok) {
 		mp_textView->setFont(font);
+        applyMarkupFont(mp_markupView, font);
+        QSettings settings;
+        settings.setValue(SETTING_DOC_VIEWER_FONT_FAMILY, font.family());
+        settings.setValue(SETTING_DOC_VIEWER_FONT_SIZE, font.pointSize());
 	}
 }
 

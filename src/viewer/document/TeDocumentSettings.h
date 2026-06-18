@@ -22,4 +22,15 @@ SETTING_STR(SETTING_CONTAINER_FOLDER, "document_viewer/markdown_folder");
 
 SETTING_STR(SETTING_TEXT_CODECS, "document_viewer/text_codecs");
 
+SETTING_STR(SETTING_DOC_VIEWER_WINDOW_WIDTH, "document_viewer/layout/window_width");
+SETTING_STR(SETTING_DOC_VIEWER_WINDOW_HEIGHT, "document_viewer/layout/window_height");
+
+SETTING_STR(SETTING_DOC_VIEWER_WORD_WRAP, "document_viewer/text/word_wrap");
+SETTING_STR(SETTING_DOC_VIEWER_LINE_NUMBER, "document_viewer/text/line_number");
+SETTING_STR(SETTING_DOC_VIEWER_TAB_STOP, "document_viewer/text/tab_stop");
+
+SETTING_STR(SETTING_DOC_VIEWER_FONT_FAMILY, "document_viewer/text/font_family");
+SETTING_STR(SETTING_DOC_VIEWER_FONT_SIZE, "document_viewer/text/font_size");
+SETTING_STR(SETTING_DOC_VIEWER_TEXT_CODEC, "document_viewer/text/codec");
+
 #undef SETTING_STR
