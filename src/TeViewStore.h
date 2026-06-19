@@ -50,6 +50,7 @@ class TeDriveBar;
 class QSplitter;
 class QToolBar;
 class TeFileTreeView;
+class QDockWidget;
 
 /**
  * @class TeViewStore
@@ -336,6 +337,7 @@ private:
 	QSplitter*     mp_split = nullptr;
 	QToolBar*	   mp_toolBar = nullptr;
 	TeDetailView*  mp_detailView = nullptr;
+	QDockWidget*   mp_detailDock = nullptr;
 	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE;
 
 	int  m_currentTabPlace = TAB_LEFT;

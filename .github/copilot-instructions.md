@@ -86,6 +86,31 @@ Thoroughness: {quick|medium|thorough}
 - 同じファイルを2回以上 read する場合は、前回の読み取り結果を参照する
 - compaction を避けるため、大量のコード出力結果は即座に要約する
 
+## Token Efficiency (Cache & Tools)
+
+トークン消費とレイテンシは「プロンプトキャッシュ」と「ツール定義」の2コストが大半を占める。
+この2点を意識して無駄なキャッシュ失効・ツールロードを避ける。
+（参考: VS Code Blog "Improving token efficiency in GitHub Copilot", 2026-06-17）
+
+### Prompt Cache を温存する
+
+- 1セッション内でモデル・reasoning effort を途中変更しない（キャッシュ prefix が無効化される）。モデルは着手前に確定する（→ Model Selection 参照）
+- 関連作業は連続して実行する。長時間の中断はキャッシュ失効を招く（数分〜最大1時間で破棄）
+- 安定した内容（指示・ツール定義・リポジトリ文脈）を会話の冒頭から動かさない
+  - Anthropic は明示的キャッシュ境界、OpenAI は自動 prefix キャッシュ。いずれも「冒頭の不変性」が効果の前提
+
+### Tool 定義のオーバーヘッドを抑える
+
+- 全ツールの常時ロードを前提にせず、必要なツールは tool_search で都度取得する（deferred tools）
+- 一度ロードしたツールはセッション内で再検索しない
+- MCP / 拡張ツールは実際に使うものだけ有効化し、常時ロード対象を最小化する
+- 検索・コマンド実行・要約など狭いタスクは安価モデルのサブエージェントへ委譲する（→ Subagent Delegation / Model Selection 参照）
+
+### Output Token を抑える
+
+- 大量のツール出力・生データは即座に要約し、会話へ残さない（→ Context Management 参照）
+- 取得済みの情報は再取得しない
+
 ## Model Selection (Agent Auto)
 
 **運用方針: Agent は Auto モードをメインとして使用する。**
@@ -104,6 +129,7 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 
 - 優先順位: 品質 > トークンコスト
 - 軽量タスクは GPT 最新 mini または MAI 最新に集約しコストを削減する
+- モデルは着手前に確定し、セッション途中で切り替えない（プロンプトキャッシュ失効を防ぐ。→ Token Efficiency 参照）
 
 ## Generic Workflow Rules
 

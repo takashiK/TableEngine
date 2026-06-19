@@ -183,7 +183,7 @@ void TeOptionSetting::storeDefaultSettings(bool force)
 	SETTING(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300);
 	SETTING(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 500);
 	SETTING(SETTING_LAYOUT_DIALOG_MIN_WIDTH, 300);
-	SETTING(SETTING_LAYOUT_PANE_ADJUST_WINDOW, false);
+	SETTING(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, true);
 
 #undef SETTING
 }
@@ -476,7 +476,7 @@ QWidget * TeOptionSetting::createPagePanel()
 	const int treeRatio = qBound(10, settings.value(SETTING_LAYOUT_TREE_LIST_RATIO, 25).toInt(), 90);
 	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 2400);
 	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 3200);
-	const bool paneAdjustWindow = settings.value(SETTING_LAYOUT_PANE_ADJUST_WINDOW, false).toBool();
+	const bool detailDefaultFloating = settings.value(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, true).toBool();
 
 	QGroupBox* paneGroup = new QGroupBox(tr("Pane Widths"));
 	QGridLayout* paneLayout = new QGridLayout();
@@ -538,12 +538,12 @@ QWidget * TeOptionSetting::createPagePanel()
 		}
 		m_option[SETTING_LAYOUT_DETAIL_MAX_WIDTH] = value;
 	});
-	QCheckBox* paneAdjustWindowCheck = new QCheckBox(tr("Adjust window size when showing/hiding Detail pane"));
-	paneAdjustWindowCheck->setChecked(paneAdjustWindow);
-	connect(paneAdjustWindowCheck, &QCheckBox::toggled, [this](bool checked) {
-		m_option[SETTING_LAYOUT_PANE_ADJUST_WINDOW] = checked;
+	QCheckBox* detailDefaultFloatingCheck = new QCheckBox(tr("Show Detail pane as floating window by default"));
+	detailDefaultFloatingCheck->setChecked(detailDefaultFloating);
+	connect(detailDefaultFloatingCheck, &QCheckBox::toggled, [this](bool checked) {
+		m_option[SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING] = checked;
 	});
-	paneLayout->addWidget(paneAdjustWindowCheck, 5, 0, 1, 2);
+	paneLayout->addWidget(detailDefaultFloatingCheck, 5, 0, 1, 2);
 	paneGroup->setLayout(paneLayout);
 	layout->addWidget(paneGroup);
 	layout->addStretch();
