@@ -99,8 +99,8 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 | 一括置換・機械的修正 | 低 | GPT 最新 mini / MAI 最新 |
 | ドキュメント更新 | 中 | Claude 最新 Sonnet |
 | ビルドエラー修正 | 中 | Claude 最新 Sonnet |
-| 設計レポート生成 | 高 | Claude 最新 Sonnet |
-| アーキテクチャ設計 | 高 | Claude 最新 Sonnet |
+| 設計レポート生成 | 高 | Claude 最新 Opus |
+| アーキテクチャ設計 | 高 | Claude 最新 Opus |
 
 - 優先順位: 品質 > トークンコスト
 - 軽量タスクは GPT 最新 mini または MAI 最新に集約しコストを削減する
@@ -109,9 +109,10 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 
 ### Analysis Phase
 
-1. 大ファイル（300行超）の読解は Explore サブエージェントに委譲する（→ codebase-analysis SKILL 参照）
-2. 利用パターン調査（grep → read の連鎖が3回超える場合）はサブエージェントに委譲する
-3. 分析結果は session memory に要約を書き出してからフェーズを進める
+1. プログラムの設計資料は、doc/markdown/ に Markdown 形式で記載されているものを参照する
+2. 大ファイル（300行超）の読解は Explore サブエージェントに委譲する（→ codebase-analysis SKILL 参照）
+3. 利用パターン調査（grep → read の連鎖が3回超える場合）はサブエージェントに委譲する
+4. 分析結果は session memory に要約を書き出してからフェーズを進める
 
 ### Implementation Phase
 
