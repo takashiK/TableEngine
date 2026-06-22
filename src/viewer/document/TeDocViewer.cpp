@@ -474,7 +474,19 @@ void TeDocViewer::highlightSettings()
 {
     //ToDo : highlight settings
     TeTextSyntaxDialog dialog(this);
-	dialog.exec();
+    dialog.setSyntaxHighlighter(mp_textHighlighter);
+	if( dialog.exec() == QDialog::Accepted) {
+        // Handle accepted dialog
+        mp_syntaxLoader->loadAll();
+    }
+
+    // recover the current syntax highlighting
+    // if SyntaxDialog use live edit mode, then current syntax is dynamically updated.
+    // so both Accepted and Rejected will update the syntax.
+    if (centralWidget() == mp_textView) {
+        TeTextSyntax syntax = mp_syntaxLoader->relatedEntry(mp_document->fileinfo().suffix());
+        mp_textHighlighter->setTextSyntax(syntax);
+    }
 }
 
 void TeDocViewer::setupTabStopMenu(QMenu* menu)

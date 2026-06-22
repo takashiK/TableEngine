@@ -26,6 +26,7 @@
 #include <dialogs/TeKeySetting.h>
 #include <dialogs/TeMenuSetting.h>
 #include <dialogs/TeToolbarSetting.h>
+#include <viewer/document/TeDocumentSettings.h>
 
 #include "version.h"
 
@@ -41,13 +42,7 @@ int main(int argc, char *argv[])
 	QApplication::setOrganizationName("TableWare");
 	QApplication::setApplicationName("TableEngine");
 	QApplication::setApplicationVersion(APP_VERSION_STR);
-
 	QApplication a(argc, argv);
-	//Load translation file.
-	QTranslator myappTranslator;
-	bool res = myappTranslator.load("tableengine_" + QLocale::system().name());
-	if (res)
-		a.installTranslator(&myappTranslator);
 
 	//setup setting folder and load settings.
 	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QApplication::applicationDirPath());
@@ -56,15 +51,28 @@ int main(int argc, char *argv[])
 	TeKeySetting::storeDefaultSettings();
 	TeMenuSetting::storeDefaultSettings();
 	TeToolbarSetting::storeDefaultSettings();
-	
-	//initialize com thread. it use for windows shell.
-	threadInitialize(&a);
+
+	//set document viewer
+	QSettings settings;
+	settings.setValue(SETTING_TEXT_HIGHLIGHT_SCHEMA,":/Schema/text_highlight.json");
+	settings.setValue(SETTING_TEXT_HIGHLIGHT_FOLDER, QApplication::applicationDirPath() + "/highlight");
+
+	QPixmapCache::setCacheLimit(51200); // 50MB
 
 	//setup dispatcher for command.
 	TeDispatcher dispatcher;
 	dispatcher.setFactory(TeCommandFactory::factory());
 
-	QPixmapCache::setCacheLimit(51200); // 50MB
+
+	//Load translation file.
+	QTranslator myappTranslator;
+	bool res = myappTranslator.load("tableengine_" + QLocale::system().name());
+	if (res)
+		a.installTranslator(&myappTranslator);
+	
+	//initialize com thread. it use for windows shell.
+	threadInitialize(&a);
+
 
 	//create main window
 	TeViewStore store;

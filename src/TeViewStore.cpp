@@ -45,6 +45,7 @@
 #include "TeEventEmitter.h"
 #include "utils/TeUtils.h"
 #include "dialogs/TeFilePathDialog.h"
+#include "platform/TeFileOperationManager.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -123,6 +124,7 @@ void positionDetailDockNextToMainWindow(QMainWindow* mainWindow, QDockWidget* de
 TeViewStore::TeViewStore(QObject *parent)
 	: QObject(parent)
 {
+	mp_fileOpManager = new TeFileOperationManager(this);
 }
 
 TeViewStore::~TeViewStore()
@@ -159,6 +161,7 @@ void TeViewStore::initialize()
 {
 	//Main window
 	mp_mainWindow = new TeMainWindow;
+	if (mp_fileOpManager) mp_fileOpManager->setOwnerWidget(mp_mainWindow);
 	connect(qApp, &QCoreApplication::aboutToQuit, this, [this]() { storeWindowSizeIfNeeded(); });
 
 	//Drive bar
@@ -543,6 +546,11 @@ void TeViewStore::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QE
 QWidget * TeViewStore::mainWindow()
 {
 	return mp_mainWindow;
+}
+
+TeFileOperationManager * TeViewStore::fileOperationManager()
+{
+	return mp_fileOpManager;
 }
 
 bool TeViewStore::isDetailVisible() const

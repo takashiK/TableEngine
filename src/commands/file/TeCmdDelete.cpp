@@ -21,7 +21,7 @@
 #include "TeCmdDelete.h"
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
-#include "platform/platform_util.h"
+#include "platform/TeFileOperationManager.h"
 
 #include <QMainWindow>
 #include <QFileInfo>
@@ -84,16 +84,6 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 
 void TeCmdDelete::deleteItems(TeViewStore* p_store, const QStringList & list)
 {
-	QDir dir;
-
-	bool bSuccess = true;
-
-	bSuccess = deleteFiles(list);
-
-	if (!bSuccess) {
-		QMessageBox msg(p_store->mainWindow());
-		msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-		msg.setText(QObject::tr("Failed delete files."));
-		msg.exec();
-	}
+	//Delete target files in background; failure is reported by the manager.
+	p_store->fileOperationManager()->deleteFiles(list, QObject::tr("Failed delete files."));
 }

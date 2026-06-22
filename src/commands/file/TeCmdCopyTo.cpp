@@ -24,7 +24,7 @@
 #include "widgets/TeFileFolderView.h"
 #include "dialogs/TeFilePathDialog.h"
 #include "dialogs/TeAskCreationModeDialog.h"
-#include "platform/platform_util.h"
+#include "platform/TeFileOperationManager.h"
 
 #include <QFileInfo>
 #include <QDir>
@@ -105,9 +105,11 @@ void TeCmdCopyTo::copyItems(TeViewStore* p_store, const QStringList & list, cons
 	QDir dir;
 
 	bool bSuccess = true;
+	const QString errorText = QObject::tr("Copy to following path failed.") + QString("\n") + path;
+	TeFileOperationManager* mgr = p_store->fileOperationManager();
 
 	if (dir.exists(path)) {
-		bSuccess = copyFiles(list, path);
+		mgr->copyFiles(list, path, errorText);
 	}
 	else {
 		QFileInfo info(path);
@@ -119,13 +121,13 @@ void TeCmdCopyTo::copyItems(TeViewStore* p_store, const QStringList & list, cons
 			if (dlg.exec() == QDialog::Accepted) {
 				if (dlg.createMode() == TeAskCreationModeDialog::MODE_RENAME_FILE) {
 					//copy to modified path.
-					bSuccess = copyFile(list.at(0), mpath);
+					mgr->copyFile(list.at(0), mpath, errorText);
 				}
 				else {
 					//create new directory and copy to it.
 					bSuccess = dir.mkpath(mpath);
 					if (bSuccess) {
-						bSuccess = copyFiles(list, mpath);
+						mgr->copyFiles(list, mpath, errorText);
 					}
 				}
 			}
@@ -138,7 +140,7 @@ void TeCmdCopyTo::copyItems(TeViewStore* p_store, const QStringList & list, cons
 				//Create Folder
 				bSuccess = dir.mkpath(path);
 				if (bSuccess) {
-					bSuccess = copyFiles(list, path);
+					mgr->copyFiles(list, path, errorText);
 				}
 			}
 		}
@@ -147,7 +149,7 @@ void TeCmdCopyTo::copyItems(TeViewStore* p_store, const QStringList & list, cons
 	if (!bSuccess) {
 		QMessageBox msg(p_store->mainWindow());
 		msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-		msg.setText(QObject::tr("Copy to following path failed.") + QString("\n") + path);
+		msg.setText(errorText);
 		msg.exec();
 	}
 }

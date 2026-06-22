@@ -2,12 +2,13 @@
 
 #include <QDialog>
 
+class TeTextSyntaxHighlighter;
+
 /**
  * @file TeTextSyntaxDialog.h
  * @brief Declaration of TeTextSyntaxDialog.
  * @ingroup viewer
  */
-
 
 class TeTextSyntaxDialog :
     public QDialog
@@ -17,5 +18,10 @@ class TeTextSyntaxDialog :
 public:
 	TeTextSyntaxDialog(QWidget *parent);
 	virtual ~TeTextSyntaxDialog();
+
+	void setSyntaxHighlighter(TeTextSyntaxHighlighter* highlighter);
+
+private:
+	TeTextSyntaxHighlighter* mp_textHighlighter = nullptr;
 };
 
