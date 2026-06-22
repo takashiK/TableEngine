@@ -26,6 +26,7 @@
 #include <QStringList>
 #include <QInputDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 
 /**
  * @file TeCmdRename.cpp
@@ -81,7 +82,15 @@ bool TeCmdRename::execute(TeViewStore* p_store)
 				return true;
 			}
 			if (info.fileName() != newName) {
-				QFile::rename(path, info.absolutePath() + "/" + newName);
+				bool result = QFile::rename(path, info.absolutePath() + "/" + newName);
+				if (!result) {
+					QMessageBox msg(p_store->mainWindow());
+					msg.setWindowTitle(QObject::tr("Rename"));
+					msg.setText(QObject::tr("Failed to rename file."));
+					msg.setInformativeText(path);
+					msg.setIcon(QMessageBox::Warning);
+					msg.exec();
+				}
 			}
 		}
 	}

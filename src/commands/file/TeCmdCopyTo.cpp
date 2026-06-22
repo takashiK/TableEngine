@@ -82,6 +82,9 @@ bool TeCmdCopyTo::execute(TeViewStore* p_store)
 			//get distination folder.
 			TeFilePathDialog dlg(p_store->mainWindow());
 			dlg.setCurrentPath(p_folder->currentPath());
+			dlg.setFavorites(getFavorites());
+			dlg.setHistory(p_folder->getPathHistory());
+
 			dlg.setWindowTitle(TeFilePathDialog::tr("Copy to"));
 			if (dlg.exec() == QDialog::Accepted) {
 				if (dlg.targetPath().isEmpty()) {

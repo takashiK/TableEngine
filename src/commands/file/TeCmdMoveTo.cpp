@@ -82,6 +82,8 @@ bool TeCmdMoveTo::execute(TeViewStore* p_store)
 			//select folder.
 			TeFilePathDialog dlg(p_store->mainWindow());
 			dlg.setCurrentPath(p_folder->currentPath());
+			dlg.setFavorites(getFavorites());
+			dlg.setHistory(p_folder->getPathHistory());
 			dlg.setWindowTitle(TeFilePathDialog::tr("Move to"));
 			if (dlg.exec() == QDialog::Accepted) {
 				if (dlg.targetPath().isEmpty()) {
