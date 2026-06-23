@@ -44,9 +44,9 @@ TEST(tst_TeSettings, init_folder_mode_values_distinct)
 
 // ── SETTING_STR keys non-empty ────────────────────────────────────────────────
 
-TEST(tst_TeSettings, setting_startup_key_nonempty)
+TEST(tst_TeSettings, setting_general_key_nonempty)
 {
-    EXPECT_STRNE(SETTING_STARTUP, "");
+    EXPECT_STRNE(SETTING_GENERAL, "");
 }
 
 TEST(tst_TeSettings, setting_favorites_key_nonempty)
@@ -64,8 +64,8 @@ TEST(tst_TeSettings, setting_menu_key_nonempty)
     EXPECT_STRNE(SETTING_MENU, "");
 }
 
-TEST(tst_TeSettings, startup_multi_instance_key_contains_startup_prefix)
+TEST(tst_TeSettings, general_multi_instance_key_contains_general_prefix)
 {
-    QString key = QString::fromLatin1(SETTING_STARTUP_MultiInstance);
-    EXPECT_TRUE(key.startsWith("startup"));
+    QString key = QString::fromLatin1(SETTING_GENERAL_MultiInstance);
+    EXPECT_TRUE(key.startsWith("general"));
 }
