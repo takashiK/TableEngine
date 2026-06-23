@@ -115,6 +115,20 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 						selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::Toggle);
 					}
 					break;
+				default:
+					// Incremental inline search (QAbstractItemView::keyboardSearch)
+					// is triggered by a printable character without Ctrl/Alt/Meta.
+					// It moves the cursor just like an arrow key, so the temporary
+					// single selection made by a preceding click must be cancelled
+					// (consistent with the arrow-key move behavior).
+					if (!event->text().isEmpty()
+						&& event->text().at(0).isPrint()
+						&& !(event->modifiers() & (Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier))) {
+						if (m_pressedIndex == currentIndex() && selectionModel()->isSelected(currentIndex()) && selectionModel()->selectedIndexes().size() == 1) {
+							selectionModel()->setCurrentIndex(currentIndex(), QItemSelectionModel::Toggle);
+						}
+					}
+					break;
 				}
 			}
 			switch (event->key()) {

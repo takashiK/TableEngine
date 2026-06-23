@@ -713,6 +713,43 @@ TEST_F(tst_TeFileListView, key_shift_inline_search)
     EXPECT_TRUE(view.selectionModel()->isSelected(selected));
 }
 
+TEST_F(tst_TeFileListView, key_inline_search_after_click)
+{
+    // After a click creates a temporary single selection, an incremental inline
+    // search (Shift+character) moves the cursor like an arrow key and must
+    // cancel that temporary selection.
+    //
+    // Only the Shift+character case is tested here: a plain character without
+    // Shift is consumed by the application Dispatcher (command handling) before
+    // reaching keyboardSearch, so its behavior depends on the Dispatcher
+    // configuration and is not deterministic at the view level.
+    //
+    // Note: the QWindow overload of keyClick routes through
+    // QWindowSystemInterface so that QGuiApplication::keyboardModifiers()
+    // reflects the held Shift key, reproducing the real-world condition.
+
+    TeFileListView view;
+    setupView(view);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+    QWindow* window = view.windowHandle();
+    ASSERT_NE(nullptr, window);
+
+    QModelIndex index = view.model()->index(8, 0);
+    QRect rect = view.visualRect(index);
+
+    // --- Shift held: click selects, then inline search cancels selection ---
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::NoModifier, rect.center());
+    EXPECT_EQ(index, view.currentIndex());
+    EXPECT_TRUE(view.selectionModel()->isSelected(index));
+    EXPECT_EQ(1, view.selectionModel()->selectedRows().count());
+
+    QTest::keyClick(window, Qt::Key_I, Qt::ShiftModifier);
+    EXPECT_NE(index, view.currentIndex());                       // cursor moved (search worked)
+    EXPECT_FALSE(view.selectionModel()->isSelected(index));      // temporary selection cancelled
+    EXPECT_EQ(0, view.selectionModel()->selectedRows().count());
+}
+
 TEST_F(tst_TeFileListView, key_ctrl_move)
 {
     // Ctrl Move    move current cell / no effect to selection
