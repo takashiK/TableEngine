@@ -157,8 +157,8 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 
 詳細手順は以下のスキルファイルを参照すること（言語判定後に lang/ フラグメントをロード）:
 
-- `.vscode/skills/codebase-analysis/SKILL.md` — コード構造分析の手順・委譲テンプレート
-- `.vscode/skills/refactoring/SKILL.md` — リファクタリングの Phase 管理・一括置換
+- `.github/skills/codebase-analysis/SKILL.md` — コード構造分析の手順・委譲テンプレート
+- `.github/skills/refactoring/SKILL.md` — リファクタリングの Phase 管理・一括置換
 
 <!-- =================================================================== -->
 <!-- ===== 後半: ワークスペース固有ルール（このプロジェクト専用）     ===== -->
