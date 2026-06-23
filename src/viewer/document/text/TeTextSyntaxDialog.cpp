@@ -2,14 +2,20 @@
 
 #include "TeTextSyntaxHighlighter.h"
 
+#include "panel/TeTextPanelList.h"
+#include "panel/TeTextPanelSymbol.h"
+#include "panel/TeTextPanelSyntax.h"
+#include "panel/TeTextPanelRegion.h"
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QListWidget>
 #include <QScrollArea>
 #include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
-#include <QGroupBox>
+#include <QFrame>
 #include <QStyle>
 
 /**
@@ -27,8 +33,8 @@ TeTextSyntaxDialog::TeTextSyntaxDialog(QWidget* parent) : QDialog(parent)
     QHBoxLayout* groupLayout = new QHBoxLayout();
     QLabel* label = new QLabel(tr("Rule name:"));
     groupLayout->addWidget(label);
-    QComboBox* combo = new QComboBox();
-    groupLayout->addWidget(combo);
+    mp_ruleCombo = new QComboBox();
+    groupLayout->addWidget(mp_ruleCombo);
     groupLayout->setStretch(1, 1);
     QPushButton* addBtn = new QPushButton(tr("Add"));
     groupLayout->addWidget(addBtn);
@@ -43,21 +49,21 @@ TeTextSyntaxDialog::TeTextSyntaxDialog(QWidget* parent) : QDialog(parent)
     // Related file suffix list
     QLabel* suffixLabel = new QLabel(tr("suffixes:"));
     bodyLayout->addWidget(suffixLabel, 0, 0);
-    
-    QListWidget* suffixList = new QListWidget();
-    suffixList->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    mp_suffixList = new QListWidget();
+    mp_suffixList->setSelectionMode(QAbstractItemView::SingleSelection);
     // Constrain width to roughly 6 characters; the default QListWidget size hint
     // requests about 6x the font height regardless of content, which makes this
     // non-stretched column wider than intended.
     {
         const int charCount = 12;
-        const QFontMetrics fm = suffixList->fontMetrics();
+        const QFontMetrics fm = mp_suffixList->fontMetrics();
         const int contentWidth = fm.averageCharWidth() * charCount;
-        const int frame = suffixList->frameWidth() * 2;
-        const int scrollBar = suffixList->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
-        suffixList->setMaximumWidth(contentWidth + frame + scrollBar);
+        const int frame = mp_suffixList->frameWidth() * 2;
+        const int scrollBar = mp_suffixList->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+        mp_suffixList->setMaximumWidth(contentWidth + frame + scrollBar);
     }
-    bodyLayout->addWidget(suffixList, 1, 0);
+    bodyLayout->addWidget(mp_suffixList, 1, 0);
     bodyLayout->setRowStretch(1, 1);
 
     // Syntax details
@@ -66,30 +72,62 @@ TeTextSyntaxDialog::TeTextSyntaxDialog(QWidget* parent) : QDialog(parent)
 
     QScrollArea* scrollArea = new QScrollArea();
     scrollArea->setWidgetResizable(true);
-    QVBoxLayout* symbolLayout = new QVBoxLayout();
+
+    QWidget* detailWidget = new QWidget();
+    QVBoxLayout* detailLayout = new QVBoxLayout(detailWidget);
 
     // Symbols
-    QGroupBox* symbolGroup = new QGroupBox(tr("Symbols"));
+    mp_symbolList = new TeTextPanelList(tr("Symbols"));
+    detailLayout->addWidget(mp_symbolList);
 
-    symbolLayout->addWidget(symbolGroup);
+    QFrame* separator1 = new QFrame();
+    separator1->setFrameShape(QFrame::HLine);
+    separator1->setFrameShadow(QFrame::Sunken);
+    detailLayout->addWidget(separator1);
 
     // Syntaxs
-    QGroupBox* syntaxGroup = new QGroupBox(tr("Syntaxs"));
+    mp_syntaxList = new TeTextPanelList(tr("Syntaxs"));
+    detailLayout->addWidget(mp_syntaxList);
 
-    symbolLayout->addWidget(syntaxGroup);
+    QFrame* separator2 = new QFrame();
+    separator2->setFrameShape(QFrame::HLine);
+    separator2->setFrameShadow(QFrame::Sunken);
+    detailLayout->addWidget(separator2);
 
     // Regions
-    QGroupBox* regionGroup = new QGroupBox(tr("Regions"));
+    mp_regionList = new TeTextPanelList(tr("Regions"));
+    detailLayout->addWidget(mp_regionList);
 
-    symbolLayout->addWidget(regionGroup);
+    detailLayout->addStretch(1);
 
-    scrollArea->setLayout(symbolLayout);
+    scrollArea->setWidget(detailWidget);
 
     bodyLayout->addWidget(scrollArea, 1, 1);
     bodyLayout->setColumnStretch(1, 1);
     layout->addLayout(bodyLayout);
 
     setLayout(layout);
+
+    // New empty entries created via each group's "Add" button.
+    connect(mp_symbolList, &TeTextPanelList::itemAdded, this, [this]() {
+        mp_symbolList->addPanel(new TeTextPanelSymbol());
+    });
+    connect(mp_syntaxList, &TeTextPanelList::itemAdded, this, [this]() {
+        mp_syntaxList->addPanel(new TeTextPanelSyntax());
+    });
+    connect(mp_regionList, &TeTextPanelList::itemAdded, this, [this]() {
+        mp_regionList->addPanel(new TeTextPanelRegion());
+    });
+
+    // Load highlight definitions and populate the rule selector.
+    m_loader.loadAll();
+    mp_ruleCombo->addItems(m_loader.titles());
+
+    connect(mp_ruleCombo, &QComboBox::currentTextChanged, this, &TeTextSyntaxDialog::rebuildForTitle);
+
+    if (mp_ruleCombo->count() > 0) {
+        rebuildForTitle(mp_ruleCombo->currentText());
+    }
 }
 
 TeTextSyntaxDialog::~TeTextSyntaxDialog()
@@ -99,4 +137,45 @@ TeTextSyntaxDialog::~TeTextSyntaxDialog()
 void TeTextSyntaxDialog::setSyntaxHighlighter(TeTextSyntaxHighlighter *highlighter)
 {
     mp_textHighlighter = highlighter;
+}
+
+void TeTextSyntaxDialog::rebuildForTitle(const QString& title)
+{
+    // Suffixes associated with the selected rule.
+    mp_suffixList->clear();
+    const QMap<QString, QString>& relations = m_loader.relations();
+    for (auto itr = relations.begin(); itr != relations.end(); ++itr) {
+        if (itr.value() == title) {
+            mp_suffixList->addItem(itr.key());
+        }
+    }
+
+    // Entry panels for the selected rule.
+    mp_symbolList->clearPanels();
+    mp_syntaxList->clearPanels();
+    mp_regionList->clearPanels();
+
+    if (title.isEmpty()) {
+        return;
+    }
+
+    TeTextSyntax syntax = m_loader.entry(title);
+
+    for (const auto& keywords : syntax.keywords()) {
+        TeTextPanelSymbol* panel = new TeTextPanelSymbol();
+        panel->setData(keywords);
+        mp_symbolList->addPanel(panel);
+    }
+
+    for (const auto& regex : syntax.regexes()) {
+        TeTextPanelSyntax* panel = new TeTextPanelSyntax();
+        panel->setData(regex);
+        mp_syntaxList->addPanel(panel);
+    }
+
+    for (const auto& region : syntax.regions()) {
+        TeTextPanelRegion* panel = new TeTextPanelRegion();
+        panel->setData(region);
+        mp_regionList->addPanel(panel);
+    }
 }
