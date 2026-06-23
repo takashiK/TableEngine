@@ -16,6 +16,8 @@
 SETTING_STR(SETTING_TEXT_HIGHLIGHT_SCHEMA, "document_viewer/text_highlight_schema");
 SETTING_STR(SETTING_TEXT_HIGHLIGHT_DEFAULT, "document_viewer/text_highlight_default");
 SETTING_STR(SETTING_TEXT_HIGHLIGHT_FOLDER, "document_viewer/text_highlight_folder");
+SETTING_STR(SETTING_TEXT_HIGHLIGHT_DIALOG_WIDTH, "document_viewer/text_highlight_dialog_width");
+SETTING_STR(SETTING_TEXT_HIGHLIGHT_DIALOG_HEIGHT, "document_viewer/text_highlight_dialog_height");
 
 SETTING_STR(SETTING_MARKDOWN_DEFAULT, "document_viewer/markdown_default");
 SETTING_STR(SETTING_CONTAINER_FOLDER, "document_viewer/markdown_folder");

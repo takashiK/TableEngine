@@ -2,6 +2,7 @@
 
 #include <QDialog>
 
+#include "TeTextSyntax.h"
 #include "TeTextSyntaxLoader.h"
 
 class TeTextSyntaxHighlighter;
@@ -26,12 +27,26 @@ public:
 
 	void setSyntaxHighlighter(TeTextSyntaxHighlighter* highlighter);
 
+protected:
+	void done(int result) override;
+
 private:
 	void rebuildForTitle(const QString& title);
+	void reloadSuffixList(const QString& title);
+
+	TeTextSyntax collectCurrentSyntax() const;
+	void commitCurrent();
+	void onAddEntry();
+	void onDelEntry();
+	void onAddSuffix();
+	void onDelSuffix();
 
 	TeTextSyntaxHighlighter* mp_textHighlighter = nullptr;
 
 	TeTextSyntaxLoader m_loader;
+
+	QString m_currentTitle;
+	bool m_suppressComboSignal = false;
 
 	QComboBox* mp_ruleCombo = nullptr;
 	QListWidget* mp_suffixList = nullptr;

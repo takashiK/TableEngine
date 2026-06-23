@@ -60,6 +60,30 @@
 - 設計レポートを伴う作業は、実装・設定変更・ファイル編集の前に「内容確認と承認」をユーザーへ求める
 - 承認前は read-only の調査とレポート提示までに留め、変更系ツール（編集・実行）を開始しない
 
+## Orchestration Strategy
+
+メインチャット（オーケストレーター）は方針決定と委譲に専念し、実作業は `runSubagent` 経由で
+subagent に委譲する。subagent 内部の中間情報を遮断することで、コンテキスト肥大とトークンコストを抑制する。
+
+### レイヤー責務
+
+| 層 | モデル | 責務 | やらないこと |
+|----|--------|------|------------|
+| オーケストレーター（main） | Opus 固定 | 意図理解・タスク分解・委譲仕様作成・結果統合・設計判断・承認ゲート | 大量 read・一括編集・探索の直接実行 |
+| Subagent | 難易度別（→ Model Selection） | 調査・読解・編集・ビルド・検証 | 設計の最終確定・ユーザー承認 |
+
+### 運用原則
+
+- **既定委譲**: 実作業は原則 subagent へ委譲する。オーケストレーターは大量読解・一括編集を直接行わない。
+- **文脈遮断（最重要）**: subagent は中間生成物（ファイル全文・grep 生ログ・試行錯誤）を返さない。返却は次の4点に限定する。
+  1. 結論サマリ
+  2. 変更したファイルと行（実装委譲時）
+  3. オーケストレーターの次判断に必要な最小事実
+  4. 未解決事項・要確認点
+- **委譲仕様の品質**: 委譲時は Goal / 前提（必要分のみ）/ Target / Constraints / Return format / Model tier / Thoroughness を明示し、subagent の品質を担保する。
+- **承認ゲートの保持**: 設計レポート提示とユーザー承認はオーケストレーター層が保持する。subagent は承認後のみ変更系を実行する（→ Report Delivery And Approval Gate 参照）。
+- **委譲オーバーヘッド閾値**: 単一ファイル・数行・小出力で完結する自明作業はオーケストレーター直接実行を許容する（委譲コスト > 便益を回避）。
+
 ## Subagent Delegation Rules
 
 ### When to Delegate
@@ -69,14 +93,21 @@
 | 300行超のファイル構造把握 | Explore | "Read fully, return: type list, function list, import list" |
 | 3ファイル以上のパターン調査 | Explore | "Search pattern X in dir Y, return: file, line, context" |
 | ドキュメント全読解 | Explore | "Read all files in dir, return: per-file summary" |
+| 実装・修正作業（自明な小規模を除く） | 実装 subagent | "Edit target, build & verify, return: changed files+lines, build/test result" |
+| ビルド・テスト実行と結果判定 | 実装 subagent | "Run build/test, return: pass/fail summary, failing items only" |
+
+> 委譲可否は Orchestration Strategy の「委譲オーバーヘッド閾値」に従う。
 
 ### Delegation Prompt Template
 
 ```
-Research only — do NOT modify files.
+Goal: {what to achieve}
+Context: {minimal prerequisites only}
 Target: {files or directory}
-Task: {what to extract}
-Return format: {structured format specification}
+Task: {what to do or extract}
+Constraints: {e.g. Research only — do NOT modify files / approved edits only}
+Return format: {structured, context-minimized — conclusions & changed lines only, no raw dumps}
+Model tier: {low|mid|high — per Model Selection}
 Thoroughness: {quick|medium|thorough}
 ```
 
@@ -85,6 +116,7 @@ Thoroughness: {quick|medium|thorough}
 - フェーズ切り替え時に session memory に決定事項を書き出す
 - 同じファイルを2回以上 read する場合は、前回の読み取り結果を参照する
 - compaction を避けるため、大量のコード出力結果は即座に要約する
+- subagent の返却は要約のみを会話に残し、raw 出力（ファイル全文・grep 生ログ・試行錯誤）はオーケストレーターへ伝搬させない（→ Orchestration Strategy 参照）
 
 ## Token Efficiency (Cache & Tools)
 
@@ -130,6 +162,8 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 - 優先順位: 品質 > トークンコスト
 - 軽量タスクは GPT 最新 mini または MAI 最新に集約しコストを削減する
 - モデルは着手前に確定し、セッション途中で切り替えない（プロンプトキャッシュ失効を防ぐ。→ Token Efficiency 参照）
+- オーケストレーター層は Opus 固定とする（→ Orchestration Strategy 参照）
+- 上表の選択は **subagent 層**がタスク難易度に応じて行う。オーケストレーターは委譲時に推奨 tier を明示する
 
 ## Generic Workflow Rules
 

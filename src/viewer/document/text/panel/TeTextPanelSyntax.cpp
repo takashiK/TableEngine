@@ -28,6 +28,7 @@ TeTextPanelSyntax::TeTextPanelSyntax(QWidget* parent)
 
 void TeTextPanelSyntax::setData(const TeTextSyntax::SyntaxRegex& data)
 {
+	qDebug() << "TeTextPanelSyntax::setData" << data.regex.pattern();
 	mp_regex->setText(data.regex.pattern());
 	mp_style->setFormat(data.format);
 }
