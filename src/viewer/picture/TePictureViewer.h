@@ -46,12 +46,15 @@ public slots:
 	void showImageList(bool flag);
 	void setStrechMode(Strech mode);
 	void setSortOrder(int column, Qt::SortOrder order);
+	void rotateLeft();
+	void rotateRight();
 
 protected slots:
 	void updateView(const QModelIndex& index = QModelIndex());
 
 protected:
 	void setupMenu();
+	void loadImage(const QModelIndex& index);
 
 private:
 	QGraphicsView* mp_graphics;
@@ -64,4 +67,6 @@ private:
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 	QModelIndex m_imageIndex;
 	TeEventEmitter* mp_emitter;
+	int m_orientation = 1;
+	int m_rotation = 0;
 };
