@@ -28,9 +28,28 @@ set_target_properties(TableEngine PROPERTIES
     MACOSX_BUNDLE ON
 )
 
+if(WIN32)
+    set(HIGHLIGHT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Resources/highlight")
+
+    # Keep runtime assets next to the built executable for local runs.
+    add_custom_command(TARGET TableEngine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:TableEngine>/highlight"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${HIGHLIGHT_SOURCE_DIR}"
+            "$<TARGET_FILE_DIR:TableEngine>/highlight"
+        VERBATIM
+    )
+endif()
+
 # --- Installation rules (used by cmake --install and CPack) ---
 if(WIN32)
     install(TARGETS TableEngine RUNTIME DESTINATION .)
+
+    # Put syntax highlight assets next to TableEngine.exe in release artifacts.
+    install(DIRECTORY
+        "${CMAKE_CURRENT_SOURCE_DIR}/Resources/highlight/"
+        DESTINATION "highlight"
+    )
 
     install(FILES
         "${CMAKE_SOURCE_DIR}/LICENSE"

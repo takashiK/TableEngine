@@ -88,6 +88,9 @@ bool TeCmdExtract::execute(TeViewStore* p_store)
 			dlg.setExtraFlag(0, true);
 
 			dlg.setCurrentPath(p_folder->currentPath());
+			dlg.setFavorites(getFavorites());
+			dlg.setHistory(p_folder->getPathHistory());
+
 			dlg.setWindowTitle(TeFilePathDialog::tr("Extract to"));
 			if (dlg.exec() == QDialog::Accepted) {
 				if (dlg.targetPath().isEmpty()) {

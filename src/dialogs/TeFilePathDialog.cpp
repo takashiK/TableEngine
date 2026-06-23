@@ -45,7 +45,7 @@ TeFilePathDialog::TeFilePathDialog(QWidget *parent, const QStringList& extraFlag
 	//Except Help button
 	Qt::WindowFlags flags = windowFlags();
 	setWindowFlags(flags & ~Qt::WindowContextHelpButtonHint);
-	const int minimumWidth = qMax(300, TeSettings::dialogMinimumWidth());
+	const int minimumWidth = TeSettings::dialogMinimumWidth();
 	setMinimumWidth(minimumWidth);
 
 	QVBoxLayout *layout = new QVBoxLayout();
@@ -53,7 +53,6 @@ TeFilePathDialog::TeFilePathDialog(QWidget *parent, const QStringList& extraFlag
 	//CommboBox for File path.
 	mp_combo = new QComboBox();
 	mp_combo->setEditable(true);
-	mp_combo->setMinimumWidth(minimumWidth);
 	mp_combo->installEventFilter(this);
 
 	QFileSystemModel* model = new QFileSystemModel();

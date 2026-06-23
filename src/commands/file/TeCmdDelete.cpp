@@ -20,12 +20,14 @@
 
 #include "TeCmdDelete.h"
 #include "TeViewStore.h"
+#include "TeSettings.h"
 #include "utils/TeUtils.h"
-#include "platform/platform_util.h"
+#include "platform/TeFileOperationManager.h"
 
 #include <QMainWindow>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QSettings>
 #include <QDir>
 
 /**
@@ -75,6 +77,16 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 	QStringList paths;
 
 	if (getSelectedItemList(p_store, &paths)) {
+		QSettings settings;
+		if (settings.value(SETTING_GENERAL_ConfirmBeforeDelete, true).toBool()) {
+			const QString msg = (paths.size() == 1)
+				? QFileInfo(paths.first()).fileName()
+				: QObject::tr("Delete Selected Files ?");
+			if (QMessageBox::question(p_store->mainWindow(), QObject::tr("Delete"), msg)
+					!= QMessageBox::Yes) {
+				return true; // cancelled by user
+			}
+		}
 		//delete target files.
 		deleteItems(p_store, paths);
 	}
@@ -84,16 +96,6 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 
 void TeCmdDelete::deleteItems(TeViewStore* p_store, const QStringList & list)
 {
-	QDir dir;
-
-	bool bSuccess = true;
-
-	bSuccess = deleteFiles(list);
-
-	if (!bSuccess) {
-		QMessageBox msg(p_store->mainWindow());
-		msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-		msg.setText(QObject::tr("Failed delete files."));
-		msg.exec();
-	}
+	//Delete target files in background; failure is reported by the manager.
+	p_store->fileOperationManager()->deleteFiles(list, QObject::tr("Failed delete files."));
 }

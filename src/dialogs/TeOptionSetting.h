@@ -53,7 +53,7 @@ public slots:
 	void accept();
 
 protected:
-	QWidget* createPageStartup();
+	QWidget* createPageGeneral();
 	QWidget* createPageFolder();
 	QWidget* createPageWindow();
 	QWidget* createPagePanel();

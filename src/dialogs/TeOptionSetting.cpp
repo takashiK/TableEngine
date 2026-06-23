@@ -127,7 +127,7 @@ TeOptionSetting::TeOptionSetting(QWidget *parent, TeFileListView* p_listView)
 	QVBoxLayout* layout = new QVBoxLayout();
 
 	QTabWidget* tab = new QTabWidget();
-	tab->addTab(createPageStartup(), tr("Startup"));
+	tab->addTab(createPageGeneral(), tr("General"));
 	tab->addTab(createPageFolder(), tr("Folder"));
 	tab->addTab(createPageWindow(), tr("Window"));
 	tab->addTab(createPagePanel(), tr("Panel"));
@@ -159,19 +159,20 @@ void TeOptionSetting::updateSettings()
 void TeOptionSetting::storeDefaultSettings(bool force)
 {
 	QSettings settings;
-	if (settings.childGroups().contains(SETTING_STARTUP)) {
+	if (settings.childGroups().contains(SETTING_GENERAL)) {
 		if (!force) {
 			return;
 		}
-		settings.remove(SETTING_STARTUP);
+		settings.remove(SETTING_GENERAL);
 		settings.remove(SETTING_LAYOUT);
 	}
 
 #define SETTING( str, default_value)  settings.setValue( str , settings.value( str , default_value ))
 
-	SETTING(SETTING_STARTUP_MultiInstance, true);
-	SETTING(SETTING_STARTUP_InitialFolderMode, TeSettings::INIT_FOLDER_MODE_SELECTED);
-	SETTING(SETTING_STARTUP_InitialFolder, QDir::rootPath() );
+	SETTING(SETTING_GENERAL_MultiInstance, true);
+	SETTING(SETTING_GENERAL_InitialFolderMode, TeSettings::INIT_FOLDER_MODE_SELECTED);
+	SETTING(SETTING_GENERAL_InitialFolder, QDir::rootPath() );
+	SETTING(SETTING_GENERAL_ConfirmBeforeDelete, true);
 	SETTING(SETTING_LAYOUT_WINDOW_SIZE_MODE, TeSettings::WINDOW_SIZE_MODE_REMEMBER);
 	SETTING(SETTING_LAYOUT_WINDOW_FIXED_WIDTH, 850);
 	SETTING(SETTING_LAYOUT_WINDOW_FIXED_HEIGHT, 520);
@@ -183,7 +184,7 @@ void TeOptionSetting::storeDefaultSettings(bool force)
 	SETTING(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300);
 	SETTING(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 500);
 	SETTING(SETTING_LAYOUT_DIALOG_MIN_WIDTH, 300);
-	SETTING(SETTING_LAYOUT_PANE_ADJUST_WINDOW, false);
+	SETTING(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, true);
 
 #undef SETTING
 }
@@ -197,32 +198,37 @@ void TeOptionSetting::accept()
 	QDialog::accept();
 }
 
-QWidget * TeOptionSetting::createPageStartup()
+QWidget * TeOptionSetting::createPageGeneral()
 {
 	QSettings settings;
 	QWidget* page = new QWidget();
 	QVBoxLayout* layout = new QVBoxLayout();
 
 	QCheckBox* cbox = new QCheckBox(tr("Allow multi instance."));
-	cbox->setChecked(settings.value(SETTING_STARTUP_MultiInstance).toBool());
-	connect(cbox, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_STARTUP_MultiInstance] =  (state == Qt::Checked); });
+	cbox->setChecked(settings.value(SETTING_GENERAL_MultiInstance).toBool());
+	connect(cbox, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_GENERAL_MultiInstance] =  (state == Qt::Checked); });
 	layout->addWidget(cbox);
+
+	QCheckBox* cbDelete = new QCheckBox(tr("Confirm before delete."));
+	cbDelete->setChecked(settings.value(SETTING_GENERAL_ConfirmBeforeDelete, true).toBool());
+	connect(cbDelete, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_GENERAL_ConfirmBeforeDelete] =  (state == Qt::Checked); });
+	layout->addWidget(cbDelete);
 
 	QGroupBox* groupBox = new QGroupBox(tr("Startup Folder"));
 	QVBoxLayout* boxLayout = new QVBoxLayout();
 
 	QRadioButton* radio = new QRadioButton(tr("Hold previous state."));
-	radio->setChecked(settings.value(SETTING_STARTUP_InitialFolderMode).toInt() == TeSettings::INIT_FOLDER_MODE_PREVIOUS);
-	connect(radio, &QRadioButton::clicked, [this](bool checked) { if (checked) m_option[SETTING_STARTUP_InitialFolderMode] = TeSettings::INIT_FOLDER_MODE_PREVIOUS; });
+	radio->setChecked(settings.value(SETTING_GENERAL_InitialFolderMode).toInt() == TeSettings::INIT_FOLDER_MODE_PREVIOUS);
+	connect(radio, &QRadioButton::clicked, [this](bool checked) { if (checked) m_option[SETTING_GENERAL_InitialFolderMode] = TeSettings::INIT_FOLDER_MODE_PREVIOUS; });
 	boxLayout->addWidget(radio);
 	radio = new QRadioButton(tr("Selected Folder."));
-	radio->setChecked(settings.value(SETTING_STARTUP_InitialFolderMode).toInt() == TeSettings::INIT_FOLDER_MODE_SELECTED);
-	connect(radio, &QRadioButton::clicked, [this](bool checked) { if (checked) m_option[SETTING_STARTUP_InitialFolderMode] = TeSettings::INIT_FOLDER_MODE_SELECTED; });
+	radio->setChecked(settings.value(SETTING_GENERAL_InitialFolderMode).toInt() == TeSettings::INIT_FOLDER_MODE_SELECTED);
+	connect(radio, &QRadioButton::clicked, [this](bool checked) { if (checked) m_option[SETTING_GENERAL_InitialFolderMode] = TeSettings::INIT_FOLDER_MODE_SELECTED; });
 	boxLayout->addWidget(radio);
 
 	QHBoxLayout* editLayout = new QHBoxLayout();
-	QLineEdit* edit = new QLineEdit(settings.value(SETTING_STARTUP_InitialFolder).toString());
-	connect(edit, &QLineEdit::textChanged, [this](const QString& text) {m_option[SETTING_STARTUP_InitialFolder] = text; });
+	QLineEdit* edit = new QLineEdit(settings.value(SETTING_GENERAL_InitialFolder).toString());
+	connect(edit, &QLineEdit::textChanged, [this](const QString& text) {m_option[SETTING_GENERAL_InitialFolder] = text; });
 	editLayout->addWidget(edit);
 	QPushButton* button = new QPushButton(tr("Find"));
 	connect(button, &QPushButton::clicked, [edit,this](bool /*checked*/) 
@@ -476,7 +482,7 @@ QWidget * TeOptionSetting::createPagePanel()
 	const int treeRatio = qBound(10, settings.value(SETTING_LAYOUT_TREE_LIST_RATIO, 25).toInt(), 90);
 	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 2400);
 	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 3200);
-	const bool paneAdjustWindow = settings.value(SETTING_LAYOUT_PANE_ADJUST_WINDOW, false).toBool();
+	const bool detailDefaultFloating = settings.value(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, true).toBool();
 
 	QGroupBox* paneGroup = new QGroupBox(tr("Pane Widths"));
 	QGridLayout* paneLayout = new QGridLayout();
@@ -538,12 +544,12 @@ QWidget * TeOptionSetting::createPagePanel()
 		}
 		m_option[SETTING_LAYOUT_DETAIL_MAX_WIDTH] = value;
 	});
-	QCheckBox* paneAdjustWindowCheck = new QCheckBox(tr("Adjust window size when showing/hiding Detail pane"));
-	paneAdjustWindowCheck->setChecked(paneAdjustWindow);
-	connect(paneAdjustWindowCheck, &QCheckBox::toggled, [this](bool checked) {
-		m_option[SETTING_LAYOUT_PANE_ADJUST_WINDOW] = checked;
+	QCheckBox* detailDefaultFloatingCheck = new QCheckBox(tr("Show Detail pane as floating window by default"));
+	detailDefaultFloatingCheck->setChecked(detailDefaultFloating);
+	connect(detailDefaultFloatingCheck, &QCheckBox::toggled, [this](bool checked) {
+		m_option[SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING] = checked;
 	});
-	paneLayout->addWidget(paneAdjustWindowCheck, 5, 0, 1, 2);
+	paneLayout->addWidget(detailDefaultFloatingCheck, 5, 0, 1, 2);
 	paneGroup->setLayout(paneLayout);
 	layout->addWidget(paneGroup);
 	layout->addStretch();

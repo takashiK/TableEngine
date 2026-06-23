@@ -70,11 +70,12 @@ namespace TeSettings {
 #define SETTING_STR( name , str) extern const char* name
 #endif
 
-SETTING_STR(SETTING_STARTUP, "startup");
+SETTING_STR(SETTING_GENERAL, "general");
 
-SETTING_STR(SETTING_STARTUP_MultiInstance , "startup/multi_instance" );
-SETTING_STR(SETTING_STARTUP_InitialFolderMode, "startup/initial_folder_mode");
-SETTING_STR(SETTING_STARTUP_InitialFolder, "startup/initial_folder");
+SETTING_STR(SETTING_GENERAL_MultiInstance , "general/multi_instance" );
+SETTING_STR(SETTING_GENERAL_InitialFolderMode, "general/initial_folder_mode");
+SETTING_STR(SETTING_GENERAL_InitialFolder, "general/initial_folder");
+SETTING_STR(SETTING_GENERAL_ConfirmBeforeDelete, "general/confirm_before_delete");
 
 SETTING_STR(SETTING_LAYOUT, "layout");
 SETTING_STR(SETTING_LAYOUT_WINDOW_SIZE_MODE, "layout/window_size_mode");
@@ -88,7 +89,7 @@ SETTING_STR(SETTING_LAYOUT_TREE_LIST_RATIO, "layout/tree_list_ratio");
 SETTING_STR(SETTING_LAYOUT_DETAIL_MIN_WIDTH, "layout/detail_min_width");
 SETTING_STR(SETTING_LAYOUT_DETAIL_MAX_WIDTH, "layout/detail_max_width");
 SETTING_STR(SETTING_LAYOUT_DIALOG_MIN_WIDTH, "layout/dialog_min_width");
-SETTING_STR(SETTING_LAYOUT_PANE_ADJUST_WINDOW, "layout/pane_adjust_window");
+SETTING_STR(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, "layout/detail_default_floating");
 
 SETTING_STR(SETTING_KEY, "command_key");
 SETTING_STR(SETTING_TOOLBAR, "toolbar");

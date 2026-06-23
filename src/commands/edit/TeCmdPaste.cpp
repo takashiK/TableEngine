@@ -19,10 +19,11 @@
 ****************************************************************************/
 
 #include "TeCmdPaste.h"
-#include "platform/platform_util.h"
+#include "platform/TeFileOperationManager.h"
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
 #include "utils/TeUtils.h"
+#include "platform/platform_util.h"
 
 #include <QGuiApplication>
 #include <QClipboard>
@@ -84,10 +85,10 @@ bool TeCmdPaste::execute(TeViewStore* p_store)
 
 		if (!paths.isEmpty()) {
 			if (isMoveAction(mime)) {
-				moveFiles(paths, dstPath);
+				p_store->fileOperationManager()->moveFiles(paths, dstPath);
 			}
 			else {
-				copyFiles(paths, dstPath);
+				p_store->fileOperationManager()->copyFiles(paths, dstPath);
 			}
 		}
 	}

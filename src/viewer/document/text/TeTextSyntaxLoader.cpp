@@ -105,6 +105,9 @@ void TeTextSyntaxLoader::clear()
 
 bool TeTextSyntaxLoader::loadAll()
 {
+    //clear syntaxes and relations
+    clear();
+    
     //Load syntaxes
     QSettings setting;
     QString path = setting.value(SETTING_TEXT_HIGHLIGHT_FOLDER, QApplication::applicationDirPath() + "/highlight").toString();

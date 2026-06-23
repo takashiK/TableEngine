@@ -50,6 +50,8 @@ class TeDriveBar;
 class QSplitter;
 class QToolBar;
 class TeFileTreeView;
+class QDockWidget;
+class TeFileOperationManager;
 
 /**
  * @class TeViewStore
@@ -155,6 +157,9 @@ public:
 
 	/** @brief Returns the main window widget. */
 	QWidget*  mainWindow();
+
+	/** @brief Returns the background file-operation manager. */
+	TeFileOperationManager* fileOperationManager();
 
 	/** @brief Returns the tab panel index (TAB_LEFT/TAB_RIGHT) that has keyboard focus. */
 	int currentTabPlace();
@@ -336,6 +341,7 @@ private:
 	QSplitter*     mp_split = nullptr;
 	QToolBar*	   mp_toolBar = nullptr;
 	TeDetailView*  mp_detailView = nullptr;
+	QDockWidget*   mp_detailDock = nullptr;
 	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE;
 
 	int  m_currentTabPlace = TAB_LEFT;
@@ -354,4 +360,5 @@ private:
 	Qt::ColorScheme m_lastColorScheme = Qt::ColorScheme::Unknown;
 	QList<QWidget*> m_floatingWidgets;
 	TeFindFolderView* mp_findView = nullptr;
+	TeFileOperationManager* mp_fileOpManager = nullptr;
 };

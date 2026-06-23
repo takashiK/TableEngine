@@ -38,6 +38,12 @@ class TeNativeEvent;
 extern bool threadInitialize(QApplication* a);
 extern void threadUninitialize();
 
+//Initialize and uninitialize COM (or equivalent) for a worker thread.
+//Used by background file-operation threads so shell APIs can be called off
+//the GUI thread.  No-op on platforms that do not require per-thread init.
+extern void comInitializeThread();
+extern void comUninitializeThread();
+
 //File action
 extern bool showFilesContext(int px, int py, const QStringList& paths);
 extern void showFileContext( int px, int py, const QString& path);
@@ -47,12 +53,12 @@ extern void showFileProperties(const QString& path);
 
 extern void openFile(const QString& path);
 
-extern bool copyFiles(const QStringList& files, const QString& path);
-extern bool copyFile(const QString& fromFile, const QString& toFile);
+extern bool copyFiles(const QStringList& files, const QString& path, WId owner = 0);
+extern bool copyFile(const QString& fromFile, const QString& toFile, WId owner = 0);
 
-extern bool moveFiles(const QStringList& files, const QString& path);
+extern bool moveFiles(const QStringList& files, const QString& path, WId owner = 0);
 
-extern bool deleteFiles(const QStringList& files);
+extern bool deleteFiles(const QStringList& files, WId owner = 0);
 
 extern QPixmap getThumbnail(const QString& path, const QSize& size);
 extern QPixmap getFileIcon(const QString& path, const QSize& size);

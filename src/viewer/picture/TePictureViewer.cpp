@@ -1,5 +1,6 @@
 #include "TePictureViewer.h"
 #include "utils/TeThumbnailProvider.h"
+#include "utils/TeQImageExifReader.h"
 
 #include <QMenuBar>
 #include <QMenu>
@@ -10,12 +11,35 @@
 #include <QListView>
 #include <QDockWidget>
 #include <QFileSystemModel>
+#include <QTransform>
 
 /**
  * @file TePictureViewer.cpp
  * @brief Declaration of TePictureViewer.
  * @ingroup viewer
  */
+
+namespace {
+/**
+ * @brief Builds a view transform that corrects an image to upright based on its
+ *        EXIF orientation.
+ * @param orientation EXIF orientation value (1-8).
+ * @return Transform to apply to the QGraphicsView (rotation and/or mirroring).
+ */
+QTransform exifViewTransform(int orientation)
+{
+	switch (orientation) {
+		case 2: return QTransform().scale(-1, 1);
+		case 3: return QTransform().rotate(180);
+		case 4: return QTransform().scale(1, -1);
+		case 5: return QTransform().rotate(90) * QTransform().scale(-1, 1);
+		case 6: return QTransform().rotate(90);
+		case 7: return QTransform().rotate(90) * QTransform().scale(1, -1);
+		case 8: return QTransform().rotate(270);
+		default: return QTransform();
+	}
+}
+} // namespace
 
 
 TePictureViewer::TePictureViewer(QWidget *parent)
@@ -135,25 +159,48 @@ void TePictureViewer::setSortOrder(int column, Qt::SortOrder order)
 void TePictureViewer::updateView(const QModelIndex& index)
 {
 	if (index.isValid() && (m_imageIndex != index)) {
-		mp_image->setPixmap(QPixmap(mp_model->filePath(index)));
+		loadImage(index);
 		m_imageIndex = index;
 	}
 
+	mp_graphics->setSceneRect(mp_image->boundingRect());
+	mp_graphics->setTransform(exifViewTransform(m_orientation));
+	mp_graphics->rotate(m_rotation);
 	switch (m_strechMode) {
 		case StrechNone:
-			mp_graphics->setSceneRect(mp_image->boundingRect());
-			mp_graphics->resetTransform();
 			break;
 		case StrechFit:
-			mp_graphics->setSceneRect(mp_image->boundingRect());
 			mp_graphics->fitInView(mp_image, Qt::KeepAspectRatio);
 			break;
 		case StrechFill:
-			mp_graphics->setSceneRect(mp_image->boundingRect());
 			mp_graphics->fitInView(mp_image, Qt::IgnoreAspectRatio);
 			break;
 
 	}
+}
+
+void TePictureViewer::loadImage(const QModelIndex& index)
+{
+	const QString path = mp_model->filePath(index);
+
+	TeQImageExifReader reader;
+	const QMap<QString, QString> meta = reader.read(path);
+	m_orientation = meta.value(QStringLiteral("Orientation"), QStringLiteral("1")).toInt();
+
+	mp_image->setPixmap(QPixmap(path));
+	m_rotation = 0;
+}
+
+void TePictureViewer::rotateRight()
+{
+	m_rotation = (m_rotation + 90) % 360;
+	updateView();
+}
+
+void TePictureViewer::rotateLeft()
+{
+	m_rotation = (m_rotation + 270) % 360;
+	updateView();
 }
 
 void TePictureViewer::setupMenu()
@@ -178,6 +225,13 @@ void TePictureViewer::setupMenu()
 	action->setCheckable(true);
 	action->setChecked(mp_dock->isVisible());
 	connect(action, &QAction::toggled, this, &TePictureViewer::showImageList);
+	menu->addSeparator();
+	action = menu->addAction(tr("Rotate &Right"));
+	action->setShortcuts({ QKeySequence(Qt::Key_BracketRight), QKeySequence(Qt::CTRL | Qt::Key_R) });
+	connect(action, &QAction::triggered, this, &TePictureViewer::rotateRight);
+	action = menu->addAction(tr("Rotate &Left"));
+	action->setShortcuts({ QKeySequence(Qt::Key_BracketLeft), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R) });
+	connect(action, &QAction::triggered, this, &TePictureViewer::rotateLeft);
 	menu->addSeparator();
 	QMenu* subMenu = menu->addMenu(tr("Strech Mode"));
 	action = subMenu->addAction(tr("None"));

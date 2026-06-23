@@ -53,6 +53,10 @@ public:
 	bool removeSyntaxRegex(int index);
 	bool removeSyntaxRegion(int index);
 
+	bool moveSyntaxKeywords(int fromIndex, int toIndex);
+	bool moveSyntaxRegex(int fromIndex, int toIndex);
+	bool moveSyntaxRegion(int fromIndex, int toIndex);
+
 private:
 	void update_keywords();
 

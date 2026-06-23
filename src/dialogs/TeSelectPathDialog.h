@@ -45,7 +45,17 @@ public:
 public slots:
 	void setTargetPath(const QString& path);
 
+protected:
+	void showEvent(QShowEvent* event) override;
+
 private:
+	void editToTree(const QString& path);
+	void treeToEdit(const QModelIndex& index);
+	void scheduleReveal(const QString& path);
+	void tryReveal();
+
 	QLineEdit*  mp_edit;
 	TeFileTreeView* mp_tree;
+	bool        m_syncing = false;
+	QString     m_revealTarget;
 };

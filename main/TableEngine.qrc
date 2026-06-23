@@ -78,4 +78,7 @@
         <file alias="stylesheet_dark.css">Resources/stylesheet/stylesheet_dark.css</file>
         <file alias="stylesheet_light.css">Resources/stylesheet/stylesheet_light.css</file>
     </qresource>
+    <qresource prefix="/Schema">
+        <file alias="text_highlight.json">Resources/schema/text_highlight_schema.json</file>
+    </qresource>
 </RCC>
