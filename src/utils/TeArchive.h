@@ -69,6 +69,15 @@ class Reader :
 	Q_OBJECT
 
 public:
+	/** @brief Result codes for open() / verifyPassword(). */
+	enum Result {
+		RESULT_OK,                ///< Operation succeeded.
+		RESULT_FORMAT_ERROR,      ///< Unknown or unsupported archive format.
+		RESULT_PASSWORD_REQUIRED, ///< Archive is encrypted and a password is required.
+		RESULT_WRONG_PASSWORD,    ///< The supplied password is incorrect.
+		RESULT_FATAL,             ///< Unrecoverable error (I/O, file not found, etc.).
+	};
+
 	Reader();
 	Reader(const QString& path);
 	virtual ~Reader();
@@ -81,6 +90,27 @@ public:
 	 * @param overwrite Callback function pointer.
 	 */
 	void setCallback( bool(*overwrite)(QFileInfo*) );
+
+	/**
+	 * @brief Sets the password used to open and extract an encrypted archive.
+	 * @param password Passphrase (empty clears it).
+	 */
+	void setPassword(const QString& password);
+	/** @brief Returns the password currently held. */
+	const QString& password() const { return m_password; }
+	/** @brief Returns true when the opened archive contains encrypted entries. */
+	bool isEncrypted() const { return m_encrypted; }
+	/** @brief Returns the result of the last open() / verifyPassword() call. */
+	Result lastResult() const { return m_result; }
+
+	/**
+	 * @brief Validates the currently held password against the opened archive.
+	 *
+	 * Attempts to read the header (and first encrypted entry's data) to confirm
+	 * the passphrase decrypts the archive.
+	 * @return RESULT_OK on success, RESULT_WRONG_PASSWORD / RESULT_PASSWORD_REQUIRED otherwise.
+	 */
+	Result verifyPassword();
 
 	/**
 	 * @brief Opens an archive file.
@@ -148,7 +178,10 @@ signals:
 
 	/** @brief Emitted when extraction completes (success or cancellation). */
 	void finished();
-
+	/** @brief Emitted when an unrecoverable archive error occurs.
+	 * @param message Human-readable error description.
+	 */
+	void error(const QString& message);
 public:
 	/** @brief Forward iterator over archive entries. */
 	class const_iterator {
@@ -175,7 +208,10 @@ public:
 
 private:
 	QString     m_path;             ///< Path of the opened archive.
+	QString     m_password;         ///< Passphrase for an encrypted archive.
 	ArchiveType m_type = AR_NONE;             ///< Detected archive format.
+	Result      m_result = RESULT_OK;        ///< Result of the last open()/verifyPassword().
+	bool        m_encrypted = false;         ///< True when the archive has encrypted entries.
 	bool        m_cancel = false;           ///< Cancellation flag.
 	bool(*overwrite_check)(QFileInfo*) = nullptr; ///< Optional overwrite callback.
 
@@ -205,6 +241,17 @@ public:
 	void clear();
 	int count();
 	void clearCancel();
+
+	/**
+	 * @brief Sets the password used to encrypt the created archive.
+	 *
+	 * Encryption is currently applied to ZIP archives (AES-256).  For formats
+	 * that do not support encryption the password is ignored.
+	 * @param password Passphrase (empty disables encryption).
+	 */
+	void setPassword(const QString& password);
+	/** @brief Returns the password currently held. */
+	const QString& password() const { return m_password; }
 
 	bool addEntry(const QString& src, const QString& dest);
 	bool addEntries(const QString& base, const QStringList& srcList, const QString& dest=QString());
@@ -255,6 +302,7 @@ private:
 		}
 	};
 	QList<ArchiveInfo> m_entryList;
+	QString m_password;             ///< Passphrase for an encrypted archive (ZIP).
 	qint64 m_totalBytes = 0;
 	bool m_cancel = false;
 };

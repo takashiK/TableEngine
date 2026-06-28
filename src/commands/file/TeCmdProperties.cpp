@@ -19,8 +19,11 @@
 ****************************************************************************/
 
 #include "TeCmdProperties.h"
+#include "TeViewStore.h"
 #include "utils/TeUtils.h"
 #include "platform/platform_util.h"
+#include "widgets/TeArchiveFolderView.h"
+#include "dialogs/TePropertiesDialog.h"
 
 #include <QURL>
 #include <QList>
@@ -71,7 +74,15 @@ bool TeCmdProperties::execute(TeViewStore* p_store)
 {
 	QStringList paths;
 	if (getSelectedItemList(p_store, &paths)) {
-		showFilesProperties(paths);
+		TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+		if (p_arc != nullptr) {
+			TePropertiesDialog dlg(p_arc->entryInfo(paths), false, p_store->mainWindow());
+			dlg.exec();
+		}
+		else {
+			TePropertiesDialog dlg(TePropertiesDialog::fromPaths(paths), true, p_store->mainWindow());
+			dlg.exec();
+		}
 	}
 
 	return true;

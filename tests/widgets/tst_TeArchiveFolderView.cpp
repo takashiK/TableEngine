@@ -146,14 +146,13 @@ TEST_F(tst_TeArchiveFolderView, clear_on_empty_view_does_not_crash)
 
 TEST_F(tst_TeArchiveFolderView, setRootPath_with_URI_READ_prefix)
 {
-    // setRootPath() forwards to setArchive(), which opens the file as-is;
-    // URI-prefixed paths won't open successfully, so this call returns false
-    // and rootPath() remains empty. Just verify it doesn't crash.
+    // setRootPath() strips the URI_READ scheme prefix and opens the archive in
+    // read-only mode, so rootPath() resolves to the underlying archive path.
     TeArchiveFolderView view;
     QString uri = TeArchiveFolderView::URI_READ + archivePath;
     view.setRootPath(uri);
-    // rootPath() is empty because the URI scheme prefix is not stripped
-    EXPECT_TRUE(view.rootPath().isEmpty());
+    EXPECT_TRUE(view.isReadOnly());
+    EXPECT_FALSE(view.rootPath().isEmpty());
 }
 
 // ── setCurrentPath / currentPath ──────────────────────────────────────────────

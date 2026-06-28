@@ -24,6 +24,7 @@
 #include "widgets/TeFileFolderView.h"
 #include "dialogs/TeFilePathDialog.h"
 #include "dialogs/TeAskCreationModeDialog.h"
+#include "dialogs/TePasswordDialog.h"
 
 #include "utils/TeArchive.h"
 
@@ -145,7 +146,35 @@ void TeCmdExtract::extractItems(TeViewStore* p_store, const QStringList & list, 
 			if (createArchiveFolder) {
 				basePath += QDir::separator() + info.baseName();
 			}
-			TeArchive::Reader reader(list[i]);
+			TeArchive::Reader reader;
+			reader.open(list[i]);
+
+			// Resolve the password for encrypted archives before extracting.
+			bool needPassword = (reader.lastResult() == TeArchive::Reader::RESULT_PASSWORD_REQUIRED)
+				|| (reader.lastResult() == TeArchive::Reader::RESULT_OK && reader.isEncrypted()
+					&& reader.verifyPassword() != TeArchive::Reader::RESULT_OK);
+			if (needPassword) {
+				bool ok = false;
+				while (true) {
+					TePasswordDialog dlg(p_store->mainWindow());
+					dlg.setPrompt(QObject::tr("Enter the password for \"%1\":").arg(info.fileName()));
+					if (dlg.exec() != QDialog::Accepted) {
+						break;
+					}
+					reader.setPassword(dlg.password());
+					// Re-open so header-encrypted archives (e.g. 7-Zip) bind the path.
+					reader.open(list[i]);
+					if (reader.lastResult() == TeArchive::Reader::RESULT_OK
+						&& reader.verifyPassword() == TeArchive::Reader::RESULT_OK) {
+						ok = true;
+						break;
+					}
+				}
+				if (!ok) {
+					bSuccess = false;
+					continue;
+				}
+			}
 
 			QString targetInfo = QObject::tr("Extact ") + QString::asprintf("(%d/%d) : ",i,list.size()) + info.fileName() + "\n";
 

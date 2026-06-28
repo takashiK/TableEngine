@@ -22,6 +22,7 @@
 
 #include <QSortFilterProxyModel>
 #include <QSize>
+#include <QDateTime>
 #include "TeTypes.h"
 
 /**
@@ -152,6 +153,31 @@ private slots:
     void onSourceRootPathChanged();
 
 private:
+    /**
+     * @brief Source-model-agnostic attributes of a single entry.
+     *
+     * Used by lessThan() so that ordering works regardless of whether the
+     * source model is a QFileSystemModel or a QStandardItemModel.
+     */
+    struct EntryAttr {
+        bool isDir = false;   ///< True if the entry is a directory or "..".
+        qint64 size = 0;      ///< File size in bytes.
+        QString name;         ///< Display name.
+        QString suffix;       ///< File name suffix/extension.
+        QDateTime modified;   ///< Last-modified timestamp.
+    };
+
+    /**
+     * @brief Extracts entry attributes from a source-model index.
+     * @param srcIndex Index in the source model.
+     * @return Populated EntryAttr describing the entry.
+     *
+     * @details When QFileSystemModel::FileInfoRole is available the attributes
+     * are taken from the QFileInfo; otherwise they are read from the
+     * TeFileInfo item roles (ROLE_TYPE / ROLE_SIZE / ROLE_DATE / DisplayRole).
+     */
+    EntryAttr entryAttr(const QModelIndex& srcIndex) const;
+
     TeTypes::OrderType m_sortType = TeTypes::ORDER_NAME;        ///< Active sort criterion.
     QSize m_pixmapSize = QSize(128, 128);                   ///< Target thumbnail size.
     TeImageLoader* mp_imageLoader = nullptr;        ///< Async thumbnail loader.

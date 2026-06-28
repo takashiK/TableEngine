@@ -22,9 +22,13 @@
 
 #include "TeFolderView.h"
 #include "utils/TeHistory.h"
+#include "utils/TeFileInfo.h"
 
 #include <QModelIndex>
 #include <QStringList>
+#include <QList>
+#include <QMap>
+#include <QSet>
 
 /**
  * @file TeArchiveFolderView.h
@@ -35,10 +39,13 @@
  */
 
 class TeEventFilter;
+class TeFileSortProxyModel;
 class QAbstractItemView;
 class QStandardItem;
+class QStandardItemModel;
 class QFileIconProvider;
 class QPoint;
+class QTemporaryDir;
 
 namespace TeArchive {
 	enum ArchiveType;
@@ -69,13 +76,19 @@ public:
 	static const QString URI_WRITE; ///< URI scheme prefix for a writable archive mount.
 	static const QString URI_READ;  ///< URI scheme prefix for a read-only archive mount.
 
+	/** @brief Archive mount mode. */
+	enum Mode {
+		MODE_READONLY, ///< Browsing an existing archive (read-only).
+		MODE_WRITABLE, ///< Composing a new archive (staging, write enabled).
+	};
+
 	//ROLE & COLUMN rule is same as TeFileInfo
 
 public:
 	TeArchiveFolderView(QWidget *parent = Q_NULLPTR);
 	~TeArchiveFolderView();
 
-	/** @brief Returns TeTypes::WT_ARCHIVE_FOLDER_VIEW. */
+	/** @brief Returns TeTypes::WT_ARCHIVEVIEW. */
 	virtual TeTypes::WidgetType getType() const;
 
 	/** @brief Returns the tree-view pane. */
@@ -128,7 +141,73 @@ public:
 	 * @return true on success.
 	 */
 	bool setArchive(TeArchive::Reader* p_archive);
+	/** @brief Returns the current mount mode. */
+	Mode mode() const { return m_mode; }
+	/** @brief Returns true when the mount is read-only (existing archive). */
+	bool isReadOnly() const { return m_mode == MODE_READONLY; }
 
+	/** @brief Returns the reader backing a read-only mount (may be null). */
+	TeArchive::Reader* reader() const { return mp_reader; }
+	/** @brief Returns the writer backing a writable mount (may be null). */
+	TeArchive::Writer* writer() const { return mp_writer; }
+
+	/** @brief Returns the absolute archive file path (without URI prefix). */
+	QString archivePath() const;
+
+	/**
+	 * @brief Returns the TeFileInfo describing each of the given virtual paths.
+	 * @param virtualPaths Virtual paths inside the archive.
+	 * @return TeFileInfo for every path found in the model (missing ones skipped).
+	 */
+	QList<TeFileInfo> entryInfo(const QStringList& virtualPaths);
+
+	/**
+	 * @brief Returns a temporary directory owned by this view.
+	 *
+	 * The directory is created lazily and removed when the view is destroyed
+	 * or clear() is called.  Used for extracting entries during copy/paste.
+	 * @return Absolute path of the temporary directory, or empty on failure.
+	 */
+	QString tempPath();
+
+	// --- Writable-mode staging operations (MODE_WRITABLE only) ---------------
+
+	/**
+	 * @brief Stages filesystem files/directories into the archive at @p destDir.
+	 * @param destDir   Virtual destination directory inside the archive.
+	 * @param srcPaths  Absolute filesystem paths of files/directories to add.
+	 * @return true if at least one entry was staged.
+	 */
+	bool stageEntries(const QString& destDir, const QStringList& srcPaths);
+
+	/**
+	 * @brief Removes staged entries (and their children) from the archive view.
+	 * @param virtualPaths Virtual paths of entries to remove.
+	 * @return true on success.
+	 */
+	bool removeEntries(const QStringList& virtualPaths);
+
+	/**
+	 * @brief Creates an empty staged directory at @p destDir/@p name.
+	 * @return true on success.
+	 */
+	bool makeDirectory(const QString& destDir, const QString& name);
+
+	/**
+	 * @brief Renames a staged entry.
+	 * @param virtualPath Current virtual path of the entry.
+	 * @param newName     New leaf name.
+	 * @return true on success.
+	 */
+	bool renameEntry(const QString& virtualPath, const QString& newName);
+
+	/**
+	 * @brief Commits all staged entries to an archive file.
+	 * @param destPath Absolute output archive path.
+	 * @param type     Archive format.
+	 * @return true on success.
+	 */
+	bool commit(const QString& destPath, TeArchive::ArchiveType type);
 public slots:
 	/**
 	 * @brief Updates file-type visibility flags and sort order.
@@ -150,6 +229,9 @@ protected:
 	/** @brief Inserts a directory entry into the in-memory model. */
 	void internalAddDirEntry(const QString& path);
 
+	/** @brief Rebuilds the model from the staging maps (Writable mode). */
+	void rebuildStagingModel();
+
 	/** @brief Converts a list-view model index to its virtual archive path. */
 	QString indexToPath(const QModelIndex &index);
 
@@ -168,8 +250,11 @@ protected:
 	/** @brief Creates the ".." parent-directory row items for @p path. */
 	QList<QStandardItem*> createParentEntry(const QString& path);
 
-	/** @brief Shows a system-shell context menu at @p pos. */
-	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos) const;
+	/** @brief Shows a custom (TeMenuSetting-based) context menu at @p pos. */
+	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos);
+
+	/** @brief Builds and shows a user-defined context menu from settings. */
+	void showUserContextMenu(const QString& menuName, const QPoint& pos);
 
 protected slots:
 	/**
@@ -180,6 +265,19 @@ protected slots:
 
 private:
 	QString m_rootPath;              ///< URI of the currently mounted archive.
+	Mode m_mode = MODE_WRITABLE;     ///< Current mount mode.
+
+	TeArchive::Reader* mp_reader = nullptr; ///< Reader for a read-only mount (owned).
+	TeArchive::Writer* mp_writer = nullptr; ///< Writer staging a writable mount (owned).
+	QTemporaryDir* mp_tempDir = nullptr;    ///< Temp dir for extraction (owned, lazy).
+
+	QMap<QString, QString> m_stagedFiles;   ///< Writable staging: dest virtual path -> source FS path.
+	QSet<QString> m_stagedDirs;             ///< Writable staging: empty directory virtual paths.
+
+	QStandardItemModel* mp_treeModel;   ///< Source model backing the tree pane.
+	QStandardItemModel* mp_listModel;   ///< Source model backing the list pane.
+	TeFileSortProxyModel* mp_treeProxy; ///< Sort/filter proxy between source model and tree pane.
+	TeFileSortProxyModel* mp_listProxy; ///< Sort/filter proxy between source model and list pane.
 
 	TeFileTreeView* mp_treeView;     ///< Left-pane tree widget.
 	TeFileListView* mp_listView;     ///< Right-pane list widget.

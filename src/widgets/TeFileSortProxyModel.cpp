@@ -20,6 +20,7 @@
 
 #include "TeFileSortProxyModel.h"
 #include "utils/TeImageLoader.h"
+#include "utils/TeFileInfo.h"
 
 #include <QFileSystemModel>
 #include <QImageReader>
@@ -209,56 +210,74 @@ bool TeFileSortProxyModel::filterAcceptsRow(int source_row, const QModelIndex &s
 
 bool TeFileSortProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
 {
-    QVariant leftData = sourceModel()->data(source_left, QFileSystemModel::FileInfoRole);
-    QVariant rightData = sourceModel()->data(source_right, QFileSystemModel::FileInfoRole);
+    EntryAttr left = entryAttr(source_left);
+    EntryAttr right = entryAttr(source_right);
 
-    if (!leftData.isValid() || !rightData.isValid())
-        return QSortFilterProxyModel::lessThan(source_left, source_right);
-
-    QFileInfo leftFileInfo = qvariant_cast<QFileInfo>(leftData);
-    QFileInfo rightFileInfo = qvariant_cast<QFileInfo>(rightData);
-
-    if (leftFileInfo.isDir() && !rightFileInfo.isDir())
+    if (left.isDir && !right.isDir)
         return sortOrder() == Qt::AscendingOrder; // Directories come before files
-    if (!leftFileInfo.isDir() && rightFileInfo.isDir())
+    if (!left.isDir && right.isDir)
         return sortOrder() != Qt::AscendingOrder; // Files come after directories
-    
-    if (leftFileInfo.isDir() && rightFileInfo.isDir()) {
+
+    if (left.isDir && right.isDir) {
         // Both are directories, sort by name
-        if (leftFileInfo.fileName() == "..")
+        if (left.name == "..")
             return sortOrder() == Qt::AscendingOrder; // ".." comes first
-        if (rightFileInfo.fileName() == "..")
+        if (right.name == "..")
             return sortOrder() != Qt::AscendingOrder; // ".." comes first
         if (sortOrder() == Qt::AscendingOrder){
-            return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
+            return stringLessThan(left.name, right.name, sortCaseSensitivity(), isSortLocaleAware());
         } else {
-            return stringLessThan(rightFileInfo.fileName(), leftFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
+            return stringLessThan(right.name, left.name, sortCaseSensitivity(), isSortLocaleAware());
         }
     }
 
     switch( sortType()) {
     case TeTypes::ORDER_NAME:
-        return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
+        return stringLessThan(left.name, right.name, sortCaseSensitivity(), isSortLocaleAware());
     case TeTypes::ORDER_SIZE:
-        if (leftFileInfo.size() == rightFileInfo.size()) {
+        if (left.size == right.size) {
             // If sizes are the same, sort by name
-            return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
+            return stringLessThan(left.name, right.name, sortCaseSensitivity(), isSortLocaleAware());
         }
-        return leftFileInfo.size() < rightFileInfo.size();
+        return left.size < right.size;
     case TeTypes::ORDER_EXTENSION:
-        if (leftFileInfo.suffix() == rightFileInfo.suffix()) {
+        if (left.suffix == right.suffix) {
             // If extensions are the same, sort by name
-            return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
+            return stringLessThan(left.name, right.name, sortCaseSensitivity(), isSortLocaleAware());
         }
-        return stringLessThan(leftFileInfo.suffix(), rightFileInfo.suffix(), sortCaseSensitivity(), isSortLocaleAware());
+        return stringLessThan(left.suffix, right.suffix, sortCaseSensitivity(), isSortLocaleAware());
     case TeTypes::ORDER_MODIFIED:
-        if (leftFileInfo.lastModified() == rightFileInfo.lastModified()) {
+        if (left.modified == right.modified) {
             // If modification times are the same, sort by name
-            return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
+            return stringLessThan(left.name, right.name, sortCaseSensitivity(), isSortLocaleAware());
         }
-        return leftFileInfo.lastModified() < rightFileInfo.lastModified();
+        return left.modified < right.modified;
     }
-    return stringLessThan(leftFileInfo.fileName(), rightFileInfo.fileName(), sortCaseSensitivity(), isSortLocaleAware());
+    return stringLessThan(left.name, right.name, sortCaseSensitivity(), isSortLocaleAware());
+}
+
+TeFileSortProxyModel::EntryAttr TeFileSortProxyModel::entryAttr(const QModelIndex& srcIndex) const
+{
+    EntryAttr attr;
+    QVariant fileInfoVar = srcIndex.data(QFileSystemModel::FileInfoRole);
+    if (fileInfoVar.isValid()) {
+        // Filesystem source: preserve exact QFileInfo-based behavior.
+        QFileInfo info = qvariant_cast<QFileInfo>(fileInfoVar);
+        attr.isDir = info.isDir();
+        attr.size = info.size();
+        attr.name = info.fileName();
+        attr.suffix = info.suffix();
+        attr.modified = info.lastModified();
+    } else {
+        // Generic source (e.g. QStandardItemModel): read TeFileInfo roles.
+        const int type = srcIndex.data(TeFileInfo::ROLE_TYPE).toInt();
+        attr.isDir = (type == TeFileInfo::EN_DIR || type == TeFileInfo::EN_PARENT);
+        attr.size = srcIndex.data(TeFileInfo::ROLE_SIZE).toLongLong();
+        attr.modified = srcIndex.data(TeFileInfo::ROLE_DATE).toDateTime();
+        attr.name = srcIndex.data(Qt::DisplayRole).toString();
+        attr.suffix = QFileInfo(attr.name).suffix();
+    }
+    return attr;
 }
 
 bool TeFileSortProxyModel::stringLessThan(const QString &left, const QString &right, Qt::CaseSensitivity cs, bool isLocaleAware)

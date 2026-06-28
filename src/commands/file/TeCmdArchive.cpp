@@ -22,6 +22,7 @@
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
 #include "widgets/TeFileFolderView.h"
+#include "widgets/TeArchiveFolderView.h"
 #include "utils/TeArchive.h"
 
 #include <QFileInfo>
@@ -71,6 +72,41 @@ QFlags<TeTypes::CmdType> TeCmdArchive::type()
 */
 bool TeCmdArchive::execute(TeViewStore* p_store)
 {
+	TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+
+	if (p_arc != nullptr) {
+		// In a writable archive view, the Archive command commits the staged
+		// entries to the target archive file. Read-only mounts have nothing to commit.
+		if (p_arc->isReadOnly()) {
+			return true;
+		}
+
+		QString targetPath = p_arc->archivePath();
+		if (targetPath.isEmpty()) {
+			targetPath = QFileDialog::getSaveFileName(p_store->mainWindow(), QObject::tr("Archive file path"), QString(), QObject::tr("Archive (*.zip *.tgz *.tar.gz *.tar.bz2 *.7z)"));
+		}
+		if (targetPath.isEmpty()) {
+			return true;
+		}
+
+		TeArchive::ArchiveType type = archiveTypeFromPath(targetPath);
+		if (type == TeArchive::AR_NONE) {
+			QMessageBox msg(p_store->mainWindow());
+			msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
+			msg.setText(QObject::tr("Archive type is not supported.") + QString("\n") + targetPath);
+			msg.exec();
+			return true;
+		}
+
+		if (!p_arc->commit(targetPath, type)) {
+			QMessageBox msg(p_store->mainWindow());
+			msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
+			msg.setText(QObject::tr("Archive to following path failed.") + QString("\n") + targetPath);
+			msg.exec();
+		}
+		return true;
+	}
+
 	TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
 
 	if (p_folder != nullptr) {
@@ -93,6 +129,29 @@ bool TeCmdArchive::execute(TeViewStore* p_store)
 	}
 
 	return true;
+}
+
+TeArchive::ArchiveType TeCmdArchive::archiveTypeFromPath(const QString& targetPath)
+{
+	QFileInfo targetInfo(targetPath);
+	const QString suffix = targetInfo.completeSuffix();
+
+	if (suffix == "zip") {
+		return TeArchive::AR_ZIP;
+	}
+	else if (suffix == "tgz") {
+		return TeArchive::AR_TAR_GZIP;
+	}
+	else if (suffix == "tar.gz") {
+		return TeArchive::AR_TAR_GZIP;
+	}
+	else if (suffix == "tar.bz2") {
+		return TeArchive::AR_TAR_BZIP2;
+	}
+	else if (suffix == "7z") {
+		return TeArchive::AR_7ZIP;
+	}
+	return TeArchive::AR_NONE;
 }
 
 void TeCmdArchive::archiveItems(TeViewStore* p_store, const QStringList & list, const QString & targetPath, const QString& currentPath)

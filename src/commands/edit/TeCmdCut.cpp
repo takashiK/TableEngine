@@ -21,6 +21,7 @@
 #include "TeCmdCut.h"
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
+#include "widgets/TeArchiveFolderView.h"
 #include "platform/platform_util.h"
 
 #include <QURL>
@@ -71,6 +72,15 @@ bool TeCmdCut::execute(TeViewStore* p_store)
 	QStringList paths;
 
 	if (getSelectedItemList(p_store, &paths)) {
+		// Archive entries are virtual; extract them to a temp location first so
+		// the clipboard can carry real file URLs.
+		if (qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView()) != nullptr) {
+			paths = extractArchiveSelection(p_store, paths);
+			if (paths.isEmpty()) {
+				return true;
+			}
+		}
+
 		QList<QUrl> urls;
 		for (const auto& path : paths) {
 			urls.append(QUrl::fromLocalFile(path));
