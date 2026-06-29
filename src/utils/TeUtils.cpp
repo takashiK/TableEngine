@@ -7,10 +7,13 @@
 #include "widgets/TeFileListView.h"
 #include "utils/TeFileInfo.h"
 #include "utils/TeArchive.h"
+#include "dialogs/TePasswordDialog.h"
 
 #include <QStringList>
 #include <QAbstractItemView>
 #include <QFileSystemModel>
+#include <QProgressDialog>
+#include <QMessageBox>
 
 #include <QSet>
 #include <QFileInfo>
@@ -122,7 +125,153 @@ QString getCurrentItem(TeViewStore* p_store)
 	return QString();
 }
 
-QStringList extractArchiveSelection(TeViewStore* p_store, const QStringList& entries)
+void extractArchives(TeViewStore* p_store, const QStringList & list, const QString & targetPath, bool createArchiveFolder)
+{
+	QDir dir;
+
+	bool bSuccess = true;
+
+	QFileInfo targetInfo(targetPath);
+
+	//target confirm
+	if (targetInfo.exists()) {
+		if (targetInfo.isDir()) {
+			//Acceptale target
+		}
+		else {
+			//Target is not directory
+			bSuccess = false;
+		}
+	}
+	else {
+		//directory is not found.
+		bSuccess = false;
+	}
+
+	if (bSuccess) {
+		//start extract
+		QProgressDialog progress(QObject::tr(""), QObject::tr("Cancel"), 0, list.size(), p_store->mainWindow());
+		progress.setWindowTitle(QObject::tr("Extract"));
+		progress.setWindowModality(Qt::WindowModal);
+
+
+		for (int i = 0; i < list.size(); i++) {
+			QString basePath = targetPath;
+			QFileInfo info(list[i]);
+			if (createArchiveFolder) {
+				basePath += QDir::separator() + info.baseName();
+			}
+			TeArchive::Reader reader;
+			reader.open(list[i]);
+
+			// Resolve the password for encrypted archives before extracting.
+			bool needPassword = (reader.lastResult() == TeArchive::Reader::RESULT_PASSWORD_REQUIRED)
+				|| (reader.lastResult() == TeArchive::Reader::RESULT_OK && reader.isEncrypted()
+					&& reader.verifyPassword() != TeArchive::Reader::RESULT_OK);
+			if (needPassword) {
+				bool ok = false;
+				while (true) {
+					TePasswordDialog dlg(p_store->mainWindow());
+					dlg.setPrompt(QObject::tr("Enter the password for \"%1\":").arg(info.fileName()));
+					if (dlg.exec() != QDialog::Accepted) {
+						break;
+					}
+					reader.setPassword(dlg.password());
+					// Re-open so header-encrypted archives (e.g. 7-Zip) bind the path.
+					reader.open(list[i]);
+					if (reader.lastResult() == TeArchive::Reader::RESULT_OK
+						&& reader.verifyPassword() == TeArchive::Reader::RESULT_OK) {
+						ok = true;
+						break;
+					}
+				}
+				if (!ok) {
+					bSuccess = false;
+					continue;
+				}
+			}
+
+			QString targetInfo = QObject::tr("Extact ") + QString::asprintf("(%d/%d) : ",i,list.size()) + info.fileName() + "\n";
+
+			QObject::connect(&reader, &TeArchive::Reader::maximumValue, &progress, &QProgressDialog::setMaximum);
+			QObject::connect(&reader, &TeArchive::Reader::valueChanged, &progress, &QProgressDialog::setValue);
+			QObject::connect(&reader, &TeArchive::Reader::currentFileInfoChanged, [&progress,&targetInfo](const TeFileInfo& info) {
+				progress.setLabelText(targetInfo + info.path.right(30));
+				});
+			QObject::connect(&reader, &TeArchive::Reader::finished, [&progress]() { progress.setValue(progress.maximum()); });
+			QObject::connect(&progress, &QProgressDialog::canceled, &reader, &TeArchive::Reader::cancel);
+
+			bSuccess = reader.extractAll(basePath);
+		}
+	}
+
+	if (!bSuccess) {
+		QMessageBox msg(p_store->mainWindow());
+		msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
+		msg.setText(QObject::tr("Extract to following path failed.") + QString("\n") + targetPath);
+		msg.exec();
+	}
+}
+
+QStringList extractArchiveSelectionToPath(TeViewStore* p_store, const QString& basePath, const QStringList& entries, const QString& targetPath)
+{
+	QStringList result;
+
+	TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+	if (p_arc == nullptr || p_arc->reader() == nullptr) {
+		return result;
+	}
+
+	QDir dir(targetPath);
+	if (!dir.exists()) {
+		if (!dir.mkpath(".")) {
+			return result;
+		}
+	}
+
+	TeArchive::Reader* reader = p_arc->reader();
+	reader->clearCancel();
+
+	//start extract
+	QProgressDialog progress(QObject::tr(""), QObject::tr("Cancel"), 0, 100, p_store->mainWindow());
+	progress.setWindowTitle(QObject::tr("Extract"));
+	progress.setWindowModality(Qt::WindowModal);
+
+	QString targetInfo = QObject::tr("Extact : ") + reader->path() + "\n";
+
+	QObject::connect(reader, &TeArchive::Reader::maximumValue, &progress, &QProgressDialog::setMaximum);
+	QObject::connect(reader, &TeArchive::Reader::valueChanged, &progress, &QProgressDialog::setValue);
+	QObject::connect(reader, &TeArchive::Reader::currentFileInfoChanged, [&progress,&targetInfo](const TeFileInfo& info) {
+		progress.setLabelText(targetInfo + info.path.right(30));
+		});	
+	QObject::connect(reader, &TeArchive::Reader::finished, [&progress]() { progress.setValue(progress.maximum()); });
+	QObject::connect(&progress, &QProgressDialog::canceled, reader, &TeArchive::Reader::cancel);
+
+	auto relativePaths = entries;
+	if (!basePath.isEmpty()) {
+		// Convert absolute paths to relative paths for extraction.
+		for (QString& path : relativePaths) {
+			if (path.startsWith(basePath)) {
+				path = path.mid(basePath.length());
+				if (path.startsWith('/')) {
+					path = path.mid(1);
+				}
+			}
+		}
+	}
+
+	if (!reader->extract(targetPath, basePath, relativePaths)) {
+		return result;
+	}
+
+	const QString base = targetPath.endsWith('/') ? targetPath : targetPath + "/";
+	for (const auto& entry : relativePaths) {
+		result.append(QDir::cleanPath(base + entry));
+	}
+	return result;
+}
+
+QStringList extractArchiveSelectionToTempPath(TeViewStore* p_store, const QStringList& entries)
 {
 	QStringList result;
 
@@ -136,17 +285,7 @@ QStringList extractArchiveSelection(TeViewStore* p_store, const QStringList& ent
 		return result;
 	}
 
-	TeArchive::Reader* reader = p_arc->reader();
-	reader->clearCancel();
-	if (!reader->extract(tempDir, QString(), entries)) {
-		return result;
-	}
-
-	const QString base = tempDir.endsWith('/') ? tempDir : tempDir + "/";
-	for (const auto& entry : entries) {
-		result.append(QDir::cleanPath(base + entry));
-	}
-	return result;
+	return extractArchiveSelectionToPath(p_store, QString(), entries, tempDir);
 }
 
 QString getCurrentFolder(TeViewStore* p_store)

@@ -154,6 +154,7 @@ public:
 		CMDID_SYSTEM_FILE_DIVIDE,                         // #Divde file
 		CMDID_SYSTEM_FILE_COMBINE,                        // #Combine file
 		CMDID_SYSTEM_FILE_ARCHIVE,                        // #Archive files
+		CMDID_SYSTEM_FILE_ARCHIVE_NEW,                    // #Create archive file (Explorer mode)
 		CMDID_SYSTEM_FILE_EXTRACT,                        // #Extranct form archive
 		CMDID_SYSTEM_FILE_RUN_WITH_COMMAND,               // #Execute Command with selected files
 		CMDID_SYSTEM_FILE_PROPERTY,                       // #Property

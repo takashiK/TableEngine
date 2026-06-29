@@ -134,6 +134,13 @@ public:
 	bool setArchive(const QString& path);
 
 	/**
+	 * @brief Creates a new writable archive at @p path and mounts it.
+	 * @param path Absolute path to the new archive file.
+	 * @return true on success.
+	 */
+	bool newArchive(const QString& path);
+
+	/**
 	 * @brief Mounts a pre-opened archive reader.
 	 *
 	 * Ownership of @p p_archive is transferred to this view.
@@ -148,8 +155,6 @@ public:
 
 	/** @brief Returns the reader backing a read-only mount (may be null). */
 	TeArchive::Reader* reader() const { return mp_reader; }
-	/** @brief Returns the writer backing a writable mount (may be null). */
-	TeArchive::Writer* writer() const { return mp_writer; }
 
 	/** @brief Returns the absolute archive file path (without URI prefix). */
 	QString archivePath() const;
@@ -268,7 +273,6 @@ private:
 	Mode m_mode = MODE_WRITABLE;     ///< Current mount mode.
 
 	TeArchive::Reader* mp_reader = nullptr; ///< Reader for a read-only mount (owned).
-	TeArchive::Writer* mp_writer = nullptr; ///< Writer staging a writable mount (owned).
 	QTemporaryDir* mp_tempDir = nullptr;    ///< Temp dir for extraction (owned, lazy).
 
 	QMap<QString, QString> m_stagedFiles;   ///< Writable staging: dest virtual path -> source FS path.

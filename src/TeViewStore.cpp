@@ -828,7 +828,11 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 {
 	TeArchiveFolderView* folderView = new TeArchiveFolderView;
 	folderView->setDispatcher(this);
-	folderView->setArchive(path);
+	bool ok = folderView->setArchive(path);
+	if (!ok) {
+		delete folderView;
+		return nullptr;
+	}
 	folderView->list()->setFocusPolicy(Qt::ClickFocus);
 	folderView->list()->setSelectionMode(selectionMode());
 	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);

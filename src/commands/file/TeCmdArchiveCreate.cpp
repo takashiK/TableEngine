@@ -18,41 +18,32 @@
 **
 ****************************************************************************/
 
-#include "TeCmdCut.h"
-#include "TeViewStore.h"
+#include "TeCmdArchiveCreate.h"
 #include "utils/TeUtils.h"
-#include "widgets/TeArchiveFolderView.h"
-#include "platform/platform_util.h"
-
-#include <QURL>
-#include <QList>
-
-#include <QMimeData>
-#include <QGuiApplication>
-#include <QClipboard>
 
 /**
- * @file TeCmdCut.cpp
- * @brief Implementation of TeCmdCut.
+ * @file TeCmdArchiveCreate.cpp
+ * @brief Declaration of TeCmdArchiveCreate.
  * @ingroup commands
  */
 
-TeCmdCut::TeCmdCut()
+
+TeCmdArchiveCreate::TeCmdArchiveCreate()
 {
 }
 
-TeCmdCut::~TeCmdCut()
+TeCmdArchiveCreate::~TeCmdArchiveCreate()
 {
 }
 
-bool TeCmdCut::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+bool TeCmdArchiveCreate::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
 	NOT_USED(p_cmdParam);
 	return false;
 }
 
-QFlags<TeTypes::CmdType> TeCmdCut::type()
+QFlags<TeTypes::CmdType> TeCmdArchiveCreate::type()
 {
 	return QFlags<TeTypes::CmdType>(
 		TeTypes::CMD_TRIGGER_NORMAL
@@ -67,34 +58,8 @@ QFlags<TeTypes::CmdType> TeCmdCut::type()
 	);
 }
 
-bool TeCmdCut::execute(TeViewStore* p_store)
+
+bool TeCmdArchiveCreate::execute(TeViewStore* p_store)
 {
-	QStringList paths;
-
-	if (getSelectedItemList(p_store, &paths)) {
-		// Archive entries are virtual; extract them to a temp location first so
-		// the clipboard can carry real file URLs.
-		if (qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView()) != nullptr) {
-			paths = extractArchiveSelectionToTempPath(p_store, paths);
-			if (paths.isEmpty()) {
-				return true;
-			}
-		}
-
-		QList<QUrl> urls;
-		for (const auto& path : paths) {
-			urls.append(QUrl::fromLocalFile(path));
-		}
-		QMimeData* mime = new QMimeData();
-		mime->setUrls(urls);
-
-		setMoveAction(mime);
-
-		//after call setMimeData. MimeData's owner is changed to QClipboard.
-		//so can't delete MimeData instance.
-		QClipboard* clipboard = QGuiApplication::clipboard();
-		clipboard->setMimeData(mime);
-	}
-
 	return true;
 }

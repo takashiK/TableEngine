@@ -909,6 +909,15 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 		return false;
 	}
 
+	QString basePath;
+	if (base.isEmpty()) {
+		basePath = "";
+	}
+	else {
+		basePath = QDir::cleanPath(base) + "/";
+	}
+
+
 	emit maximumValue(static_cast<int>((srcInfo.size() - 1) / 1024 + 1));
 
 	QtArchiveInfo arInfo;
@@ -933,13 +942,21 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 		emit valueChanged(archive_read_bytes(&arInfo));
 
 		if (info.type == TeFileInfo::EN_DIR || info.type == TeFileInfo::EN_FILE) {
-			if (!info.path.startsWith(base)) {
+			if (!info.path.startsWith(basePath)) {
 				continue;
 			}
 			bool found = false;
 			for (auto&& entry : entries) {
-				if (info.path.mid(base.size()).startsWith(entry)) {
-					found = true; break;
+				if (info.path.mid(basePath.length()).startsWith(entry)) {
+					if(info.path.length() == basePath.length() + entry.length() ){
+						//match file or directory. so this entry is target. so extract this entry.
+						found = true; break;
+					}else{
+						if (info.path.at(basePath.length() + entry.length()) == '/') {
+							//match directory part. so this entry is child of directory. so extract this entry.
+							found = true; break;
+						}
+					}
 				}
 			}
 			if (!found) continue;
@@ -949,7 +966,7 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 			dir.mkpath(destBase + info.path);
 		}
 		else if (info.type == TeFileInfo::EN_FILE) {
-			QFileInfo fileInfo(destBase + info.path);
+			QFileInfo fileInfo(destBase + info.path.mid(basePath.length()));
 			if (fileInfo.exists() && (overwrite_check != Q_NULLPTR) && !overwrite_check(&fileInfo)) {
 				continue;
 			}

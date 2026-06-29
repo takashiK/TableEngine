@@ -40,6 +40,28 @@ bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths);
 QString getCurrentItem(TeViewStore* p_store);
 
 /**
+ * @brief Extracts the given archive files to a target directory.
+ * @param p_store The application-wide TeViewStore.
+ * @param list List of archive file paths to extract.
+ * @param targetPath Destination directory for extracted files.
+ * @param createArchiveFolder If true, creates a subfolder named after each archive.
+ */
+void extractArchives(TeViewStore* p_store, const QStringList & list, const QString & targetPath, bool createArchiveFolder);
+
+/**
+ * @brief Extracts the given archive entries to the active view's temp directory.
+ *
+ * Only valid when the active folder view is a TeArchiveFolderView with an open reader.
+ * Each entry is extracted to targetPath.
+ * @param p_store The application-wide TeViewStore.
+ * @param basePath The base path to use for the extracted entries.
+ * @param entries Virtual archive entry paths to extract.
+ * @param targetPath Destination directory for extracted files.
+ * @return Absolute paths of the extracted top-level items, or empty on failure.
+ */
+QStringList extractArchiveSelectionToPath(TeViewStore* p_store, const QString& basePath, const QStringList& entries, const QString& targetPath);
+
+/**
  * @brief Extracts the given archive entries to the active view's temp directory.
  *
  * Only valid when the active folder view is a TeArchiveFolderView with an open
@@ -49,7 +71,7 @@ QString getCurrentItem(TeViewStore* p_store);
  * @param entries Virtual archive entry paths to extract.
  * @return Absolute paths of the extracted top-level items, or empty on failure.
  */
-QStringList extractArchiveSelection(TeViewStore* p_store, const QStringList& entries);
+QStringList extractArchiveSelectionToTempPath(TeViewStore* p_store, const QStringList& entries);
 
 /**
  * @brief Returns the directory path currently shown in the active list view.

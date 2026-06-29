@@ -210,10 +210,6 @@ TeArchiveFolderView::~TeArchiveFolderView()
 		delete mp_reader;
 		mp_reader = nullptr;
 	}
-	if (mp_writer) {
-		delete mp_writer;
-		mp_writer = nullptr;
-	}
 	if (mp_tempDir) {
 		delete mp_tempDir;
 		mp_tempDir = nullptr;
@@ -350,10 +346,6 @@ void TeArchiveFolderView::clear()
 	if (mp_reader) {
 		delete mp_reader;
 		mp_reader = nullptr;
-	}
-	if (mp_writer) {
-		delete mp_writer;
-		mp_writer = nullptr;
 	}
 	if (mp_tempDir) {
 		delete mp_tempDir;
@@ -603,10 +595,6 @@ bool TeArchiveFolderView::commit(const QString& destPath, TeArchive::ArchiveType
 	}
 
 	TeArchive::Writer writer;
-	if (mp_writer != nullptr && !mp_writer->password().isEmpty()) {
-		writer.setPassword(mp_writer->password());
-	}
-
 	for (auto it = m_stagedFiles.constBegin(); it != m_stagedFiles.constEnd(); ++it) {
 		if (!writer.addEntry(it.value(), it.key())) {
 			return false;
@@ -637,7 +625,10 @@ bool TeArchiveFolderView::setArchive(const QString & path)
 
 	// Handle encrypted archives: prompt for the password and retry until the
 	// user supplies a correct one or cancels.
-	if (p_archive->lastResult() == TeArchive::Reader::RESULT_PASSWORD_REQUIRED) {
+	bool needPassword = (p_archive->lastResult() == TeArchive::Reader::RESULT_PASSWORD_REQUIRED)
+		|| (p_archive->lastResult() == TeArchive::Reader::RESULT_OK && p_archive->isEncrypted()
+			&& p_archive->verifyPassword() != TeArchive::Reader::RESULT_OK);
+	if (needPassword) {
 		bool ok = false;
 		while (true) {
 			TePasswordDialog dialog(this);
@@ -646,7 +637,7 @@ bool TeArchiveFolderView::setArchive(const QString & path)
 				break; // cancelled by the user
 			}
 			p_archive->setPassword(dialog.password());
-			if (p_archive->verifyPassword()) {
+			if (p_archive->verifyPassword() == TeArchive::Reader::RESULT_OK) {
 				ok = true;
 				break;
 			}
@@ -666,6 +657,19 @@ bool TeArchiveFolderView::setArchive(const QString & path)
 		return false;
 	}
 	return true;
+}
+
+bool TeArchiveFolderView::newArchive(const QString& path) {
+	clear();
+	if (path.isEmpty()) {
+		return false;
+	}
+	QFileInfo info(path);
+	if (info.exists()) {
+		return false;
+	}
+
+    return false;
 }
 
 bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
@@ -817,8 +821,11 @@ QStandardItem * TeArchiveFolderView::mkpath(const QFileIconProvider & iconProvid
 				path += paths[j] + "/";
 			}
 			QString parentPath = path.left(path.size() == 0 ? 0 : path.size() - 1);
-			path = path + "/" + paths[i];
-
+			if (path.size() > 0){
+				path = path + "/" + paths[i];
+			}else{
+				path = paths[i];
+			}
 			TeFileInfo info;
 			info.type = TeFileInfo::EN_DIR;
 			info.path = path;

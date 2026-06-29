@@ -24,7 +24,6 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QDialogButtonBox>
 #include <QFileInfo>
 #include <QDir>
@@ -122,10 +121,9 @@ void TePropertiesDialog::buildUi(const QList<TeFileInfo>& items, bool filesystem
 	topLayout->addLayout(form);
 
 	auto addRow = [form](const QString& label, const QString& value) {
-		QLineEdit* edit = new QLineEdit(value);
-		edit->setReadOnly(true);
-		edit->setFrame(false);
-		form->addRow(label + QStringLiteral(":"), edit);
+		QLabel* line = new QLabel(value);
+		line->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+		form->addRow(label + QStringLiteral(":"), line);
 	};
 
 	if (items.size() == 1) {

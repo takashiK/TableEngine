@@ -78,7 +78,7 @@ bool TeCmdCopy::execute(TeViewStore* p_store)
 		// Archive entries are virtual; extract them to a temp location first so
 		// the clipboard can carry real file URLs.
 		if (qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView()) != nullptr) {
-			paths = extractArchiveSelection(p_store, paths);
+			paths = extractArchiveSelectionToTempPath(p_store, paths);
 			if (paths.isEmpty()) {
 				return true;
 			}
