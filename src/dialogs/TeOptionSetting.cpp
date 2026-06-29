@@ -173,6 +173,7 @@ void TeOptionSetting::storeDefaultSettings(bool force)
 	SETTING(SETTING_GENERAL_InitialFolderMode, TeSettings::INIT_FOLDER_MODE_SELECTED);
 	SETTING(SETTING_GENERAL_InitialFolder, QDir::rootPath() );
 	SETTING(SETTING_GENERAL_ConfirmBeforeDelete, true);
+	SETTING(SETTING_GENERAL_CopyToOppositePane, true);
 	SETTING(SETTING_LAYOUT_WINDOW_SIZE_MODE, TeSettings::WINDOW_SIZE_MODE_REMEMBER);
 	SETTING(SETTING_LAYOUT_WINDOW_FIXED_WIDTH, 850);
 	SETTING(SETTING_LAYOUT_WINDOW_FIXED_HEIGHT, 520);
@@ -213,6 +214,11 @@ QWidget * TeOptionSetting::createPageGeneral()
 	cbDelete->setChecked(settings.value(SETTING_GENERAL_ConfirmBeforeDelete, true).toBool());
 	connect(cbDelete, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_GENERAL_ConfirmBeforeDelete] =  (state == Qt::Checked); });
 	layout->addWidget(cbDelete);
+
+	QCheckBox* cbCopy = new QCheckBox(tr("Copy/Move to opposite pane."));
+	cbCopy->setChecked(settings.value(SETTING_GENERAL_CopyToOppositePane, true).toBool());
+	connect(cbCopy, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_GENERAL_CopyToOppositePane] =  (state == Qt::Checked); });
+	layout->addWidget(cbCopy);
 
 	QGroupBox* groupBox = new QGroupBox(tr("Startup Folder"));
 	QVBoxLayout* boxLayout = new QVBoxLayout();

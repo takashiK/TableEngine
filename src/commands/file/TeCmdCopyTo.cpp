@@ -23,6 +23,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QSettings>
 
 #include "TeViewStore.h"
 #include "dialogs/TeAskCreationModeDialog.h"
@@ -31,6 +32,8 @@
 #include "utils/TeUtils.h"
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeArchiveFolderView.h"
+#include "TeSettings.h"
+
 
 /**
  * @file TeCmdCopyTo.cpp
@@ -66,6 +69,15 @@ QFlags<TeTypes::CmdType> TeCmdCopyTo::type() {
 bool TeCmdCopyTo::execute(TeViewStore* p_store) {
     QStringList paths;
 
+    QString targetPath;
+    if (QSettings().value(SETTING_GENERAL_CopyToOppositePane, true).toBool()) {
+        int tabPlace = p_store->currentTabPlace() == TeViewStore::TAB_RIGHT ? TeViewStore::TAB_LEFT : TeViewStore::TAB_RIGHT;
+        TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->getFolderView(tabPlace));
+        if (p_folder != nullptr) {
+            targetPath = p_folder->currentPath();
+        }
+    }
+
     if (getSelectedItemList(p_store, &paths)) {
         TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
 
@@ -75,6 +87,9 @@ bool TeCmdCopyTo::execute(TeViewStore* p_store) {
             dlg.setCurrentPath(p_folder->currentPath());
             dlg.setFavorites(getFavorites());
             dlg.setHistory(p_folder->getPathHistory());
+            if(!targetPath.isEmpty()) {
+                dlg.setTargetPath(targetPath);
+            }
 
             dlg.setWindowTitle(TeFilePathDialog::tr("Copy to"));
             if (dlg.exec() == QDialog::Accepted) {
@@ -97,7 +112,11 @@ bool TeCmdCopyTo::execute(TeViewStore* p_store) {
 				QFileInfo info(p_arc->archivePath());
 				dlg.setCurrentPath(info.absolutePath());
 				dlg.setFavorites(getFavorites());
-				dlg.setTargetPath(info.absolutePath());
+                if(!targetPath.isEmpty()) {
+                    dlg.setTargetPath(targetPath);
+                }else{
+                    dlg.setTargetPath(info.absolutePath());
+                }
 
 				dlg.setWindowTitle(TeFilePathDialog::tr("Extract to"));
 				if (dlg.exec() == QDialog::Accepted) {
