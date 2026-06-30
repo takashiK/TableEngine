@@ -21,6 +21,7 @@
 #include "TeCmdRename.h"
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
+#include "widgets/TeArchiveFolderView.h"
 #include "TeSettings.h"
 
 #include <QStringList>
@@ -68,6 +69,34 @@ bool TeCmdRename::execute(TeViewStore* p_store)
 {
 	QStringList paths;
 	if (getSelectedItemList(p_store, &paths)) {
+		TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+		if (p_arc != nullptr) {
+			// Renaming inside an archive is only supported in writable mode; it
+			// updates the staged entry keys rather than touching the filesystem.
+			if (p_arc->isReadOnly()) {
+				return true;
+			}
+			for (const auto& path : paths) {
+				const int slash = path.lastIndexOf('/');
+				const QString baseName = (slash >= 0) ? path.mid(slash + 1) : path;
+				bool ok;
+				QInputDialog inputDlg(p_store->mainWindow());
+				inputDlg.setWindowTitle(QObject::tr("Rename"));
+				inputDlg.setLabelText(QObject::tr("New name"));
+				inputDlg.setTextValue(baseName);
+				inputDlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
+				ok = (inputDlg.exec() == QDialog::Accepted);
+				const QString newName = inputDlg.textValue();
+				if (newName.isEmpty() || !ok) {
+					return true;
+				}
+				if (baseName != newName) {
+					p_arc->renameEntry(path, newName);
+				}
+			}
+			return true;
+		}
+
 		for (const auto& path : paths) {
 			QFileInfo info(path);
 			bool ok;

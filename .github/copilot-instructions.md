@@ -62,51 +62,60 @@
 
 ## Orchestration Strategy
 
-メインチャット（オーケストレーター）は方針決定と委譲に専念し、実作業は `runSubagent` 経由で
-subagent に委譲する。subagent 内部の中間情報を遮断することで、コンテキスト肥大とトークンコストを抑制する。
+メインチャット（オーケストレーター）は方針決定と **計画タスク単位の委譲** に専念し、実作業は
+`runSubagent`（custom agent `Task Executor`）へ **まるごと委譲** する。細粒度の作業判断は executor
+内部に閉じ込め、委譲の往復回数と要約オーバーヘッドを最小化する（細かい単発委譲はコスト非効率）。
 
-### レイヤー責務
+### レイヤー責務（3層階層）
 
-| 層 | モデル | 責務 | やらないこと |
-|----|--------|------|------------|
-| オーケストレーター（main） | Opus 固定 | 意図理解・タスク分解・委譲仕様作成・結果統合・設計判断・承認ゲート | 大量 read・一括編集・探索の直接実行 |
-| Subagent | 難易度別（→ Model Selection） | 調査・読解・編集・ビルド・検証 | 設計の最終確定・ユーザー承認 |
+| 層 | エージェント / モデル | 責務 | やらないこと |
+|----|------|------|------------|
+| L0 オーケストレーター（main） | default / Opus 固定 | 意図理解・**計画タスク分解**・単位委譲・結果統合・設計判断・承認ゲート | 個別 read/grep・一括編集・細粒度の単発委譲 |
+| L1 タスク実行 | `Task Executor` / mid | 受領した1単位を調査→実装→検証まで自己完結。単位内の細粒度作業を自文脈で処理 | 設計の最終確定・ユーザー承認・スコープ外変更 |
+| L2 サブサブ | `Explore`(read-only) / `Task Executor`(nested) / low〜mid | 重い読解の隔離・独立並列調査・大きな独立サブ単位の実装 | スコープ外変更 |
 
 ### 運用原則
 
-- **既定委譲**: 実作業は原則 subagent へ委譲する。オーケストレーターは大量読解・一括編集を直接行わない。
-- **文脈遮断（最重要）**: subagent は中間生成物（ファイル全文・grep 生ログ・試行錯誤）を返さない。返却は次の4点に限定する。
+- **粗粒度委譲（最重要）**: オーケストレーターは **Phase / 計画タスク = 1委譲単位** で `Task Executor` に渡す。個別ファイル読解や数行修正を単発委譲しない（往復・要約コストを回避）。
+- **階層的細分化**: 単位内の細粒度判断・サブサブ起動は executor が担う。executor はコスト/応答性/品質を勘案し、必要時のみ L2 を起動する（基準は `.github/agents/task-executor.agent.md`）。
+- **文脈遮断（最重要）**: 各層は中間生成物（ファイル全文・grep 生ログ・試行錯誤）を上位へ返さない。返却は次の4点に限定する。
   1. 結論サマリ
   2. 変更したファイルと行（実装委譲時）
-  3. オーケストレーターの次判断に必要な最小事実
+  3. 上位の次判断に必要な最小事実
   4. 未解決事項・要確認点
-- **委譲仕様の品質**: 委譲時は Goal / 前提（必要分のみ）/ Target / Constraints / Return format / Model tier / Thoroughness を明示し、subagent の品質を担保する。
-- **承認ゲートの保持**: 設計レポート提示とユーザー承認はオーケストレーター層が保持する。subagent は承認後のみ変更系を実行する（→ Report Delivery And Approval Gate 参照）。
-- **委譲オーバーヘッド閾値**: 単一ファイル・数行・小出力で完結する自明作業はオーケストレーター直接実行を許容する（委譲コスト > 便益を回避）。
+- **委譲仕様の品質**: 委譲時は Goal / 前提（必要分のみ）/ Scope / Tasks / Constraints / Verify / Return format / Model tier / Thoroughness を明示する。
+- **承認ゲートの保持**: 設計レポート提示とユーザー承認は L0 が保持する。executor は承認後のみ変更系を実行する（→ Report Delivery And Approval Gate 参照）。
+- **直接実行の許容**: 単一ファイル参照・数行確認・小出力の自明作業、および read-only の単発 Q&A は L0 直接実行を許容する（委譲コスト > 便益を回避）。
 
 ## Subagent Delegation Rules
 
-### When to Delegate
+### 委譲の基本単位
 
-| 状況 | 委譲先 | プロンプト要件 |
-|------|--------|--------------|
-| 300行超のファイル構造把握 | Explore | "Read fully, return: type list, function list, import list" |
-| 3ファイル以上のパターン調査 | Explore | "Search pattern X in dir Y, return: file, line, context" |
-| ドキュメント全読解 | Explore | "Read all files in dir, return: per-file summary" |
-| 実装・修正作業（自明な小規模を除く） | 実装 subagent | "Edit target, build & verify, return: changed files+lines, build/test result" |
-| ビルド・テスト実行と結果判定 | 実装 subagent | "Run build/test, return: pass/fail summary, failing items only" |
+オーケストレーター（L0）は **計画タスク（Phase 相当）を1単位** として `Task Executor` に委譲する。
+executor が単位内の調査・実装・検証・サブサブ（L2）起動を自律管理する。L0 は個別の read/grep や
+数行修正を単発委譲しない。
 
-> 委譲可否は Orchestration Strategy の「委譲オーバーヘッド閾値」に従う。
+| 委譲パターン | 委譲先 | 委譲粒度 | 返却 |
+|------|--------|--------|------|
+| 実装を伴う計画タスク1単位 | `Task Executor` | Phase 全体 | 変更ファイル+行 / build・test 結果 / 要確認点 |
+| 設計前の純調査（read-only、大規模） | `Task Executor` or `Explore` | 調査テーマ単位 | 構造化要約のみ |
+| L0 自身の軽量確認 | （直接実行） | 単一ファイル・数行 | — |
+
+> executor 内部の細粒度委譲（重い読解→`Explore`、独立サブ単位→nested `Task Executor`）の判断基準は
+> `.github/agents/task-executor.agent.md` に定義する。
 
 ### Delegation Prompt Template
 
+委譲は計画タスク単位。executor が単位内を自律処理する前提で記述する。
+
 ```
-Goal: {what to achieve}
-Context: {minimal prerequisites only}
-Target: {files or directory}
-Task: {what to do or extract}
-Constraints: {e.g. Research only — do NOT modify files / approved edits only}
-Return format: {structured, context-minimized — conclusions & changed lines only, no raw dumps}
+Goal: {この単位で達成する成果（Phase の目的）}
+Context: {最小限の前提のみ}
+Scope: {対象ファイル/ディレクトリと変更可否}
+Tasks: {単位内に含む作業の列挙（細部は executor 裁量）}
+Constraints: {Research only / approved edits only / スコープ外厳禁}
+Verify: {ビルド・テストの実行と合否基準}
+Return format: {結論・変更行・合否・要確認のみ。生ログ不可}
 Model tier: {low|mid|high — per Model Selection}
 Thoroughness: {quick|medium|thorough}
 ```

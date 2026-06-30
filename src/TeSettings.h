@@ -76,6 +76,7 @@ SETTING_STR(SETTING_GENERAL_MultiInstance , "general/multi_instance" );
 SETTING_STR(SETTING_GENERAL_InitialFolderMode, "general/initial_folder_mode");
 SETTING_STR(SETTING_GENERAL_InitialFolder, "general/initial_folder");
 SETTING_STR(SETTING_GENERAL_ConfirmBeforeDelete, "general/confirm_before_delete");
+SETTING_STR(SETTING_GENERAL_CopyToOppositePane, "general/copy_to_opposite_pane");
 
 SETTING_STR(SETTING_LAYOUT, "layout");
 SETTING_STR(SETTING_LAYOUT_WINDOW_SIZE_MODE, "layout/window_size_mode");

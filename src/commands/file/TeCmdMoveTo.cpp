@@ -25,11 +25,13 @@
 #include "dialogs/TeFilePathDialog.h"
 #include "dialogs/TeAskCreationModeDialog.h"
 #include "platform/TeFileOperationManager.h"
+#include "TeSettings.h"
 
 #include <QMainWindow>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QDir>
+#include <QSettings>
 
 /**
  * @file TeCmdMoveTo.cpp
@@ -73,6 +75,15 @@ QFlags<TeTypes::CmdType> TeCmdMoveTo::type()
 */
 bool TeCmdMoveTo::execute(TeViewStore* p_store)
 {
+    QString targetPath;
+    if (QSettings().value(SETTING_GENERAL_CopyToOppositePane, true).toBool()) {
+        int tabPlace = p_store->currentTabPlace() == TeViewStore::TAB_RIGHT ? TeViewStore::TAB_LEFT : TeViewStore::TAB_RIGHT;
+        TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->getFolderView(tabPlace));
+        if (p_folder != nullptr) {
+            targetPath = p_folder->currentPath();
+        }
+    }
+
 	TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
 
 	if (p_folder != nullptr) {
@@ -85,6 +96,9 @@ bool TeCmdMoveTo::execute(TeViewStore* p_store)
 			dlg.setFavorites(getFavorites());
 			dlg.setHistory(p_folder->getPathHistory());
 			dlg.setWindowTitle(TeFilePathDialog::tr("Move to"));
+            if(!targetPath.isEmpty()) {
+                dlg.setTargetPath(targetPath);
+            }
 			if (dlg.exec() == QDialog::Accepted) {
 				if (dlg.targetPath().isEmpty()) {
 					QMessageBox msg(p_store->mainWindow());

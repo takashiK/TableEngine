@@ -20,6 +20,7 @@
 
 #pragma once
 #include "commands/TeCommandBase.h"
+#include "utils/TeArchive.h"
 
 /**
  * @file TeCmdArchive.h
@@ -44,5 +45,8 @@ protected:
 	virtual bool execute(TeViewStore* p_store);
 
 	void archiveItems(TeViewStore* p_store, const QStringList& list, const QString& targetPath, const QString& currentPath);
+
+	/** @brief Maps a target file path suffix to an archive type. */
+	static TeArchive::ArchiveType archiveTypeFromPath(const QString& targetPath);
 };
 

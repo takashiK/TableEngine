@@ -22,6 +22,7 @@
 #include "TeViewStore.h"
 #include "TeSettings.h"
 #include "utils/TeUtils.h"
+#include "widgets/TeArchiveFolderView.h"
 #include "platform/TeFileOperationManager.h"
 
 #include <QMainWindow>
@@ -77,6 +78,23 @@ bool TeCmdDelete::execute(TeViewStore* p_store)
 	QStringList paths;
 
 	if (getSelectedItemList(p_store, &paths)) {
+		TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+		if (p_arc != nullptr) {
+			// Deleting inside an archive is only supported in writable mode; it
+			// removes the staged entries rather than touching the filesystem.
+			if (!p_arc->isReadOnly()) {
+				QSettings settings;
+				if (settings.value(SETTING_GENERAL_ConfirmBeforeDelete, true).toBool()) {
+					if (QMessageBox::question(p_store->mainWindow(), QObject::tr("Delete"), QObject::tr("Delete Selected Files ?"))
+							!= QMessageBox::Yes) {
+						return true; // cancelled by user
+					}
+				}
+				p_arc->removeEntries(paths);
+			}
+			return true;
+		}
+
 		QSettings settings;
 		if (settings.value(SETTING_GENERAL_ConfirmBeforeDelete, true).toBool()) {
 			const QString msg = (paths.size() == 1)

@@ -21,6 +21,7 @@
 #include "TeCmdRenameMulti.h"
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
+#include "widgets/TeArchiveFolderView.h"
 #include "dialogs/TeRenameMultiDialog.h"
 
 #include <QStringList>
@@ -67,6 +68,32 @@ bool TeCmdRenameMulti::execute(TeViewStore* p_store)
 {
 	QStringList files;
 	if (getSelectedItemList(p_store, &files)) {
+		TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+		if (p_arc != nullptr) {
+			// Multi-rename inside an archive is only supported in writable mode; it
+			// updates staged entry keys. Birth time is unavailable for virtual
+			// entries, so ordering falls back to the virtual path name.
+			if (p_arc->isReadOnly()) {
+				return true;
+			}
+			TeRenameMultiDialog dialog;
+			if (dialog.exec() == QDialog::Accepted) {
+				QString baseName = dialog.baseName();
+				QString extention = dialog.extention();
+				int digits = dialog.digits();
+				int startNum = dialog.startNum();
+
+				files.sort();
+				for (int i = 0; i < files.size(); i++) {
+					QString newName = baseName;
+					newName += QString("%1").arg(startNum + i, digits, 10, u'0');
+					newName += extention;
+					p_arc->renameEntry(files[i], newName);
+				}
+			}
+			return true;
+		}
+
 		TeRenameMultiDialog dialog;
 		if (dialog.exec() == QDialog::Accepted) {
 			QString baseName = dialog.baseName();

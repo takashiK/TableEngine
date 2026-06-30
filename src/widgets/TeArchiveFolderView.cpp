@@ -23,7 +23,12 @@
 #include "TeEventFilter.h"
 #include "TeFileTreeView.h"
 #include "TeFileListView.h"
+#include "TeFileSortProxyModel.h"
+#include "TeSettings.h"
 #include "utils/TeArchiveFinder.h"
+#include "commands/TeCommandFactory.h"
+#include "commands/TeCommandInfo.h"
+#include "dialogs/TePasswordDialog.h"
 
 #include "utils/TeArchive.h"
 
@@ -36,6 +41,14 @@
 #include <QApplication>
 #include <QIcon>
 #include <QDir>
+#include <QMenu>
+#include <QSettings>
+#include <QStack>
+#include <QProgressDialog>
+#include <QTemporaryDir>
+#include <QMessageBox>
+#include <QDirIterator>
+#include <QDateTime>
 /**
  * @file TeArchiveFolderView.cpp
  * @brief Implementation of TeArchiveFolderView.
@@ -123,17 +136,37 @@ TeArchiveFolderView::TeArchiveFolderView(QWidget *parent)
 	mp_listView->setSizePolicy(listPolicy);
 
 
-	mp_treeView->setModel(new QStandardItemModel);
+	mp_treeProxy = new TeFileSortProxyModel(this);
+	mp_treeModel = new QStandardItemModel(mp_treeProxy);
+	mp_treeProxy->setSourceModel(mp_treeModel);
+	mp_treeProxy->setSortCaseSensitivity(Qt::CaseInsensitive);
+	mp_treeView->setModel(mp_treeProxy);
 
 	mp_treeView->setHeaderHidden(true);
 	mp_treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+	// Archive entries are backed by QStandardItemModel whose items are editable
+	// by default. Disable inline editing so a left double-click emits activated
+	// (matching TeFileFolderView, which uses a read-only QFileSystemModel).
+	mp_treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	mp_listView->setModel(new QStandardItemModel);
-	mp_listView->setViewMode(QListView::ListMode);
-	mp_listView->setWrapping(true);
-	mp_listView->setResizeMode(QListView::Adjust);
+	mp_listProxy = new TeFileSortProxyModel(this);
+	mp_listModel = new QStandardItemModel(mp_listProxy);
+	mp_listProxy->setSourceModel(mp_listModel);
+	mp_listProxy->setSortCaseSensitivity(Qt::CaseInsensitive);
+	mp_listView->setModel(mp_listProxy);
+	// Configure the list delegate (size/date detail columns) and list layout
+	// in one call, mirroring TeFileFolderView's list view configuration.
+	mp_listView->setFileViewMode(TeTypes::FILEINFO_SIZE | TeTypes::FILEINFO_MODIFIED,
+		TeTypes::FILEVIEW_SMALL_ICON);
 	mp_listView->setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
+	mp_listView->setSelectionRectVisible(true);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
+	mp_listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	// Establish an ascending, column-0 sort so subsequent inserts stay ordered
+	// (mirrors TeFileFolderView's proxy configuration).
+	mp_treeProxy->sort(0, Qt::AscendingOrder);
+	mp_listProxy->sort(0, Qt::AscendingOrder);
 
 	//Initialize as write mode.
 	clear();
@@ -141,7 +174,7 @@ TeArchiveFolderView::TeArchiveFolderView(QWidget *parent)
 	//Synchronize views when current directory changed.
 	connect(mp_treeView->selectionModel(), &QItemSelectionModel::currentChanged,
 		[this](const QModelIndex &current, const QModelIndex &/*previous*/)
-	{ setCurrentPath(indexToPath(current)); });
+	{ setCurrentPath(indexToPath(mp_treeProxy->mapToSource(current))); });
 
 	connect(mp_listView, &QListView::activated, this, &TeArchiveFolderView::itemActivated);
 
@@ -173,11 +206,20 @@ TeArchiveFolderView::TeArchiveFolderView(QWidget *parent)
 
 TeArchiveFolderView::~TeArchiveFolderView()
 {
-	QAbstractItemModel* model;
+	if (mp_reader) {
+		delete mp_reader;
+		mp_reader = nullptr;
+	}
+	if (mp_tempDir) {
+		delete mp_tempDir;
+		mp_tempDir = nullptr;
+	}
+
+	// The proxies are QObject children of this view and each source model is a
+	// child of its proxy, so both are destroyed automatically with this object.
+	// The views do not own their models, so delete only the views here.
 	if (mp_treeView) {
-		model = mp_treeView->model();
 		delete mp_treeView;
-		delete model;
 		mp_treeView = nullptr;
 	}
 	if (mp_treeEvent) {
@@ -186,9 +228,7 @@ TeArchiveFolderView::~TeArchiveFolderView()
 	}
 
 	if (mp_listView) {
-		model = mp_listView->model();
 		delete mp_listView;
-		delete model;
 		mp_listView = nullptr;
 	}
 	if (mp_listEvent) {
@@ -214,10 +254,29 @@ TeFileListView * TeArchiveFolderView::list()
 
 void TeArchiveFolderView::setRootPath(const QString & path)
 {
-	setArchive(path);
+	if (path.startsWith(URI_READ)) {
+		m_mode = MODE_READONLY;
+		setArchive(path.mid(URI_READ.size()));
+	}
+	else if (path.startsWith(URI_WRITE)) {
+		m_mode = MODE_WRITABLE;
+		clear();
+		m_rootPath = path.mid(URI_WRITE.size());
+		m_history.push(TeHistory::PathPair(m_rootPath, QString()));
+	}
+	else {
+		// No URI prefix: treat as an existing (read-only) archive.
+		m_mode = MODE_READONLY;
+		setArchive(path);
+	}
 }
 
 QString TeArchiveFolderView::rootPath()
+{
+	return m_rootPath;
+}
+
+QString TeArchiveFolderView::archivePath() const
 {
 	return m_rootPath;
 }
@@ -230,7 +289,7 @@ void TeArchiveFolderView::setCurrentPath(const QString & path)
 
 QString TeArchiveFolderView::currentPath()
 {
-	return indexToPath(mp_listView->rootIndex());
+	return indexToPath(mp_listProxy->mapToSource(mp_listView->rootIndex()));
 }
 
 void TeArchiveFolderView::moveNextPath()
@@ -255,19 +314,16 @@ void TeArchiveFolderView::updatePath(const QString& path)
 	if (currentPath() != path) {
 		QString target = QDir::cleanPath(path);
 
-		QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
-		QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
-
-		QStandardItem* entry = findPath(tree_model->item(0), target);
+		QStandardItem* entry = findPath(mp_treeModel->item(0), target);
 		if (entry != nullptr) {
-			mp_treeView->setCurrentIndex(tree_model->indexFromItem(entry));
+			mp_treeView->setCurrentIndex(mp_treeProxy->mapFromSource(mp_treeModel->indexFromItem(entry)));
 			mp_listView->clearSelection();
-			entry = findPath(list_model->item(0), target);
-			mp_listView->setRootIndex(list_model->indexFromItem(entry));
+			entry = findPath(mp_listModel->item(0), target);
+			mp_listView->setRootIndex(mp_listProxy->mapFromSource(mp_listModel->indexFromItem(entry)));
 		}
 		else {
-			mp_treeView->setCurrentIndex(tree_model->index(0, 0));
-			mp_listView->setRootIndex(list_model->index(0, 0));
+			mp_treeView->setCurrentIndex(mp_treeProxy->mapFromSource(mp_treeModel->index(0, 0)));
+			mp_listView->setRootIndex(mp_listProxy->mapFromSource(mp_listModel->index(0, 0)));
 		}
 	}
 }
@@ -287,17 +343,27 @@ TeFinder* TeArchiveFolderView::makeFinder()
 
 void TeArchiveFolderView::clear()
 {
-	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
-	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
-	tree_model->clear();
-	list_model->clear();
+	if (mp_reader) {
+		delete mp_reader;
+		mp_reader = nullptr;
+	}
+	if (mp_tempDir) {
+		delete mp_tempDir;
+		mp_tempDir = nullptr;
+	}
+
+	m_stagedFiles.clear();
+	m_stagedDirs.clear();
+
+	mp_treeModel->clear();
+	mp_listModel->clear();
 
 	m_rootPath.clear();
 
-	tree_model->appendRow(createRootEntry());
-	list_model->appendRow(createRootEntry());
+	mp_treeModel->appendRow(createRootEntry());
+	mp_listModel->appendRow(createRootEntry());
 
-	mp_listView->setRootIndex(list_model->index(0,0));
+	mp_listView->setRootIndex(mp_listProxy->mapFromSource(mp_listModel->index(0,0)));
 
 	//Hide headers of treeView.
 	for (int i = 1; i < mp_treeView->header()->count(); i++) {
@@ -307,16 +373,303 @@ void TeArchiveFolderView::clear()
 	m_history.clear();
 }
 
-bool TeArchiveFolderView::setArchive(const QString & path)
+QString TeArchiveFolderView::tempPath()
 {
-	TeArchive::Reader archive;
-	QDir dir;
-	QString absPath = dir.absoluteFilePath(path);
-	if (!archive.open(absPath)) {
+	if (mp_tempDir == nullptr) {
+		mp_tempDir = new QTemporaryDir();
+	}
+	if (!mp_tempDir->isValid()) {
+		return QString();
+	}
+	return mp_tempDir->path();
+}
+
+QList<TeFileInfo> TeArchiveFolderView::entryInfo(const QStringList& virtualPaths)
+{
+	QList<TeFileInfo> result;
+	QStandardItem* root = mp_listModel->item(0);
+	if (root == nullptr) {
+		return result;
+	}
+	for (const QString& path : virtualPaths) {
+		QStandardItem* item = findPath(root, QDir::cleanPath(path));
+		if (item != nullptr) {
+			TeFileInfo info;
+			info.importFromItem(item);
+			result.append(info);
+		}
+	}
+	return result;
+}
+
+void TeArchiveFolderView::rebuildStagingModel()
+{
+	QString cur = currentPath();
+
+	mp_treeProxy->setDynamicSortFilter(false);
+	mp_listProxy->setDynamicSortFilter(false);
+
+	mp_treeModel->clear();
+	mp_listModel->clear();
+	mp_treeModel->appendRow(createRootEntry());
+	mp_listModel->appendRow(createRootEntry());
+
+	QString name = m_rootPath.isEmpty() ? tr("Archive") : QFileInfo(m_rootPath).fileName();
+	mp_treeModel->item(0)->setData(name, Qt::DisplayRole);
+	mp_listModel->item(0)->setData(name, Qt::DisplayRole);
+
+	for (auto it = m_stagedDirs.constBegin(); it != m_stagedDirs.constEnd(); ++it) {
+		internalAddDirEntry(*it);
+	}
+	for (auto it = m_stagedFiles.constBegin(); it != m_stagedFiles.constEnd(); ++it) {
+		QFileInfo fi(it.value());
+		internalAddEntry(it.key(), fi.size(), fi.lastModified(), 0x644);
+	}
+
+	mp_treeProxy->sort(0, mp_treeProxy->sortOrder());
+	mp_listProxy->sort(0, mp_listProxy->sortOrder());
+	mp_treeProxy->setDynamicSortFilter(true);
+	mp_listProxy->setDynamicSortFilter(true);
+
+	updatePath(cur);
+}
+
+bool TeArchiveFolderView::stageEntries(const QString& destDir, const QStringList& srcPaths)
+{
+	if (m_mode != MODE_WRITABLE) {
 		return false;
 	}
 
-	return setArchive(&archive);
+	QString base = destDir;
+	if (!base.isEmpty() && !base.endsWith('/')) {
+		base += '/';
+	}
+
+	bool added = false;
+	for (const QString& src : srcPaths) {
+		QFileInfo fi(src);
+		if (!fi.exists()) {
+			continue;
+		}
+
+		if (fi.isDir()) {
+			QString dirRoot = base + fi.fileName();
+			m_stagedDirs.insert(dirRoot);
+			QDir srcDir(src);
+			QDirIterator it(src,
+				QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System,
+				QDirIterator::Subdirectories);
+			while (it.hasNext()) {
+				QString child = it.next();
+				QFileInfo ci(child);
+				QString dest = dirRoot + "/" + srcDir.relativeFilePath(child);
+				if (ci.isDir()) {
+					m_stagedDirs.insert(dest);
+				}
+				else {
+					m_stagedFiles.insert(dest, child);
+				}
+			}
+			added = true;
+		}
+		else {
+			m_stagedFiles.insert(base + fi.fileName(), src);
+			added = true;
+		}
+	}
+
+	if (added) {
+		rebuildStagingModel();
+	}
+	return added;
+}
+
+bool TeArchiveFolderView::removeEntries(const QStringList& virtualPaths)
+{
+	if (m_mode != MODE_WRITABLE) {
+		return false;
+	}
+
+	bool changed = false;
+	for (const QString& vp : virtualPaths) {
+		const QString sub = vp + "/";
+		for (auto it = m_stagedFiles.begin(); it != m_stagedFiles.end(); ) {
+			if (it.key() == vp || it.key().startsWith(sub)) {
+				it = m_stagedFiles.erase(it);
+				changed = true;
+			}
+			else {
+				++it;
+			}
+		}
+		for (auto it = m_stagedDirs.begin(); it != m_stagedDirs.end(); ) {
+			if (*it == vp || it->startsWith(sub)) {
+				it = m_stagedDirs.erase(it);
+				changed = true;
+			}
+			else {
+				++it;
+			}
+		}
+	}
+
+	if (changed) {
+		rebuildStagingModel();
+	}
+	return changed;
+}
+
+bool TeArchiveFolderView::makeDirectory(const QString& destDir, const QString& name)
+{
+	if (m_mode != MODE_WRITABLE || name.isEmpty()) {
+		return false;
+	}
+
+	QString base = destDir;
+	if (!base.isEmpty() && !base.endsWith('/')) {
+		base += '/';
+	}
+	m_stagedDirs.insert(base + name);
+	rebuildStagingModel();
+	return true;
+}
+
+bool TeArchiveFolderView::renameEntry(const QString& virtualPath, const QString& newName)
+{
+	if (m_mode != MODE_WRITABLE || newName.isEmpty()) {
+		return false;
+	}
+
+	const int slash = virtualPath.lastIndexOf('/');
+	const QString parent = (slash >= 0) ? virtualPath.left(slash + 1) : QString();
+	const QString newPath = parent + newName;
+	if (newPath == virtualPath) {
+		return false;
+	}
+
+	const QString sub = virtualPath + "/";
+	bool changed = false;
+
+	QMap<QString, QString> updatedFiles;
+	for (auto it = m_stagedFiles.constBegin(); it != m_stagedFiles.constEnd(); ++it) {
+		if (it.key() == virtualPath) {
+			updatedFiles.insert(newPath, it.value());
+			changed = true;
+		}
+		else if (it.key().startsWith(sub)) {
+			updatedFiles.insert(newPath + it.key().mid(virtualPath.size()), it.value());
+			changed = true;
+		}
+		else {
+			updatedFiles.insert(it.key(), it.value());
+		}
+	}
+	m_stagedFiles = updatedFiles;
+
+	QSet<QString> updatedDirs;
+	for (const QString& d : m_stagedDirs) {
+		if (d == virtualPath) {
+			updatedDirs.insert(newPath);
+			changed = true;
+		}
+		else if (d.startsWith(sub)) {
+			updatedDirs.insert(newPath + d.mid(virtualPath.size()));
+			changed = true;
+		}
+		else {
+			updatedDirs.insert(d);
+		}
+	}
+	m_stagedDirs = updatedDirs;
+
+	if (changed) {
+		rebuildStagingModel();
+	}
+	return changed;
+}
+
+bool TeArchiveFolderView::commit(const QString& destPath, TeArchive::ArchiveType type)
+{
+	if (m_mode != MODE_WRITABLE) {
+		return false;
+	}
+
+	TeArchive::Writer writer;
+	for (auto it = m_stagedFiles.constBegin(); it != m_stagedFiles.constEnd(); ++it) {
+		if (!writer.addEntry(it.value(), it.key())) {
+			return false;
+		}
+	}
+
+	QProgressDialog progress(tr("Archiving..."), tr("Cancel"), 0, writer.count(), this);
+	progress.setWindowTitle(tr("Archive"));
+	progress.setWindowModality(Qt::WindowModal);
+	QObject::connect(&writer, &TeArchive::Writer::maximumValue, &progress, &QProgressDialog::setMaximum);
+	QObject::connect(&writer, &TeArchive::Writer::valueChanged, &progress, &QProgressDialog::setValue);
+	QObject::connect(&writer, &TeArchive::Writer::currentFileInfoChanged, &progress, [&progress](const TeFileInfo& info) {
+		progress.setLabelText(tr("Archive : ") + info.path.right(30));
+	});
+	QObject::connect(&writer, &TeArchive::Writer::finished, &progress, [&progress]() { progress.setValue(progress.maximum()); });
+	QObject::connect(&progress, &QProgressDialog::canceled, &writer, &TeArchive::Writer::cancel);
+
+	return writer.archive(destPath, type);
+}
+
+bool TeArchiveFolderView::setArchive(const QString & path)
+{
+	QDir dir;
+	QString absPath = dir.absoluteFilePath(path);
+
+	TeArchive::Reader* p_archive = new TeArchive::Reader();
+	p_archive->open(absPath);
+
+	// Handle encrypted archives: prompt for the password and retry until the
+	// user supplies a correct one or cancels.
+	bool needPassword = (p_archive->lastResult() == TeArchive::Reader::RESULT_PASSWORD_REQUIRED)
+		|| (p_archive->lastResult() == TeArchive::Reader::RESULT_OK && p_archive->isEncrypted()
+			&& p_archive->verifyPassword() != TeArchive::Reader::RESULT_OK);
+	if (needPassword) {
+		bool ok = false;
+		while (true) {
+			TePasswordDialog dialog(this);
+			dialog.setPrompt(tr("Enter the password for \"%1\":").arg(QFileInfo(absPath).fileName()));
+			if (dialog.exec() != QDialog::Accepted) {
+				break; // cancelled by the user
+			}
+			p_archive->setPassword(dialog.password());
+			if (p_archive->verifyPassword() == TeArchive::Reader::RESULT_OK) {
+				ok = true;
+				break;
+			}
+		}
+		if (!ok) {
+			delete p_archive;
+			return false;
+		}
+	}
+	else if (p_archive->lastResult() != TeArchive::Reader::RESULT_OK) {
+		delete p_archive;
+		return false;
+	}
+
+	if (!setArchive(p_archive)) {
+		delete p_archive;
+		return false;
+	}
+	return true;
+}
+
+bool TeArchiveFolderView::newArchive(const QString& path) {
+	clear();
+	if (path.isEmpty()) {
+		return false;
+	}
+	QFileInfo info(path);
+	if (info.exists()) {
+		return false;
+	}
+
+    return false;
 }
 
 bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
@@ -326,17 +679,30 @@ bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 		return false;
 	}
 
+	// Take ownership of the reader for the lifetime of the mount.
+	mp_reader = p_archive;
+	m_mode = MODE_READONLY;
+
 	m_rootPath = p_archive->path();
 	m_history.push(TeHistory::PathPair(m_rootPath, QString()));
 
 	QFileInfo info(m_rootPath);
 
-	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
-	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
-	
-	tree_model->item(0)->setData(info.fileName(), Qt::DisplayRole);
-	list_model->item(0)->setData(info.fileName(), Qt::DisplayRole);
+	mp_treeModel->item(0)->setData(info.fileName(), Qt::DisplayRole);
+	mp_listModel->item(0)->setData(info.fileName(), Qt::DisplayRole);
 
+	// Suspend dynamic re-sorting while bulk-loading entries for performance.
+	mp_treeProxy->setDynamicSortFilter(false);
+	mp_listProxy->setDynamicSortFilter(false);
+
+	// Enumerating archive entries can be slow; show a busy progress dialog so
+	// the user can distinguish processing from a frozen UI.
+	QProgressDialog progress(tr("Opening archive \"%1\"...").arg(info.fileName()),
+		QString(), 0, 0, this);
+	progress.setWindowModality(Qt::WindowModal);
+	progress.setMinimumDuration(500);
+
+	int count = 0;
 	for (const auto& entry : *p_archive) {
 		switch (entry.type) {
 		case TeFileInfo::EN_DIR:
@@ -348,10 +714,22 @@ bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 		default:
 			break;
 		}
+		if ((++count % 64) == 0) {
+			QApplication::processEvents();
+		}
 	}
 
-	tree_model->sort(0);
-	list_model->sort(0);
+	mp_treeProxy->sort(0, mp_treeProxy->sortOrder());
+	mp_listProxy->sort(0, mp_listProxy->sortOrder());
+	mp_treeProxy->setDynamicSortFilter(true);
+	mp_listProxy->setDynamicSortFilter(true);
+
+	// Place the cursor on the first entry for keyboard parity with the
+	// file-system folder view.
+	QModelIndex srcRoot = mp_listModel->index(0, 0);
+	if (mp_listModel->hasChildren(srcRoot)) {
+		mp_listView->setCurrentIndex(mp_listProxy->mapFromSource(mp_listModel->index(0, 0, srcRoot)));
+	}
 
 	return true;
 }
@@ -360,15 +738,12 @@ void TeArchiveFolderView::internalAddEntry(const QString & path, qint64 size, co
 {
 	if (path.startsWith('/')) return;
 
-	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
-	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
-
 	QStringList paths = QDir::cleanPath(path).split('/');
 
 	QFileIconProvider iconProvider;
 
-	mkpath(iconProvider,tree_model->item(0),paths,false);
-	QStandardItem* list = mkpath(iconProvider,list_model->item(0),paths,true);
+	mkpath(iconProvider,mp_treeModel->item(0),paths,false);
+	QStandardItem* list = mkpath(iconProvider,mp_listModel->item(0),paths,true);
 
 	if (list != nullptr && findChild(list, paths.last()) == nullptr) {
 		TeFileInfo info;
@@ -393,14 +768,11 @@ void TeArchiveFolderView::internalAddDirEntry(const QString & path)
 		destPath = QDir::cleanPath(path) + "/";
 	}
 
-	QStandardItemModel* tree_model = qobject_cast<QStandardItemModel*>(mp_treeView->model());
-	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
-
 	QStringList paths = destPath.split('/');
 
 	QFileIconProvider iconProvider;
-	mkpath(iconProvider, tree_model->item(0), paths,false);
-	mkpath(iconProvider, list_model->item(0), paths,true);
+	mkpath(iconProvider, mp_treeModel->item(0), paths,false);
+	mkpath(iconProvider, mp_listModel->item(0), paths,true);
 }
 
 QString TeArchiveFolderView::indexToPath(const QModelIndex & index)
@@ -449,8 +821,11 @@ QStandardItem * TeArchiveFolderView::mkpath(const QFileIconProvider & iconProvid
 				path += paths[j] + "/";
 			}
 			QString parentPath = path.left(path.size() == 0 ? 0 : path.size() - 1);
-			path = path + "/" + paths[i];
-
+			if (path.size() > 0){
+				path = path + "/" + paths[i];
+			}else{
+				path = paths[i];
+			}
 			TeFileInfo info;
 			info.type = TeFileInfo::EN_DIR;
 			info.path = path;
@@ -544,25 +919,94 @@ QList<QStandardItem*> TeArchiveFolderView::createParentEntry(const QString& path
 	return entries;
 }
 
-void TeArchiveFolderView::showContextMenu(const QAbstractItemView * /*pView*/, const QPoint & /*pos*/) const
+void TeArchiveFolderView::showContextMenu(const QAbstractItemView * pView, const QPoint & pos)
 {
-	
+	if (pView == nullptr) return;
+
+	// Archive entries are virtual; the OS shell menu cannot operate on them, so
+	// always present the user-defined (TeMenuSetting) menu.  The commands
+	// themselves decide what is applicable based on the current selection/mode.
+	QPoint gpos = pView->mapToGlobal(pos);
+	if (pView == mp_treeView) {
+		showUserContextMenu(SETTING_TREEPOPUP_GROUP, gpos);
+	}
+	else if (pView == mp_listView) {
+		showUserContextMenu(SETTING_LISTPOPUP_GROUP, gpos);
+	}
+}
+
+void TeArchiveFolderView::showUserContextMenu(const QString& menuName, const QPoint& pos)
+{
+	QSettings settings;
+	TeCommandFactory* p_factory = TeCommandFactory::factory();
+
+	QMenu menu;
+
+	settings.beginGroup(SETTING_MENU);
+	settings.beginGroup(menuName);
+	QStack<QMenu*> menus;
+	menus.push(&menu);
+
+	for (const auto& key : settings.childKeys()) {
+		QStringList values = settings.value(key).toString().split(',');
+		int indent = values[0].toInt();
+		TeTypes::CmdId cmdId = static_cast<TeTypes::CmdId>(values[2].toInt());
+		QString name = values[1];
+
+		if (indent < 0) {
+			qDebug() << "Setting File Error: Invalid menu indent.";
+			continue;
+		}
+
+		while (indent+1 < menus.size()) {
+			menus.pop();
+		}
+
+		if (cmdId == TeTypes::CMDID_SPECIAL_FOLDER) {
+			//Create Sub menu folder
+			menus.push(menus.top()->addMenu(name));
+		}
+		else if (cmdId == TeTypes::CMDID_SPECIAL_SEPARATOR) {
+			//add Separator
+			menus.top()->addSeparator();
+		}
+		else {
+			//Create Menu Item
+			const TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
+			QAction* action = new QAction(p_info->icon(), p_info->name());
+			connect(action, &QAction::triggered, [this, cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
+			menus.top()->addAction(action);
+		}
+	}
+	settings.endGroup();
+	settings.endGroup();
+
+	menu.exec(pos);
 }
 
 void TeArchiveFolderView::itemActivated(const QModelIndex & index)
 {
-	QStandardItemModel* list_model = qobject_cast<QStandardItemModel*>(mp_listView->model());
-	int type = index.data(TeFileInfo::ROLE_TYPE).toInt();
+	QModelIndex srcIndex = mp_listProxy->mapToSource(index);
+	int type = srcIndex.data(TeFileInfo::ROLE_TYPE).toInt();
 	if (type == TeFileInfo::EN_DIR || type == TeFileInfo::EN_PARENT) {
-		setCurrentPath(indexToPath(index));
+		setCurrentPath(indexToPath(srcIndex));
 	}
 }
 
 void TeArchiveFolderView::setFileShowMode(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed)
 {
-	// TODO: Implement file show mode in archive folder view.
+	// Hidden/system type flags do not apply to archive entries; only the sort
+	// order is honoured here.
 	Q_UNUSED(typeFlags);
-	Q_UNUSED(order);
-	Q_UNUSED(orderReversed);
-	//In archive folder view, file show mode is not supported.
+
+	Qt::SortOrder sortOrder = orderReversed ? Qt::DescendingOrder : Qt::AscendingOrder;
+
+	// The sort criterion is a TeTypes::OrderType; the proxy applies the
+	// type-aware comparison (directory-first, name/size/date/extension) in
+	// lessThan(), mirroring TeFileFolderView.
+	mp_treeProxy->setSortType(order);
+	mp_listProxy->setSortType(order);
+
+	mp_treeProxy->sort(0, sortOrder);
+	mp_listProxy->sort(0, sortOrder);
 }

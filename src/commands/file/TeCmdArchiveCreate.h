@@ -19,28 +19,40 @@
 ****************************************************************************/
 
 #pragma once
+
 #include "commands/TeCommandBase.h"
 
+#include <QList>
+#include <QFlags>
+
 /**
- * @file TeCmdExtract.h
- * @brief Declaration of TeCmdExtract.
+ * @file TeCmdArchiveCreate.h
+ * @brief Declaration of TeCmdArchiveCreate.
  * @ingroup commands
  */
 
-class TeCmdExtract :
-	public TeCommandBase
+
+class TeViewStore;
+
+class TeCmdArchiveCreate :
+    public TeCommandBase
 {
 public:
-	TeCmdExtract();
-	virtual ~TeCmdExtract();
+	TeCmdArchiveCreate();
+	virtual ~TeCmdArchiveCreate();
+
+
 	// Check if this command is selected when item is selected.
 	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
-
 
 	// type of command
 	static QFlags<TeTypes::CmdType> type();
 
 protected:
+	// Execute command.
+	// return
+	//   true  : command is finished. after execute, this command is deleted.
+	//   false : command is still processing. after finish. you must call finish() to delete this command.
 	virtual bool execute(TeViewStore* p_store);
 };
 

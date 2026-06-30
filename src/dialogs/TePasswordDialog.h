@@ -19,28 +19,40 @@
 ****************************************************************************/
 
 #pragma once
-#include "commands/TeCommandBase.h"
+
+#include <QDialog>
 
 /**
- * @file TeCmdExtract.h
- * @brief Declaration of TeCmdExtract.
- * @ingroup commands
+ * @file TePasswordDialog.h
+ * @brief Declaration of TePasswordDialog.
+ * @ingroup dialogs
  */
 
-class TeCmdExtract :
-	public TeCommandBase
+class QLineEdit;
+class QLabel;
+class QCheckBox;
+
+/**
+ * @class TePasswordDialog
+ * @brief Simple modal dialog that prompts the user for an archive password.
+ * @ingroup dialogs
+ */
+class TePasswordDialog : public QDialog
 {
+	Q_OBJECT
+
 public:
-	TeCmdExtract();
-	virtual ~TeCmdExtract();
-	// Check if this command is selected when item is selected.
-	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
+	TePasswordDialog(QWidget* parent = nullptr);
+	~TePasswordDialog();
 
+	/** @brief Returns the password entered by the user. */
+	QString password() const;
 
-	// type of command
-	static QFlags<TeTypes::CmdType> type();
+	/** @brief Sets the descriptive prompt (e.g. the archive file name). */
+	void setPrompt(const QString& text);
 
-protected:
-	virtual bool execute(TeViewStore* p_store);
+private:
+	QLabel*    mp_prompt;
+	QLineEdit* mp_password;
+	QCheckBox* mp_show;
 };
-

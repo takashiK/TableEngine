@@ -16,12 +16,27 @@
 graph TD
     subgraph "ワークスペース内（全設定を保持）"
         CI[".github/copilot-instructions.md<br/>前半=汎用 / 後半=固有"]
+        AG[".github/agents/<br/>task-executor (Task Executor)"]
         SKA[".github/skills/codebase-analysis/<br/>コア + lang/"]
         SKR[".github/skills/refactoring/<br/>コア + lang/"]
         PG["prompts/ 汎用<br/>design-report, update-docs, agent-tuning"]
         PS["prompts/ 固有<br/>refactor-package-split, batch-code-migration"]
     end
-    CI --> SKA & SKR & PG & PS
+    CI --> AG & SKA & SKR & PG & PS
+```
+
+### オーケストレーション3層階層
+
+```mermaid
+graph TD
+    L0["L0 オーケストレーター (main / Opus)<br/>計画タスク分解・単位委譲・承認ゲート"]
+    L1["L1 Task Executor (mid)<br/>1単位を調査→実装→検証で自己完結"]
+    L2a["L2 Explore (read-only / low)<br/>重い読解の隔離"]
+    L2b["L2 Task Executor nested (mid)<br/>独立サブ単位"]
+    L0 -->|計画タスク1単位をまるごと委譲| L1
+    L1 -->|必要時のみ| L2a & L2b
+    L1 -.->|要約のみ| L0
+    L2a & L2b -.->|要約のみ| L1
 ```
 
 ## 3. 混在戦略
@@ -104,6 +119,7 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 | ビルドプリセット名を小文字 `-debug` に修正 | `CMakePresets.json` の実名は小文字。`-Debug` 表記は実行失敗の原因 | 2026-06-22 |
 | vcvars 検出に vswhere `-products *` 採用 | ハードコードの Community パスは BuildTools 版で不一致。vswhere 自動検出で環境非依存化 | 2026-06-22 |
 | オーケストレーション運用を導入 | main(Opus) は委譲・統合・承認に専念し、実作業は subagent へ委譲。subagent が難易度別にモデルを選択し、中間情報を遮断することでコンテキスト肥大とトークンコストを抑制 | 2026-06-24 |
+| 粗粒度・3層階層委譲へ移行 | 細かい単発 subagent 呼び出しは往復・要約オーバーヘッドが大きい（コスト分析で確認）。L0 は Phase/計画タスクを1単位として custom agent `Task Executor` にまるごと委譲し、executor が単位内の細粒度作業と L2（Explore / nested executor）起動を自律管理。委譲回数を削減し文脈分離を維持 | 2026-06-26 |
 
 ## 7. ブラッシュアップ手順
 
