@@ -45,6 +45,7 @@
 #include "TeEventEmitter.h"
 #include "utils/TeUtils.h"
 #include "dialogs/TeFilePathDialog.h"
+#include "platform/TeFileOperationManager.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -54,6 +55,7 @@
 #include <QStatusBar>
 #include <QHeaderView>
 #include <QSplitter>
+#include <QDockWidget>
 #include <QHBoxLayout>
 #include <QSizePolicy>
 #include <QSettings>
@@ -62,14 +64,67 @@
 #include <QDir>
 #include <QFile>
 #include <QTextStream>
+#include <QCoreApplication>
 #include <QGuiApplication>
+#include <QScreen>
 #include <QStyleHints>
 #include <QtWidgets/QApplication>
 #include "utils/TeFolderAppearance.h"
 
+namespace {
+bool isDetailDefaultFloatingEnabled()
+{
+	QSettings settings;
+	return settings.value(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, true).toBool();
+}
+
+int paneFallbackWidth(const char* key, int minValue, int maxValue)
+{
+	QSettings settings;
+	return qBound(minValue, settings.value(key, minValue).toInt(), maxValue);
+}
+
+void positionDetailDockNextToMainWindow(QMainWindow* mainWindow, QDockWidget* detailDock, int minWidth, int maxWidth)
+{
+	if (!mainWindow || !detailDock || mainWindow->isMaximized() || mainWindow->isFullScreen()) {
+		return;
+	}
+
+	const QRect mainFrame = mainWindow->frameGeometry();
+	const int dockWidth = qBound(minWidth, qMax(minWidth, detailDock->width()), maxWidth);
+	QRect next(mainFrame.right() + 1, mainFrame.top(), dockWidth, mainFrame.height());
+
+	QScreen* screen = mainWindow->screen();
+	if (!screen) {
+		screen = QGuiApplication::screenAt(mainWindow->frameGeometry().center());
+	}
+	if (screen) {
+		const QRect available = screen->availableGeometry();
+		if (next.width() > available.width()) {
+			next.setWidth(available.width());
+		}
+		if (next.left() < available.left()) {
+			next.moveLeft(available.left());
+		}
+		if (next.right() > available.right()) {
+			next.moveLeft(available.right() - next.width() + 1);
+		}
+		if (next.top() < available.top()) {
+			next.moveTop(available.top());
+		}
+		if (next.bottom() > available.bottom()) {
+			next.moveTop(available.bottom() - next.height() + 1);
+		}
+	}
+
+	detailDock->setGeometry(next);
+}
+}
+
 TeViewStore::TeViewStore(QObject *parent)
 	: QObject(parent)
 {
+	mp_fileOpManager = new TeFileOperationManager(this);
 }
 
 TeViewStore::~TeViewStore()
@@ -106,6 +161,8 @@ void TeViewStore::initialize()
 {
 	//Main window
 	mp_mainWindow = new TeMainWindow;
+	if (mp_fileOpManager) mp_fileOpManager->setOwnerWidget(mp_mainWindow);
+	connect(qApp, &QCoreApplication::aboutToQuit, this, [this]() { storeWindowSizeIfNeeded(); });
 
 	//Drive bar
 	mp_driveBar = new TeDriveBar("Drive Bar");
@@ -203,8 +260,14 @@ void TeViewStore::initialize()
 	mp_detailView->registerSection(new TeDetailFileInfoSection());
 	mp_detailView->registerSection(new TeDetailExifSection());
 	mp_detailView->registerSection(new TeDetailTextPreviewSection());
-	mp_split->addWidget(mp_detailView);
-	mp_detailView->setVisible(false);
+	mp_detailDock = new QDockWidget(tr("Detail"), mp_mainWindow);
+	mp_detailDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	mp_detailDock->setFeatures(QDockWidget::DockWidgetClosable
+						 | QDockWidget::DockWidgetMovable
+						 | QDockWidget::DockWidgetFloatable);
+	mp_detailDock->setWidget(mp_detailView);
+	mp_mainWindow->addDockWidget(Qt::RightDockWidgetArea, mp_detailDock);
+	mp_detailDock->hide();
 
 	mp_mainWindow->setCentralWidget(mp_split);
 
@@ -381,6 +444,7 @@ void TeViewStore::loadSetting()
 {
 	setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
 	applyStyleSheet();
+	applyLayoutSettings();
 }
 
 void TeViewStore::loadKeySetting()
@@ -455,6 +519,7 @@ void TeViewStore::show()
 
 void TeViewStore::close()
 {
+	storeWindowSizeIfNeeded();
 	if (mp_mainWindow) mp_mainWindow->close();
 }
 
@@ -483,16 +548,38 @@ QWidget * TeViewStore::mainWindow()
 	return mp_mainWindow;
 }
 
+TeFileOperationManager * TeViewStore::fileOperationManager()
+{
+	return mp_fileOpManager;
+}
+
 bool TeViewStore::isDetailVisible() const
 {
-	return mp_detailView && mp_detailView->isVisible();
+	return mp_detailDock && mp_detailDock->isVisible();
 }
 
 void TeViewStore::setDetailVisible(bool visible)
 {
-	if (mp_detailView) {
-		mp_detailView->setVisible(visible);
+	if (!mp_detailDock || !mp_detailView || isDetailVisible() == visible) {
+		return;
 	}
+
+	if (!visible) {
+		mp_detailDock->hide();
+		return;
+	}
+
+	const int detailMinWidth = paneFallbackWidth(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 120, 3200);
+	const int detailMaxWidth = paneFallbackWidth(SETTING_LAYOUT_DETAIL_MAX_WIDTH, detailMinWidth, 4200);
+	const bool defaultFloating = isDetailDefaultFloatingEnabled();
+
+	mp_detailDock->setFloating(defaultFloating);
+	if (defaultFloating) {
+		positionDetailDockNextToMainWindow(mp_mainWindow, mp_detailDock, detailMinWidth, detailMaxWidth);
+	}
+
+	mp_detailDock->show();
+	mp_detailDock->raise();
 }
 
 int TeViewStore::currentTabPlace()
@@ -620,6 +707,87 @@ void TeViewStore::setCurrentFolderView(TeFolderView * view)
 			tree = view->tree();
 		}
 	}
+
+	applyLayoutSettings();
+}
+
+void TeViewStore::applyLayoutSettings()
+{
+	QSettings settings;
+	const int mode = settings.value(SETTING_LAYOUT_WINDOW_SIZE_MODE, TeSettings::WINDOW_SIZE_MODE_REMEMBER).toInt();
+	const int fixedWidth = qBound(640, settings.value(SETTING_LAYOUT_WINDOW_FIXED_WIDTH, 1280).toInt(), 8192);
+	const int fixedHeight = qBound(480, settings.value(SETTING_LAYOUT_WINDOW_FIXED_HEIGHT, 800).toInt(), 8192);
+	const int lastWidth = qBound(640, settings.value(SETTING_LAYOUT_WINDOW_LAST_WIDTH, fixedWidth).toInt(), 8192);
+	const int lastHeight = qBound(480, settings.value(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, fixedHeight).toInt(), 8192);
+
+	if (mp_mainWindow && !mp_mainWindow->isVisible()) {
+		const QSize startupSize = (mode == TeSettings::WINDOW_SIZE_MODE_FIXED)
+			? QSize(fixedWidth, fixedHeight)
+			: QSize(lastWidth, lastHeight);
+		mp_mainWindow->resize(startupSize);
+	}
+
+	const int treeMinWidth = qBound(120, settings.value(SETTING_LAYOUT_TREE_MIN_WIDTH, 200).toInt(), 2400);
+	const int treeMaxWidth = qBound(treeMinWidth, settings.value(SETTING_LAYOUT_TREE_MAX_WIDTH, 400).toInt(), 3200);
+	const int treeRatio = qBound(10, settings.value(SETTING_LAYOUT_TREE_LIST_RATIO, 25).toInt(), 90);
+	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 3200);
+	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 4200);
+
+	if (mp_detailView) {
+		mp_detailView->setMinimumWidth(detailMinWidth);
+		mp_detailView->setMaximumWidth(detailMaxWidth);
+	}
+	if (mp_detailDock) {
+		mp_detailDock->setMinimumWidth(detailMinWidth);
+		mp_detailDock->setMaximumWidth(detailMaxWidth);
+	}
+
+	TeFileTreeView* tree = nullptr;
+	if (mp_split) {
+		tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
+	}
+	if (tree) {
+		tree->setMinimumWidth(treeMinWidth);
+		tree->setMaximumWidth(treeMaxWidth);
+	}
+
+	if (mp_split && tree && (!mp_mainWindow || !mp_mainWindow->isVisible())) {
+		QList<int> sizes = mp_split->sizes();
+		if (sizes.size() >= 2) {
+			int treeSize = sizes.at(0);
+			int listSize = sizes.at(1);
+			int total = treeSize + listSize;
+			if (total <= 0) {
+				total = qMax(800, mp_mainWindow ? mp_mainWindow->width() : 800);
+			}
+			const int wantedTreeSize = qBound(treeMinWidth, (total * treeRatio) / 100, treeMaxWidth);
+			const int wantedListSize = qMax(200, total - wantedTreeSize);
+			sizes[0] = wantedTreeSize;
+			sizes[1] = wantedListSize;
+			mp_split->setSizes(sizes);
+		}
+	}
+}
+
+void TeViewStore::storeWindowSizeIfNeeded()
+{
+	if (!mp_mainWindow) {
+		return;
+	}
+
+	QSettings settings;
+	const int mode = settings.value(SETTING_LAYOUT_WINDOW_SIZE_MODE, TeSettings::WINDOW_SIZE_MODE_REMEMBER).toInt();
+	if (mode != TeSettings::WINDOW_SIZE_MODE_REMEMBER) {
+		return;
+	}
+
+	const QSize size = mp_mainWindow->isMaximized()
+		? mp_mainWindow->normalGeometry().size()
+		: mp_mainWindow->size();
+	if (size.isValid() && size.width() > 0 && size.height() > 0) {
+		settings.setValue(SETTING_LAYOUT_WINDOW_LAST_WIDTH, size.width());
+		settings.setValue(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, size.height());
+	}
 }
 
 TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place)
@@ -660,7 +828,11 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 {
 	TeArchiveFolderView* folderView = new TeArchiveFolderView;
 	folderView->setDispatcher(this);
-	folderView->setArchive(path);
+	bool ok = folderView->setArchive(path);
+	if (!ok) {
+		delete folderView;
+		return nullptr;
+	}
 	folderView->list()->setFocusPolicy(Qt::ClickFocus);
 	folderView->list()->setSelectionMode(selectionMode());
 	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
@@ -922,13 +1094,45 @@ bool TeViewStore::isNavigationVisible() const
 
 void TeViewStore::setNavigationVisible(bool visible)
 {
-	if (m_isNavigationVisible != visible) {
+	if (m_isNavigationVisible == visible || !mp_split) {
+		return;
+	}
+
+	TeFileTreeView* tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
+	if (!tree) {
 		m_isNavigationVisible = visible;
-		TeFileTreeView* tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
-		if (tree) {
-			tree->setHidden(!visible);
+		return;
+	}
+
+	const QList<int> prevSizes = mp_split->sizes();
+	const int navIndex = mp_split->indexOf(tree);
+	const int navCurrentWidth = (navIndex >= 0 && navIndex < prevSizes.size()) ? prevSizes.at(navIndex) : 0;
+	const int targetNavWidth = visible
+		? qMax(navCurrentWidth, paneFallbackWidth(SETTING_LAYOUT_TREE_MIN_WIDTH, 120, 2400))
+		: navCurrentWidth;
+
+	int folderIndex = -1;
+	int prevFolderWidth = 0;
+	QWidget* folderWidget = mp_tab[TAB_LEFT] ? mp_tab[TAB_LEFT]->parentWidget() : nullptr;
+	if (folderWidget) {
+		folderIndex = mp_split->indexOf(folderWidget);
+		if (folderIndex >= 0 && folderIndex < prevSizes.size()) {
+			prevFolderWidth = prevSizes.at(folderIndex);
 		}
 	}
+
+	m_isNavigationVisible = visible;
+	tree->setHidden(!visible);
+
+	QList<int> sizes = mp_split->sizes();
+	const int newNavIndex = mp_split->indexOf(tree);
+	if (folderIndex >= 0 && folderIndex < sizes.size()) {
+		sizes[folderIndex] = prevFolderWidth;
+	}
+	if (newNavIndex >= 0 && newNavIndex < sizes.size()) {
+		sizes[newNavIndex] = visible ? targetNavWidth : 0;
+	}
+	mp_split->setSizes(sizes);
 }
 
 

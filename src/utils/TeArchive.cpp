@@ -24,7 +24,11 @@
 
 #include <QFile>
 #include <QDir>
+#include <QStringDecoder>
+#include <QVarLengthArray>
 #include <algorithm>
+
+#include <icu.h>
 
 /**
  * @file TeArchive.cpp
@@ -99,13 +103,71 @@ namespace {
 	};
 
 	/*!
-		\internal 
+		\internal
 
-		Provide operation for "open file for read" to libarchive.
-
-		\param a state structure of libarchive.
-		\param client_data it is expected "Pointer of QtArchvieResource".
+		Decode a byte string using an ICU converter (e.g. "cp932").
+		Returns an empty string on failure.
 	 */
+	QString decode_icu(const QByteArray& bytes, const char* encoding)
+	{
+		if (bytes.isEmpty()) {
+			return QString();
+		}
+		UErrorCode status = U_ZERO_ERROR;
+		UConverter* conv = ucnv_open(encoding, &status);
+		if (U_FAILURE(status) || conv == nullptr) {
+			return QString();
+		}
+		int32_t cap = bytes.size() * 2 + 1;
+		QVarLengthArray<UChar> buf(cap);
+		int32_t len = ucnv_toUChars(conv, buf.data(), cap, bytes.constData(), bytes.size(), &status);
+		ucnv_close(conv);
+		if (U_FAILURE(status)) {
+			return QString();
+		}
+		return QString::fromUtf16(reinterpret_cast<const char16_t*>(buf.data()), len);
+	}
+
+	/*!
+		\internal
+
+		Decode an archive entry path name.
+
+		ZIP archives store file names either in UTF-8 (general-purpose bit 11) or
+		in a legacy code page; on Japanese systems this is typically Shift-JIS
+		(CP932).  This helper decodes raw bytes as UTF-8 when they form a valid
+		UTF-8 sequence and falls back to CP932 otherwise.
+	 */
+	QString decode_entry_name(struct archive_entry* entry)
+	{
+		const char* p_raw = archive_entry_pathname(entry);
+		QByteArray raw = (p_raw != nullptr) ? QByteArray(p_raw) : QByteArray();
+
+		if (raw.isEmpty()) {
+			const wchar_t* p_wide = archive_entry_pathname_w(entry);
+			if (p_wide != nullptr) {
+				return QString::fromWCharArray(p_wide);
+			}
+			return QString();
+		}
+
+		// Valid UTF-8 (includes pure ASCII) -> decode as UTF-8.
+		QStringDecoder decoder(QStringDecoder::Utf8, QStringDecoder::Flag::Stateless);
+		QString utf8 = decoder.decode(raw);
+		if (!decoder.hasError()) {
+			return utf8;
+		}
+
+		// Otherwise assume a legacy Japanese code page (Shift-JIS / CP932).
+		QString sjis = decode_icu(raw, "cp932");
+		if (!sjis.isEmpty()) {
+			return sjis;
+		}
+
+		return QString::fromLocal8Bit(raw);
+	}
+
+
 	extern "C" int qt_read_open_callback(struct archive *a, void *client_data)
 	{
 		QtArchiveResource * qas = static_cast<QtArchiveResource*>(client_data);
@@ -316,11 +378,15 @@ namespace {
 		\param arInfo this function setup this param to "Read from archive file" by \a path information.
 		\param path   target for read archive file.
 	 */
-	bool open_read_archive(QtArchiveInfo* arInfo, const QString& path)
+	bool open_read_archive(QtArchiveInfo* arInfo, const QString& path, const QString& password = QString())
 	{
 		arInfo->ar = archive_read_new();
 		archive_read_support_format_all(arInfo->ar);
 		archive_read_support_compression_all(arInfo->ar);
+
+		if (!password.isEmpty()) {
+			archive_read_add_passphrase(arInfo->ar, password.toUtf8().constData());
+		}
 
 		archive_read_set_seek_callback(arInfo->ar, qt_seek_callback);
 
@@ -438,14 +504,7 @@ namespace {
 				continue;
 			}
 
-			const char* p_path = archive_entry_pathname(arInfo->entry);
-			const char* p_upath = archive_entry_pathname_utf8(arInfo->entry);
-			if (p_upath != nullptr && p_upath[0] != 0) {
-				info->path = QDir::cleanPath(QString::fromUtf8(p_upath));
-			}
-			else {
-				info->path = QDir::cleanPath(QString::fromLocal8Bit(p_path));
-			}
+			info->path = QDir::cleanPath(decode_entry_name(arInfo->entry));
 
 			if (info->path.startsWith(".") || info->path.startsWith("/") || info->path.contains(":")) {
 				//reject unacceptable path
@@ -489,7 +548,7 @@ namespace {
 		\param path   path for creation.
 
 	 */
-	bool open_write_archvie(QtArchiveInfo* arInfo, const QString& path, TeArchive::ArchiveType type)
+	bool open_write_archvie(QtArchiveInfo* arInfo, const QString& path, TeArchive::ArchiveType type, const QString& password = QString())
 	{
 		arInfo->ar = archive_write_new();
 
@@ -512,6 +571,12 @@ namespace {
 			archive_write_set_format_gnutar(arInfo->ar);
 			archive_write_set_compression_bzip2(arInfo->ar);
 			break;
+		}
+
+		// Encrypted archive creation is currently supported for ZIP (AES-256).
+		if (!password.isEmpty() && type == TeArchive::AR_ZIP) {
+			archive_write_set_options(arInfo->ar, "zip:encryption=aes256");
+			archive_write_set_passphrase(arInfo->ar, password.toUtf8().constData());
 		}
 
 		arInfo->res.file.setFileName(path.toLocal8Bit());
@@ -602,6 +667,14 @@ void Reader::setCallback( bool(*overwrite)(QFileInfo*) )
 }
 
 /*!
+	Set the password used to open and extract an encrypted archive.
+ */
+void Reader::setPassword(const QString& password)
+{
+	m_password = password;
+}
+
+/*!
 	Open archive file.
 	If archive file is not found or Reader can't detect format of archive then this function failed and return false.
 	This function close file, that already opened by this function, before open another file.
@@ -611,20 +684,46 @@ bool Reader::open(const QString & path)
 	bool result = false;
 	close();
 	if (!QFile::exists(path)) {
+		m_result = RESULT_FATAL;
 		return false;
 	}
 
 	QtArchiveInfo arInfo;
 
-	if (!open_read_archive(&arInfo, path)) {
+	if (!open_read_archive(&arInfo, path, m_password)) {
+		m_result = RESULT_FATAL;
 		return false;
 	}
 
-	if (ARCHIVE_OK == archive_read_next_header(arInfo.ar, &arInfo.entry)) {
+	int r = archive_read_next_header(arInfo.ar, &arInfo.entry);
+	if (r == ARCHIVE_OK || r == ARCHIVE_WARN) {
 		m_type = check_format(&arInfo);
 		if (m_type != AR_NONE) {
 			result = true;
 			m_path = path;
+			m_encrypted = (archive_read_has_encrypted_entries(arInfo.ar) > 0);
+			m_result = RESULT_OK;
+		}
+		else {
+			m_result = RESULT_FORMAT_ERROR;
+		}
+	}
+	else {
+		// The first header could not be read.  For header-encrypted archives
+		// (e.g. 7-Zip) this indicates a missing or incorrect passphrase.
+		const char* es = archive_error_string(arInfo.ar);
+		QString err = (es != nullptr) ? QString::fromLocal8Bit(es) : QString();
+		if (err.contains("passphrase", Qt::CaseInsensitive)
+			|| err.contains("password", Qt::CaseInsensitive)
+			|| err.contains("encrypt", Qt::CaseInsensitive)) {
+			m_encrypted = true;
+			m_result = m_password.isEmpty() ? RESULT_PASSWORD_REQUIRED : RESULT_WRONG_PASSWORD;
+		}
+		else {
+			m_result = RESULT_FATAL;
+		}
+		if (!err.isEmpty()) {
+			emit error(err);
 		}
 	}
 
@@ -634,11 +733,57 @@ bool Reader::open(const QString & path)
 }
 
 /*!
+	Validate the currently held password against the opened archive.
+ */
+Reader::Result Reader::verifyPassword()
+{
+	if (m_path.isEmpty()) {
+		m_result = RESULT_FATAL;
+		return m_result;
+	}
+
+	QtArchiveInfo arInfo;
+	if (!open_read_archive(&arInfo, m_path, m_password)) {
+		m_result = RESULT_FATAL;
+		return m_result;
+	}
+
+	Result res = RESULT_OK;
+	for (;;) {
+		int r = archive_read_next_header(arInfo.ar, &arInfo.entry);
+		if (r == ARCHIVE_EOF) {
+			break;
+		}
+		if (r < ARCHIVE_WARN) {
+			// Header decryption failed (header-encrypted archive).
+			res = m_password.isEmpty() ? RESULT_PASSWORD_REQUIRED : RESULT_WRONG_PASSWORD;
+			break;
+		}
+		if (archive_entry_is_encrypted(arInfo.entry)
+			&& archive_entry_filetype(arInfo.entry) == AE_IFREG) {
+			const void* buff;
+			size_t size = 0;
+			la_int64_t offset = 0;
+			int dr = archive_read_data_block(arInfo.ar, &buff, &size, &offset);
+			if (dr < ARCHIVE_OK && dr != ARCHIVE_EOF) {
+				res = m_password.isEmpty() ? RESULT_PASSWORD_REQUIRED : RESULT_WRONG_PASSWORD;
+			}
+			break; // a single encrypted entry is enough to validate the password.
+		}
+	}
+
+	close_read_archive(&arInfo);
+	m_result = res;
+	return res;
+}
+
+/*!
 	close archive file if it is already opened.
  */
 void Reader::close()
 {
 	m_type = AR_NONE;
+	m_encrypted = false;
 	m_path.clear();
 }
 
@@ -683,7 +828,7 @@ bool Reader::extractAll(const QString & destPath)
 		return false;
 	}
 
-	if (!open_read_archive(&arInfo, m_path)) {
+	if (!open_read_archive(&arInfo, m_path, m_password)) {
 		emit finished();
 		return false;
 	}
@@ -764,10 +909,19 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 		return false;
 	}
 
+	QString basePath;
+	if (base.isEmpty()) {
+		basePath = "";
+	}
+	else {
+		basePath = QDir::cleanPath(base) + "/";
+	}
+
+
 	emit maximumValue(static_cast<int>((srcInfo.size() - 1) / 1024 + 1));
 
 	QtArchiveInfo arInfo;
-	if (!open_read_archive(&arInfo, m_path)) {
+	if (!open_read_archive(&arInfo, m_path, m_password)) {
 		emit finished();
 		return false;
 	}
@@ -788,13 +942,21 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 		emit valueChanged(archive_read_bytes(&arInfo));
 
 		if (info.type == TeFileInfo::EN_DIR || info.type == TeFileInfo::EN_FILE) {
-			if (!info.path.startsWith(base)) {
+			if (!info.path.startsWith(basePath)) {
 				continue;
 			}
 			bool found = false;
 			for (auto&& entry : entries) {
-				if (info.path.mid(base.size()).startsWith(entry)) {
-					found = true; break;
+				if (info.path.mid(basePath.length()).startsWith(entry)) {
+					if(info.path.length() == basePath.length() + entry.length() ){
+						//match file or directory. so this entry is target. so extract this entry.
+						found = true; break;
+					}else{
+						if (info.path.at(basePath.length() + entry.length()) == '/') {
+							//match directory part. so this entry is child of directory. so extract this entry.
+							found = true; break;
+						}
+					}
 				}
 			}
 			if (!found) continue;
@@ -804,7 +966,7 @@ bool Reader::extract(const QString & destPath, const QString & base, const QStri
 			dir.mkpath(destBase + info.path);
 		}
 		else if (info.type == TeFileInfo::EN_FILE) {
-			QFileInfo fileInfo(destBase + info.path);
+			QFileInfo fileInfo(destBase + info.path.mid(basePath.length()));
 			if (fileInfo.exists() && (overwrite_check != Q_NULLPTR) && !overwrite_check(&fileInfo)) {
 				continue;
 			}
@@ -909,7 +1071,7 @@ Reader::const_iterator::const_iterator(Reader * ar)
 		QtArchiveInfo* arInfo = new QtArchiveInfo;
 		data = arInfo;
 
-		open_read_archive(arInfo, ar->m_path);
+		open_read_archive(arInfo, ar->m_path, ar->m_password);
 		if (!read_next_entry(arInfo, &info)) {
 			close_read_archive(arInfo);
 			delete arInfo;
@@ -987,6 +1149,14 @@ void Writer::clear()
 	m_totalBytes = 0;
 	m_cancel = false;
 	m_entryList.clear();
+}
+
+/*!
+	Set the password used to encrypt the created archive (ZIP / AES-256).
+ */
+void Writer::setPassword(const QString& password)
+{
+	m_password = password;
 }
 
 /*!
@@ -1111,7 +1281,7 @@ bool Writer::archive(const QString & dest, ArchiveType type)
 	}
 
 	QtArchiveInfo arInfo;
-	if (!open_write_archvie(&arInfo, dest, type)) {
+	if (!open_write_archvie(&arInfo, dest, type, m_password)) {
 		emit finished();
 		return false;
 	}

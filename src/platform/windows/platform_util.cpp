@@ -180,6 +180,16 @@ void threadUninitialize()
 	CoUninitialize();
 }
 
+void comInitializeThread()
+{
+	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+}
+
+void comUninitializeThread()
+{
+	CoUninitialize();
+}
+
 
 bool showFilesContext(int px, int py, const QStringList& paths)
 {
@@ -298,7 +308,7 @@ void openFile(const QString& path)
 	}
 }
 
-bool copyFiles(const QStringList & files, const QString & path)
+bool copyFiles(const QStringList & files, const QString & path, WId owner)
 {
 	HRESULT hr = S_OK;
 	IFileOperation *pfo;
@@ -310,6 +320,9 @@ bool copyFiles(const QStringList & files, const QString & path)
 
 	if (SUCCEEDED(hr)) {
 		//hr = pfo->SetOperationFlags(FOF_NO_UI);
+		if (owner != 0) {
+			pfo->SetOwnerWindow(reinterpret_cast<HWND>(owner));
+		}
 		if (SUCCEEDED(hr)) {
 			IShellItem *psiTo = NULL;
 
@@ -350,7 +363,7 @@ bool copyFiles(const QStringList & files, const QString & path)
 	return SUCCEEDED(hr);
 }
 
-bool copyFile(const QString & fromFile, const QString & toFile)
+bool copyFile(const QString & fromFile, const QString & toFile, WId owner)
 {
 	HRESULT hr = S_OK;
 	IFileOperation *pfo;
@@ -373,6 +386,9 @@ bool copyFile(const QString & fromFile, const QString & toFile)
 
 	if (SUCCEEDED(hr)) {
 		//hr = pfo->SetOperationFlags(FOF_NO_UI);
+		if (owner != 0) {
+			pfo->SetOwnerWindow(reinterpret_cast<HWND>(owner));
+		}
 		if (SUCCEEDED(hr)) {
 			IShellItem *psiTo = NULL;
 
@@ -405,7 +421,7 @@ bool copyFile(const QString & fromFile, const QString & toFile)
 	return SUCCEEDED(hr);
 }
 
-bool moveFiles(const QStringList & files, const QString & path)
+bool moveFiles(const QStringList & files, const QString & path, WId owner)
 {
 	HRESULT hr = S_OK;
 	IFileOperation *pfo;
@@ -417,6 +433,9 @@ bool moveFiles(const QStringList & files, const QString & path)
 
 	if (SUCCEEDED(hr)) {
 		//hr = pfo->SetOperationFlags(FOF_NO_UI);
+		if (owner != 0) {
+			pfo->SetOwnerWindow(reinterpret_cast<HWND>(owner));
+		}
 		if (SUCCEEDED(hr)) {
 			IShellItem *psiTo = NULL;
 
@@ -456,7 +475,7 @@ bool moveFiles(const QStringList & files, const QString & path)
 	return SUCCEEDED(hr);
 }
 
-bool deleteFiles(const QStringList & files)
+bool deleteFiles(const QStringList & files, WId owner)
 {
 	HRESULT hr = S_OK;
 	IFileOperation *pfo;
@@ -468,6 +487,9 @@ bool deleteFiles(const QStringList & files)
 
 	if (SUCCEEDED(hr)) {
 		//hr = pfo->SetOperationFlags(FOF_NO_UI);
+		if (owner != 0) {
+			pfo->SetOwnerWindow(reinterpret_cast<HWND>(owner));
+		}
 		if (SUCCEEDED(hr)) {
 			for(const QString& from : files) {
 				IShellItem *psiFrom = NULL;

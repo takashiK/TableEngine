@@ -24,12 +24,14 @@
 #include "utils/TeUtils.h"
 #include "dialogs/TeFilePathDialog.h"
 #include "dialogs/TeAskCreationModeDialog.h"
-#include "platform/platform_util.h"
+#include "platform/TeFileOperationManager.h"
+#include "TeSettings.h"
 
 #include <QMainWindow>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QDir>
+#include <QSettings>
 
 /**
  * @file TeCmdMoveTo.cpp
@@ -73,6 +75,15 @@ QFlags<TeTypes::CmdType> TeCmdMoveTo::type()
 */
 bool TeCmdMoveTo::execute(TeViewStore* p_store)
 {
+    QString targetPath;
+    if (QSettings().value(SETTING_GENERAL_CopyToOppositePane, true).toBool()) {
+        int tabPlace = p_store->currentTabPlace() == TeViewStore::TAB_RIGHT ? TeViewStore::TAB_LEFT : TeViewStore::TAB_RIGHT;
+        TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->getFolderView(tabPlace));
+        if (p_folder != nullptr) {
+            targetPath = p_folder->currentPath();
+        }
+    }
+
 	TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
 
 	if (p_folder != nullptr) {
@@ -82,7 +93,12 @@ bool TeCmdMoveTo::execute(TeViewStore* p_store)
 			//select folder.
 			TeFilePathDialog dlg(p_store->mainWindow());
 			dlg.setCurrentPath(p_folder->currentPath());
+			dlg.setFavorites(getFavorites());
+			dlg.setHistory(p_folder->getPathHistory());
 			dlg.setWindowTitle(TeFilePathDialog::tr("Move to"));
+            if(!targetPath.isEmpty()) {
+                dlg.setTargetPath(targetPath);
+            }
 			if (dlg.exec() == QDialog::Accepted) {
 				if (dlg.targetPath().isEmpty()) {
 					QMessageBox msg(p_store->mainWindow());
@@ -105,9 +121,11 @@ void TeCmdMoveTo::moveItems(TeViewStore* p_store, const QStringList & list, cons
 	QDir dir;
 
 	bool bSuccess = true;
+	const QString errorText = QObject::tr("Move to following path failed.") + QString("\n") + path;
+	TeFileOperationManager* mgr = p_store->fileOperationManager();
 
 	if (dir.exists(path)) {
-		bSuccess = moveFiles(list, path);
+		mgr->moveFiles(list, path, errorText);
 	}
 	else {
 		QFileInfo info(path);
@@ -118,7 +136,7 @@ void TeCmdMoveTo::moveItems(TeViewStore* p_store, const QStringList & list, cons
 			//Create Folder
 			bSuccess = dir.mkpath(path);
 			if (bSuccess) {
-				bSuccess = moveFiles(list, path);
+				mgr->moveFiles(list, path, errorText);
 			}
 		}
 	}
@@ -126,7 +144,7 @@ void TeCmdMoveTo::moveItems(TeViewStore* p_store, const QStringList & list, cons
 	if (!bSuccess) {
 		QMessageBox msg(p_store->mainWindow());
 		msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-		msg.setText(QObject::tr("Move to following path failed.") + QString("\n") + path);
+		msg.setText(errorText);
 		msg.exec();
 	}
 }

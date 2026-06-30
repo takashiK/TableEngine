@@ -81,6 +81,7 @@ static void changeKeyTree(int key, QCheckBox* ctrl, QCheckBox* shift, QTreeWidge
 TeKeySetting::TeKeySetting(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	QVBoxLayout* layout = new QVBoxLayout();
 	QHBoxLayout*  hbox = new QHBoxLayout();
 
@@ -198,8 +199,8 @@ void TeKeySetting::storeDefaultSettings(bool force)
 	SETTING(Qt::CTRL | Qt::Key_N, TeTypes::CMDID_SYSTEM_FOLDER_CREATE_FOLDER);
 	SETTING(Qt::Key_C, TeTypes::CMDID_SYSTEM_FILE_COPY_TO);
 	SETTING(Qt::Key_M, TeTypes::CMDID_SYSTEM_FILE_MOVE_TO);
-	SETTING(Qt::Key_D, TeTypes::CMDID_SYSTEM_FILE_DELETE);
 	SETTING(Qt::Key_Delete, TeTypes::CMDID_SYSTEM_FILE_DELETE);
+	SETTING(Qt::Key_D, TeTypes::CMDID_SYSTEM_FILE_DELETE);
 	SETTING(Qt::Key_R, TeTypes::CMDID_SYSTEM_FILE_RENAME);
 	SETTING(Qt::Key_F2, TeTypes::CMDID_SYSTEM_FILE_RENAME);
 	SETTING(Qt::Key_F4, TeTypes::CMDID_SYSTEM_FILE_PROPERTY);
@@ -218,8 +219,10 @@ void TeKeySetting::storeDefaultSettings(bool force)
 	SETTING(Qt::Key_W, TeTypes::CMDID_SYSTEM_EDIT_SELECT_BY_FILTER);
 
 	SETTING(Qt::Key_Backspace, TeTypes::CMDID_SYSTEM_FOLDER_GOTO_PARENT);
-	SETTING(Qt::Key_Home, TeTypes::CMDID_SYSTEM_FOLDER_GOTO_ROOT);
+	SETTING(Qt::CTRL | Qt::Key_Home, TeTypes::CMDID_SYSTEM_FOLDER_GOTO_ROOT);
 	SETTING(Qt::Key_G, TeTypes::CMDID_SYSTEM_FOLDER_GOTO_FOLDER);
+	SETTING(Qt::CTRL | Qt::Key_B, TeTypes::CMDID_SYSTEM_FOLDER_PREV_FOLDER);
+	SETTING(Qt::CTRL | Qt::Key_R, TeTypes::CMDID_SYSTEM_FOLDER_NEXT_FOLDER);
 	SETTING(Qt::Key_F, TeTypes::CMDID_SYSTEM_FOLDER_FIND);
 	SETTING(Qt::CTRL | Qt::Key_F, TeTypes::CMDID_SYSTEM_FOLDER_FIND);
 
@@ -237,14 +240,11 @@ void TeKeySetting::storeDefaultSettings(bool force)
 	SETTING(Qt::CTRL | Qt::Key_J, TeTypes::CMDID_SYSTEM_WINDOW_NEXT_TAB);
 	SETTING(Qt::CTRL | Qt::Key_K, TeTypes::CMDID_SYSTEM_WINDOW_PREV_TAB);
 
-	SETTING(Qt::Key_J, TeTypes::CMDID_SYSTEM_NAVI_DOWN);
-	SETTING(Qt::Key_K, TeTypes::CMDID_SYSTEM_NAVI_UP);
-	SETTING(Qt::Key_H, TeTypes::CMDID_SYSTEM_NAVI_LEFT);
-	SETTING(Qt::Key_L, TeTypes::CMDID_SYSTEM_NAVI_RIGHT);
-
-	SETTING(Qt::Key_Q, TeTypes::CMDID_SYSTEM_NAVI_DRIVEBAR);
+	SETTING(Qt::Key_L, TeTypes::CMDID_SYSTEM_NAVI_DRIVEBAR);
 	SETTING(Qt::Key_Tab, TeTypes::CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_LR);
 	SETTING(Qt::CTRL | Qt::Key_Tab, TeTypes::CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE);
+	SETTING(Qt::Key_J, TeTypes::CMDID_SYSTEM_NAVI_DOWN);
+	SETTING(Qt::Key_K, TeTypes::CMDID_SYSTEM_NAVI_UP);
 
 
 #undef SETTING	

@@ -93,7 +93,7 @@ int TeTextSyntax::addSyntaxRegion(const SyntaxRegion& region)
 
 bool TeTextSyntax::removeSyntaxKeywords(int index)
 {
-    if (index < m_keywords.size()) {
+    if (index >= 0 && index < m_keywords.size()) {
         m_keywords.removeAt(index);
         return true;
     }
@@ -102,7 +102,7 @@ bool TeTextSyntax::removeSyntaxKeywords(int index)
 
 bool TeTextSyntax::removeSyntaxRegex(int index)
 {
-    if (index < m_regexes.size()) {
+    if (index >= 0 && index < m_regexes.size()) {
         m_regexes.removeAt(index);
         return true;
     }
@@ -111,8 +111,35 @@ bool TeTextSyntax::removeSyntaxRegex(int index)
 
 bool TeTextSyntax::removeSyntaxRegion(int index)
 {
-    if (index < m_regions.size()) {
+    if (index >= 0 && index < m_regions.size()) {
         m_regions.removeAt(index);
+        return true;
+    }
+    return false;
+}
+
+bool TeTextSyntax::moveSyntaxKeywords(int fromIndex, int toIndex)
+{
+    if (fromIndex >= 0 && fromIndex < m_keywords.size() && toIndex >= 0 && toIndex < m_keywords.size()) {
+        m_keywords.move(fromIndex, toIndex);
+        return true;
+    }
+    return false;
+}
+
+bool TeTextSyntax::moveSyntaxRegex(int fromIndex, int toIndex)
+{
+    if (fromIndex >= 0 && fromIndex < m_regexes.size() && toIndex >= 0 && toIndex < m_regexes.size()) {
+        m_regexes.move(fromIndex, toIndex);
+        return true;
+    }
+    return false;
+}
+
+bool TeTextSyntax::moveSyntaxRegion(int fromIndex, int toIndex)
+{
+    if (fromIndex >= 0 && fromIndex < m_regions.size() && toIndex >= 0 && toIndex < m_regions.size()) {
+        m_regions.move(fromIndex, toIndex);
         return true;
     }
     return false;

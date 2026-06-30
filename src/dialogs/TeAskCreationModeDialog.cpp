@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 #include "TeAskCreationModeDialog.h"
+#include "TeSettings.h"
 
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -43,6 +44,8 @@ TeAskCreationModeDialog::TeAskCreationModeDialog(QWidget *parent)
 	//Helpボタン削除
 	Qt::WindowFlags flags = windowFlags();
 	setWindowFlags(flags & ~Qt::WindowContextHelpButtonHint);
+	const int minimumWidth = qMax(300, TeSettings::dialogMinimumWidth());
+	setMinimumWidth(minimumWidth);
 
 	QVBoxLayout* layout = new QVBoxLayout();
 
@@ -55,7 +58,7 @@ TeAskCreationModeDialog::TeAskCreationModeDialog(QWidget *parent)
 	mp_path = new QLineEdit();
 	mp_path->setReadOnly(true);
 	mp_path->setCursorPosition(0);
-	mp_path->setMinimumWidth(300);
+	mp_path->setMinimumWidth(minimumWidth);
 	flayout->addRow(tr("Path:"), mp_path);
 
 

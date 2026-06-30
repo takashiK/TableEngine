@@ -51,6 +51,7 @@
 TeMenuSetting::TeMenuSetting(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	QVBoxLayout* layout = new QVBoxLayout();
 	QHBoxLayout*  hbox = new QHBoxLayout();
 
@@ -394,6 +395,7 @@ void TeMenuSetting::editEntryName(QTreeWidgetItem * item)
 	QInputDialog dlg(this);
 	dlg.setLabelText(tr("Enter New name."));
 	dlg.setTextValue(item->data(MENU_REGISTER, Qt::DisplayRole).toString());
+	dlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
 	if (dlg.exec() == QInputDialog::Accepted) {
 		QString name = dlg.textValue();
 		item->setData(MENU_DISPLAY, Qt::DisplayRole, name.replace("&", ""));
@@ -429,6 +431,7 @@ QTreeWidgetItem * TeMenuSetting::createFolderItem()
 {
 	QInputDialog dlg(this);
 	dlg.setLabelText(tr("Enter Folder name."));
+	dlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
 	if (dlg.exec() == QInputDialog::Accepted) {
 		QTreeWidgetItem* item = createEntryItem(dlg.textValue(), TeTypes::CMDID_SPECIAL_FOLDER);
 		return item;

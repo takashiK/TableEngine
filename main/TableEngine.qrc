@@ -23,7 +23,6 @@
         <file alias="copy.png">Resources/icon/iconmonstr-copy-9-64.png</file>
         <file alias="paste.png">Resources/icon/iconmonstr-clipboard-2-64.png</file>
         <file alias="cut.png">Resources/icon/iconmonstr-cut-4-64.png</file>
-        <file alias="view.png">Resources/icon/iconmonstr-file-14-64.png</file>
         <file alias="binary.png">Resources/icon/iconmonstr-file-23-64.png</file>
         <file alias="command.png">Resources/icon/iconmonstr-terminal-lined-64.png</file>
         <file alias="exit.png">Resources/icon/iconmonstr-x-mark-square-multiple-filled-64.png</file>
@@ -73,9 +72,13 @@
         <file alias="sortName.png">Resources/icon/iconmonstr-id-card-5-64.png</file>
         <file alias="folder_up.png">Resources/icon/iconmonstr-arrow_R-60-240.png</file>
         <file alias="application.ico">Resources/app_icon/table_engine.ico</file>
+        <file alias="view.png">Resources/icon/iconmonstr-file-24-64.png</file>
     </qresource>
     <qresource prefix="/Style">
         <file alias="stylesheet_dark.css">Resources/stylesheet/stylesheet_dark.css</file>
         <file alias="stylesheet_light.css">Resources/stylesheet/stylesheet_light.css</file>
+    </qresource>
+    <qresource prefix="/Schema">
+        <file alias="text_highlight.json">Resources/schema/text_highlight_schema.json</file>
     </qresource>
 </RCC>

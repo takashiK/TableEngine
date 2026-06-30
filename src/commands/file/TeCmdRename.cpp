@@ -21,10 +21,13 @@
 #include "TeCmdRename.h"
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
+#include "widgets/TeArchiveFolderView.h"
+#include "TeSettings.h"
 
 #include <QStringList>
 #include <QInputDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 
 /**
  * @file TeCmdRename.cpp
@@ -66,15 +69,57 @@ bool TeCmdRename::execute(TeViewStore* p_store)
 {
 	QStringList paths;
 	if (getSelectedItemList(p_store, &paths)) {
+		TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+		if (p_arc != nullptr) {
+			// Renaming inside an archive is only supported in writable mode; it
+			// updates the staged entry keys rather than touching the filesystem.
+			if (p_arc->isReadOnly()) {
+				return true;
+			}
+			for (const auto& path : paths) {
+				const int slash = path.lastIndexOf('/');
+				const QString baseName = (slash >= 0) ? path.mid(slash + 1) : path;
+				bool ok;
+				QInputDialog inputDlg(p_store->mainWindow());
+				inputDlg.setWindowTitle(QObject::tr("Rename"));
+				inputDlg.setLabelText(QObject::tr("New name"));
+				inputDlg.setTextValue(baseName);
+				inputDlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
+				ok = (inputDlg.exec() == QDialog::Accepted);
+				const QString newName = inputDlg.textValue();
+				if (newName.isEmpty() || !ok) {
+					return true;
+				}
+				if (baseName != newName) {
+					p_arc->renameEntry(path, newName);
+				}
+			}
+			return true;
+		}
+
 		for (const auto& path : paths) {
 			QFileInfo info(path);
 			bool ok;
-			QString newName = QInputDialog::getText(p_store->mainWindow(), QObject::tr("Rename"), QObject::tr("New name"), QLineEdit::Normal,  info.fileName(),&ok);
+			QInputDialog inputDlg(p_store->mainWindow());
+			inputDlg.setWindowTitle(QObject::tr("Rename"));
+			inputDlg.setLabelText(QObject::tr("New name"));
+			inputDlg.setTextValue(info.fileName());
+			inputDlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
+			ok = (inputDlg.exec() == QDialog::Accepted);
+			const QString newName = inputDlg.textValue();
 			if (newName.isEmpty() || !ok) {
 				return true;
 			}
 			if (info.fileName() != newName) {
-				QFile::rename(path, info.absolutePath() + "/" + newName);
+				bool result = QFile::rename(path, info.absolutePath() + "/" + newName);
+				if (!result) {
+					QMessageBox msg(p_store->mainWindow());
+					msg.setWindowTitle(QObject::tr("Rename"));
+					msg.setText(QObject::tr("Failed to rename file."));
+					msg.setInformativeText(path);
+					msg.setIcon(QMessageBox::Warning);
+					msg.exec();
+				}
 			}
 		}
 	}

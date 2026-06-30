@@ -1,6 +1,6 @@
 #include "TePathListDialog.h"
 #include "dialogs/TeFilePathDialog.h"
-
+#include "TeSettings.h"
 #include <QLabel>
 #include <QListView>
 #include <QStringListModel>
@@ -21,6 +21,7 @@
 TePathListDialog::TePathListDialog(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	QVBoxLayout* layout = new QVBoxLayout();
 	QHBoxLayout* hLayout = new QHBoxLayout();
 

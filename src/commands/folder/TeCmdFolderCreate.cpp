@@ -20,11 +20,13 @@
 
 #include "TeCmdFolderCreate.h"
 #include "utils/TeUtils.h"
+#include "TeSettings.h"
 
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeFileListView.h"
 #include "widgets/TeFileTreeView.h"
+#include "widgets/TeArchiveFolderView.h"
 
 #include <QFileSystemModel>
 #include <QFileInfo>
@@ -76,6 +78,22 @@ QFlags<TeTypes::CmdType> TeCmdFolderCreate::type()
 bool TeCmdFolderCreate::execute(TeViewStore * p_store)
 {
 
+	TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+
+	if (p_arc != nullptr) {
+		// Creating a folder inside an archive is only supported in writable mode;
+		// it stages an empty directory entry under the current virtual path.
+		if (!p_arc->isReadOnly()) {
+			QInputDialog dlg(p_store->mainWindow());
+			dlg.setLabelText(QInputDialog::tr("Enter Folder name."));
+			dlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
+			if (dlg.exec() == QInputDialog::Accepted && !dlg.textValue().isEmpty()) {
+				p_arc->makeDirectory(p_arc->currentPath(), dlg.textValue());
+			}
+		}
+		return true;
+	}
+
 	TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
 
 	if (p_folder != nullptr) {
@@ -98,6 +116,7 @@ bool TeCmdFolderCreate::execute(TeViewStore * p_store)
 		if (!path.isEmpty()) {
 			QInputDialog dlg(p_store->mainWindow());
 			dlg.setLabelText(QInputDialog::tr("Enter Folder name."));
+			dlg.setMinimumWidth(TeSettings::dialogMinimumWidth());
 			if (dlg.exec() == QInputDialog::Accepted) {
 				QDir dir;
 				if (!dir.mkdir(path + "/" + dlg.textValue())) {

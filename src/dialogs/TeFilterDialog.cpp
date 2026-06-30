@@ -1,4 +1,5 @@
 #include "TeFilterDialog.h"
+#include "TeSettings.h"
 
 #include <QLineEdit>
 #include <QLabel>
@@ -17,6 +18,7 @@
 TeFilterDialog::TeFilterDialog(QWidget *parent)
 	: QDialog(parent)
 {
+	setMinimumWidth(TeSettings::dialogMinimumWidth());
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 	QHBoxLayout* lineLayout = new QHBoxLayout();
 

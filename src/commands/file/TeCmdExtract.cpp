@@ -19,18 +19,20 @@
 ****************************************************************************/
 
 #include "TeCmdExtract.h"
-#include "TeViewStore.h"
-#include "utils/TeUtils.h"
-#include "widgets/TeFileFolderView.h"
-#include "dialogs/TeFilePathDialog.h"
-#include "dialogs/TeAskCreationModeDialog.h"
 
-#include "utils/TeArchive.h"
-
+#include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QProgressDialog>
-#include <QDir>
+
+#include "TeViewStore.h"
+#include "dialogs/TeAskCreationModeDialog.h"
+#include "dialogs/TeFilePathDialog.h"
+#include "dialogs/TePasswordDialog.h"
+#include "utils/TeArchive.h"
+#include "utils/TeUtils.h"
+#include "widgets/TeFileFolderView.h"
+#include "widgets/TeArchiveFolderView.h"
 
 /**
  * @file TeCmdExtract.cpp
@@ -38,130 +40,87 @@
  * @ingroup commands
  */
 
-TeCmdExtract::TeCmdExtract()
-{
+TeCmdExtract::TeCmdExtract() {
 }
 
-
-TeCmdExtract::~TeCmdExtract()
-{
+TeCmdExtract::~TeCmdExtract() {
 }
 
-bool TeCmdExtract::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
-{
-	NOT_USED(p_store);
-	NOT_USED(p_cmdParam);
-	return false;
+bool TeCmdExtract::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam) {
+    NOT_USED(p_store);
+    NOT_USED(p_cmdParam);
+    return false;
 }
 
-QFlags<TeTypes::CmdType> TeCmdExtract::type()
-{
-	return QFlags<TeTypes::CmdType>(
-		TeTypes::CMD_TRIGGER_NORMAL
-		// TeTypes::CMD_TRIGGER_SELECT
+QFlags<TeTypes::CmdType> TeCmdExtract::type() {
+    return QFlags<TeTypes::CmdType>(
+        TeTypes::CMD_TRIGGER_NORMAL
+        // TeTypes::CMD_TRIGGER_SELECT
 
-		| TeTypes::CMD_CATEGORY_TREE
-		| TeTypes::CMD_CATEGORY_LIST
-		| TeTypes::CMD_CATEGORY_OTHER
+        | TeTypes::CMD_CATEGORY_TREE | TeTypes::CMD_CATEGORY_LIST | TeTypes::CMD_CATEGORY_OTHER
 
-		| TeTypes::CMD_TARGET_FILE
-		| TeTypes::CMD_TARGET_DIRECTORY
-	);
+        | TeTypes::CMD_TARGET_FILE | TeTypes::CMD_TARGET_DIRECTORY);
 }
 
 /**
-* Copy selected files to target directory
-*/
-bool TeCmdExtract::execute(TeViewStore* p_store)
-{
-	TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
+ * Copy selected files to target directory
+ */
+bool TeCmdExtract::execute(TeViewStore* p_store) {
+    QStringList paths;
 
-	if (p_folder != nullptr) {
+    if (getSelectedItemList(p_store, &paths)) {
 
-		QStringList paths;
+		TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
+        if (p_folder != nullptr) {
+            // get distination folder.
+            QStringList extraFlags = {QObject::tr("Create new folder by archive file name.")};
 
-		if (getSelectedItemList(p_store, &paths)) {
-			//get distination folder.
-			QStringList extraFlags = {QObject::tr("Create new folder by archive file name.")};
+            TeFilePathDialog dlg(p_store->mainWindow(), extraFlags);
+            dlg.setExtraFlag(0, true);
 
-			TeFilePathDialog dlg(p_store->mainWindow(),extraFlags);
-			dlg.setExtraFlag(0, true);
+            dlg.setCurrentPath(p_folder->currentPath());
+            dlg.setFavorites(getFavorites());
+            dlg.setHistory(p_folder->getPathHistory());
 
-			dlg.setCurrentPath(p_folder->currentPath());
-			dlg.setWindowTitle(TeFilePathDialog::tr("Extract to"));
-			if (dlg.exec() == QDialog::Accepted) {
-				if (dlg.targetPath().isEmpty()) {
-					QMessageBox msg(p_store->mainWindow());
-					msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-					msg.setText(QObject::tr("Faild ExtractTo Function.\nTarget path is not set."));
-					msg.exec();
-				}
-				else {
-					extractItems(p_store,paths, dlg.targetPath(),dlg.getExtraFlag(0));
+            dlg.setWindowTitle(TeFilePathDialog::tr("Extract to"));
+            if (dlg.exec() == QDialog::Accepted) {
+                if (dlg.targetPath().isEmpty()) {
+                    QMessageBox msg(p_store->mainWindow());
+                    msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
+                    msg.setText(QObject::tr("Faild ExtractTo Function.\nTarget path is not set."));
+                    msg.exec();
+                } else {
+                    extractArchives(p_store, paths, dlg.targetPath(), dlg.getExtraFlag(0));
+                }
+            }
+        }
+		else{
+			TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+			if (p_arc != nullptr) {
+				// get distination folder.
+				TeFilePathDialog dlg(p_store->mainWindow());
+
+				QFileInfo info(p_arc->archivePath());
+				dlg.setCurrentPath(info.absolutePath());
+				dlg.setFavorites(getFavorites());
+				dlg.setTargetPath(info.absolutePath());
+
+				dlg.setWindowTitle(TeFilePathDialog::tr("Extract to"));
+				if (dlg.exec() == QDialog::Accepted) {
+					if (dlg.targetPath().isEmpty()) {
+						QMessageBox msg(p_store->mainWindow());
+						msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
+						msg.setText(QObject::tr("Faild ExtractTo Function.\nTarget path is not set."));
+						msg.exec();
+					} else {
+						QString targetPath = dlg.targetPath();
+						QString basePath = p_arc->currentPath();
+						extractArchiveSelectionToPath(p_store, basePath, paths, targetPath);
+					}
 				}
 			}
 		}
-	}
+    }
 
-	return true;
-}
-
-void TeCmdExtract::extractItems(TeViewStore* p_store, const QStringList & list, const QString & targetPath, bool createArchiveFolder)
-{
-	QDir dir;
-
-	bool bSuccess = true;
-
-	QFileInfo targetInfo(targetPath);
-
-	//target confirm
-	if (targetInfo.exists()) {
-		if (targetInfo.isDir()) {
-			//Acceptale target
-		}
-		else {
-			//Target is not directory
-			bSuccess = false;
-		}
-	}
-	else {
-		//directory is not found.
-		bSuccess = false;
-	}
-
-	if (bSuccess) {
-		//start extract
-		QProgressDialog progress(QObject::tr(""), QObject::tr("Cancel"), 0, list.size(), p_store->mainWindow());
-		progress.setWindowTitle(QObject::tr("Extract"));
-		progress.setWindowModality(Qt::WindowModal);
-
-
-		for (int i = 0; i < list.size(); i++) {
-			QString basePath = targetPath;
-			QFileInfo info(list[i]);
-			if (createArchiveFolder) {
-				basePath += QDir::separator() + info.baseName();
-			}
-			TeArchive::Reader reader(list[i]);
-
-			QString targetInfo = QObject::tr("Extact ") + QString::asprintf("(%d/%d) : ",i,list.size()) + info.fileName() + "\n";
-
-			QObject::connect(&reader, &TeArchive::Reader::maximumValue, &progress, &QProgressDialog::setMaximum);
-			QObject::connect(&reader, &TeArchive::Reader::valueChanged, &progress, &QProgressDialog::setValue);
-			QObject::connect(&reader, &TeArchive::Reader::currentFileInfoChanged, [&progress,&targetInfo](const TeFileInfo& info) {
-				progress.setLabelText(targetInfo + info.path.right(30));
-				});
-			QObject::connect(&reader, &TeArchive::Reader::finished, [&progress]() { progress.setValue(progress.maximum()); });
-			QObject::connect(&progress, &QProgressDialog::canceled, &reader, &TeArchive::Reader::cancel);
-
-			bSuccess = reader.extractAll(basePath);
-		}
-	}
-
-	if (!bSuccess) {
-		QMessageBox msg(p_store->mainWindow());
-		msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-		msg.setText(QObject::tr("Extract to following path failed.") + QString("\n") + targetPath);
-		msg.exec();
-	}
+    return true;
 }

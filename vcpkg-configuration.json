@@ -1,0 +1,6 @@
+{
+  "$comment": "Repo-local overlay so libarchive is built with ZIP AES-256 write encryption (ENABLE_CNG=ON) without modifying the support/vcpkg submodule.",
+  "overlay-ports": [
+    "./vcpkg-overlays"
+  ]
+}

@@ -74,6 +74,8 @@ graph TD
 | `QHexView` | 外部ライブラリ。バイナリデータのヘキサダンプ表示ウィジェット |
 | `QHexDocument` | `QHexView` のデータモデル |
 
+詳細は [viewer/TeBinaryViewer.md](viewer/TeBinaryViewer.md) を参照してください。
+
 ---
 
 ## Picture Viewer (TePictureViewer)

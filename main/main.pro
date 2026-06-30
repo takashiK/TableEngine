@@ -52,7 +52,7 @@ win32-msvc {
         QMAKE_POST_LINK +=$$quote(cmd /c copy /y $${FILE} $${COPYTODIR}$$escape_expand(\n\t))
     }
 
-    COPYDIRS = Resources/container Resources/highlight
+    COPYDIRS = Resources/highlight
 
     for(DIR,COPYDIRS){
         DIRNAME = $${DIR}

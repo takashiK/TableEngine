@@ -15,6 +15,7 @@ class TeTextSyntaxLoader;
 class TeDocument;
 
 class QTextEdit;
+class QCloseEvent;
 
 class TeDocViewer :
     public QMainWindow
@@ -32,6 +33,7 @@ public slots:
     void findNext(const QString& text, bool caseSensitive, bool regex, bool backward=false);
 
 protected:
+    void closeEvent(QCloseEvent* event) override;
     void textViewMode();
     void markupMode();
     void showFindDialog();
@@ -57,5 +59,6 @@ private:
     QList<QAction*> mp_textActions;
     QDialog* mp_findDialog = nullptr;
     QDialog* mp_gotoLineDialog = nullptr;
+    QString m_textCodec;
 };
 

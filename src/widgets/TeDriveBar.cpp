@@ -247,7 +247,7 @@ void TeDriveBar::keyPressEvent(QKeyEvent *event)
 {
 	QString s = event->text().toUpper();
 
-	if (s.isEmpty() || !s[0].isLetter())
+	if (s.isEmpty() || (!s[0].isLetter() && !s[0].isNumber()))
 		return QToolBar::keyPressEvent(event);
 	
 	for (QAction* action : actions()) {

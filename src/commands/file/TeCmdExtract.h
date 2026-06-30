@@ -42,7 +42,5 @@ public:
 
 protected:
 	virtual bool execute(TeViewStore* p_store);
-
-	void extractItems(TeViewStore* p_store, const QStringList& list, const QString& targetPath, bool createArchiveFolder);
 };
 

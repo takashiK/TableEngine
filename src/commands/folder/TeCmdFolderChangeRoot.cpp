@@ -96,10 +96,13 @@ bool TeCmdFolderChangeRoot::execute(TeViewStore* p_store)
 	}
 	else {
 		TeFilePathDialog dlg(p_store->mainWindow());
+		dlg.setFavorites(getFavorites());
+
 		//initial target is current value.
 		TeFolderView* p_folder = p_store->getFolderView(tabPos);
 		if (p_folder && p_folder->getType() == TeTypes::WT_FOLDERVIEW) {
 			dlg.setCurrentPath(p_folder->currentPath());
+			dlg.setHistory(p_folder->getPathHistory());
 		}
 		dlg.setWindowTitle(TeFilePathDialog::tr("Change Root path to"));
 		if (dlg.exec() == QDialog::Accepted) {

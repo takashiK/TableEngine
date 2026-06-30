@@ -47,6 +47,7 @@ QList<int> TeKeyMap::assignableKeys()
 	}
 
 	list << Qt::Key_Escape << Qt::Key_Backspace << Qt::Key_Delete;
+	list << Qt::Key_Home << Qt::CTRL+Qt::Key_Home << Qt::Key_End << Qt::CTRL+Qt::Key_End;
     list << Qt::Key_Tab << (Qt::CTRL + Qt::Key_Tab);
 
 	return list;

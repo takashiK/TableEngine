@@ -19,10 +19,12 @@
 ****************************************************************************/
 
 #include "TeCmdPaste.h"
-#include "platform/platform_util.h"
+#include "platform/TeFileOperationManager.h"
 #include "TeViewStore.h"
 #include "widgets/TeFileFolderView.h"
+#include "widgets/TeArchiveFolderView.h"
 #include "utils/TeUtils.h"
+#include "platform/platform_util.h"
 
 #include <QGuiApplication>
 #include <QClipboard>
@@ -73,23 +75,41 @@ bool TeCmdPaste::execute(TeViewStore* p_store)
 	const QClipboard* clipboard = QGuiApplication::clipboard();
 	const QMimeData* mime = clipboard->mimeData();
 
-	if (mime != nullptr && mime->hasUrls() && !dstPath.isEmpty()) {
-		QList<QUrl> urls = mime->urls();
-		QStringList paths;
-		for (const auto& url : urls) {
-			if (url.isLocalFile()) {
-				paths.append(url.toLocalFile());
-			}
-		}
+	if (mime == nullptr || !mime->hasUrls()) {
+		return true;
+	}
 
-		if (!paths.isEmpty()) {
-			if (isMoveAction(mime)) {
-				moveFiles(paths, dstPath);
-			}
-			else {
-				copyFiles(paths, dstPath);
-			}
+	QList<QUrl> urls = mime->urls();
+	QStringList paths;
+	for (const auto& url : urls) {
+		if (url.isLocalFile()) {
+			paths.append(url.toLocalFile());
 		}
+	}
+	if (paths.isEmpty()) {
+		return true;
+	}
+
+	TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+	if (p_arc != nullptr) {
+		// Paste into an archive is only supported in writable mode; it stages
+		// the source files instead of touching the filesystem. The destination
+		// may be the archive root, where the virtual path is empty.
+		if (!p_arc->isReadOnly()) {
+			p_arc->stageEntries(dstPath, paths);
+		}
+		return true;
+	}
+
+	if (dstPath.isEmpty()) {
+		return true;
+	}
+
+	if (isMoveAction(mime)) {
+		p_store->fileOperationManager()->moveFiles(paths, dstPath);
+	}
+	else {
+		p_store->fileOperationManager()->copyFiles(paths, dstPath);
 	}
 	return true;
 }
