@@ -20,6 +20,7 @@
 
 #include "TeDriveBar.h"
 #include "platform/platform_util.h"
+#include "platform/TeNativeEvent.h"
 
 #include <QFileIconProvider>
 #include <QDir>
@@ -57,13 +58,14 @@ TeDriveBar::TeDriveBar(QWidget *parent)
 		act->setData(QDir::homePath());
 		addAction(act);
 		connect(act, &QAction::triggered, [this, act](bool) { selectDrive(act->data().toString()); });
-
-		mp_driveStart = act;
 	}
 
 	updateDrive(true);
 
-	mp_quickStart = addSeparator();
+	//Refresh drive buttons whenever the OS reports a drive mount/unmount (e.g. USB insert/removal).
+	connect(getNativeEvent(), &TeNativeEvent::mountStateChanged, this, &TeDriveBar::updateDrive);
+
+	mp_driveStart = addSeparator();
 
 	loadQuickAccesses();
 
@@ -226,7 +228,7 @@ void TeDriveBar::updateDrive(bool state)
 		QAction* act = new QAction(provider.icon(QFileInfo(drive.rootPath())), drive.rootPath().left(1));
 		act->setData(drive.rootPath());
 		act->setToolTip(name);
-		addAction(act);
+		insertAction(mp_driveStart, act);
 		connect(act, &QAction::triggered, [this, act](bool) { selectDrive(act->data().toString()); });
 		m_driveActions.append(act);
 	}
