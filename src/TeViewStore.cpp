@@ -877,6 +877,11 @@ void TeViewStore::deleteFolderView(TeFolderView * view)
 {
 	if (view == nullptr) return;
 
+	// total count of tabs is 1, then don't delete it. because at least one tab is needed.
+	if (mp_tab[TAB_LEFT]->count() + mp_tab[TAB_RIGHT]->count() <= 1) {
+		return;
+	}
+
 	TeFolderView* folder = currentFolderView();
 	int index = tabPlace(view);
 
@@ -909,9 +914,11 @@ void TeViewStore::deleteFolderView(TeFolderView * view)
 	if (mp_tab[TAB_RIGHT]->count() == 0)
 		mp_tab[TAB_RIGHT]->setHidden(true);
 
-	if (!mp_tab[TAB_RIGHT]->isHidden())
+	if (!mp_tab[TAB_RIGHT]->isHidden()){
 		mp_tab[TAB_LEFT]->setTabBarAutoHide(false);
-
+	}else{
+		mp_tab[TAB_LEFT]->setTabBarAutoHide(true);
+	}
 	//target new current folder if current folder is deleted.
 	if (isCurrentDelete) {
 		if (mp_tab[index]->count() > 0) {
