@@ -79,6 +79,12 @@ SETTING_STR(SETTING_GENERAL_InitialFolder, "general/initial_folder");
 SETTING_STR(SETTING_GENERAL_ConfirmBeforeDelete, "general/confirm_before_delete");
 SETTING_STR(SETTING_GENERAL_CopyToOppositePane, "general/copy_to_opposite_pane");
 
+SETTING_STR(SETTING_COMMAND, "command");
+SETTING_STR(SETTING_COMMAND_Shell, "command/shell");
+SETTING_STR(SETTING_COMMAND_ShellArg, "command/shellarg");
+SETTING_STR(SETTING_COMMAND_ExecuteWithShell, "command/isExecuteWithShell");
+SETTING_STR(SETTING_COMMAND_ExecuteWithTerminal, "command/isExecuteWithTerminal");
+
 SETTING_STR(SETTING_LAYOUT, "layout");
 SETTING_STR(SETTING_LAYOUT_WINDOW_SIZE_MODE, "layout/window_size_mode");
 SETTING_STR(SETTING_LAYOUT_WINDOW_FIXED_WIDTH, "layout/window_fixed_width");

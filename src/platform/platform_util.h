@@ -70,3 +70,7 @@ extern void setCopyAction(QMimeData* mime);
 
 //NativeEventFilter
 extern TeNativeEvent* getNativeEvent();
+
+//shell
+// OS-specific fallback shell command, used when the SHELL environment variable is not set.
+extern QString getDefaultShellCommand();

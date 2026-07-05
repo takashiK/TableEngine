@@ -20,6 +20,7 @@
 
 #include "TeCmdRunCommand.h"
 #include "TeViewStore.h"
+#include "TeSettings.h"
 #include "utils/TeUtils.h"
 #include "utils/TeToolCommand.h"
 #include "dialogs/TeCommandInputDialog.h"
@@ -30,6 +31,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QStringDecoder>
+#include <QSettings>
 
 /**
  * @file TeCmdRunCommand.cpp
@@ -103,24 +105,28 @@ bool TeCmdRunCommand::execute(TeViewStore* p_store)
 		process.setEnvironment(QProcess::systemEnvironment());
 		process.setWorkingDirectory(TeToolCommand::workingDirectory(p_store));
 
-		if (shell) {
-			// execute with shell
-			QStringList args = QProcess::splitCommand(command);
-			if (!args.isEmpty()){
-				args.prepend("/c");
-				process.setProgram("cmd.exe");
+		// Resolve the configured shell only when requested. If "shell" is enabled
+		// but no shell command is configured, fall back to direct execution
+		// (same behaviour as shell == false).
+		QSettings settings;
+		const QString shellCommand = shell ? settings.value(SETTING_COMMAND_Shell).toString() : QString();
+
+		QStringList args = QProcess::splitCommand(command);
+		if (!args.isEmpty()) {
+			if (!shellCommand.isEmpty()) {
+				// execute with the configured shell
+				const QString shellArg = settings.value(SETTING_COMMAND_ShellArg).toString();
+				if (!shellArg.isEmpty()) {
+					args.prepend(shellArg);
+				}
+				process.setProgram(shellCommand);
 				process.setArguments(args);
-			}
-		}else{
-			// execute without shell
-			QStringList args = QProcess::splitCommand(command);
-			if (!args.isEmpty()) {
+			} else {
+				// execute without shell
 				process.setProgram(args.takeFirst());
 				process.setArguments(args);
 			}
 		}
-
-		qDebug() << "Run command:" << process.program() << process.arguments();
 
 		process.start(QProcess::ReadOnly);
 

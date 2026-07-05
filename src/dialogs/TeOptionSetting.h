@@ -54,6 +54,7 @@ public slots:
 
 protected:
 	QWidget* createPageGeneral();
+	QWidget* createPagesCommand();
 	QWidget* createPageFolder();
 	QWidget* createPageWindow();
 	QWidget* createPagePanel();
