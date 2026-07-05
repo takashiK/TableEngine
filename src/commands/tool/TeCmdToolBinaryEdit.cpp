@@ -19,7 +19,11 @@
 ****************************************************************************/
 
 #include "TeCmdToolBinaryEdit.h"
+#include "TeSettings.h"
 #include "utils/TeUtils.h"
+#include "utils/TeToolCommand.h"
+
+#include <QSettings>
 
 /**
  * @file TeCmdToolBinaryEdit.cpp
@@ -61,5 +65,10 @@ QFlags<TeTypes::CmdType> TeCmdToolBinaryEdit::type()
 
 bool TeCmdToolBinaryEdit::execute(TeViewStore* p_store)
 {
+	QSettings settings;
+	const QString command = settings.value(SETTING_TOOLS_BINARY_EDIT).toString();
+
+	TeToolCommand::runCommand(p_store, command, false, false);
+
 	return true;
 }

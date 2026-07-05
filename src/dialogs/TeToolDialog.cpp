@@ -14,6 +14,7 @@
 #include <QScrollArea>
 #include <QFrame>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -75,7 +76,9 @@ QWidget* TeToolDialog::createPageGeneral()
 		layout->addWidget(argsEdit, row + 1, 1, 1, 2);
 
 		connect(browseButton, &QToolButton::clicked, this, [this, pathEdit]() {
-			const QString path = QFileDialog::getOpenFileName(this, tr("Select Command"));
+			const QString currentPath = pathEdit->text().trimmed();
+			const QString startDir = currentPath.isEmpty() ? QString() : QFileInfo(currentPath).absolutePath();
+			const QString path = QFileDialog::getOpenFileName(this, tr("Select Command"), startDir);
 			if (path.isEmpty()) {
 				return; // Cancel: leave the field untouched.
 			}
@@ -155,7 +158,9 @@ QWidget* TeToolDialog::createUserEntry(const ToolSetting& initial)
     browseButton->setText("...");
     row1->addWidget(browseButton);
     connect(browseButton, &QToolButton::clicked, this, [this, commandEdit]() {
-        const QString path = QFileDialog::getOpenFileName(this, tr("Select Command"));
+        const QString currentPath = commandEdit->text().trimmed();
+        const QString startDir = currentPath.isEmpty() ? QString() : QFileInfo(currentPath).absolutePath();
+        const QString path = QFileDialog::getOpenFileName(this, tr("Select Command"), startDir);
         if (path.isEmpty()) {
             return; // Cancel: leave the field untouched.
         }

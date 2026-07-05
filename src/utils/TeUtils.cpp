@@ -104,6 +104,21 @@ bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths)
 	return (p_paths != nullptr) && !p_paths->isEmpty();
 }
 
+bool getSelectedFileList(TeViewStore* p_store, QStringList* p_paths)
+{
+	if (p_paths == nullptr) {
+		return false;
+	}
+	QStringList allItems;
+	getSelectedItemList(p_store, &allItems);
+	for (const QString& path : allItems) {
+		if (!QFileInfo(path).isDir()) {
+			p_paths->append(path);
+		}
+	}
+	return !p_paths->isEmpty();
+}
+
 QString getCurrentItem(TeViewStore* p_store)
 {
 	TeFolderView* p_folder = p_store->currentFolderView();

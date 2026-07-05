@@ -33,6 +33,14 @@ enum TeFileType {
 bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths);
 
 /**
+ * @brief Same as getSelectedItemList(), but excludes directories.
+ * @param p_store  The application-wide TeViewStore.
+ * @param p_paths  Output list populated with absolute file paths (directories skipped).
+ * @return true if at least one file path was collected.
+ */
+bool getSelectedFileList(TeViewStore* p_store, QStringList* p_paths);
+
+/**
  * @brief Returns the path of the focused (current) item in the active list view.
  * @param p_store The application-wide TeViewStore.
  * @return Absolute path string, or an empty string if no item is current.

@@ -20,18 +20,9 @@
 
 #include "TeCmdRunCommand.h"
 #include "TeViewStore.h"
-#include "TeSettings.h"
 #include "utils/TeUtils.h"
 #include "utils/TeToolCommand.h"
 #include "dialogs/TeCommandInputDialog.h"
-
-#include <QProcess>
-#include <QMessageBox>
-#include <QPlainTextEdit>
-#include <QByteArray>
-#include <QString>
-#include <QStringDecoder>
-#include <QSettings>
 
 /**
  * @file TeCmdRunCommand.cpp
@@ -96,65 +87,8 @@ bool TeCmdRunCommand::execute(TeViewStore* p_store)
 		}
 	}
 
-	if (!command.isEmpty()) {
-		command = TeToolCommand::expandMacros(command, p_store);
-
-		//run command
-		QProcess process;
-
-		process.setEnvironment(QProcess::systemEnvironment());
-		process.setWorkingDirectory(TeToolCommand::workingDirectory(p_store));
-
-		// Resolve the configured shell only when requested. If "shell" is enabled
-		// but no shell command is configured, fall back to direct execution
-		// (same behaviour as shell == false).
-		QSettings settings;
-		const QString shellCommand = shell ? settings.value(SETTING_COMMAND_Shell).toString() : QString();
-
-		QStringList args = QProcess::splitCommand(command);
-		if (!args.isEmpty()) {
-			if (!shellCommand.isEmpty()) {
-				// execute with the configured shell
-				const QString shellArg = settings.value(SETTING_COMMAND_ShellArg).toString();
-				if (!shellArg.isEmpty()) {
-					args.prepend(shellArg);
-				}
-				process.setProgram(shellCommand);
-				process.setArguments(args);
-			} else {
-				// execute without shell
-				process.setProgram(args.takeFirst());
-				process.setArguments(args);
-			}
-		}
-
-		process.start(QProcess::ReadOnly);
-
-		if (!process.waitForStarted()) {
-			// TODO: shell variation
-			QMessageBox::critical(p_store->mainWindow(), QObject::tr("Run command"), QObject::tr("Failed to start command."));
-		}
-		else {
-			process.waitForFinished();
-			if (output) {
-				QPlainTextEdit* edit = new QPlainTextEdit();
-
-				QByteArray out = process.readAllStandardOutput();
-				QString codecName = detectTextCodec(out, QStringList({ "UTF-8","Shift_JIS","EUC-JP","ISO-2022-JP" }));
-				QStringDecoder decoder(codecName.toLatin1().constData());
-				if (!decoder.isValid()) {
-					decoder = QStringDecoder("UTF-8");
-				}
-				QString outText = decoder(out);
-
-				edit->setPlainText(outText);
-				edit->setReadOnly(true);
-				edit->setMinimumSize(600, 400);
-				p_store->registerFloatingWidget(edit);
-				edit->show();
-			}
-		}
-	}
+	TeToolCommand::runCommand(p_store, command, shell, output);
 
 	return true;
 }
+

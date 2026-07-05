@@ -66,11 +66,21 @@ namespace TeToolCommand {
 
 	/**
 	 * @brief Expands %F/%f/%M/%m/%P macros in @p commandTemplate using the current view state.
+	 *
+	 * Directories are excluded from %F/%f (the single current item) and %M/%m
+	 * (the selected item list) — see getSelectedFileList(). When the current
+	 * item is a directory, %F/%f expand to an empty string.
+	 *
 	 * @param commandTemplate Raw command string containing macros.
 	 * @param p_store         Application-wide TeViewStore used to resolve current/selected items.
+	 * @param p_hasTarget     Optional out-parameter. Set to false when the template references
+	 *                        %F/%f and/or %M/%m but no target file exists (current item is a
+	 *                        directory / nothing selected, or no non-directory items are
+	 *                        selected). Set to true otherwise (including when none of these
+	 *                        macros are used).
 	 * @return The command string with all macros replaced by actual values.
 	 */
-	QString expandMacros(const QString& commandTemplate, TeViewStore* p_store);
+	QString expandMacros(const QString& commandTemplate, TeViewStore* p_store, bool* p_hasTarget = nullptr);
 
 	/**
 	 * @brief Returns the working directory to use when executing a tool command (the %P value).
@@ -78,5 +88,33 @@ namespace TeToolCommand {
 	 * @return Absolute path of the current folder.
 	 */
 	QString workingDirectory(TeViewStore* p_store);
+
+	/**
+	 * @brief Expands and executes a command template via QProcess.
+	 *
+	 * Shared by TeCmdRunCommand, TeCmdToolFileEdit and TeCmdToolBinaryEdit. Does
+	 * nothing when @p commandTemplate is empty, or when it references
+	 * %F/%f/%M/%m but no target file exists (see expandMacros()).
+	 *
+	 * When @p shell is true, resolves SETTING_COMMAND_Shell / SETTING_COMMAND_ShellArg
+	 * from QSettings; if no shell command is configured, falls back to direct
+	 * execution (same as shell == false). When @p output is true, captures
+	 * standard output and displays it in a floating QPlainTextEdit registered
+	 * on @p p_store.
+	 *
+	 * @param p_store         Application-wide TeViewStore.
+	 * @param commandTemplate Raw command string (may contain %F/%f/%M/%m/%P macros).
+	 * @param shell           Whether to run the command through the configured shell.
+	 * @param output          Whether to capture and display standard output.
+	 */
+	void runCommand(TeViewStore* p_store, const QString& commandTemplate, bool shell, bool output);
+
+	/**
+	 * @brief Finds a user-defined tool command (tools/user/tool01..MAX_USER_TOOLS) matching
+	 *        the file's suffix.
+	 * @param path File path used to extract the suffix (extension) for matching (case-insensitive).
+	 * @return The raw command template if a match is found; otherwise an empty string.
+	 */
+	QString findUserToolCommand(const QString& path);
 
 } // namespace TeToolCommand

@@ -19,7 +19,13 @@
 ****************************************************************************/
 
 #include "TeCmdToolFileEdit.h"
+#include "TeViewStore.h"
+#include "TeSettings.h"
 #include "utils/TeUtils.h"
+#include "utils/TeToolCommand.h"
+
+#include <QSettings>
+#include <QMessageBox>
 
 /**
  * @file TeCmdToolFileEdit.cpp
@@ -61,5 +67,47 @@ QFlags<TeTypes::CmdType> TeCmdToolFileEdit::type()
 
 bool TeCmdToolFileEdit::execute(TeViewStore* p_store)
 {
+	QStringList selected;
+	if (!getSelectedFileList(p_store, &selected) || selected.isEmpty()) {
+		return true;
+	}
+	const QString targetFile = selected.first();
+
+	// 1./2. Check tools/user/tool01..MAX_USER_TOOLS for a suffix match.
+	QString command = TeToolCommand::findUserToolCommand(targetFile);
+
+	// 3. Fall back to the tool configured for the detected file type.
+	if (command.isEmpty()) {
+		QSettings settings;
+		switch (getFileType(targetFile)) {
+		case TE_FILE_TEXT:
+			command = settings.value(SETTING_TOOLS_TEXT_EDIT).toString();
+			qDebug() << "TeCmdToolFileEdit: using text editor command:" << command;
+			break;
+		case TE_FILE_IMAGE:
+			command = settings.value(SETTING_TOOLS_IMAGE_EDIT).toString();
+			break;
+		default:
+			break;
+		}
+	}
+
+	qDebug() << "TeCmdToolFileEdit: command to run:" << command;
+
+	// 4. No matching tool: confirm falling back to the binary editor.
+	if (command.isEmpty()) {
+		const int result = QMessageBox::warning(p_store->mainWindow(),
+			QObject::tr("No editor configured"),
+			QObject::tr("No editor tool is configured for this file.\nOpen with the binary editor instead?"),
+			QMessageBox::Ok, QMessageBox::Cancel);
+		if (result != QMessageBox::Ok) {
+			return true;
+		}
+		QSettings settings;
+		command = settings.value(SETTING_TOOLS_BINARY_EDIT).toString();
+	}
+
+	TeToolCommand::runCommand(p_store, command, false, false);
+
 	return true;
 }
