@@ -58,6 +58,9 @@ public:
 	/** @brief Returns the list-view pane. */
 	TeFileListView* list() override;
 
+	/** @brief Returns the TeFileInfo for the item currently focused in the list view. */
+	TeFileInfo currentFileInfo() const override;
+
 	/** @brief Not meaningful for this view; always returns an empty string. */
 	void    setRootPath(const QString& path) override;
 	/** @brief Returns an empty string (no file-system root). */

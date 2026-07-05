@@ -71,6 +71,9 @@ public:
 	/** @brief Returns the list-view pane. */
 	virtual TeFileListView* list();
 
+	/** @brief Returns the TeFileInfo for the item currently focused in the list view. */
+	virtual TeFileInfo currentFileInfo() const override;
+
 	/**
 	 * @brief Sets the root path shown by the tree.
 	 * @param path Absolute directory path.

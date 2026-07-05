@@ -96,6 +96,9 @@ public:
 	/** @brief Returns the list-view pane. */
 	virtual TeFileListView* list();
 
+	/** @brief Returns the TeFileInfo for the item currently focused in the list view. */
+	virtual TeFileInfo currentFileInfo() const override;
+
 	/**
 	 * @brief Sets the URI of the archive currently mounted.
 	 * @param path URI with URI_WRITE or URI_READ prefix followed by the

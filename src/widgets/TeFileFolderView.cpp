@@ -27,6 +27,7 @@
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
 #include "utils/TeFileFinder.h"
+#include "utils/TeFileInfo.h"
 #include "TeFileSortProxyModel.h"
 
 #include <QLayout>
@@ -102,16 +103,10 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 			setCurrentPath(mp_treeModel->filePath(sourceIndex));
 		 });
 
-	// Notify the detail panel when the focused list item changes
+	// Notify the detail panel / status bar when the focused list item changes
 	connect(mp_listView->selectionModel(), &QItemSelectionModel::currentChanged,
-		[this](const QModelIndex& current, const QModelIndex&) {
-			if (!current.isValid()) {
-				emit currentFileChanged(QFileInfo());
-				return;
-			}
-			QVariant var = current.data(QFileSystemModel::FileInfoRole);
-			if (var.isValid() && var.canConvert<QFileInfo>())
-				emit currentFileChanged(qvariant_cast<QFileInfo>(var));
+		[this](const QModelIndex&, const QModelIndex&) {
+			emit currentFileChanged(currentFileInfo());
 		});
 
 	connect(mp_listView, &QListView::activated, 
@@ -190,6 +185,26 @@ TeFileTreeView * TeFileFolderView::tree()
 TeFileListView * TeFileFolderView::list()
 {
 	return mp_listView;
+}
+
+TeFileInfo TeFileFolderView::currentFileInfo() const
+{
+	QModelIndex current = mp_listView->currentIndex();
+	if (!current.isValid())
+		return TeFileInfo();
+
+	QVariant var = current.data(QFileSystemModel::FileInfoRole);
+	if (!var.isValid() || !var.canConvert<QFileInfo>())
+		return TeFileInfo();
+
+	QFileInfo fi = qvariant_cast<QFileInfo>(var);
+	TeFileInfo info;
+	info.type = fi.isDir() ? TeFileInfo::EN_DIR : TeFileInfo::EN_FILE;
+	info.path = QDir::fromNativeSeparators(fi.absoluteFilePath());
+	info.size = fi.isDir() ? 0 : fi.size();
+	info.lastModified = fi.lastModified();
+	info.permissions = static_cast<int>(fi.permissions());
+	return info;
 }
 
 void TeFileFolderView::showContextMenu(const QAbstractItemView * pView, const QPoint & pos)

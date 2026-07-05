@@ -88,6 +88,9 @@ public:
 	 */
 	void importFromItem(const QStandardItem* item);
 
+	/** @brief Returns just the file/directory name portion of path(). */
+	QString fileName() const;
+
 	EntryType type;         ///< Entry type descriptor.
 	QString   path;         ///< Full path of the entry.
 	qint64    size;         ///< File size in bytes.

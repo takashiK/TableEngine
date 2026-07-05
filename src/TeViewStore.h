@@ -52,6 +52,7 @@ class QToolBar;
 class TeFileTreeView;
 class QDockWidget;
 class TeFileOperationManager;
+class QLabel;
 
 /**
  * @class TeViewStore
@@ -335,6 +336,8 @@ signals:
 private:
 	void applyLayoutSettings();
 	void storeWindowSizeIfNeeded();
+	/** @brief Refreshes the status bar's right-hand label from currentFolderView()'s focused item. */
+	void updateStatusRightLabel();
 	TeMainWindow*  mp_mainWindow = nullptr;
 	QTabWidget*    mp_tab[TAB_MAX] = {}; ///< Left and right tab panels.
 	TeDriveBar*    mp_driveBar = nullptr;
@@ -342,6 +345,7 @@ private:
 	QToolBar*	   mp_toolBar = nullptr;
 	TeDetailView*  mp_detailView = nullptr;
 	QDockWidget*   mp_detailDock = nullptr;
+	QLabel*        mp_statusRightLabel = nullptr; ///< Status bar label showing the focused item's full name.
 	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE;
 
 	int  m_currentTabPlace = TAB_LEFT;

@@ -176,6 +176,12 @@ TeArchiveFolderView::TeArchiveFolderView(QWidget *parent)
 		[this](const QModelIndex &current, const QModelIndex &/*previous*/)
 	{ setCurrentPath(indexToPath(mp_treeProxy->mapToSource(current))); });
 
+	// Notify the detail panel / status bar when the focused list item changes
+	connect(mp_listView->selectionModel(), &QItemSelectionModel::currentChanged,
+		[this](const QModelIndex&, const QModelIndex&) {
+			emit currentFileChanged(currentFileInfo());
+		});
+
 	connect(mp_listView, &QListView::activated, this, &TeArchiveFolderView::itemActivated);
 
 	//connect to custom context menu.
@@ -250,6 +256,20 @@ TeFileTreeView * TeArchiveFolderView::tree()
 TeFileListView * TeArchiveFolderView::list()
 {
 	return mp_listView;
+}
+
+TeFileInfo TeArchiveFolderView::currentFileInfo() const
+{
+	QModelIndex current = mp_listView->currentIndex();
+	if (!current.isValid())
+		return TeFileInfo();
+
+	QModelIndex source = mp_listProxy->mapToSource(current);
+	QStandardItem* item = mp_listModel->itemFromIndex(source);
+	TeFileInfo info;
+	if (item != nullptr)
+		info.importFromItem(item);
+	return info;
 }
 
 void TeArchiveFolderView::setRootPath(const QString & path)

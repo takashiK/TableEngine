@@ -80,6 +80,12 @@ TeFindFolderView::TeFindFolderView(QWidget* parent)
 	mp_listView->setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
+	// Notify the detail panel / status bar when the focused list item changes
+	connect(mp_listView->selectionModel(), &QItemSelectionModel::currentChanged,
+		[this](const QModelIndex&, const QModelIndex&) {
+			emit currentFileChanged(currentFileInfo());
+		});
+
 	connect(mp_treeView->selectionModel(), &QItemSelectionModel::currentChanged,
 	        this, &TeFindFolderView::onTreeSelectionChanged);
 
@@ -127,6 +133,19 @@ TeFileTreeView* TeFindFolderView::tree()
 TeFileListView* TeFindFolderView::list()
 {
 	return mp_listView;
+}
+
+TeFileInfo TeFindFolderView::currentFileInfo() const
+{
+	QModelIndex current = mp_listView->currentIndex();
+	if (!current.isValid())
+		return TeFileInfo();
+
+	QStandardItem* item = listModel() ? listModel()->itemFromIndex(current) : nullptr;
+	TeFileInfo info;
+	if (item != nullptr)
+		info.importFromItem(item);
+	return info;
 }
 
 void TeFindFolderView::setRootPath(const QString& /*path*/)

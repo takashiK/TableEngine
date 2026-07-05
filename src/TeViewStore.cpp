@@ -33,6 +33,7 @@
 #include "widgets/detail/TeDetailTextPreviewSection.h"
 #include "TeDispatcher.h"
 #include "TeSettings.h"
+#include "utils/TeFileInfo.h"
 
 /**
  * @file TeViewStore.cpp
@@ -226,10 +227,8 @@ void TeViewStore::initialize()
 	mp_mainWindow->addToolBar(mp_driveBar);
 
 	//Status Bar
-	QLabel *labelR = new QLabel(u8"Right Text");
-	mp_mainWindow->statusBar()->addPermanentWidget(labelR);
-	QLabel *labelL = new QLabel(u8"Left Text");
-	mp_mainWindow->statusBar()->addWidget(labelL);
+	mp_statusRightLabel = new QLabel();
+	mp_mainWindow->statusBar()->addPermanentWidget(mp_statusRightLabel);
 
 	//Toolbar
 	mp_toolBar = new QToolBar("Toolbar");
@@ -720,7 +719,16 @@ void TeViewStore::setCurrentFolderView(TeFolderView * view)
 		}
 	}
 
+	updateStatusRightLabel();
 	applyLayoutSettings();
+}
+
+void TeViewStore::updateStatusRightLabel()
+{
+	if (!mp_statusRightLabel) return;
+
+	TeFolderView* view = currentFolderView();
+	mp_statusRightLabel->setText(view ? view->currentFileInfo().fileName() : QString());
 }
 
 void TeViewStore::applyLayoutSettings()
@@ -825,11 +833,6 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	folderView->setFileShowMode(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	connect(this, &TeViewStore::fileListViewModeChanged, folderView->list(), &TeFileListView::setFileViewMode);
 	connect(this, &TeViewStore::fileListShowModeChanged, folderView, &TeFileFolderView::setFileShowMode);
-
-	if (mp_detailView) {
-		connect(folderView, &TeFolderView::currentFileChanged,
-				mp_detailView, &TeDetailView::setFileInfo);
-	}
 
 	addFolderView(folderView, place);
 
@@ -1050,6 +1053,18 @@ void TeViewStore::addFolderView(TeFolderView* folderView, int place)
 
 	if(!mp_tab[TAB_RIGHT]->isHidden())
 		mp_tab[TAB_LEFT]->setTabBarAutoHide(false);
+
+	// Keep the detail panel and the status bar's right-hand label in sync with
+	// whichever item is focused in this view's list, for every folder view type.
+	if (mp_detailView) {
+		connect(folderView, &TeFolderView::currentFileChanged,
+				mp_detailView, &TeDetailView::setFileInfo);
+	}
+	connect(folderView, &TeFolderView::currentFileChanged, this, [this, folderView](const TeFileInfo&) {
+		if (currentFolderView() == folderView) {
+			updateStatusRightLabel();
+		}
+	});
 
 	setCurrentFolderView(folderView);
 }
