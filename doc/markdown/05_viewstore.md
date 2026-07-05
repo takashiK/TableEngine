@@ -156,12 +156,15 @@ classDiagram
 
 | 定数 | キー文字列 | 用途 |
 |---|---|---|
-| `SETTING_STARTUP` | `"startup"` | 起動設定グループ |
-| `SETTING_STARTUP_MultiInstance` | `"startup/multi_instance"` | 多重起動の許可 |
-| `SETTING_STARTUP_InitialFolderMode` | `"startup/initial_folder_mode"` | 初期フォルダ設定 |
+| `SETTING_GENERAL_*` | `"general/*"` | 一般設定（多重起動許可・初期フォルダ・削除確認・コピー先ペイン等） |
+| `SETTING_LAYOUT_*` | `"layout/*"` | ウィンドウ・ペインのレイアウト設定 |
 | `SETTING_KEY` | `"command_key"` | キー割り当て設定 |
+| `SETTING_TOOLBAR` | `"toolbar"` | ツールバー設定 |
 | `SETTING_MENU` | `"menu"` | メニュー設定 |
 | `SETTING_FAVORITES` | `"Favorites"` | お気に入りフォルダ |
+| `SETTING_FOLDER_*` | `"folder/appearance/*"` | フォルダビューの外観設定（フォント・色等） |
+| `SETTING_TOOLS_TEXT_EDIT` / `SETTING_TOOLS_IMAGE_EDIT` / `SETTING_TOOLS_BINARY_EDIT` | `"tools/text_edit"` 等 | 外部ツール実行コマンド文字列（text / image / binary 編集用） |
+| `SETTING_TOOLS_USER` | `"tools/user"` | ユーザー定義ツールリスト（グループ。子キー `tool01`〜`tool99`） |
 
 ---
 

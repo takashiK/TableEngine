@@ -21,6 +21,7 @@
 #include "TeCmdRunCommand.h"
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
+#include "utils/TeToolCommand.h"
 #include "dialogs/TeCommandInputDialog.h"
 
 #include <QProcess>
@@ -69,8 +70,10 @@ QFlags<TeTypes::CmdType> TeCmdRunCommand::type()
 bool TeCmdRunCommand::execute(TeViewStore* p_store)
 {
 	//Macro
-	// %F : Replace current file name.
-	// %M : Replace selected file names.
+	// %F : Replace current file path.
+	// %f : Replace current file name.
+	// %M : Replace selected file paths.
+	// %m : Replace selected file names.
 	// %P : Replace current folder path.
 
 	QString command;
@@ -92,33 +95,34 @@ bool TeCmdRunCommand::execute(TeViewStore* p_store)
 	}
 
 	if (!command.isEmpty()) {
-		//replace %F to current file
-		if (command.contains("%F")) {
-			command.replace("%F", getCurrentItem(p_store));
-		}
+		command = TeToolCommand::expandMacros(command, p_store);
 
-		//replace %M to selected file list
-		if (command.contains("%M")) {
-			QStringList selected;
-			if (getSelectedItemList(p_store, &selected)) {
-				command.replace("%M", selected.join(" "));
+		//run command
+		QProcess process;
+
+		process.setEnvironment(QProcess::systemEnvironment());
+		process.setWorkingDirectory(TeToolCommand::workingDirectory(p_store));
+
+		if (shell) {
+			// execute with shell
+			QStringList args = QProcess::splitCommand(command);
+			if (!args.isEmpty()){
+				args.prepend("/c");
+				process.setProgram("cmd.exe");
+				process.setArguments(args);
+			}
+		}else{
+			// execute without shell
+			QStringList args = QProcess::splitCommand(command);
+			if (!args.isEmpty()) {
+				process.setProgram(args.takeFirst());
+				process.setArguments(args);
 			}
 		}
 
-		//replace %P to current folder path
-		if (command.contains("%P")) {
-			command.replace("%P", getCurrentFolder(p_store));
-		}
-		
-		//run command
-		QProcess process;
-		process.setWorkingDirectory(getCurrentFolder(p_store));
+		qDebug() << "Run command:" << process.program() << process.arguments();
 
-		if (shell) {
-			command = "cmd.exe /c " + command;
-		}
-
-		process.startCommand(command, QProcess::ReadOnly);
+		process.start(QProcess::ReadOnly);
 
 		if (!process.waitForStarted()) {
 			// TODO: shell variation
@@ -139,6 +143,7 @@ bool TeCmdRunCommand::execute(TeViewStore* p_store)
 
 				edit->setPlainText(outText);
 				edit->setReadOnly(true);
+				edit->setMinimumSize(600, 400);
 				p_store->registerFloatingWidget(edit);
 				edit->show();
 			}

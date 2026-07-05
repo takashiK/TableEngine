@@ -40,8 +40,9 @@ namespace TeSettings {
 	 * @brief Limits for list-style settings.
 	 */
 	enum {
-		MAX_FAVORITES = 99, ///< Maximum number of favourite folder entries.
-		MAX_HISTORY   = 99, ///< Maximum number of navigation history entries.
+		MAX_FAVORITES  = 99, ///< Maximum number of favourite folder entries.
+		MAX_HISTORY    = 99, ///< Maximum number of navigation history entries.
+		MAX_USER_TOOLS = 99, ///< Maximum number of user-defined tool entries.
 	};
 
 	/**
@@ -100,6 +101,12 @@ SETTING_STR(SETTING_TREEPOPUP_GROUP, "menuGroup01");
 SETTING_STR(SETTING_LISTPOPUP_GROUP, "menuGroup02");
 
 SETTING_STR(SETTING_FAVORITES, "Favorites");
+
+SETTING_STR(SETTING_TOOLS, "tools");
+SETTING_STR(SETTING_TOOLS_TEXT_EDIT, "tools/text_edit");
+SETTING_STR(SETTING_TOOLS_IMAGE_EDIT, "tools/image_edit");
+SETTING_STR(SETTING_TOOLS_BINARY_EDIT, "tools/binary_edit");
+SETTING_STR(SETTING_TOOLS_USER, "tools/user");
 
 // --- folder view appearance (extendable per section) ---
 SETTING_STR(SETTING_FOLDER_APPEARANCE,       "folder/appearance");

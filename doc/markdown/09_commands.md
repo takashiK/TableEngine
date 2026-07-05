@@ -21,7 +21,7 @@
 | Edit | `0x2000〜` | `commands/edit/` | 選択・クリップボード操作 |
 | Folder | `0x3000〜` | `commands/folder/` | フォルダナビゲーション |
 | View | `0x4000〜` | `commands/view/` | 表示設定 |
-| Tool | `0x5000〜` | `commands/tool/` | ツール・ビューワ起動 |
+| Tool | `0x5000〜` | `commands/tool/` | ツール設定・ビューワ / エディタ起動 |
 | Window | `0x6000〜` | `commands/window/` | ウィンドウ・タブ操作 |
 | Setting | `0x7000〜` | `commands/setting/` | 設定ダイアログ |
 | Help | `0x8000〜` | `commands/help/` | ヘルプ・バージョン情報 |
@@ -123,14 +123,17 @@
 | `CMDID_SYSTEM_HELP_HELP` | `TeCmdHelp` | ヘルプドキュメントを開く |
 | `CMDID_SYSTEM_HELP_VERSION` | `TeCmdVersion` | バージョン情報ダイアログを表示 |
 
----
-
-## CmdType Flags
+### Tool Commands (`commands/tool/`)
 
 | CmdId | クラス | 説明 |
 |---|---|---|
 | `CMDID_SYSTEM_TOOL_VIEW_FILE` | `TeCmdToolFile` | テキスト / ドキュメントビューワ起動 |
 | `CMDID_SYSTEM_TOOL_VIEW_BINARY` | `TeCmdToolBinary` | バイナリビューワ起動 |
+| `CMDID_SYSTEM_TOOL_EDIT_FILE` | `TeCmdToolFileEdit` | `tools/text_edit` に保存されたコマンドを展開して実行し、ファイルを編集する |
+| `CMDID_SYSTEM_TOOL_EDIT_BINARY` | `TeCmdToolBinaryEdit` | `tools/binary_edit` に保存されたコマンドを展開して実行し、バイナリファイルを編集する |
+| `CMDID_SYSTEM_TOOL_SETUP` | `TeCmdToolSetting` | `TeToolDialog` を表示し、外部ツール設定（text / image / binary 編集コマンド、ユーザー定義ツールリスト）を編集する |
+
+コマンド文字列で利用できるマクロ（`%F` / `%f` / `%M` / `%m` / `%P`）の詳細は [10_utils.md](10_utils.md) の `TeToolCommand` を参照してください。
 
 ---
 
