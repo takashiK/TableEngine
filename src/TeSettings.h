@@ -71,13 +71,13 @@ namespace TeSettings {
 #define SETTING_STR( name , str) extern const char* name
 #endif
 
-SETTING_STR(SETTING_GENERAL, "general");
+SETTING_STR(SETTING_GENERAL, "main");
 
-SETTING_STR(SETTING_GENERAL_MultiInstance , "general/multi_instance" );
-SETTING_STR(SETTING_GENERAL_InitialFolderMode, "general/initial_folder_mode");
-SETTING_STR(SETTING_GENERAL_InitialFolder, "general/initial_folder");
-SETTING_STR(SETTING_GENERAL_ConfirmBeforeDelete, "general/confirm_before_delete");
-SETTING_STR(SETTING_GENERAL_CopyToOppositePane, "general/copy_to_opposite_pane");
+SETTING_STR(SETTING_GENERAL_MultiInstance , "main/multi_instance" );
+SETTING_STR(SETTING_GENERAL_InitialFolderMode, "main/initial_folder_mode");
+SETTING_STR(SETTING_GENERAL_InitialFolder, "main/initial_folder");
+SETTING_STR(SETTING_GENERAL_ConfirmBeforeDelete, "main/confirm_before_delete");
+SETTING_STR(SETTING_GENERAL_CopyToOppositePane, "main/copy_to_opposite_pane");
 
 SETTING_STR(SETTING_COMMAND, "command");
 SETTING_STR(SETTING_COMMAND_Shell, "command/shell");
