@@ -335,6 +335,10 @@ QStringList TeArchiveFolderView::getPathHistory() const
 	return QStringList();
 }
 
+QStringList TeArchiveFolderView::getPathHistoryWithRoot(const QString& root) const {
+    return QStringList();
+}
+
 TeFinder* TeArchiveFolderView::makeFinder()
 {
 	if(m_rootPath.isEmpty()) return nullptr;

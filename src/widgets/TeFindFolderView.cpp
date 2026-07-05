@@ -182,6 +182,11 @@ QStringList TeFindFolderView::getPathHistory() const
 	return list;
 }
 
+QStringList TeFindFolderView::getPathHistoryWithRoot(const QString & root) const
+{
+	return getPathHistory();
+}
+
 TeFinder* TeFindFolderView::makeFinder()
 {
 	return nullptr;

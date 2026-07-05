@@ -38,6 +38,8 @@ class TeCmdGotoFolder :
     public TeCommandBase
 {
 public:
+	static const char* PARAM_PATH; ///< Parameter key for the target folder path (QString).
+public:
 	TeCmdGotoFolder();
 	virtual ~TeCmdGotoFolder();
 

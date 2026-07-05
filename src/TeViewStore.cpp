@@ -42,6 +42,7 @@
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
 #include "commands/folder/TeCmdFolderChangeRoot.h"
+#include "commands/folder/TeCmdGotoFolder.h"
 #include "TeEventEmitter.h"
 #include "utils/TeUtils.h"
 #include "dialogs/TeFilePathDialog.h"
@@ -203,14 +204,25 @@ void TeViewStore::initialize()
 		});
 
 	connect(mp_driveBar, &TeDriveBar::driveSelected, [this](const QString& path) {
-		TeCmdParam param;
-		param.insert(TeCmdFolderChangeRoot::PARAM_ROOT_PATH, path);
-		emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT,TeTypes::WT_DRIVEBAR,nullptr,&param);
+		QStringList history;
 		auto folder = currentFolderView();
 		if (folder) {
 			folder->list()->viewport()->setFocus();
+
+			//search same root folder entry in History of Current folderView
+			history = folder->getPathHistoryWithRoot(path);
 		}
-		});
+		TeCmdParam param;
+		param.insert(TeCmdFolderChangeRoot::PARAM_ROOT_PATH, path);
+		emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT,TeTypes::WT_DRIVEBAR,nullptr,&param);
+
+		qDebug() << "History for root" << path << ":" << history;
+		TeCmdParam param2;
+		if (!history.isEmpty()) {
+			param2.insert(TeCmdGotoFolder::PARAM_PATH, history.first());
+			emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_GOTO_FOLDER, TeTypes::WT_DRIVEBAR, nullptr, &param2);
+		}
+	});
 	mp_mainWindow->addToolBar(mp_driveBar);
 
 	//Status Bar

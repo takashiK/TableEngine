@@ -93,6 +93,8 @@ public:
 	virtual void movePrevPath();
 	/** @brief Returns all paths in the navigation history. */
 	virtual QStringList getPathHistory() const;
+	/** @brief Returns all paths in the navigation history for a specific root. */
+	virtual QStringList getPathHistoryWithRoot(const QString& root) const;
 
 	/** @brief Creates and returns a TeFileFinder for this view. */
 	virtual TeFinder* makeFinder();

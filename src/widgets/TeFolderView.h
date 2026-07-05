@@ -109,6 +109,9 @@ public:
 	/** @brief Returns the navigation history as a list of path strings. */
 	virtual QStringList getPathHistory() const = 0;
 
+	/** @brief Returns the navigation history as a list of path strings. */
+	virtual QStringList getPathHistoryWithRoot(const QString& root) const = 0;
+
 	/**
 	 * @brief Creates and returns the appropriate TeFinder for this view type.
 	 *

@@ -74,6 +74,8 @@ public:
 	void        movePrevPath() override;
 	/** @brief Returns the list of registered search labels. */
 	QStringList getPathHistory() const override;
+	/** @brief Returns the list of registered search labels for a specific root. */
+	QStringList getPathHistoryWithRoot(const QString& root) const override;
 
 	/**
 	 * @brief Returns nullptr (TeFindFolderView does not produce a finder).

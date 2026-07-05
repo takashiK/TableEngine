@@ -87,6 +87,16 @@ QList<TeHistory::PathPair> TeHistory::getPair() const
 	return m_history;
 }
 
+QStringList TeHistory::getWithRoot(const QString& root) const {
+    QStringList list;
+    for (const auto& pair : m_history) {
+        if (pair.first == root) {
+            list.append(pair.second);
+        }
+    }
+    return list;
+}
+
 void TeHistory::set(const QList<PathPair>& list)
 {
 	m_history = list;
