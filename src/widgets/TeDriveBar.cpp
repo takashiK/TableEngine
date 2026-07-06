@@ -45,11 +45,13 @@ TeDriveBar::TeDriveBar(QWidget *parent)
 
 	{
 		//Root directory
-		QAction* act = new QAction(QApplication::style()->standardIcon(QStyle::SP_ComputerIcon), "A");
-		act->setData(QDir::rootPath());
-		act->setToolTip(tr("Computer"));
-		addAction(act);
-		connect(act, &QAction::triggered, [this, act](bool) { selectDrive(act->data().toString()); });
+		if (QDir::rootPath() == "/") {
+			QAction* act = new QAction(QApplication::style()->standardIcon(QStyle::SP_DriveHDIcon), "A");
+			act->setData(QDir::rootPath());
+			act->setToolTip(tr("Root"));
+			addAction(act);
+			connect(act, &QAction::triggered, [this, act](bool) { selectDrive(act->data().toString()); });
+		}
 	}
 	{
 		//Home directory
