@@ -40,8 +40,9 @@ namespace TeSettings {
 	 * @brief Limits for list-style settings.
 	 */
 	enum {
-		MAX_FAVORITES = 99, ///< Maximum number of favourite folder entries.
-		MAX_HISTORY   = 99, ///< Maximum number of navigation history entries.
+		MAX_FAVORITES  = 99, ///< Maximum number of favourite folder entries.
+		MAX_HISTORY    = 99, ///< Maximum number of navigation history entries.
+		MAX_USER_TOOLS = 99, ///< Maximum number of user-defined tool entries.
 	};
 
 	/**
@@ -70,13 +71,19 @@ namespace TeSettings {
 #define SETTING_STR( name , str) extern const char* name
 #endif
 
-SETTING_STR(SETTING_GENERAL, "general");
+SETTING_STR(SETTING_GENERAL, "main");
 
-SETTING_STR(SETTING_GENERAL_MultiInstance , "general/multi_instance" );
-SETTING_STR(SETTING_GENERAL_InitialFolderMode, "general/initial_folder_mode");
-SETTING_STR(SETTING_GENERAL_InitialFolder, "general/initial_folder");
-SETTING_STR(SETTING_GENERAL_ConfirmBeforeDelete, "general/confirm_before_delete");
-SETTING_STR(SETTING_GENERAL_CopyToOppositePane, "general/copy_to_opposite_pane");
+SETTING_STR(SETTING_GENERAL_MultiInstance , "main/multi_instance" );
+SETTING_STR(SETTING_GENERAL_InitialFolderMode, "main/initial_folder_mode");
+SETTING_STR(SETTING_GENERAL_InitialFolder, "main/initial_folder");
+SETTING_STR(SETTING_GENERAL_ConfirmBeforeDelete, "main/confirm_before_delete");
+SETTING_STR(SETTING_GENERAL_CopyToOppositePane, "main/copy_to_opposite_pane");
+
+SETTING_STR(SETTING_COMMAND, "command");
+SETTING_STR(SETTING_COMMAND_Shell, "command/shell");
+SETTING_STR(SETTING_COMMAND_ShellArg, "command/shellarg");
+SETTING_STR(SETTING_COMMAND_ExecuteWithShell, "command/isExecuteWithShell");
+SETTING_STR(SETTING_COMMAND_ExecuteWithTerminal, "command/isExecuteWithTerminal");
 
 SETTING_STR(SETTING_LAYOUT, "layout");
 SETTING_STR(SETTING_LAYOUT_WINDOW_SIZE_MODE, "layout/window_size_mode");
@@ -100,6 +107,12 @@ SETTING_STR(SETTING_TREEPOPUP_GROUP, "menuGroup01");
 SETTING_STR(SETTING_LISTPOPUP_GROUP, "menuGroup02");
 
 SETTING_STR(SETTING_FAVORITES, "Favorites");
+
+SETTING_STR(SETTING_TOOLS, "tools");
+SETTING_STR(SETTING_TOOLS_TEXT_EDIT, "tools/text_edit");
+SETTING_STR(SETTING_TOOLS_IMAGE_EDIT, "tools/image_edit");
+SETTING_STR(SETTING_TOOLS_BINARY_EDIT, "tools/binary_edit");
+SETTING_STR(SETTING_TOOLS_USER, "tools/user");
 
 // --- folder view appearance (extendable per section) ---
 SETTING_STR(SETTING_FOLDER_APPEARANCE,       "folder/appearance");

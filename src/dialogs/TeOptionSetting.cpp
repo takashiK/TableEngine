@@ -23,12 +23,15 @@
 #include "TeSelectPathDialog.h"
 #include "TeFontDialog.h"
 #include "../widgets/TeFileListView.h"
+#include "../platform/platform_util.h"
 
 #include <QApplication>
 #include <QColorDialog>
 #include <QRegularExpression>
 #include <QSettings>
 #include <QDir>
+#include <QFileInfo>
+#include <QFileDialog>
 #include <QTabWidget>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
@@ -111,6 +114,33 @@ static QColor colorFromCss(const QString& css,
 	return result;
 }
 
+/**
+ * @brief Determines the default shell command.
+ *
+ * Uses the SHELL environment variable when set; otherwise falls back to the
+ * OS-specific default provided by platform_util.
+ */
+static QString defaultShellCommand()
+{
+	QString result = qEnvironmentVariable("SHELL");
+	if (result.isEmpty()) {
+		result = getDefaultShellCommand();
+	}
+	return result;
+}
+
+/**
+ * @brief Determines the default shell argument used to run a command line.
+ *
+ * cmd.exe expects "/c", while pwsh/bash/zsh expect "-c".
+ */
+static QString defaultShellArg(const QString& shellCommand)
+{
+	const QString baseName = QFileInfo(shellCommand).completeBaseName();
+	return baseName.compare(QStringLiteral("cmd"), Qt::CaseInsensitive) == 0
+		? QStringLiteral("/c") : QStringLiteral("-c");
+}
+
 } // anonymous namespace
 
 
@@ -128,6 +158,7 @@ TeOptionSetting::TeOptionSetting(QWidget *parent, TeFileListView* p_listView)
 
 	QTabWidget* tab = new QTabWidget();
 	tab->addTab(createPageGeneral(), tr("General"));
+	tab->addTab(createPagesCommand(), tr("Command"));
 	tab->addTab(createPageFolder(), tr("Folder"));
 	tab->addTab(createPageWindow(), tr("Window"));
 	tab->addTab(createPagePanel(), tr("Panel"));
@@ -158,34 +189,49 @@ void TeOptionSetting::updateSettings()
 
 void TeOptionSetting::storeDefaultSettings(bool force)
 {
-	QSettings settings;
-	if (settings.childGroups().contains(SETTING_GENERAL)) {
-		if (!force) {
-			return;
-		}
-		settings.remove(SETTING_GENERAL);
-		settings.remove(SETTING_LAYOUT);
-	}
 
 #define SETTING( str, default_value)  settings.setValue( str , settings.value( str , default_value ))
 
-	SETTING(SETTING_GENERAL_MultiInstance, true);
-	SETTING(SETTING_GENERAL_InitialFolderMode, TeSettings::INIT_FOLDER_MODE_SELECTED);
-	SETTING(SETTING_GENERAL_InitialFolder, QDir::rootPath() );
-	SETTING(SETTING_GENERAL_ConfirmBeforeDelete, true);
-	SETTING(SETTING_GENERAL_CopyToOppositePane, true);
-	SETTING(SETTING_LAYOUT_WINDOW_SIZE_MODE, TeSettings::WINDOW_SIZE_MODE_REMEMBER);
-	SETTING(SETTING_LAYOUT_WINDOW_FIXED_WIDTH, 850);
-	SETTING(SETTING_LAYOUT_WINDOW_FIXED_HEIGHT, 520);
-	SETTING(SETTING_LAYOUT_WINDOW_LAST_WIDTH, 850);
-	SETTING(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, 520);
-	SETTING(SETTING_LAYOUT_TREE_MIN_WIDTH, 200);
-	SETTING(SETTING_LAYOUT_TREE_MAX_WIDTH, 400);
-	SETTING(SETTING_LAYOUT_TREE_LIST_RATIO, 25);
-	SETTING(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300);
-	SETTING(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 500);
-	SETTING(SETTING_LAYOUT_DIALOG_MIN_WIDTH, 300);
-	SETTING(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, true);
+	QSettings settings;
+
+	if (force || !settings.childGroups().contains(SETTING_GENERAL)) {
+		settings.remove(SETTING_GENERAL);
+
+		SETTING(SETTING_GENERAL_MultiInstance, true);
+		SETTING(SETTING_GENERAL_InitialFolderMode, TeSettings::INIT_FOLDER_MODE_SELECTED);
+		SETTING(SETTING_GENERAL_InitialFolder, QDir::rootPath() );
+		SETTING(SETTING_GENERAL_ConfirmBeforeDelete, true);
+		SETTING(SETTING_GENERAL_CopyToOppositePane, true);
+	}
+
+	if (force || !settings.childGroups().contains(SETTING_COMMAND)) {
+		settings.remove(SETTING_COMMAND);
+		{
+			const QString shellDefault = defaultShellCommand();
+			SETTING(SETTING_COMMAND_Shell, shellDefault);
+			SETTING(SETTING_COMMAND_ShellArg, defaultShellArg(shellDefault));
+		}
+		SETTING(SETTING_COMMAND_ExecuteWithShell, true);
+		SETTING(SETTING_COMMAND_ExecuteWithTerminal, false);
+	}
+
+	if (force || !settings.childGroups().contains(SETTING_LAYOUT)) {
+		settings.remove(SETTING_LAYOUT);
+		
+		SETTING(SETTING_LAYOUT_WINDOW_SIZE_MODE, TeSettings::WINDOW_SIZE_MODE_REMEMBER);
+		SETTING(SETTING_LAYOUT_WINDOW_FIXED_WIDTH, 850);
+		SETTING(SETTING_LAYOUT_WINDOW_FIXED_HEIGHT, 520);
+		SETTING(SETTING_LAYOUT_WINDOW_LAST_WIDTH, 850);
+		SETTING(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, 520);
+		SETTING(SETTING_LAYOUT_TREE_MIN_WIDTH, 200);
+		SETTING(SETTING_LAYOUT_TREE_MAX_WIDTH, 400);
+		SETTING(SETTING_LAYOUT_TREE_LIST_RATIO, 25);
+		SETTING(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300);
+		SETTING(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 500);
+		SETTING(SETTING_LAYOUT_DIALOG_MIN_WIDTH, 300);
+		SETTING(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, true);
+	}
+
 
 #undef SETTING
 }
@@ -250,6 +296,64 @@ QWidget * TeOptionSetting::createPageGeneral()
 
 	groupBox->setLayout(boxLayout);
 	layout->addWidget(groupBox);
+	layout->addStretch();
+
+	page->setLayout(layout);
+	return page;
+}
+
+QWidget * TeOptionSetting::createPagesCommand()
+{
+	QSettings settings;
+	QWidget* page = new QWidget();
+	QVBoxLayout* layout = new QVBoxLayout();
+
+	QGroupBox* groupBox = new QGroupBox(tr("Shell"));
+	QGridLayout* grid = new QGridLayout();
+
+	grid->addWidget(new QLabel(tr("Shell command:")), 0, 0);
+	QLineEdit* shellEdit = new QLineEdit(settings.value(SETTING_COMMAND_Shell).toString());
+	grid->addWidget(shellEdit, 0, 1);
+	connect(shellEdit, &QLineEdit::textChanged, [this](const QString& text) { m_option[SETTING_COMMAND_Shell] = text; });
+
+	QPushButton* browseButton = new QPushButton(tr("Browse"));
+	connect(browseButton, &QPushButton::clicked, [shellEdit, this](bool /*checked*/) {
+		const QString path = QFileDialog::getOpenFileName(this, tr("Select Shell"), shellEdit->text());
+		if (!path.isEmpty()) {
+			shellEdit->setText(path);
+		}
+	});
+	grid->addWidget(browseButton, 0, 2);
+
+	grid->addWidget(new QLabel(tr("Shell argument:")), 1, 0);
+	QLineEdit* shellArgEdit = new QLineEdit(settings.value(SETTING_COMMAND_ShellArg).toString());
+	grid->addWidget(shellArgEdit, 1, 1);
+	connect(shellArgEdit, &QLineEdit::textChanged, [this](const QString& text) { m_option[SETTING_COMMAND_ShellArg] = text; });
+
+	QPushButton* resetButton = new QPushButton(tr("Reset Shell settings"));
+	connect(resetButton, &QPushButton::clicked, [this, shellEdit, shellArgEdit](bool /*checked*/) {
+		const QString shellDefault = defaultShellCommand();
+		const QString shellArgDefault = defaultShellArg(shellDefault);
+		shellEdit->setText(shellDefault);
+		shellArgEdit->setText(shellArgDefault);
+		m_option[SETTING_COMMAND_Shell] = shellDefault;
+		m_option[SETTING_COMMAND_ShellArg] = shellArgDefault;
+	});
+	grid->addWidget(resetButton, 2, 1);
+
+	groupBox->setLayout(grid);
+	layout->addWidget(groupBox);
+
+	QCheckBox* cbShell = new QCheckBox(tr("Enable shell by default in command input dialog."));
+	cbShell->setChecked(settings.value(SETTING_COMMAND_ExecuteWithShell, true).toBool());
+	connect(cbShell, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_COMMAND_ExecuteWithShell] = (state == Qt::Checked); });
+	layout->addWidget(cbShell);
+
+	QCheckBox* cbOutput = new QCheckBox(tr("Enable output by default in command input dialog."));
+	cbOutput->setChecked(settings.value(SETTING_COMMAND_ExecuteWithTerminal, false).toBool());
+	connect(cbOutput, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_COMMAND_ExecuteWithTerminal] = (state == Qt::Checked); });
+	layout->addWidget(cbOutput);
+
 	layout->addStretch();
 
 	page->setLayout(layout);

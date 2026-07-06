@@ -69,8 +69,12 @@
 #include "view/TeCmdViewFileOrder.h"
 #include "view/TeCmdViewLayout.h"
 
+
+#include "tool/TeCmdToolSetting.h"
 #include "tool/TeCmdToolFile.h"
+#include "tool/TeCmdToolFileEdit.h"
 #include "tool/TeCmdToolBinary.h"
+#include "tool/TeCmdToolBinaryEdit.h"
 
 #include "window/TeCmdWindowBar.h"
 #include "window/TeCmdWindowNewTab.h"
@@ -207,8 +211,13 @@ TeCommandFactory::TeCommandFactory()
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_TOOL);
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_TOOL_SETUP, TeCmdToolSetting, tr("Tool Setting"), tr("Show tool setting dialog."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/tool_settings.png")));
+		SEPARATOR();
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_TOOL_VIEW_FILE, TeCmdToolFile, tr("View File"), tr("View file."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/view.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_TOOL_VIEW_BINARY, TeCmdToolBinary, tr("View Binary"), tr("View binary file."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/binary.png")));
+		SEPARATOR();
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_TOOL_EDIT_FILE, TeCmdToolFileEdit, tr("Edit File"), tr("Edit file."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/file_edit.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_TOOL_EDIT_BINARY, TeCmdToolBinaryEdit, tr("Edit Binary"), tr("Edit binary file."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/binary_edit.png")));
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_WINDOW);

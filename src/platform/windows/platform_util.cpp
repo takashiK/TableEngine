@@ -644,3 +644,14 @@ TeNativeEvent* getNativeEvent()
 {
 	return &g_event;
 }
+
+
+//////////////////////////////////////////////////////////
+//
+// Shell
+//
+
+QString getDefaultShellCommand()
+{
+	return QStringLiteral("pwsh.exe");
+}

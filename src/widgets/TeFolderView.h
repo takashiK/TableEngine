@@ -21,8 +21,8 @@
 #pragma once
 
 #include <QWidget>
-#include <QFileInfo>
 #include "TeDispatchable.h"
+#include "utils/TeFileInfo.h"
 
 /**
  * @file TeFolderView.h
@@ -68,6 +68,15 @@ public:
 	virtual TeFileListView* list() = 0;
 
 	/**
+	 * @brief Returns the TeFileInfo describing the item currently focused in list().
+	 *
+	 * Returns a default-constructed (empty path) TeFileInfo when no item is
+	 * current.  Implemented by each concrete subclass since the underlying
+	 * model differs (QFileSystemModel vs. QStandardItemModel-based).
+	 */
+	virtual TeFileInfo currentFileInfo() const = 0;
+
+	/**
 	 * @brief Sets the dispatcher used for event-to-command routing.
 	 * @param p_dispatcher The application-wide dispatcher.
 	 */
@@ -109,6 +118,9 @@ public:
 	/** @brief Returns the navigation history as a list of path strings. */
 	virtual QStringList getPathHistory() const = 0;
 
+	/** @brief Returns the navigation history as a list of path strings. */
+	virtual QStringList getPathHistoryWithRoot(const QString& root) const = 0;
+
 	/**
 	 * @brief Creates and returns the appropriate TeFinder for this view type.
 	 *
@@ -142,12 +154,12 @@ signals:
 	/**
 	 * @brief Emitted when the user moves to a different item in the list view.
 	 *
-	 * Connected to TeDetailView::setFileInfo() so the detail panel stays in
-	 * sync with the focused item.  @p info is a default-constructed QFileInfo
-	 * when no item is selected.
+	 * Connected to TeDetailView::setFileInfo() and to the status bar label so
+	 * they stay in sync with the focused item.  @p info is a default-constructed
+	 * (empty path) TeFileInfo when no item is selected.
 	 * @param info Metadata of the newly focused item.
 	 */
-	void currentFileChanged(const QFileInfo& info);
+	void currentFileChanged(const TeFileInfo& info);
 
 private:
 	TeDispatchable* mp_dispatcher = nullptr;

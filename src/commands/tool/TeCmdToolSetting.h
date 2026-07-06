@@ -26,26 +26,24 @@
 #include <QFlags>
 
 /**
- * @file TeCmdGotoFolder.h
- * @brief Declaration of TeCmdGotoFolder.
+ * @file TeCmdToolSetting.h
+ * @brief Declaration of TeCmdToolSetting.
  * @ingroup commands
  */
 
 
 class TeViewStore;
 
-class TeCmdGotoFolder :
+class TeCmdToolSetting :
     public TeCommandBase
 {
 public:
-	static const char* PARAM_PATH; ///< Parameter key for the target folder path (QString).
-public:
-	TeCmdGotoFolder();
-	virtual ~TeCmdGotoFolder();
+	TeCmdToolSetting();
+	virtual ~TeCmdToolSetting();
+
 
 	// Check if this command is selected when item is selected.
 	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
-
 
 	// type of command
 	static QFlags<TeTypes::CmdType> type();

@@ -33,6 +33,7 @@
 #include "widgets/detail/TeDetailTextPreviewSection.h"
 #include "TeDispatcher.h"
 #include "TeSettings.h"
+#include "utils/TeFileInfo.h"
 
 /**
  * @file TeViewStore.cpp
@@ -42,6 +43,7 @@
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
 #include "commands/folder/TeCmdFolderChangeRoot.h"
+#include "commands/folder/TeCmdGotoFolder.h"
 #include "TeEventEmitter.h"
 #include "utils/TeUtils.h"
 #include "dialogs/TeFilePathDialog.h"
@@ -203,21 +205,30 @@ void TeViewStore::initialize()
 		});
 
 	connect(mp_driveBar, &TeDriveBar::driveSelected, [this](const QString& path) {
-		TeCmdParam param;
-		param.insert(TeCmdFolderChangeRoot::PARAM_ROOT_PATH, path);
-		emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT,TeTypes::WT_DRIVEBAR,nullptr,&param);
+		QStringList history;
 		auto folder = currentFolderView();
 		if (folder) {
 			folder->list()->viewport()->setFocus();
+
+			//search same root folder entry in History of Current folderView
+			history = folder->getPathHistoryWithRoot(path);
 		}
-		});
+		TeCmdParam param;
+		param.insert(TeCmdFolderChangeRoot::PARAM_ROOT_PATH, path);
+		emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT,TeTypes::WT_DRIVEBAR,nullptr,&param);
+
+		qDebug() << "History for root" << path << ":" << history;
+		TeCmdParam param2;
+		if (!history.isEmpty()) {
+			param2.insert(TeCmdGotoFolder::PARAM_PATH, history.first());
+			emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_GOTO_FOLDER, TeTypes::WT_DRIVEBAR, nullptr, &param2);
+		}
+	});
 	mp_mainWindow->addToolBar(mp_driveBar);
 
 	//Status Bar
-	QLabel *labelR = new QLabel(u8"Right Text");
-	mp_mainWindow->statusBar()->addPermanentWidget(labelR);
-	QLabel *labelL = new QLabel(u8"Left Text");
-	mp_mainWindow->statusBar()->addWidget(labelL);
+	mp_statusRightLabel = new QLabel();
+	mp_mainWindow->statusBar()->addPermanentWidget(mp_statusRightLabel);
 
 	//Toolbar
 	mp_toolBar = new QToolBar("Toolbar");
@@ -708,7 +719,16 @@ void TeViewStore::setCurrentFolderView(TeFolderView * view)
 		}
 	}
 
+	updateStatusRightLabel();
 	applyLayoutSettings();
+}
+
+void TeViewStore::updateStatusRightLabel()
+{
+	if (!mp_statusRightLabel) return;
+
+	TeFolderView* view = currentFolderView();
+	mp_statusRightLabel->setText(view ? view->currentFileInfo().fileName() : QString());
 }
 
 void TeViewStore::applyLayoutSettings()
@@ -814,11 +834,6 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	connect(this, &TeViewStore::fileListViewModeChanged, folderView->list(), &TeFileListView::setFileViewMode);
 	connect(this, &TeViewStore::fileListShowModeChanged, folderView, &TeFileFolderView::setFileShowMode);
 
-	if (mp_detailView) {
-		connect(folderView, &TeFolderView::currentFileChanged,
-				mp_detailView, &TeDetailView::setFileInfo);
-	}
-
 	addFolderView(folderView, place);
 
 	return folderView;
@@ -865,6 +880,11 @@ void TeViewStore::deleteFolderView(TeFolderView * view)
 {
 	if (view == nullptr) return;
 
+	// total count of tabs is 1, then don't delete it. because at least one tab is needed.
+	if (mp_tab[TAB_LEFT]->count() + mp_tab[TAB_RIGHT]->count() <= 1) {
+		return;
+	}
+
 	TeFolderView* folder = currentFolderView();
 	int index = tabPlace(view);
 
@@ -897,9 +917,11 @@ void TeViewStore::deleteFolderView(TeFolderView * view)
 	if (mp_tab[TAB_RIGHT]->count() == 0)
 		mp_tab[TAB_RIGHT]->setHidden(true);
 
-	if (!mp_tab[TAB_RIGHT]->isHidden())
+	if (!mp_tab[TAB_RIGHT]->isHidden()){
 		mp_tab[TAB_LEFT]->setTabBarAutoHide(false);
-
+	}else{
+		mp_tab[TAB_LEFT]->setTabBarAutoHide(true);
+	}
 	//target new current folder if current folder is deleted.
 	if (isCurrentDelete) {
 		if (mp_tab[index]->count() > 0) {
@@ -1031,6 +1053,18 @@ void TeViewStore::addFolderView(TeFolderView* folderView, int place)
 
 	if(!mp_tab[TAB_RIGHT]->isHidden())
 		mp_tab[TAB_LEFT]->setTabBarAutoHide(false);
+
+	// Keep the detail panel and the status bar's right-hand label in sync with
+	// whichever item is focused in this view's list, for every folder view type.
+	if (mp_detailView) {
+		connect(folderView, &TeFolderView::currentFileChanged,
+				mp_detailView, &TeDetailView::setFileInfo);
+	}
+	connect(folderView, &TeFolderView::currentFileChanged, this, [this, folderView](const TeFileInfo&) {
+		if (currentFolderView() == folderView) {
+			updateStatusRightLabel();
+		}
+	});
 
 	setCurrentFolderView(folderView);
 }

@@ -33,6 +33,8 @@
  * @ingroup commands
  */
 
+const char* TeCmdGotoFolder::PARAM_PATH = "path";
+
 TeCmdGotoFolder::TeCmdGotoFolder()
 {
 }
@@ -65,39 +67,49 @@ QFlags<TeTypes::CmdType> TeCmdGotoFolder::type()
 
 bool TeCmdGotoFolder::execute(TeViewStore* p_store)
 {
-	TeFilePathDialog dlg(p_store->mainWindow());
-	TeFolderView* p_view = p_store->currentFolderView();
-	dlg.setCurrentPath(getCurrentFolder(p_store));
-	dlg.setFavorites(getFavorites());
-	dlg.setHistory(p_view->getPathHistory());
+	QString path;
 
-	if(dlg.exec() == QDialog::Accepted)
+	if(cmdParam() && cmdParam()->contains(PARAM_PATH))
 	{
-		QString path = dlg.targetPath();
-		QDir dir(getCurrentFolder(p_store));
-		if(!path.isEmpty() && dir.exists(path))
+		path = cmdParam()->value(PARAM_PATH).toString();
+	}
+	else{
+		TeFilePathDialog dlg(p_store->mainWindow());
+		TeFolderView* p_view = p_store->currentFolderView();
+		dlg.setCurrentPath(getCurrentFolder(p_store));
+		dlg.setFavorites(getFavorites());
+		dlg.setHistory(p_view->getPathHistory());
+
+		if(dlg.exec() == QDialog::Accepted)
 		{
-			path = dir.absoluteFilePath(path);
-			TeFolderView* p_view = p_store->currentFolderView();
-			QString rootPath = dir.absoluteFilePath(p_view->rootPath());
-
-			if(path.startsWith(rootPath))
-			{
-				p_view->setCurrentPath(path);
-			}
-			else {
-				QDir rootDir(path);
-				while (!rootDir.isRoot()) {
-					rootDir.cdUp();
-				}
-				p_view->setRootPath(rootDir.absolutePath());
-				p_view->setCurrentPath(path);
-			}
-
-		}
-		else {
-			QMessageBox::warning(p_store->mainWindow(), QObject::tr("Error"), QObject::tr("The specified folder does not exist."));
+			path = dlg.targetPath();
 		}
 	}
+
+	QDir dir(getCurrentFolder(p_store));
+	if(!path.isEmpty() && dir.exists(path))
+	{
+		path = dir.absoluteFilePath(path);
+		TeFolderView* p_view = p_store->currentFolderView();
+		QString rootPath = dir.absoluteFilePath(p_view->rootPath());
+
+		if(path.startsWith(rootPath))
+		{
+			p_view->setCurrentPath(path);
+		}
+		else {
+			QDir rootDir(path);
+			while (!rootDir.isRoot()) {
+				rootDir.cdUp();
+			}
+			p_view->setRootPath(rootDir.absolutePath());
+			p_view->setCurrentPath(path);
+		}
+
+	}
+	else {
+		QMessageBox::warning(p_store->mainWindow(), QObject::tr("Error"), QObject::tr("The specified folder does not exist."));
+	}
+
 	return true;
 }

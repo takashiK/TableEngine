@@ -238,3 +238,28 @@ exいv2 などの外部ライブラリを利用する場合は `TeExifReader` �
 ```cpp
 QIcon icon(new TeAdaptiveIconEngine(":/icons/my_icon.svg"));
 ```
+
+### TeToolCommand
+
+外部ツール実行コマンド文字列内のマクロ展開・書式検証・作業ディレクトリ解決を行う共通ヘルパー群（namespace）です。  
+`TeCmdRunCommand`、および `TeCmdToolFileEdit` / `TeCmdToolBinaryEdit` から利用されます。
+
+| 関数 | 説明 |
+|---|---|
+| `isValidFormat(commandTemplate)` | `QProcess::splitCommand()` ベースの軽量な書式検証を行う。空文字は許容する |
+| `expandMacros(commandTemplate, p_store)` | コマンド文字列内のマクロを展開する |
+| `workingDirectory(p_store)` | コマンド実行時の作業ディレクトリ（`%P` と同じ値）を返す |
+
+利用可能なマクロ:
+
+| マクロ | 取得元 | 内容 |
+|---|---|---|
+| `%F` | `TeUtils::getCurrentItem()` | 現在アクティブなアイテムのフルパス |
+| `%f` | （`%F` から抽出） | 現在アクティブなアイテムのファイル名のみ |
+| `%M` | `TeUtils::getSelectedItemList()` | 選択中アイテムのフルパス群（スペース区切り） |
+| `%m` | （`%M` の各要素から抽出） | 選択中アイテムのファイル名群（スペース区切り） |
+| `%P` | `TeUtils::getCurrentFolder()` | カレントフォルダパス。コマンド実行時の作業ディレクトリにも使用される |
+
+値にスペースを含む場合は、`QProcess::splitCommand()` で正しく再分割されるよう自動的にダブルクォートで囲まれます。
+
+実装ファイル: `src/utils/TeToolCommand.h` / `.cpp`

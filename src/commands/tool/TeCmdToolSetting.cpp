@@ -18,43 +18,51 @@
 **
 ****************************************************************************/
 
-#pragma once
-
-#include "commands/TeCommandBase.h"
-
-#include <QList>
-#include <QFlags>
+#include "TeCmdToolSetting.h"
+#include "utils/TeUtils.h"
+#include "dialogs/TeToolDialog.h"
 
 /**
- * @file TeCmdGotoFolder.h
- * @brief Declaration of TeCmdGotoFolder.
+ * @file TeCmdToolSetting.cpp
+ * @brief Declaration of TeCmdToolSetting.
  * @ingroup commands
  */
 
 
-class TeViewStore;
-
-class TeCmdGotoFolder :
-    public TeCommandBase
+TeCmdToolSetting::TeCmdToolSetting()
 {
-public:
-	static const char* PARAM_PATH; ///< Parameter key for the target folder path (QString).
-public:
-	TeCmdGotoFolder();
-	virtual ~TeCmdGotoFolder();
+}
 
-	// Check if this command is selected when item is selected.
-	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
+TeCmdToolSetting::~TeCmdToolSetting()
+{
+}
+
+bool TeCmdToolSetting::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+{
+	NOT_USED(p_store);
+	NOT_USED(p_cmdParam);
+	return false;
+}
+
+QFlags<TeTypes::CmdType> TeCmdToolSetting::type()
+{
+	return QFlags<TeTypes::CmdType>(
+		TeTypes::CMD_TRIGGER_NORMAL
+		// TeTypes::CMD_TRIGGER_SELECT
+
+		| TeTypes::CMD_CATEGORY_TREE
+		| TeTypes::CMD_CATEGORY_LIST
+		| TeTypes::CMD_CATEGORY_OTHER
+
+		| TeTypes::CMD_TARGET_FILE
+		| TeTypes::CMD_TARGET_DIRECTORY
+	);
+}
 
 
-	// type of command
-	static QFlags<TeTypes::CmdType> type();
-
-protected:
-	// Execute command.
-	// return
-	//   true  : command is finished. after execute, this command is deleted.
-	//   false : command is still processing. after finish. you must call finish() to delete this command.
-	virtual bool execute(TeViewStore* p_store);
-};
-
+bool TeCmdToolSetting::execute(TeViewStore* p_store)
+{
+	TeToolDialog dialog;
+	dialog.exec();
+	return true;
+}

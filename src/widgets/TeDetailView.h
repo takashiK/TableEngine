@@ -23,6 +23,7 @@
 #include <QWidget>
 #include <QFileInfo>
 #include <QList>
+#include "utils/TeFileInfo.h"
 
 class QScrollArea;
 class QVBoxLayout;
@@ -77,9 +78,13 @@ public:
 public slots:
     /**
      * @brief Updates the panel to show information for @p info.
-     * @param info The currently selected file.
+     *
+     * @p info is converted to a QFileInfo via its path() for the existing
+     * filesystem-based sections.  Archive/search entries that don't exist on
+     * disk simply cause every section's canHandle() to return false.
+     * @param info The currently selected item (unified DTO).
      */
-    void setFileInfo(const QFileInfo& info);
+    void setFileInfo(const TeFileInfo& info);
 
     /** @brief Clears all sections. */
     void clear();

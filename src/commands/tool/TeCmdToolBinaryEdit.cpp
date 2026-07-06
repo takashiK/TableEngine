@@ -18,34 +18,36 @@
 **
 ****************************************************************************/
 
-#include "TeCmdRunCommand.h"
-#include "TeViewStore.h"
+#include "TeCmdToolBinaryEdit.h"
+#include "TeSettings.h"
 #include "utils/TeUtils.h"
 #include "utils/TeToolCommand.h"
-#include "dialogs/TeCommandInputDialog.h"
+
+#include <QSettings>
 
 /**
- * @file TeCmdRunCommand.cpp
- * @brief Implementation of TeCmdRunCommand.
+ * @file TeCmdToolBinaryEdit.cpp
+ * @brief Declaration of TeCmdToolBinaryEdit.
  * @ingroup commands
  */
 
-TeCmdRunCommand::TeCmdRunCommand()
+
+TeCmdToolBinaryEdit::TeCmdToolBinaryEdit()
 {
 }
 
-TeCmdRunCommand::~TeCmdRunCommand()
+TeCmdToolBinaryEdit::~TeCmdToolBinaryEdit()
 {
 }
 
-bool TeCmdRunCommand::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+bool TeCmdToolBinaryEdit::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
 	NOT_USED(p_cmdParam);
 	return false;
 }
 
-QFlags<TeTypes::CmdType> TeCmdRunCommand::type()
+QFlags<TeTypes::CmdType> TeCmdToolBinaryEdit::type()
 {
 	return QFlags<TeTypes::CmdType>(
 		TeTypes::CMD_TRIGGER_NORMAL
@@ -60,35 +62,13 @@ QFlags<TeTypes::CmdType> TeCmdRunCommand::type()
 	);
 }
 
-bool TeCmdRunCommand::execute(TeViewStore* p_store)
+
+bool TeCmdToolBinaryEdit::execute(TeViewStore* p_store)
 {
-	//Macro
-	// %F : Replace current file path.
-	// %f : Replace current file name.
-	// %M : Replace selected file paths.
-	// %m : Replace selected file names.
-	// %P : Replace current folder path.
+	QSettings settings;
+	const QString command = settings.value(SETTING_TOOLS_BINARY_EDIT).toString();
 
-	QString command;
-	bool shell = false;
-	bool output = false;
-	if (cmdParam()->contains("command")) {
-		command = cmdParam()->value("command").toString();
-		shell = cmdParam()->value("shell").toBool();
-		output = cmdParam()->value("output").toBool();
-	}
-	else {
-		TeCommandInputDialog dlg;
-		dlg.setWindowTitle(QObject::tr("Run command"));
-		if (dlg.exec() == QDialog::Accepted) {
-			command = dlg.command();
-			shell = dlg.shell();
-			output = dlg.output();
-		}
-	}
-
-	TeToolCommand::runCommand(p_store, command, shell, output);
+	TeToolCommand::runCommand(p_store, command, false, false);
 
 	return true;
 }
-
