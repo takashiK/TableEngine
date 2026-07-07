@@ -115,6 +115,9 @@ public:
 	/** @brief Navigates to the previous path in the history stack. */
 	virtual void movePrevPath() = 0;
 
+	/** @brief Navigates to the parent directory of the current path. */
+	virtual void moveParentPath() = 0;
+
 	/** @brief Returns the navigation history as a list of path strings. */
 	virtual QStringList getPathHistory() const = 0;
 

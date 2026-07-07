@@ -217,7 +217,6 @@ void TeViewStore::initialize()
 		param.insert(TeCmdFolderChangeRoot::PARAM_ROOT_PATH, path);
 		emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT,TeTypes::WT_DRIVEBAR,nullptr,&param);
 
-		qDebug() << "History for root" << path << ":" << history;
 		TeCmdParam param2;
 		if (!history.isEmpty()) {
 			param2.insert(TeCmdGotoFolder::PARAM_PATH, history.first());
@@ -814,12 +813,13 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 {
 	TeFileFolderView * folderView = new TeFileFolderView;
 	folderView->setDispatcher(this);
-	folderView->setRootPath(path);
+	folderView->list()->setFileViewMode(fileInfoFlags(), viewMode());
+	folderView->setFileShowMode(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	folderView->list()->setFocusPolicy(Qt::ClickFocus);
 	folderView->list()->setSelectionMode(selectionMode());
-	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
 	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
+	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
 	connect(folderView, &TeFolderView::focusIn, [this, folderView]() {
 		if (currentFolderView() != folderView) {
 			int pos = tabPlace(folderView);
@@ -829,11 +829,10 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 		}
 	});
 
-	folderView->list()->setFileViewMode(fileInfoFlags(), viewMode());
-	folderView->setFileShowMode(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	connect(this, &TeViewStore::fileListViewModeChanged, folderView->list(), &TeFileListView::setFileViewMode);
 	connect(this, &TeViewStore::fileListShowModeChanged, folderView, &TeFileFolderView::setFileShowMode);
 
+	folderView->setRootPath(path);
 	addFolderView(folderView, place);
 
 	return folderView;
@@ -843,15 +842,16 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 {
 	TeArchiveFolderView* folderView = new TeArchiveFolderView;
 	folderView->setDispatcher(this);
+	folderView->list()->setFocusPolicy(Qt::ClickFocus);
+	folderView->list()->setSelectionMode(selectionMode());
+	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
+
 	bool ok = folderView->setArchive(path);
 	if (!ok) {
 		delete folderView;
 		return nullptr;
 	}
-	folderView->list()->setFocusPolicy(Qt::ClickFocus);
-	folderView->list()->setSelectionMode(selectionMode());
 	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
-	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
 	addFolderView(folderView, place);
 

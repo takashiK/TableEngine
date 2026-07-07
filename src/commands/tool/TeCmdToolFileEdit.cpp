@@ -82,7 +82,6 @@ bool TeCmdToolFileEdit::execute(TeViewStore* p_store)
 		switch (getFileType(targetFile)) {
 		case TE_FILE_TEXT:
 			command = settings.value(SETTING_TOOLS_TEXT_EDIT).toString();
-			qDebug() << "TeCmdToolFileEdit: using text editor command:" << command;
 			break;
 		case TE_FILE_IMAGE:
 			command = settings.value(SETTING_TOOLS_IMAGE_EDIT).toString();
@@ -91,8 +90,6 @@ bool TeCmdToolFileEdit::execute(TeViewStore* p_store)
 			break;
 		}
 	}
-
-	qDebug() << "TeCmdToolFileEdit: command to run:" << command;
 
 	// 4. No matching tool: confirm falling back to the binary editor.
 	if (command.isEmpty()) {

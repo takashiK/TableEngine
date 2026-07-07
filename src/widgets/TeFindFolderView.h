@@ -75,6 +75,9 @@ public:
 	void        moveNextPath() override;
 	/** @brief Navigates to the previous registered search entry. */
 	void        movePrevPath() override;
+	/** @brief Navigates to the parent directory of the current path. */
+	void moveParentPath() override;
+
 	/** @brief Returns the list of registered search labels. */
 	QStringList getPathHistory() const override;
 	/** @brief Returns the list of registered search labels for a specific root. */

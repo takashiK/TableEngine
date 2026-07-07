@@ -192,6 +192,10 @@ void TeFindFolderView::movePrevPath()
 	}
 }
 
+void TeFindFolderView::moveParentPath() {
+	// Not applicable for find view; no parent directory concept
+}
+
 QStringList TeFindFolderView::getPathHistory() const
 {
 	QStringList list;
