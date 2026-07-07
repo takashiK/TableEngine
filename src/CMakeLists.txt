@@ -68,6 +68,7 @@ if(WIN32)
 target_compile_options(tablelibs PRIVATE /MP )
 
 target_link_libraries(tablelibs
+    Shlwapi
     LibArchive::LibArchive
     icu.lib
 )

@@ -20,7 +20,7 @@
 
 #include "TeCmdToolSetting.h"
 #include "utils/TeUtils.h"
-#include "dialogs/TeToolDialog.h"
+#include "dialogs/TeEditToolSetting.h"
 
 /**
  * @file TeCmdToolSetting.cpp
@@ -62,7 +62,7 @@ QFlags<TeTypes::CmdType> TeCmdToolSetting::type()
 
 bool TeCmdToolSetting::execute(TeViewStore* p_store)
 {
-	TeToolDialog dialog;
+	TeEditToolSetting dialog;
 	dialog.exec();
 	return true;
 }

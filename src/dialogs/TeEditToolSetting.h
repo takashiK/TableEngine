@@ -29,7 +29,7 @@ class QLineEdit;
 class QVBoxLayout;
 
 /**
- * @class TeToolDialog
+ * @class TeEditToolSetting
  * @brief Modal dialog for editing external tool settings.
  * @ingroup dialogs
  *
@@ -38,7 +38,7 @@ class QVBoxLayout;
  * are loaded from QSettings when the dialog is constructed and written back
  * only when the dialog is accepted (OK).
  */
-class TeToolDialog : public QDialog
+class TeEditToolSetting : public QDialog
 {
 	Q_OBJECT
 
@@ -57,8 +57,9 @@ class TeToolDialog : public QDialog
 	};
 
 public:
-	TeToolDialog(QWidget* parent = nullptr);
-	~TeToolDialog();
+	TeEditToolSetting(QWidget* parent = nullptr);
+	~TeEditToolSetting();
+	static void storeDefaultSettings();
 
 public slots:
 	void accept() override;
