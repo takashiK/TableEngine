@@ -20,35 +20,42 @@
 
 #pragma once
 
-#include <QMainWindow>
+#include "commands/TeCommandBase.h"
+
+#include <QList>
+#include <QFlags>
 
 /**
- * @file TeMainWindow.h
- * @brief Application main window.
- * @ingroup widgets
+ * @file TeCmdNaviItemFolder.h
+ * @brief Declaration of TeCmdNaviItemFolder.
+ * @ingroup commands
  */
 
-/**
- * @class TeMainWindow
- * @brief The application main window created by TeViewStore.
- * @ingroup widgets
- *
- * @details Extends QMainWindow with no additional public API.  Layout,
- * menu-bar, and toolbar setup are performed inside the constructor via
- * TeViewStore.
- */
-class TeMainWindow : public QMainWindow
+
+class TeViewStore;
+
+class TeCmdNaviItemFolder :
+    public TeCommandBase
 {
-	Q_OBJECT
+public:
+	static const char* PARAM_OPEN_TARGET_DIR; // Parameter key for the open target itself if item is a directory.
 
 public:
-	TeMainWindow(QWidget *parent = Q_NULLPTR);
+	TeCmdNaviItemFolder();
+	virtual ~TeCmdNaviItemFolder();
+
+
+	// Check if this command is selected when item is selected.
+	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
+
+	// type of command
+	static QFlags<TeTypes::CmdType> type();
 
 protected:
-	void closeEvent(QCloseEvent *event) override;
-
-signals:
-	void closing();
-
-private:
+	// Execute command.
+	// return
+	//   true  : command is finished. after execute, this command is deleted.
+	//   false : command is still processing. after finish. you must call finish() to delete this command.
+	virtual bool execute(TeViewStore* p_store);
 };
+

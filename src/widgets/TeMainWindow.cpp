@@ -29,3 +29,8 @@ TeMainWindow::TeMainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 }
+
+void TeMainWindow::closeEvent(QCloseEvent* event) {
+	emit closing();
+	QMainWindow::closeEvent(event);
+}

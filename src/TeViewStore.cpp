@@ -141,9 +141,6 @@ TeViewStore::~TeViewStore()
 	//TeFolderView is child of QTab. so this action do "delete TeFolderView before QMainWindow."
 	if (mp_tab[TAB_LEFT]) delete mp_tab[TAB_LEFT];
 	if (mp_tab[TAB_RIGHT]) delete mp_tab[TAB_RIGHT];
-	// mp_findView is owned by a tab (addFolderView makes it a tab child).
-	// If it was never added to a tab, delete it explicitly.
-	if (mp_findView && mp_findView->parent() == nullptr) delete mp_findView;
 	if (mp_mainWindow) delete mp_mainWindow;
 
 	for (auto widget : m_floatingWidgets) {
@@ -164,7 +161,20 @@ void TeViewStore::initialize()
 	//Main window
 	mp_mainWindow = new TeMainWindow;
 	if (mp_fileOpManager) mp_fileOpManager->setOwnerWidget(mp_mainWindow);
-	connect(qApp, &QCoreApplication::aboutToQuit, this, [this]() { storeWindowSizeIfNeeded(); });
+	connect(mp_mainWindow, &TeMainWindow::closing, this, [this]() {
+		storeWindowSizeIfNeeded();
+		QSettings settings;
+
+		int mode = settings.value(SETTING_GENERAL_InitialFolderMode, TeSettings::INIT_FOLDER_MODE_SELECTED).toInt();
+		if (mode == TeSettings::INIT_FOLDER_MODE_PREVIOUS){
+			QString path = getCurrentFolder(this);
+			TeFolderView* folder = currentFolderView();
+			if (folder) {
+				settings.setValue(SETTING_GENERAL_InitialFolder, folder->rootPath());
+				settings.setValue(SETTING_GENERAL_InitialItem, path);
+			}
+		} 
+	});
 
 	//Drive bar
 	mp_driveBar = new TeDriveBar("Drive Bar");
@@ -515,10 +525,19 @@ void TeViewStore::loadStatus()
 {
 	//FolderView復帰
 	QSettings settings;
-	QStringList paths = settings.value("initialState/paths", QStringList(QDir::rootPath())).toStringList();
+	QString rootPath = settings.value(SETTING_GENERAL_InitialFolder, QDir::rootPath()).toString();
+	QString path = settings.value(SETTING_GENERAL_InitialItem, "").toString();
+	int mode = settings.value(SETTING_GENERAL_InitialFolderMode, TeSettings::INIT_FOLDER_MODE_SELECTED).toInt();
 
-	for (QString& path : paths) {
-		createFolderView(path);
+	QFileInfo info(path);
+	QFileInfo rootInfo(rootPath);
+	if(!rootInfo.exists() || !rootInfo.isDir()) rootPath = QDir::rootPath();
+
+	TeFileFolderView* folder = createFolderView(rootPath);
+	if(folder && (mode == TeSettings::INIT_FOLDER_MODE_PREVIOUS)){
+		if(info.exists() && info.isDir() && info.absoluteFilePath().startsWith(rootInfo.absoluteFilePath())){
+			folder->setCurrentPath(path);
+		}
 	}
 }
 
@@ -529,7 +548,6 @@ void TeViewStore::show()
 
 void TeViewStore::close()
 {
-	storeWindowSizeIfNeeded();
 	if (mp_mainWindow) mp_mainWindow->close();
 }
 

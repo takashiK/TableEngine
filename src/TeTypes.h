@@ -246,6 +246,7 @@ public:
 		CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE,             // #Navigate toggle focus folder tree view
 		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_UP,               // #Navigate scroll detail view up
 		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN,             // #Navigate scroll detail view down
+		CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER, 			  // #Navigate open item's folder
 
 		CMDID_USER        = 0xD000,                       // User registed commands
 		CMDID_USER_REGIST_COMMAND,                        // Regist user commands

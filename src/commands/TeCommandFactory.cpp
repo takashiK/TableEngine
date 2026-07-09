@@ -100,6 +100,7 @@
 #include "navi/TeCmdNaviToggleFolderTree.h"
 #include "navi/TeCmdNaviDetailScrollUp.h"
 #include "navi/TeCmdNaviDetailScrollDown.h"
+#include "navi/TeCmdNaviItemFolder.h"
 
 /**
  * @file TeCommandFactory.cpp
@@ -256,6 +257,7 @@ TeCommandFactory::TeCommandFactory()
 		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE, TeCmdNaviToggleFolderTree, tr("Toggle Folder/Tree"), tr("Toggle focus between folder and tree view."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviToggleFolderTree.png")));
 		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_DETAIL_SCROLL_UP, TeCmdNaviDetailScrollUp, tr("Scroll Detail Up"), tr("Scroll detail view up."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviDetailUp.png")));
 		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN, TeCmdNaviDetailScrollDown, tr("Scroll Detail Down"), tr("Scroll detail view down."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviDetailDown.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER, TeCmdNaviItemFolder, tr("Open Item's Folder"), tr("Open item's Parent folder."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviItemFolder.png")));
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_USER);

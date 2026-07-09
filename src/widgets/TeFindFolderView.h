@@ -2,6 +2,8 @@
 
 #include <QList>
 #include <QModelIndex>
+#include <QPoint>
+#include <QAbstractItemView>
 #include "TeFolderView.h"
 #include "utils/TeSearchQuery.h"
 #include "utils/TeFileInfo.h"
@@ -107,6 +109,14 @@ public slots:
 	void setFileShowMode(TeTypes::FileTypeFlags typeFlags,
 	                     TeTypes::OrderType order,
 	                     bool orderReversed) override;
+
+protected:
+	/**
+	 * @brief Shows a system context menu at @p pos for the item view @p pView.
+	 * @param pView  The view that received the context-menu event.
+	 * @param pos    Screen position for the menu.
+	 */
+	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos);
 
 private slots:
 	/** @brief Handles tree-selection changes to switch the active search entry. */
