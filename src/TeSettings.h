@@ -94,7 +94,6 @@ SETTING_STR(SETTING_LAYOUT_WINDOW_LAST_WIDTH, "layout/window_last_width");
 SETTING_STR(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, "layout/window_last_height");
 SETTING_STR(SETTING_LAYOUT_TREE_MIN_WIDTH, "layout/tree_min_width");
 SETTING_STR(SETTING_LAYOUT_TREE_MAX_WIDTH, "layout/tree_max_width");
-SETTING_STR(SETTING_LAYOUT_TREE_LIST_RATIO, "layout/tree_list_ratio");
 SETTING_STR(SETTING_LAYOUT_DETAIL_MIN_WIDTH, "layout/detail_min_width");
 SETTING_STR(SETTING_LAYOUT_DETAIL_MAX_WIDTH, "layout/detail_max_width");
 SETTING_STR(SETTING_LAYOUT_DIALOG_MIN_WIDTH, "layout/dialog_min_width");

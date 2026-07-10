@@ -766,7 +766,6 @@ void TeViewStore::applyLayoutSettings()
 
 	const int treeMinWidth = qBound(120, settings.value(SETTING_LAYOUT_TREE_MIN_WIDTH, 200).toInt(), 2400);
 	const int treeMaxWidth = qBound(treeMinWidth, settings.value(SETTING_LAYOUT_TREE_MAX_WIDTH, 400).toInt(), 3200);
-	const int treeRatio = qBound(10, settings.value(SETTING_LAYOUT_TREE_LIST_RATIO, 25).toInt(), 90);
 	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 3200);
 	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 4200);
 
@@ -786,23 +785,6 @@ void TeViewStore::applyLayoutSettings()
 	if (tree) {
 		tree->setMinimumWidth(treeMinWidth);
 		tree->setMaximumWidth(treeMaxWidth);
-	}
-
-	if (mp_split && tree && (!mp_mainWindow || !mp_mainWindow->isVisible())) {
-		QList<int> sizes = mp_split->sizes();
-		if (sizes.size() >= 2) {
-			int treeSize = sizes.at(0);
-			int listSize = sizes.at(1);
-			int total = treeSize + listSize;
-			if (total <= 0) {
-				total = qMax(800, mp_mainWindow ? mp_mainWindow->width() : 800);
-			}
-			const int wantedTreeSize = qBound(treeMinWidth, (total * treeRatio) / 100, treeMaxWidth);
-			const int wantedListSize = qMax(200, total - wantedTreeSize);
-			sizes[0] = wantedTreeSize;
-			sizes[1] = wantedListSize;
-			mp_split->setSizes(sizes);
-		}
 	}
 }
 
