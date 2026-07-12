@@ -186,6 +186,8 @@ public:
 		CMDID_SYSTEM_FOLDER_GOTO_FOLDER,                  // #Go to folder
 		CMDID_SYSTEM_FOLDER_CHANGE_ROOT,                  // #Change root folder
 		CMDID_SYSTEM_FOLDER_FIND,                         // #Find files   TODO: Implement find command
+		CMDID_SYSTEM_FOLDER_ADD_QUICKACCESS,              // #Add QuickAccess folder to Drive bar 
+		CMDID_SYSTEM_FOLDER_EDIT_QUICKACCESS,             // #Edit QuickAccess of Drive bar
 
 		CMDID_SYSTEM_VIEW    = CMDID_SYSTEM + 0x4000,     // Menu item : View
 		CMDID_SYSTEM_VIEW_FILESIZE,					      // #Show file size

@@ -267,12 +267,14 @@ void TeViewStore::initialize()
 	QWidget *folder_widget = new QWidget();
 	folder_widget->setLayout(hbox);
 	QSizePolicy listPolicy = folder_widget->sizePolicy();
-	listPolicy.setHorizontalStretch(2);
+	listPolicy.setHorizontalStretch(1);
 	folder_widget->setSizePolicy(listPolicy);
 
 	//Splitter
 	mp_split = new QSplitter();
 	mp_split->addWidget(folder_widget);
+
+	mp_mainWindow->setCentralWidget(mp_split);
 
 	//Detail View
 	mp_detailView = new TeDetailView();
@@ -289,7 +291,6 @@ void TeViewStore::initialize()
 	mp_mainWindow->addDockWidget(Qt::RightDockWidgetArea, mp_detailDock);
 	mp_detailDock->hide();
 
-	mp_mainWindow->setCentralWidget(mp_split);
 
 	connect(mp_tab[TAB_LEFT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFolderView*>(mp_tab[TAB_LEFT]->widget(index))); });
 	connect(mp_tab[TAB_RIGHT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFolderView*>(mp_tab[TAB_RIGHT]->widget(index))); });
@@ -719,6 +720,11 @@ void TeViewStore::setCurrentFolderView(TeFolderView * view)
 	if (place == TAB_LEFT) {
 		TeFileTreeView* tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
 		if (tree != view->tree()) {
+			//Set SizePolicy of TreeView to prevent resize of TreeView when change current folder view.
+			auto policy = view->tree()->sizePolicy();
+			policy.setHorizontalStretch(0);
+			view->tree()->setSizePolicy(policy);
+
 			if (tree == Q_NULLPTR) {
 				//Insert New Item
 				//In this section directry excute after call QTab::addTab(). because it emit currentChanged and currentChanged call setCurrentFolderView().

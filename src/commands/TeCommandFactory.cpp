@@ -52,6 +52,8 @@
 #include "folder/TeCmdFolderOpenAll.h"
 #include "folder/TeCmdFolderOpenOne.h"
 #include "folder/TeCmdFolderOpenUnder.h"
+#include "folder/TeCmdAddQuickAccess.h"
+#include "folder/TeCmdEditQuickAccess.h"
 #include "folder/TeCmdAddFavorite.h"
 #include "folder/TeCmdEditFavorites.h"
 #include "folder/TeCmdPrevFolder.h"
@@ -169,6 +171,9 @@ TeCommandFactory::TeCommandFactory()
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_OPEN_ALL, TeCmdFolderOpenAll, tr("&Expand All"), tr("Expand all Folders."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/expandAll.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CLOSE_UNDER, TeCmdFolderCloseUnder, tr("Colla&pse"), tr("Collapse current Folder."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/collapse.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CLOSE_ALL, TeCmdFolderCloseAll, tr("&Collapse All"), tr("Collapse all Folders."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/collapseAll.png")));
+		SEPARATOR();
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_ADD_QUICKACCESS, TeCmdAddQuickAccess, tr("Add Quick Access"), tr("Add a folder to quick access on Drivebar."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/addQuickAccess.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_EDIT_QUICKACCESS, TeCmdEditQuickAccess, tr("Edit Quick Access"), tr("Edit quick access on Drivebar."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/editQuickAccess.png")));
 		SEPARATOR();
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_ADD_FAVORITE, TeCmdAddFavorite, tr("Add Favorite"), tr("Add a folder to favorites list."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/addFavorite.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_EDIT_FAVORITES, TeCmdEditFavorites, tr("Edit Favorites"), tr("Edit favorites list."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/editFavorites.png")));

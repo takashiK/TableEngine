@@ -200,7 +200,7 @@ void TeMenuSetting::storeDefaultTreeMenuSettings(QSettings& settings )
 	int index = 0;
 	int indent = 0;
 	QString group = QString("menuGroup01");
-	defaultEntry(settings, group, tr("Popup menu on TreeView"));
+	defaultEntry(settings, group, tr("Popup for TreeView"));
 
 	settings.beginGroup(group);
 	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FOLDER_OPEN_UNDER);
@@ -217,7 +217,7 @@ void TeMenuSetting::storeDefaultListMenuSettings(QSettings& settings )
 	int index = 0;
 	int indent = 0;
 	QString group = QString("menuGroup02");
-	defaultEntry(settings, group, tr("Popup menu on ListView"));
+	defaultEntry(settings, group, tr("Popup for ListView"));
 
 	settings.beginGroup(group);
 	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_EDIT_CUT);
