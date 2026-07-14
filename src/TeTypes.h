@@ -210,9 +210,9 @@ public:
 		CMDID_SYSTEM_TOOL    = CMDID_SYSTEM + 0x5000,     // Menu item : Tool
 		CMDID_SYSTEM_TOOL_VIEW_FILE,					  // #View file
 		CMDID_SYSTEM_TOOL_VIEW_BINARY,					  // #View binary
-		CMDID_SYSTEM_TOOL_EDIT_FILE,                      // Edit file
-		CMDID_SYSTEM_TOOL_EDIT_BINARY,                    // Edit binary
-		CMDID_SYSTEM_TOOL_SETUP,                          // Setup Tools
+		CMDID_SYSTEM_TOOL_EDIT_FILE,                      // #Edit file
+		CMDID_SYSTEM_TOOL_EDIT_BINARY,                    // #Edit binary
+		CMDID_SYSTEM_TOOL_SETUP,                          // #Setup Tools
 		CMDID_SYSTEM_TOOL_EXECUTE,                        // Execute Tool with parameters
 
 		CMDID_SYSTEM_WINDOW  = CMDID_SYSTEM + 0x6000,     // Menu item : Window

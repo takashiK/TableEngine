@@ -70,7 +70,7 @@
 #include "view/TeCmdViewFileOrderBy.h"
 #include "view/TeCmdViewFileOrder.h"
 #include "view/TeCmdViewLayout.h"
-
+#include "view/TeCmdViewSortSetting.h"
 
 #include "tool/TeCmdToolSetting.h"
 #include "tool/TeCmdToolFile.h"
@@ -213,6 +213,7 @@ TeCommandFactory::TeCommandFactory()
 			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_HUGE_ICON, TeCmdViewLayout, TeCmdViewLayout::HUGE_ICON, tr("Huge Icon"), tr("Show huge icons."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/hugeIcon.png")));
 			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_DETAIL_LIST, TeCmdViewLayout, TeCmdViewLayout::DETAIL_LIST, tr("Detail List"), tr("Show detail list."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/detailList.png")));
 		END_FOLDER();
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_VIEW_SORT_SETTING, TeCmdViewSortSetting, tr("Sort Setting"), tr("Show sort setting dialog."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/sortSetting.png")));
 	
 	END_GROUP();
 

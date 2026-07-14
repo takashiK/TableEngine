@@ -158,6 +158,8 @@ TeTypes::WidgetType TeViewStore::getType() const
 
 void TeViewStore::initialize()
 {
+	QSettings settings;
+
 	//Main window
 	mp_mainWindow = new TeMainWindow;
 	if (mp_fileOpManager) mp_fileOpManager->setOwnerWidget(mp_mainWindow);
@@ -332,6 +334,12 @@ void TeViewStore::initialize()
 	loadToolbar();
 	loadSetting();
 	loadStatus();
+
+		// showing settings
+	setToolBarVisible(settings.value(SETTING_WINDOW_SHOW_TOOLBAR, true).toBool());
+	setDriveBarVisible(settings.value(SETTING_WINDOW_SHOW_DRIVEBAR, true).toBool());
+	setStatusBarVisible(settings.value(SETTING_WINDOW_SHOW_STATUSBAR, true).toBool());
+	setNavigationVisible(settings.value(SETTING_WINDOW_SHOW_NAVIGATION, true).toBool());
 }
 
 /*!
@@ -463,7 +471,13 @@ void TeViewStore::loadToolbar()
  */
 void TeViewStore::loadSetting()
 {
-	setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
+	QSettings settings;
+	m_fileInfoFlags = static_cast<TeTypes::FileInfoFlags>(settings.value(SETTING_VIEW_SHOW_FILE_INFO, uint32_t(m_fileInfoFlags)).toUInt());
+	m_fileTypeFlags = static_cast<TeTypes::FileTypeFlags>(settings.value(SETTING_VIEW_SHOW_FILE_TYPE, uint32_t(m_fileTypeFlags)).toUInt());
+	m_fileOrderBy = static_cast<TeTypes::OrderType>(settings.value(SETTING_VIEW_SORT_ORDER_BY, uint32_t(m_fileOrderBy)).toUInt());
+	m_fileOrderReversed = settings.value(SETTING_VIEW_SORT_ORDER_REVERSED, m_fileOrderReversed).toBool();
+	m_viewMode = static_cast<TeTypes::FileViewMode>(settings.value(SETTING_VIEW_LAYOUT_MODE, uint32_t(m_viewMode)).toUInt());
+	setSelectionMode(static_cast<TeTypes::SelectionMode>(settings.value(SETTING_EDIT_SELECTION_STYLE, uint32_t(m_selectionMode)).toUInt()));
 	applyStyleSheet();
 	applyLayoutSettings();
 }
@@ -1086,6 +1100,8 @@ void TeViewStore::floatingWidgetClosed(QWidget* widget, QEvent* )
 void TeViewStore::setSelectionMode(TeTypes::SelectionMode mode)
 {
 	if (m_selectionMode != mode) {
+		QSettings settings;
+		settings.setValue(SETTING_EDIT_SELECTION_STYLE, uint32_t(mode));
 		m_selectionMode = mode;
 		emit selectionModeChanged(mode);
 	}
@@ -1099,6 +1115,8 @@ bool TeViewStore::isDriveBarVisible() const
 void TeViewStore::setDriveBarVisible(bool visible)
 {
 	if (mp_driveBar) {
+		QSettings settings;
+		settings.setValue(SETTING_WINDOW_SHOW_DRIVEBAR, visible);
 		mp_driveBar->setHidden(!visible);
 	}
 }
@@ -1111,6 +1129,8 @@ bool TeViewStore::isStatusBarVisible() const
 void TeViewStore::setStatusBarVisible(bool visible)
 {
 	if (mp_mainWindow) {
+		QSettings settings;
+		settings.setValue(SETTING_WINDOW_SHOW_STATUSBAR, visible);
 		mp_mainWindow->statusBar()->setHidden(!visible);
 	}
 }
@@ -1123,6 +1143,8 @@ bool TeViewStore::isToolBarVisible() const
 void TeViewStore::setToolBarVisible(bool visible)
 {
 	if (mp_mainWindow) {
+		QSettings settings;
+		settings.setValue(SETTING_WINDOW_SHOW_TOOLBAR, visible);
 		mp_toolBar->setHidden(!visible);
 	}
 }
@@ -1137,6 +1159,9 @@ void TeViewStore::setNavigationVisible(bool visible)
 	if (m_isNavigationVisible == visible || !mp_split) {
 		return;
 	}
+
+	QSettings settings;
+	settings.setValue(SETTING_WINDOW_SHOW_NAVIGATION, visible);
 
 	TeFileTreeView* tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
 	if (!tree) {
@@ -1180,6 +1205,8 @@ void TeViewStore::setNavigationVisible(bool visible)
 void TeViewStore::setFileInfoFlags(TeTypes::FileInfoFlags flags)
 {
 	if (m_fileInfoFlags != flags) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_SHOW_FILE_INFO, uint32_t(flags));
 		m_fileInfoFlags = flags;
 		emit fileListViewModeChanged(fileInfoFlags(), viewMode());
 	}
@@ -1188,6 +1215,8 @@ void TeViewStore::setFileInfoFlags(TeTypes::FileInfoFlags flags)
 void TeViewStore::setFileTypeFlags(TeTypes::FileTypeFlags flags)
 {
 	if (m_fileTypeFlags != flags) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_SHOW_FILE_TYPE, uint32_t(flags));
 		m_fileTypeFlags = flags;
 		emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	}
@@ -1196,6 +1225,8 @@ void TeViewStore::setFileTypeFlags(TeTypes::FileTypeFlags flags)
 void TeViewStore::setFileOrderBy(TeTypes::OrderType order)
 {
 	if (m_fileOrderBy != order) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_SORT_ORDER_BY, uint32_t(order));
 		m_fileOrderBy = order;
 		emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	}
@@ -1204,6 +1235,8 @@ void TeViewStore::setFileOrderBy(TeTypes::OrderType order)
 void TeViewStore::setFileOrderReversed(bool reversed)
 {
 	if (m_fileOrderReversed != reversed) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_SORT_ORDER_REVERSED, reversed);
 		m_fileOrderReversed = reversed;
 		emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	}
@@ -1212,6 +1245,8 @@ void TeViewStore::setFileOrderReversed(bool reversed)
 void TeViewStore::setViewMode(TeTypes::FileViewMode mode)
 {
 	if (m_viewMode != mode) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_LAYOUT_MODE, uint32_t(mode));
 		m_viewMode = mode;
 		emit fileListViewModeChanged(fileInfoFlags(), viewMode());
 	}

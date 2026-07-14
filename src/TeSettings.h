@@ -136,4 +136,18 @@ SETTING_STR(SETTING_FOLDER_FOCUS_PRIORITY,   "folder/appearance/focus_priority")
 
 SETTING_STR(SETTING_FOLDER_ACCENT_COLOR,     "folder/appearance/accent_color");
 
+// Dynamic settings
+SETTING_STR(SETTING_EDIT_SELECTION_STYLE, "edit/selection_style");
+
+SETTING_STR(SETTING_VIEW_SORT_ORDER_BY, "view/sort_order_by");
+SETTING_STR(SETTING_VIEW_SORT_ORDER_REVERSED, "view/sort_order_reversed");
+SETTING_STR(SETTING_VIEW_SHOW_FILE_INFO, "view/show_file_info");
+SETTING_STR(SETTING_VIEW_SHOW_FILE_TYPE, "view/show_file_type");
+SETTING_STR(SETTING_VIEW_LAYOUT_MODE, "view/layout_mode");
+
+SETTING_STR(SETTING_WINDOW_SHOW_TOOLBAR, "window/show_toolbar");
+SETTING_STR(SETTING_WINDOW_SHOW_DRIVEBAR, "window/show_drivebar");
+SETTING_STR(SETTING_WINDOW_SHOW_STATUSBAR, "window/show_statusbar");
+SETTING_STR(SETTING_WINDOW_SHOW_NAVIGATION, "window/show_navigation");
+
 #undef SETTING_STR
