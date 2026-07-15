@@ -76,6 +76,10 @@
         <file alias="binary_edit.png">Resources/icon/iconmonstr-pen-3-64.png</file>
         <file alias="file_edit.png">Resources/icon/iconmonstr-pen-4-64.png</file>
         <file alias="tool_settings.png">Resources/icon/iconmonstr-ruler-32-64.png</file>
+        <file alias="addQuickAccess.png">Resources/icon/iconmonstr-time-12-64.png</file>
+        <file alias="editQuickAccess.png">Resources/icon/iconmonstr-time-19-64.png</file>
+        <file alias="selectionExplorer.png">Resources/icon/iconmonstr-inbox-16-64.png</file>
+        <file alias="selectionTableEngine.png">Resources/icon/iconmonstr-dashboard-7-64.png</file>
     </qresource>
     <qresource prefix="/Style">
         <file alias="stylesheet_dark.css">Resources/stylesheet/stylesheet_dark.css</file>

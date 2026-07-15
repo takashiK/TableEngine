@@ -76,12 +76,13 @@ bool TeCmdProperties::execute(TeViewStore* p_store)
 	if (getSelectedItemList(p_store, &paths)) {
 		TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
 		if (p_arc != nullptr) {
+			//Archive properties dialog
 			TePropertiesDialog dlg(p_arc->entryInfo(paths), false, p_store->mainWindow());
 			dlg.exec();
 		}
 		else {
-			TePropertiesDialog dlg(TePropertiesDialog::fromPaths(paths), true, p_store->mainWindow());
-			dlg.exec();
+			//Filesystem OS Native properties dialog
+			showFilesProperties(paths);
 		}
 	}
 

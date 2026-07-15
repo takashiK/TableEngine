@@ -333,6 +333,21 @@ void TeFileFolderView::movePrevPath()
 		updatePath(pair.first, pair.second);
 }
 
+void TeFileFolderView::moveParentPath() {
+	QString curPath = currentPath();
+	if (curPath.isEmpty() || curPath == QDir::rootPath()) {
+		// Already at the root; no parent to navigate to
+		return;
+	}
+
+	QDir dir(curPath);
+	dir.cdUp();
+	QString parentPath = dir.absolutePath();
+	if(parentPath.startsWith(rootPath())) {
+		setCurrentPath(parentPath);
+	}
+}
+
 QStringList TeFileFolderView::getPathHistory() const
 {
 	return m_history.get();
@@ -363,12 +378,15 @@ void TeFileFolderView::updatePath(const QString& root, const QString& current)
 		//Set target path of listview to same as treeview.
 		list()->clearSelection();
 		list()->setCurrentIndex(QModelIndex());
+		mp_listSortModel->setVirtualRootPath(absRoot);
 		QModelIndex rootIndex = mp_listModel->setRootPath(absRoot);
-		list()->setRootIndex(mp_listSortModel->mapFromSource(rootIndex));
 
-		QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
+		auto listSortRoot = mp_listSortModel->mapFromSource(rootIndex);
+		list()->setRootIndex(listSortRoot);
+
+		QModelIndex curIndex = mp_listSortModel->index(0, 0, listSortRoot);
 		if (curIndex.isValid())
-			list()->setCurrentIndex(mp_listSortModel->mapFromSource(curIndex));
+			list()->setCurrentIndex(curIndex);
 		//invalid case : setCurrentIndex at directoryLoaded event.
 
 	}
@@ -388,15 +406,16 @@ void TeFileFolderView::updatePath(const QString& root, const QString& current)
 			list()->clearSelection();
 			list()->setCurrentIndex(QModelIndex());
 			QModelIndex rootIndex = mp_listModel->setRootPath(current);
-			list()->setRootIndex(mp_listSortModel->mapFromSource(rootIndex));
+			auto listSortRoot = mp_listSortModel->mapFromSource(rootIndex);
+			list()->setRootIndex(listSortRoot);
 
 			if (current == mp_listModel->filePath(prevIndex.parent())) {
 				list()->setCurrentIndex(mp_listSortModel->mapFromSource(mp_listModel->index(prevPath)));
 			}
 			else {
-				QModelIndex curIndex = mp_listModel->index(0, 0, rootIndex);
+				QModelIndex curIndex = mp_listSortModel->index(0, 0, listSortRoot);
 				if (curIndex.isValid())
-					list()->setCurrentIndex( mp_listSortModel->mapFromSource(curIndex));
+					list()->setCurrentIndex(curIndex);
 				//invalid case : setCurrentIndex at directoryLoaded event.
 			}
 		}

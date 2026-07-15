@@ -76,6 +76,7 @@ SETTING_STR(SETTING_GENERAL, "main");
 SETTING_STR(SETTING_GENERAL_MultiInstance , "main/multi_instance" );
 SETTING_STR(SETTING_GENERAL_InitialFolderMode, "main/initial_folder_mode");
 SETTING_STR(SETTING_GENERAL_InitialFolder, "main/initial_folder");
+SETTING_STR(SETTING_GENERAL_InitialItem, "main/initial_item");
 SETTING_STR(SETTING_GENERAL_ConfirmBeforeDelete, "main/confirm_before_delete");
 SETTING_STR(SETTING_GENERAL_CopyToOppositePane, "main/copy_to_opposite_pane");
 
@@ -93,7 +94,6 @@ SETTING_STR(SETTING_LAYOUT_WINDOW_LAST_WIDTH, "layout/window_last_width");
 SETTING_STR(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, "layout/window_last_height");
 SETTING_STR(SETTING_LAYOUT_TREE_MIN_WIDTH, "layout/tree_min_width");
 SETTING_STR(SETTING_LAYOUT_TREE_MAX_WIDTH, "layout/tree_max_width");
-SETTING_STR(SETTING_LAYOUT_TREE_LIST_RATIO, "layout/tree_list_ratio");
 SETTING_STR(SETTING_LAYOUT_DETAIL_MIN_WIDTH, "layout/detail_min_width");
 SETTING_STR(SETTING_LAYOUT_DETAIL_MAX_WIDTH, "layout/detail_max_width");
 SETTING_STR(SETTING_LAYOUT_DIALOG_MIN_WIDTH, "layout/dialog_min_width");
@@ -135,5 +135,19 @@ SETTING_STR(SETTING_FOLDER_FOCUS_BG,         "folder/appearance/focus/bg_color")
 SETTING_STR(SETTING_FOLDER_FOCUS_PRIORITY,   "folder/appearance/focus_priority");
 
 SETTING_STR(SETTING_FOLDER_ACCENT_COLOR,     "folder/appearance/accent_color");
+
+// Dynamic settings
+SETTING_STR(SETTING_EDIT_SELECTION_STYLE, "edit/selection_style");
+
+SETTING_STR(SETTING_VIEW_SORT_ORDER_BY, "view/sort_order_by");
+SETTING_STR(SETTING_VIEW_SORT_ORDER_REVERSED, "view/sort_order_reversed");
+SETTING_STR(SETTING_VIEW_SHOW_FILE_INFO, "view/show_file_info");
+SETTING_STR(SETTING_VIEW_SHOW_FILE_TYPE, "view/show_file_type");
+SETTING_STR(SETTING_VIEW_LAYOUT_MODE, "view/layout_mode");
+
+SETTING_STR(SETTING_WINDOW_SHOW_TOOLBAR, "window/show_toolbar");
+SETTING_STR(SETTING_WINDOW_SHOW_DRIVEBAR, "window/show_drivebar");
+SETTING_STR(SETTING_WINDOW_SHOW_STATUSBAR, "window/show_statusbar");
+SETTING_STR(SETTING_WINDOW_SHOW_NAVIGATION, "window/show_navigation");
 
 #undef SETTING_STR

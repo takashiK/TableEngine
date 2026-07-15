@@ -120,6 +120,9 @@ public:
 	virtual void moveNextPath();
 	/** @brief Navigates backward in the history stack. */
 	virtual void movePrevPath();
+	/** @brief Navigates to the parent directory of the current path. */
+	virtual void moveParentPath();
+
 	/** @brief Returns the virtual-path navigation history. */
 	virtual QStringList getPathHistory() const;
 	/** @brief Returns the virtual-path navigation history for a specific root. */

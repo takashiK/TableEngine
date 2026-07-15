@@ -186,6 +186,8 @@ public:
 		CMDID_SYSTEM_FOLDER_GOTO_FOLDER,                  // #Go to folder
 		CMDID_SYSTEM_FOLDER_CHANGE_ROOT,                  // #Change root folder
 		CMDID_SYSTEM_FOLDER_FIND,                         // #Find files   TODO: Implement find command
+		CMDID_SYSTEM_FOLDER_ADD_QUICKACCESS,              // #Add QuickAccess folder to Drive bar 
+		CMDID_SYSTEM_FOLDER_EDIT_QUICKACCESS,             // #Edit QuickAccess of Drive bar
 
 		CMDID_SYSTEM_VIEW    = CMDID_SYSTEM + 0x4000,     // Menu item : View
 		CMDID_SYSTEM_VIEW_FILESIZE,					      // #Show file size
@@ -208,9 +210,9 @@ public:
 		CMDID_SYSTEM_TOOL    = CMDID_SYSTEM + 0x5000,     // Menu item : Tool
 		CMDID_SYSTEM_TOOL_VIEW_FILE,					  // #View file
 		CMDID_SYSTEM_TOOL_VIEW_BINARY,					  // #View binary
-		CMDID_SYSTEM_TOOL_EDIT_FILE,                      // Edit file
-		CMDID_SYSTEM_TOOL_EDIT_BINARY,                    // Edit binary
-		CMDID_SYSTEM_TOOL_SETUP,                          // Setup Tools
+		CMDID_SYSTEM_TOOL_EDIT_FILE,                      // #Edit file
+		CMDID_SYSTEM_TOOL_EDIT_BINARY,                    // #Edit binary
+		CMDID_SYSTEM_TOOL_SETUP,                          // #Setup Tools
 		CMDID_SYSTEM_TOOL_EXECUTE,                        // Execute Tool with parameters
 
 		CMDID_SYSTEM_WINDOW  = CMDID_SYSTEM + 0x6000,     // Menu item : Window
@@ -246,6 +248,7 @@ public:
 		CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE,             // #Navigate toggle focus folder tree view
 		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_UP,               // #Navigate scroll detail view up
 		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN,             // #Navigate scroll detail view down
+		CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER, 			  // #Navigate open item's folder
 
 		CMDID_USER        = 0xD000,                       // User registed commands
 		CMDID_USER_REGIST_COMMAND,                        // Regist user commands

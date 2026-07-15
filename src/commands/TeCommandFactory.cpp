@@ -52,6 +52,8 @@
 #include "folder/TeCmdFolderOpenAll.h"
 #include "folder/TeCmdFolderOpenOne.h"
 #include "folder/TeCmdFolderOpenUnder.h"
+#include "folder/TeCmdAddQuickAccess.h"
+#include "folder/TeCmdEditQuickAccess.h"
 #include "folder/TeCmdAddFavorite.h"
 #include "folder/TeCmdEditFavorites.h"
 #include "folder/TeCmdPrevFolder.h"
@@ -68,7 +70,7 @@
 #include "view/TeCmdViewFileOrderBy.h"
 #include "view/TeCmdViewFileOrder.h"
 #include "view/TeCmdViewLayout.h"
-
+#include "view/TeCmdViewSortSetting.h"
 
 #include "tool/TeCmdToolSetting.h"
 #include "tool/TeCmdToolFile.h"
@@ -100,6 +102,7 @@
 #include "navi/TeCmdNaviToggleFolderTree.h"
 #include "navi/TeCmdNaviDetailScrollUp.h"
 #include "navi/TeCmdNaviDetailScrollDown.h"
+#include "navi/TeCmdNaviItemFolder.h"
 
 /**
  * @file TeCommandFactory.cpp
@@ -169,6 +172,9 @@ TeCommandFactory::TeCommandFactory()
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CLOSE_UNDER, TeCmdFolderCloseUnder, tr("Colla&pse"), tr("Collapse current Folder."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/collapse.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_CLOSE_ALL, TeCmdFolderCloseAll, tr("&Collapse All"), tr("Collapse all Folders."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/collapseAll.png")));
 		SEPARATOR();
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_ADD_QUICKACCESS, TeCmdAddQuickAccess, tr("Add Quick Access"), tr("Add a folder to quick access on Drivebar."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/addQuickAccess.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_EDIT_QUICKACCESS, TeCmdEditQuickAccess, tr("Edit Quick Access"), tr("Edit quick access on Drivebar."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/editQuickAccess.png")));
+		SEPARATOR();
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_ADD_FAVORITE, TeCmdAddFavorite, tr("Add Favorite"), tr("Add a folder to favorites list."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/addFavorite.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FOLDER_EDIT_FAVORITES, TeCmdEditFavorites, tr("Edit Favorites"), tr("Edit favorites list."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/editFavorites.png")));
 		SEPARATOR();
@@ -207,6 +213,7 @@ TeCommandFactory::TeCommandFactory()
 			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_HUGE_ICON, TeCmdViewLayout, TeCmdViewLayout::HUGE_ICON, tr("Huge Icon"), tr("Show huge icons."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/hugeIcon.png")));
 			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_DETAIL_LIST, TeCmdViewLayout, TeCmdViewLayout::DETAIL_LIST, tr("Detail List"), tr("Show detail list."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/detailList.png")));
 		END_FOLDER();
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_VIEW_SORT_SETTING, TeCmdViewSortSetting, tr("Sort Setting"), tr("Show sort setting dialog."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/sortSetting.png")));
 	
 	END_GROUP();
 
@@ -256,6 +263,7 @@ TeCommandFactory::TeCommandFactory()
 		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_TOGGLE_FOLDER_TREE, TeCmdNaviToggleFolderTree, tr("Toggle Folder/Tree"), tr("Toggle focus between folder and tree view."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviToggleFolderTree.png")));
 		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_DETAIL_SCROLL_UP, TeCmdNaviDetailScrollUp, tr("Scroll Detail Up"), tr("Scroll detail view up."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviDetailUp.png")));
 		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN, TeCmdNaviDetailScrollDown, tr("Scroll Detail Down"), tr("Scroll detail view down."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviDetailDown.png")));
+		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER, TeCmdNaviItemFolder, tr("Open Item's Folder"), tr("Open item's Parent folder."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviItemFolder.png")));
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_USER);

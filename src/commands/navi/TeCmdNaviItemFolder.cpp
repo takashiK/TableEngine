@@ -18,35 +18,36 @@
 **
 ****************************************************************************/
 
-#include "TeCmdGotoParent.h"
+#include "TeCmdNaviItemFolder.h"
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
-#include "widgets/TeFolderView.h"
 
-#include <QDir>
+#include <QFileInfo>
 
 /**
- * @file TeCmdGotoParent.cpp
- * @brief Implementation of TeCmdGotoParent.
+ * @file TeCmdNaviItemFolder.cpp
+ * @brief Declaration of TeCmdNaviItemFolder.
  * @ingroup commands
  */
 
-TeCmdGotoParent::TeCmdGotoParent()
+const char* TeCmdNaviItemFolder::PARAM_OPEN_TARGET_DIR = "open_target_dir";
+
+TeCmdNaviItemFolder::TeCmdNaviItemFolder()
 {
 }
 
-TeCmdGotoParent::~TeCmdGotoParent()
+TeCmdNaviItemFolder::~TeCmdNaviItemFolder()
 {
 }
 
-bool TeCmdGotoParent::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+bool TeCmdNaviItemFolder::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
 	NOT_USED(p_cmdParam);
 	return false;
 }
 
-QFlags<TeTypes::CmdType> TeCmdGotoParent::type()
+QFlags<TeTypes::CmdType> TeCmdNaviItemFolder::type()
 {
 	return QFlags<TeTypes::CmdType>(
 		TeTypes::CMD_TRIGGER_NORMAL
@@ -61,11 +62,37 @@ QFlags<TeTypes::CmdType> TeCmdGotoParent::type()
 	);
 }
 
-bool TeCmdGotoParent::execute(TeViewStore* p_store)
+
+bool TeCmdNaviItemFolder::execute(TeViewStore* p_store)
 {
-	auto folderView =p_store->currentFolderView();
-	if(folderView != nullptr) {
-		folderView->moveParentPath();
+	QString currentItem = getCurrentItem(p_store);
+	if (currentItem.isEmpty()) {
+		return true;
+	}
+
+	QFileInfo fileInfo(currentItem);
+	if (!fileInfo.exists()) {
+		return true;
+	}
+
+	if (cmdParam() && cmdParam()->contains(PARAM_OPEN_TARGET_DIR)) {
+		QString parentFolder = fileInfo.absoluteFilePath();
+		QString currentFolder = getCurrentFolder(p_store);
+		if (parentFolder == currentFolder) {
+			return true;
+		}
+
+		// Open the parent folder
+		p_store->createFolderView(parentFolder, TeViewStore::TAB_LEFT);
+	}else{
+		QString parentFolder = fileInfo.absolutePath();
+		QString currentFolder = getCurrentFolder(p_store);
+		if (parentFolder == currentFolder) {
+			return true;
+		}
+
+		// Open the parent folder
+		p_store->createFolderView(parentFolder, TeViewStore::TAB_LEFT);
 	}
 	return true;
 }

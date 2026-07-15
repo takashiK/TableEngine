@@ -225,7 +225,6 @@ void TeOptionSetting::storeDefaultSettings(bool force)
 		SETTING(SETTING_LAYOUT_WINDOW_LAST_HEIGHT, 520);
 		SETTING(SETTING_LAYOUT_TREE_MIN_WIDTH, 200);
 		SETTING(SETTING_LAYOUT_TREE_MAX_WIDTH, 400);
-		SETTING(SETTING_LAYOUT_TREE_LIST_RATIO, 25);
 		SETTING(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300);
 		SETTING(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 500);
 		SETTING(SETTING_LAYOUT_DIALOG_MIN_WIDTH, 300);
@@ -589,7 +588,6 @@ QWidget * TeOptionSetting::createPagePanel()
 
 	const int treeMinWidth = qBound(120, settings.value(SETTING_LAYOUT_TREE_MIN_WIDTH, 200).toInt(), 1600);
 	const int treeMaxWidth = qBound(treeMinWidth, settings.value(SETTING_LAYOUT_TREE_MAX_WIDTH, 400).toInt(), 2400);
-	const int treeRatio = qBound(10, settings.value(SETTING_LAYOUT_TREE_LIST_RATIO, 25).toInt(), 90);
 	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 2400);
 	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 3200);
 	const bool detailDefaultFloating = settings.value(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, true).toBool();
@@ -604,11 +602,6 @@ QWidget * TeOptionSetting::createPagePanel()
 	QSpinBox* treeMaxSpin = new QSpinBox();
 	treeMaxSpin->setRange(120, 2400);
 	treeMaxSpin->setValue(treeMaxWidth);
-	QLabel* treeRatioLabel = new QLabel(tr("Tree:list ratio:"));
-	QSpinBox* treeRatioSpin = new QSpinBox();
-	treeRatioSpin->setRange(10, 90);
-	treeRatioSpin->setSuffix("%");
-	treeRatioSpin->setValue(treeRatio);
 	QLabel* detailMinLabel = new QLabel(tr("Detail min width:"));
 	QSpinBox* detailMinSpin = new QSpinBox();
 	detailMinSpin->setRange(120, 3200);
@@ -621,8 +614,6 @@ QWidget * TeOptionSetting::createPagePanel()
 	paneLayout->addWidget(treeMinSpin, 0, 1);
 	paneLayout->addWidget(treeMaxLabel, 1, 0);
 	paneLayout->addWidget(treeMaxSpin, 1, 1);
-	paneLayout->addWidget(treeRatioLabel, 2, 0);
-	paneLayout->addWidget(treeRatioSpin, 2, 1);
 	paneLayout->addWidget(detailMinLabel, 3, 0);
 	paneLayout->addWidget(detailMinSpin, 3, 1);
 	paneLayout->addWidget(detailMaxLabel, 4, 0);
@@ -638,9 +629,6 @@ QWidget * TeOptionSetting::createPagePanel()
 			treeMinSpin->setValue(value);
 		}
 		m_option[SETTING_LAYOUT_TREE_MAX_WIDTH] = value;
-	});
-	connect(treeRatioSpin, &QSpinBox::valueChanged, [this](int value) {
-		m_option[SETTING_LAYOUT_TREE_LIST_RATIO] = value;
 	});
 	connect(detailMinSpin, &QSpinBox::valueChanged, [this, detailMaxSpin](int value) {
 		if (value > detailMaxSpin->value()) {

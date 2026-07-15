@@ -63,6 +63,8 @@ extern bool deleteFiles(const QStringList& files, WId owner = 0);
 extern QPixmap getThumbnail(const QString& path, const QSize& size);
 extern QPixmap getFileIcon(const QString& path, const QSize& size);
 
+extern QString getAssociatedAppPath(const QString& suffix);
+
 //clipboard action
 extern bool isMoveAction(const QMimeData* mime);
 extern void setMoveAction(QMimeData* mime);

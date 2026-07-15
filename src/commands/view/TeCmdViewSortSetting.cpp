@@ -18,35 +18,34 @@
 **
 ****************************************************************************/
 
-#include "TeCmdGotoParent.h"
+#include "TeCmdViewSortSetting.h"
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
-#include "widgets/TeFolderView.h"
-
-#include <QDir>
+#include "dialogs/TeSortSettingDialog.h"
 
 /**
- * @file TeCmdGotoParent.cpp
- * @brief Implementation of TeCmdGotoParent.
+ * @file TeCmdViewSortSetting.cpp
+ * @brief Declaration of TeCmdViewSortSetting.
  * @ingroup commands
  */
 
-TeCmdGotoParent::TeCmdGotoParent()
+
+TeCmdViewSortSetting::TeCmdViewSortSetting()
 {
 }
 
-TeCmdGotoParent::~TeCmdGotoParent()
+TeCmdViewSortSetting::~TeCmdViewSortSetting()
 {
 }
 
-bool TeCmdGotoParent::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+bool TeCmdViewSortSetting::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
 	NOT_USED(p_cmdParam);
 	return false;
 }
 
-QFlags<TeTypes::CmdType> TeCmdGotoParent::type()
+QFlags<TeTypes::CmdType> TeCmdViewSortSetting::type()
 {
 	return QFlags<TeTypes::CmdType>(
 		TeTypes::CMD_TRIGGER_NORMAL
@@ -61,11 +60,19 @@ QFlags<TeTypes::CmdType> TeCmdGotoParent::type()
 	);
 }
 
-bool TeCmdGotoParent::execute(TeViewStore* p_store)
+
+bool TeCmdViewSortSetting::execute(TeViewStore* p_store)
 {
-	auto folderView =p_store->currentFolderView();
-	if(folderView != nullptr) {
-		folderView->moveParentPath();
+	if(p_store == nullptr) {
+		return true;
+	}
+
+	TeSortSettingDialog dlg(p_store->mainWindow());
+	dlg.setOrderType( p_store->fileOrderBy() );
+	dlg.setDescending( p_store->isFileOrderReversed() );
+	if(dlg.exec()){
+		p_store->setFileOrderBy( dlg.orderType() );
+		p_store->setFileOrderReversed( dlg.isDescending() );
 	}
 	return true;
 }

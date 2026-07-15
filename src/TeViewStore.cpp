@@ -141,9 +141,6 @@ TeViewStore::~TeViewStore()
 	//TeFolderView is child of QTab. so this action do "delete TeFolderView before QMainWindow."
 	if (mp_tab[TAB_LEFT]) delete mp_tab[TAB_LEFT];
 	if (mp_tab[TAB_RIGHT]) delete mp_tab[TAB_RIGHT];
-	// mp_findView is owned by a tab (addFolderView makes it a tab child).
-	// If it was never added to a tab, delete it explicitly.
-	if (mp_findView && mp_findView->parent() == nullptr) delete mp_findView;
 	if (mp_mainWindow) delete mp_mainWindow;
 
 	for (auto widget : m_floatingWidgets) {
@@ -161,10 +158,25 @@ TeTypes::WidgetType TeViewStore::getType() const
 
 void TeViewStore::initialize()
 {
+	QSettings settings;
+
 	//Main window
 	mp_mainWindow = new TeMainWindow;
 	if (mp_fileOpManager) mp_fileOpManager->setOwnerWidget(mp_mainWindow);
-	connect(qApp, &QCoreApplication::aboutToQuit, this, [this]() { storeWindowSizeIfNeeded(); });
+	connect(mp_mainWindow, &TeMainWindow::closing, this, [this]() {
+		storeWindowSizeIfNeeded();
+		QSettings settings;
+
+		int mode = settings.value(SETTING_GENERAL_InitialFolderMode, TeSettings::INIT_FOLDER_MODE_SELECTED).toInt();
+		if (mode == TeSettings::INIT_FOLDER_MODE_PREVIOUS){
+			QString path = getCurrentFolder(this);
+			TeFolderView* folder = currentFolderView();
+			if (folder) {
+				settings.setValue(SETTING_GENERAL_InitialFolder, folder->rootPath());
+				settings.setValue(SETTING_GENERAL_InitialItem, path);
+			}
+		} 
+	});
 
 	//Drive bar
 	mp_driveBar = new TeDriveBar("Drive Bar");
@@ -217,7 +229,6 @@ void TeViewStore::initialize()
 		param.insert(TeCmdFolderChangeRoot::PARAM_ROOT_PATH, path);
 		emit requestCommand(TeTypes::CMDID_SYSTEM_FOLDER_CHANGE_ROOT,TeTypes::WT_DRIVEBAR,nullptr,&param);
 
-		qDebug() << "History for root" << path << ":" << history;
 		TeCmdParam param2;
 		if (!history.isEmpty()) {
 			param2.insert(TeCmdGotoFolder::PARAM_PATH, history.first());
@@ -258,12 +269,14 @@ void TeViewStore::initialize()
 	QWidget *folder_widget = new QWidget();
 	folder_widget->setLayout(hbox);
 	QSizePolicy listPolicy = folder_widget->sizePolicy();
-	listPolicy.setHorizontalStretch(2);
+	listPolicy.setHorizontalStretch(1);
 	folder_widget->setSizePolicy(listPolicy);
 
 	//Splitter
 	mp_split = new QSplitter();
 	mp_split->addWidget(folder_widget);
+
+	mp_mainWindow->setCentralWidget(mp_split);
 
 	//Detail View
 	mp_detailView = new TeDetailView();
@@ -280,7 +293,6 @@ void TeViewStore::initialize()
 	mp_mainWindow->addDockWidget(Qt::RightDockWidgetArea, mp_detailDock);
 	mp_detailDock->hide();
 
-	mp_mainWindow->setCentralWidget(mp_split);
 
 	connect(mp_tab[TAB_LEFT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFolderView*>(mp_tab[TAB_LEFT]->widget(index))); });
 	connect(mp_tab[TAB_RIGHT], &QTabWidget::currentChanged, [this](int index) {setCurrentFolderView(qobject_cast<TeFolderView*>(mp_tab[TAB_RIGHT]->widget(index))); });
@@ -322,6 +334,12 @@ void TeViewStore::initialize()
 	loadToolbar();
 	loadSetting();
 	loadStatus();
+
+		// showing settings
+	setToolBarVisible(settings.value(SETTING_WINDOW_SHOW_TOOLBAR, true).toBool());
+	setDriveBarVisible(settings.value(SETTING_WINDOW_SHOW_DRIVEBAR, true).toBool());
+	setStatusBarVisible(settings.value(SETTING_WINDOW_SHOW_STATUSBAR, true).toBool());
+	setNavigationVisible(settings.value(SETTING_WINDOW_SHOW_NAVIGATION, true).toBool());
 }
 
 /*!
@@ -453,7 +471,13 @@ void TeViewStore::loadToolbar()
  */
 void TeViewStore::loadSetting()
 {
-	setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
+	QSettings settings;
+	m_fileInfoFlags = static_cast<TeTypes::FileInfoFlags>(settings.value(SETTING_VIEW_SHOW_FILE_INFO, uint32_t(m_fileInfoFlags)).toUInt());
+	m_fileTypeFlags = static_cast<TeTypes::FileTypeFlags>(settings.value(SETTING_VIEW_SHOW_FILE_TYPE, uint32_t(m_fileTypeFlags)).toUInt());
+	m_fileOrderBy = static_cast<TeTypes::OrderType>(settings.value(SETTING_VIEW_SORT_ORDER_BY, uint32_t(m_fileOrderBy)).toUInt());
+	m_fileOrderReversed = settings.value(SETTING_VIEW_SORT_ORDER_REVERSED, m_fileOrderReversed).toBool();
+	m_viewMode = static_cast<TeTypes::FileViewMode>(settings.value(SETTING_VIEW_LAYOUT_MODE, uint32_t(m_viewMode)).toUInt());
+	setSelectionMode(static_cast<TeTypes::SelectionMode>(settings.value(SETTING_EDIT_SELECTION_STYLE, uint32_t(m_selectionMode)).toUInt()));
 	applyStyleSheet();
 	applyLayoutSettings();
 }
@@ -516,10 +540,19 @@ void TeViewStore::loadStatus()
 {
 	//FolderView復帰
 	QSettings settings;
-	QStringList paths = settings.value("initialState/paths", QStringList(QDir::rootPath())).toStringList();
+	QString rootPath = settings.value(SETTING_GENERAL_InitialFolder, QDir::rootPath()).toString();
+	QString path = settings.value(SETTING_GENERAL_InitialItem, "").toString();
+	int mode = settings.value(SETTING_GENERAL_InitialFolderMode, TeSettings::INIT_FOLDER_MODE_SELECTED).toInt();
 
-	for (QString& path : paths) {
-		createFolderView(path);
+	QFileInfo info(path);
+	QFileInfo rootInfo(rootPath);
+	if(!rootInfo.exists() || !rootInfo.isDir()) rootPath = QDir::rootPath();
+
+	TeFileFolderView* folder = createFolderView(rootPath);
+	if(folder && (mode == TeSettings::INIT_FOLDER_MODE_PREVIOUS)){
+		if(info.exists() && info.isDir() && info.absoluteFilePath().startsWith(rootInfo.absoluteFilePath())){
+			folder->setCurrentPath(path);
+		}
 	}
 }
 
@@ -530,7 +563,6 @@ void TeViewStore::show()
 
 void TeViewStore::close()
 {
-	storeWindowSizeIfNeeded();
 	if (mp_mainWindow) mp_mainWindow->close();
 }
 
@@ -702,6 +734,11 @@ void TeViewStore::setCurrentFolderView(TeFolderView * view)
 	if (place == TAB_LEFT) {
 		TeFileTreeView* tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
 		if (tree != view->tree()) {
+			//Set SizePolicy of TreeView to prevent resize of TreeView when change current folder view.
+			auto policy = view->tree()->sizePolicy();
+			policy.setHorizontalStretch(0);
+			view->tree()->setSizePolicy(policy);
+
 			if (tree == Q_NULLPTR) {
 				//Insert New Item
 				//In this section directry excute after call QTab::addTab(). because it emit currentChanged and currentChanged call setCurrentFolderView().
@@ -749,7 +786,6 @@ void TeViewStore::applyLayoutSettings()
 
 	const int treeMinWidth = qBound(120, settings.value(SETTING_LAYOUT_TREE_MIN_WIDTH, 200).toInt(), 2400);
 	const int treeMaxWidth = qBound(treeMinWidth, settings.value(SETTING_LAYOUT_TREE_MAX_WIDTH, 400).toInt(), 3200);
-	const int treeRatio = qBound(10, settings.value(SETTING_LAYOUT_TREE_LIST_RATIO, 25).toInt(), 90);
 	const int detailMinWidth = qBound(120, settings.value(SETTING_LAYOUT_DETAIL_MIN_WIDTH, 300).toInt(), 3200);
 	const int detailMaxWidth = qBound(detailMinWidth, settings.value(SETTING_LAYOUT_DETAIL_MAX_WIDTH, 900).toInt(), 4200);
 
@@ -769,23 +805,6 @@ void TeViewStore::applyLayoutSettings()
 	if (tree) {
 		tree->setMinimumWidth(treeMinWidth);
 		tree->setMaximumWidth(treeMaxWidth);
-	}
-
-	if (mp_split && tree && (!mp_mainWindow || !mp_mainWindow->isVisible())) {
-		QList<int> sizes = mp_split->sizes();
-		if (sizes.size() >= 2) {
-			int treeSize = sizes.at(0);
-			int listSize = sizes.at(1);
-			int total = treeSize + listSize;
-			if (total <= 0) {
-				total = qMax(800, mp_mainWindow ? mp_mainWindow->width() : 800);
-			}
-			const int wantedTreeSize = qBound(treeMinWidth, (total * treeRatio) / 100, treeMaxWidth);
-			const int wantedListSize = qMax(200, total - wantedTreeSize);
-			sizes[0] = wantedTreeSize;
-			sizes[1] = wantedListSize;
-			mp_split->setSizes(sizes);
-		}
 	}
 }
 
@@ -814,12 +833,13 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 {
 	TeFileFolderView * folderView = new TeFileFolderView;
 	folderView->setDispatcher(this);
-	folderView->setRootPath(path);
+	folderView->list()->setFileViewMode(fileInfoFlags(), viewMode());
+	folderView->setFileShowMode(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	folderView->list()->setFocusPolicy(Qt::ClickFocus);
 	folderView->list()->setSelectionMode(selectionMode());
-	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
 	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
+	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
 	connect(folderView, &TeFolderView::focusIn, [this, folderView]() {
 		if (currentFolderView() != folderView) {
 			int pos = tabPlace(folderView);
@@ -829,11 +849,10 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 		}
 	});
 
-	folderView->list()->setFileViewMode(fileInfoFlags(), viewMode());
-	folderView->setFileShowMode(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	connect(this, &TeViewStore::fileListViewModeChanged, folderView->list(), &TeFileListView::setFileViewMode);
 	connect(this, &TeViewStore::fileListShowModeChanged, folderView, &TeFileFolderView::setFileShowMode);
 
+	folderView->setRootPath(path);
 	addFolderView(folderView, place);
 
 	return folderView;
@@ -843,15 +862,16 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 {
 	TeArchiveFolderView* folderView = new TeArchiveFolderView;
 	folderView->setDispatcher(this);
+	folderView->list()->setFocusPolicy(Qt::ClickFocus);
+	folderView->list()->setSelectionMode(selectionMode());
+	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
+
 	bool ok = folderView->setArchive(path);
 	if (!ok) {
 		delete folderView;
 		return nullptr;
 	}
-	folderView->list()->setFocusPolicy(Qt::ClickFocus);
-	folderView->list()->setSelectionMode(selectionMode());
 	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
-	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
 	addFolderView(folderView, place);
 
@@ -1080,6 +1100,8 @@ void TeViewStore::floatingWidgetClosed(QWidget* widget, QEvent* )
 void TeViewStore::setSelectionMode(TeTypes::SelectionMode mode)
 {
 	if (m_selectionMode != mode) {
+		QSettings settings;
+		settings.setValue(SETTING_EDIT_SELECTION_STYLE, uint32_t(mode));
 		m_selectionMode = mode;
 		emit selectionModeChanged(mode);
 	}
@@ -1093,6 +1115,8 @@ bool TeViewStore::isDriveBarVisible() const
 void TeViewStore::setDriveBarVisible(bool visible)
 {
 	if (mp_driveBar) {
+		QSettings settings;
+		settings.setValue(SETTING_WINDOW_SHOW_DRIVEBAR, visible);
 		mp_driveBar->setHidden(!visible);
 	}
 }
@@ -1105,6 +1129,8 @@ bool TeViewStore::isStatusBarVisible() const
 void TeViewStore::setStatusBarVisible(bool visible)
 {
 	if (mp_mainWindow) {
+		QSettings settings;
+		settings.setValue(SETTING_WINDOW_SHOW_STATUSBAR, visible);
 		mp_mainWindow->statusBar()->setHidden(!visible);
 	}
 }
@@ -1117,6 +1143,8 @@ bool TeViewStore::isToolBarVisible() const
 void TeViewStore::setToolBarVisible(bool visible)
 {
 	if (mp_mainWindow) {
+		QSettings settings;
+		settings.setValue(SETTING_WINDOW_SHOW_TOOLBAR, visible);
 		mp_toolBar->setHidden(!visible);
 	}
 }
@@ -1131,6 +1159,9 @@ void TeViewStore::setNavigationVisible(bool visible)
 	if (m_isNavigationVisible == visible || !mp_split) {
 		return;
 	}
+
+	QSettings settings;
+	settings.setValue(SETTING_WINDOW_SHOW_NAVIGATION, visible);
 
 	TeFileTreeView* tree = qobject_cast<TeFileTreeView*>(mp_split->widget(0));
 	if (!tree) {
@@ -1174,6 +1205,8 @@ void TeViewStore::setNavigationVisible(bool visible)
 void TeViewStore::setFileInfoFlags(TeTypes::FileInfoFlags flags)
 {
 	if (m_fileInfoFlags != flags) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_SHOW_FILE_INFO, uint32_t(flags));
 		m_fileInfoFlags = flags;
 		emit fileListViewModeChanged(fileInfoFlags(), viewMode());
 	}
@@ -1182,6 +1215,8 @@ void TeViewStore::setFileInfoFlags(TeTypes::FileInfoFlags flags)
 void TeViewStore::setFileTypeFlags(TeTypes::FileTypeFlags flags)
 {
 	if (m_fileTypeFlags != flags) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_SHOW_FILE_TYPE, uint32_t(flags));
 		m_fileTypeFlags = flags;
 		emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	}
@@ -1190,6 +1225,8 @@ void TeViewStore::setFileTypeFlags(TeTypes::FileTypeFlags flags)
 void TeViewStore::setFileOrderBy(TeTypes::OrderType order)
 {
 	if (m_fileOrderBy != order) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_SORT_ORDER_BY, uint32_t(order));
 		m_fileOrderBy = order;
 		emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	}
@@ -1198,6 +1235,8 @@ void TeViewStore::setFileOrderBy(TeTypes::OrderType order)
 void TeViewStore::setFileOrderReversed(bool reversed)
 {
 	if (m_fileOrderReversed != reversed) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_SORT_ORDER_REVERSED, reversed);
 		m_fileOrderReversed = reversed;
 		emit fileListShowModeChanged(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	}
@@ -1206,6 +1245,8 @@ void TeViewStore::setFileOrderReversed(bool reversed)
 void TeViewStore::setViewMode(TeTypes::FileViewMode mode)
 {
 	if (m_viewMode != mode) {
+		QSettings settings;
+		settings.setValue(SETTING_VIEW_LAYOUT_MODE, uint32_t(mode));
 		m_viewMode = mode;
 		emit fileListViewModeChanged(fileInfoFlags(), viewMode());
 	}

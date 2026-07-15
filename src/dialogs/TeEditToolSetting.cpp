@@ -1,6 +1,7 @@
-#include "TeToolDialog.h"
+#include "TeEditToolSetting.h"
 #include "TeSettings.h"
 #include "utils/TeToolCommand.h"
+#include "platform/platform_util.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -19,12 +20,12 @@
 #include <QSettings>
 
 /**
- * @file TeToolDialog.cpp
- * @brief Implementation of TeToolDialog.
+ * @file TeEditToolSetting.cpp
+ * @brief Implementation of TeEditToolSetting.
  * @ingroup dialogs
  */
 
-TeToolDialog::TeToolDialog(QWidget *parent)
+TeEditToolSetting::TeEditToolSetting(QWidget *parent)
 	: QDialog(parent)
 {
 	setWindowTitle(tr("Tool Settings"));
@@ -42,17 +43,17 @@ TeToolDialog::TeToolDialog(QWidget *parent)
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 	buttonBox->setCenterButtons(true);
-	connect(buttonBox, &QDialogButtonBox::accepted, this, &TeToolDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &TeEditToolSetting::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 	mainLayout->addWidget(buttonBox);
 
 	setLayout(mainLayout);
 }
 
-TeToolDialog::~TeToolDialog()
+TeEditToolSetting::~TeEditToolSetting()
 {}
 
-QWidget* TeToolDialog::createPageGeneral()
+QWidget* TeEditToolSetting::createPageGeneral()
 {
 	QWidget* page = new QWidget();
 	QGridLayout* layout = new QGridLayout(page);
@@ -110,7 +111,7 @@ QWidget* TeToolDialog::createPageGeneral()
 	return page;
 }
 
-QWidget* TeToolDialog::createPageUser()
+QWidget* TeEditToolSetting::createPageUser()
 {
 	QWidget* page = new QWidget();
 	QVBoxLayout* pageLayout = new QVBoxLayout(page);
@@ -136,7 +137,7 @@ QWidget* TeToolDialog::createPageUser()
 	return page;
 }
 
-QWidget* TeToolDialog::createUserEntry(const ToolSetting& initial)
+QWidget* TeEditToolSetting::createUserEntry(const ToolSetting& initial)
 {
 	QFrame* frame = new QFrame();
 	frame->setFrameShape(QFrame::StyledPanel);
@@ -204,7 +205,7 @@ QWidget* TeToolDialog::createUserEntry(const ToolSetting& initial)
 	return frame;
 }
 
-void TeToolDialog::addUserEntry(const ToolSetting& initial)
+void TeEditToolSetting::addUserEntry(const ToolSetting& initial)
 {
 	if (m_userRows.size() >= TeSettings::MAX_USER_TOOLS) {
 		QMessageBox::information(this, tr("Tool Settings"),
@@ -215,7 +216,7 @@ void TeToolDialog::addUserEntry(const ToolSetting& initial)
 	mp_userLayout->insertWidget(mp_userLayout->count() - 1, frame);
 }
 
-void TeToolDialog::removeUserEntry(QWidget* frame)
+void TeEditToolSetting::removeUserEntry(QWidget* frame)
 {
 	for (int i = 0; i < m_userRows.size(); ++i) {
 		if (m_userRows.at(i).frame == frame) {
@@ -227,12 +228,12 @@ void TeToolDialog::removeUserEntry(QWidget* frame)
 	}
 }
 
-void TeToolDialog::applyValidityStyle(QLineEdit* edit, bool valid) const
+void TeEditToolSetting::applyValidityStyle(QLineEdit* edit, bool valid) const
 {
 	edit->setStyleSheet(valid ? QString() : QStringLiteral("QLineEdit { border: 1px solid red; }"));
 }
 
-bool TeToolDialog::isRowValid(const QString& path, const QString& args) const
+bool TeEditToolSetting::isRowValid(const QString& path, const QString& args) const
 {
 	const bool pathEmpty = path.trimmed().isEmpty();
 	if (pathEmpty && args.trimmed().isEmpty()) {
@@ -244,7 +245,7 @@ bool TeToolDialog::isRowValid(const QString& path, const QString& args) const
 	return TeToolCommand::isValidFormat(path);
 }
 
-void TeToolDialog::splitCommand(const QString& full, QString& path, QString& args)
+void TeEditToolSetting::splitCommand(const QString& full, QString& path, QString& args)
 {
 	const QString trimmed = full.trimmed();
 	path.clear();
@@ -274,7 +275,7 @@ void TeToolDialog::splitCommand(const QString& full, QString& path, QString& arg
 	args = trimmed.mid(tokenEnd).trimmed();
 }
 
-QString TeToolDialog::combineCommand(const QString& path, const QString& args)
+QString TeEditToolSetting::combineCommand(const QString& path, const QString& args)
 {
 	const QString trimmedPath = path.trimmed();
 	const QString trimmedArgs = args.trimmed();
@@ -285,7 +286,7 @@ QString TeToolDialog::combineCommand(const QString& path, const QString& args)
 	return trimmedArgs.isEmpty() ? quotedPath : quotedPath + QLatin1Char(' ') + trimmedArgs;
 }
 
-QString TeToolDialog::ensureItemMacro(const QString& args)
+QString TeEditToolSetting::ensureItemMacro(const QString& args)
 {
 	// Guards against forgetting to add a target-item macro: if none of %f/%F/%m/%M
 	// is present, append %f (current item file name) as a sensible default.
@@ -299,7 +300,7 @@ QString TeToolDialog::ensureItemMacro(const QString& args)
 	return trimmed.isEmpty() ? QStringLiteral("%f") : trimmed + QLatin1String(" %f");
 }
 
-void TeToolDialog::loadSettings()
+void TeEditToolSetting::loadSettings()
 {
 	QSettings settings;
 	m_textTool   = settings.value(SETTING_TOOLS_TEXT_EDIT).toString();
@@ -330,7 +331,26 @@ void TeToolDialog::loadSettings()
 	settings.endGroup();
 }
 
-void TeToolDialog::saveSettings()
+void TeEditToolSetting::storeDefaultSettings() {
+	QSettings settings;
+	if(!settings.contains(SETTING_TOOLS_TEXT_EDIT)) {
+		QString command = getAssociatedAppPath("txt");
+		if(!command.isEmpty()) {
+			settings.setValue(SETTING_TOOLS_TEXT_EDIT, combineCommand(command, QStringLiteral("%f")));
+		}
+	}
+	if(!settings.contains(SETTING_TOOLS_IMAGE_EDIT)) {
+		QString command = getAssociatedAppPath("jpg");
+		if(!command.isEmpty()) {
+			settings.setValue(SETTING_TOOLS_IMAGE_EDIT, combineCommand(command, QStringLiteral("%f")));
+		}
+	}
+	if(!settings.contains(SETTING_TOOLS_BINARY_EDIT)) {
+		// nothing to do, since the default is empty
+	}
+}
+
+void TeEditToolSetting::saveSettings()
 {
 	QSettings settings;
 	settings.setValue(SETTING_TOOLS_TEXT_EDIT, m_textTool);
@@ -353,7 +373,7 @@ void TeToolDialog::saveSettings()
 	settings.endGroup();
 }
 
-void TeToolDialog::accept()
+void TeEditToolSetting::accept()
 {
 	struct GeneralRow { QLineEdit* pathEdit; QLineEdit* argsEdit; };
 	const QList<GeneralRow> generalRows = {

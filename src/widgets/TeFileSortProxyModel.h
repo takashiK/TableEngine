@@ -115,6 +115,12 @@ public:
     /** @brief Returns true if dot-files are currently visible. */
     bool showHiddenFiles() const;
 
+
+    /** @brief Sets the virtual root path for the model. */
+    void setVirtualRootPath(const QString& path);
+    /** @brief Returns the current virtual root path. */
+    QString virtualRootPath() const;
+
 protected:
     /**
      * @brief Filters rows based on file type flags and the filename regex.
@@ -183,4 +189,5 @@ private:
     TeImageLoader* mp_imageLoader = nullptr;        ///< Async thumbnail loader.
     QRegularExpression m_fileRegex;       ///< Optional filename filter.
     bool m_showHiddenFiles = true;        ///< Whether dot-files are visible.
+    QString m_virtualRootPath;            ///< Virtual root path for the model.
 };

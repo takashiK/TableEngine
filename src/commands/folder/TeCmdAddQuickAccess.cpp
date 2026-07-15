@@ -18,35 +18,38 @@
 **
 ****************************************************************************/
 
-#include "TeCmdGotoParent.h"
+#include "TeCmdAddQuickAccess.h"
 #include "utils/TeUtils.h"
-#include "TeViewStore.h"
+#include "dialogs/TeFilePathDialog.h"
 #include "widgets/TeFolderView.h"
+#include "widgets/TeDriveBar.h"
+#include "TeViewStore.h"
 
-#include <QDir>
+#include <QFileInfo>
 
 /**
- * @file TeCmdGotoParent.cpp
- * @brief Implementation of TeCmdGotoParent.
+ * @file TeCmdAddQuickAccess.cpp
+ * @brief Declaration of TeCmdAddQuickAccess.
  * @ingroup commands
  */
 
-TeCmdGotoParent::TeCmdGotoParent()
+
+TeCmdAddQuickAccess::TeCmdAddQuickAccess()
 {
 }
 
-TeCmdGotoParent::~TeCmdGotoParent()
+TeCmdAddQuickAccess::~TeCmdAddQuickAccess()
 {
 }
 
-bool TeCmdGotoParent::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+bool TeCmdAddQuickAccess::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
 	NOT_USED(p_cmdParam);
 	return false;
 }
 
-QFlags<TeTypes::CmdType> TeCmdGotoParent::type()
+QFlags<TeTypes::CmdType> TeCmdAddQuickAccess::type()
 {
 	return QFlags<TeTypes::CmdType>(
 		TeTypes::CMD_TRIGGER_NORMAL
@@ -61,11 +64,20 @@ QFlags<TeTypes::CmdType> TeCmdGotoParent::type()
 	);
 }
 
-bool TeCmdGotoParent::execute(TeViewStore* p_store)
+
+bool TeCmdAddQuickAccess::execute(TeViewStore* p_store)
 {
-	auto folderView =p_store->currentFolderView();
-	if(folderView != nullptr) {
-		folderView->moveParentPath();
+	TeFilePathDialog dlg;
+	dlg.setCurrentPath(getCurrentFolder(p_store));
+	dlg.setTargetPath(getCurrentFolder(p_store));
+	dlg.setFavorites(getFavorites());
+	dlg.setHistory(p_store->currentFolderView()->getPathHistory());
+	if (dlg.exec() == QDialog::Accepted) {
+		QFileInfo info(dlg.targetPath());
+		if (info.exists() && info.isDir()) {
+			p_store->driveBar()->addQuickAccess(info.absoluteFilePath());
+			p_store->driveBar()->storeQuickAccesses();
+		}
 	}
 	return true;
 }

@@ -20,35 +20,36 @@
 
 #pragma once
 
-#include <QMainWindow>
+#include <QDialog>
+#include "TeTypes.h"
 
 /**
- * @file TeMainWindow.h
- * @brief Application main window.
- * @ingroup widgets
+ * @file TeSortSettingDialog.h
+ * @brief Declaration of TeSortSettingDialog.
+ * @ingroup dialogs
  */
 
-/**
- * @class TeMainWindow
- * @brief The application main window created by TeViewStore.
- * @ingroup widgets
- *
- * @details Extends QMainWindow with no additional public API.  Layout,
- * menu-bar, and toolbar setup are performed inside the constructor via
- * TeViewStore.
- */
-class TeMainWindow : public QMainWindow
+class QButtonGroup;
+
+class TeSortSettingDialog : public QDialog
 {
 	Q_OBJECT
 
+    enum orderType {
+        OrderAscending = 0,
+        OrderDescending = 1
+    };
 public:
-	TeMainWindow(QWidget *parent = Q_NULLPTR);
+	TeSortSettingDialog(QWidget *parent);
+	virtual  ~TeSortSettingDialog();
 
-protected:
-	void closeEvent(QCloseEvent *event) override;
+    TeTypes::OrderType orderType() const;
+    void setOrderType(TeTypes::OrderType type);
 
-signals:
-	void closing();
+    bool isDescending() const;
+    void setDescending(bool descending);
 
 private:
+    QButtonGroup* mp_SortGroup = nullptr;
+    QButtonGroup* mp_OrderGroup = nullptr;
 };

@@ -66,22 +66,17 @@ QFlags<TeTypes::CmdType> TeCmdOpenFile::type()
 
 bool TeCmdOpenFile::execute(TeViewStore* p_store)
 {
-	TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
+	QStringList paths;
 
-	if (p_folder != nullptr) {
-
-		QStringList paths;
-
-		if (getSelectedItemList(p_store, &paths)) {
-			//open paths if it is file.
-			for (const QString& path : paths) {
-				QFileInfo info(path);
-				if (info.isFile()) {
-					openFile(path);
-				}
+	if (getSelectedItemList(p_store, &paths)) {
+		//open paths if it is file.
+		for (const QString& path : paths) {
+			QFileInfo info(path);
+			if (info.isFile()) {
+				openFile(path);
 			}
-
 		}
+
 	}
 
 	return true;

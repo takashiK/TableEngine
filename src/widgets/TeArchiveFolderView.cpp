@@ -328,6 +328,20 @@ void TeArchiveFolderView::movePrevPath()
 	}
 }
 
+void TeArchiveFolderView::moveParentPath() {
+	// Navigate to the parent directory of the current path, if possible
+	QString curPath = currentPath();
+	if (curPath.isEmpty() || curPath == "/") {
+		// Already at the root; no parent to navigate to
+		return;
+	}
+	int index = curPath.lastIndexOf('/');
+	QString parentPath = curPath.left(index);
+	if(parentPath.startsWith(rootPath())) {
+		setCurrentPath(parentPath);
+	}
+}
+
 void TeArchiveFolderView::updatePath(const QString& path)
 {
 	QString cur = currentPath();

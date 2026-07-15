@@ -2,6 +2,8 @@
 
 #include <QList>
 #include <QModelIndex>
+#include <QPoint>
+#include <QAbstractItemView>
 #include "TeFolderView.h"
 #include "utils/TeSearchQuery.h"
 #include "utils/TeFileInfo.h"
@@ -75,6 +77,9 @@ public:
 	void        moveNextPath() override;
 	/** @brief Navigates to the previous registered search entry. */
 	void        movePrevPath() override;
+	/** @brief Navigates to the parent directory of the current path. */
+	void moveParentPath() override;
+
 	/** @brief Returns the list of registered search labels. */
 	QStringList getPathHistory() const override;
 	/** @brief Returns the list of registered search labels for a specific root. */
@@ -104,6 +109,14 @@ public slots:
 	void setFileShowMode(TeTypes::FileTypeFlags typeFlags,
 	                     TeTypes::OrderType order,
 	                     bool orderReversed) override;
+
+protected:
+	/**
+	 * @brief Shows a system context menu at @p pos for the item view @p pView.
+	 * @param pView  The view that received the context-menu event.
+	 * @param pos    Screen position for the menu.
+	 */
+	void showContextMenu(const QAbstractItemView* pView, const QPoint& pos);
 
 private slots:
 	/** @brief Handles tree-selection changes to switch the active search entry. */
