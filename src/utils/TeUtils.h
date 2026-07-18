@@ -118,5 +118,16 @@ TeFileType getFileType(const QString& path);
  */
 QString detectTextCodec(const QByteArray& data, const QStringList& codecList);
 
+/**
+ * @brief Classifies a file from at most its first 1024 bytes.
+ *
+ * The detector recognizes UTF-8, UTF-16 (little/big endian), Shift-JIS,
+ * and EUC-JP. This is a heuristic content check; it does not inspect the
+ * file name or MIME type.
+ * @param path File path to inspect.
+ * @return true when the sample is likely text, otherwise false.
+ */
+bool isTextFile(const QString& path);
+
 /** @brief No-op macro to suppress unused-variable warnings. */
 #define NOT_USED(x) (void)x

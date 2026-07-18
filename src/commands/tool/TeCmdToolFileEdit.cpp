@@ -87,6 +87,9 @@ bool TeCmdToolFileEdit::execute(TeViewStore* p_store)
 			command = settings.value(SETTING_TOOLS_IMAGE_EDIT).toString();
 			break;
 		default:
+			if(isTextFile(targetFile)) {
+				command = settings.value(SETTING_TOOLS_TEXT_EDIT).toString();
+			}
 			break;
 		}
 	}
