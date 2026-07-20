@@ -54,6 +54,8 @@ int main(int argc, char *argv[])
 	TeToolbarSetting::storeDefaultSettings();
 	TeEditToolSetting::storeDefaultSettings();
 
+	TeCommandFactory::factory()->loadUserCommands();
+
 	//set document viewer
 	QSettings settings;
 	settings.setValue(SETTING_TEXT_HIGHLIGHT_SCHEMA,":/Schema/text_highlight.json");

@@ -40,9 +40,10 @@ namespace TeSettings {
 	 * @brief Limits for list-style settings.
 	 */
 	enum {
-		MAX_FAVORITES  = 99, ///< Maximum number of favourite folder entries.
-		MAX_HISTORY    = 99, ///< Maximum number of navigation history entries.
-		MAX_USER_TOOLS = 99, ///< Maximum number of user-defined tool entries.
+		MAX_FAVORITES      = 99, ///< Maximum number of favourite folder entries.
+		MAX_HISTORY        = 99, ///< Maximum number of navigation history entries.
+		MAX_USER_TOOLS     = 99, ///< Maximum number of user-defined tool entries.
+		MAX_USER_COMMANDS  = 31, ///< Maximum number of user-registered commands (command00..command30).
 	};
 
 	/**
@@ -107,6 +108,8 @@ SETTING_STR(SETTING_TREEPOPUP_GROUP, "menuGroup01");
 SETTING_STR(SETTING_LISTPOPUP_GROUP, "menuGroup02");
 
 SETTING_STR(SETTING_FAVORITES, "Favorites");
+
+SETTING_STR(SETTING_USER, "user");
 
 SETTING_STR(SETTING_TOOLS, "tools");
 SETTING_STR(SETTING_TOOLS_TEXT_EDIT, "tools/text_edit");

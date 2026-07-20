@@ -21,6 +21,7 @@
 #include "TeCommandFactory.h"
 #include "TeCommandInfo.h"
 #include "utils/TeAdaptiveIconEngine.h"
+#include "TeSettings.h"
 
 #include "file/TeCmdFileCreate.h"
 #include "file/TeCmdOpenFile.h"
@@ -103,6 +104,11 @@
 #include "navi/TeCmdNaviDetailScrollUp.h"
 #include "navi/TeCmdNaviDetailScrollDown.h"
 #include "navi/TeCmdNaviItemFolder.h"
+
+#include "user/TeCmdUserRegistCommands.h"
+#include "user/TeCmdUserExecCommand.h"
+
+#include <QSettings>
 
 /**
  * @file TeCommandFactory.cpp
@@ -266,7 +272,10 @@ TeCommandFactory::TeCommandFactory()
 		CMD_ENTRY(TeTypes::CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER, TeCmdNaviItemFolder, tr("Open Item's Folder"), tr("Open item's Parent folder."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/naviItemFolder.png")));
 	END_GROUP();
 
-	BEGIN_GROUP(TeTypes::CMDID_USER);
+	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_USER);
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_USER_REGIST_COMMAND, TeCmdUserRegistCommands, tr("Regist User Commands"), tr("Regist user commands."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/userRegist.png")));
+		BEGIN_FOLDER(tr("User commands"));
+		END_FOLDER();
 	END_GROUP();
 
 #undef BEGIN_GROUP
@@ -300,7 +309,7 @@ QList<std::pair<QString, TeTypes::CmdId>> TeCommandFactory::groupList()
 		{ tr("&Window"), TeTypes::CMDID_SYSTEM_WINDOW },
 		{ tr("&Setting"), TeTypes::CMDID_SYSTEM_SETTING },
 		{ tr("&Help"), TeTypes::CMDID_SYSTEM_HELP },
-		{ tr("&User"), TeTypes::CMDID_USER },
+		{ tr("&User"), TeTypes::CMDID_SYSTEM_USER },
 		{ tr("&Navigation"), TeTypes::CMDID_SYSTEM_NAVI },
 	};
 	return list;
@@ -315,7 +324,7 @@ QList<std::pair<QString, TeTypes::CmdId>> TeCommandFactory::custom_groupList()
 		{ tr("&View"), TeTypes::CMDID_SYSTEM_VIEW },
 		{ tr("&Tool"), TeTypes::CMDID_SYSTEM_TOOL },
 		{ tr("&Window"), TeTypes::CMDID_SYSTEM_WINDOW },
-		{ tr("&User"), TeTypes::CMDID_USER },
+		{ tr("&User"), TeTypes::CMDID_SYSTEM_USER },
 	};
 	return list;
 }
@@ -341,6 +350,14 @@ QList<const TeCommandInfoBase*> TeCommandFactory::commandGroup(TeTypes::CmdId gr
 			}
 		}
 	}
+	if(groupId == TeTypes::CMDID_SYSTEM_USER) {
+		for (const auto& cmdId : m_userCommands.keys()) {
+			const TeCommandInfoBase* p_info = commandInfo(cmdId);
+			if (p_info) {
+				group.append(p_info);
+			}
+		}
+	}
 
 	return group;
 }
@@ -359,6 +376,8 @@ const TeCommandInfoBase* TeCommandFactory::commandInfo(TeTypes::CmdId cmdId) con
 	TeCommandInfoBase* p_info = nullptr;
 	if (m_commands.contains(cmdId)) {
 		p_info = m_commands[cmdId];
+	}else if (m_userCommands.contains(cmdId)) {
+		p_info = m_userCommands[cmdId];
 	}
 	return p_info;
 }
@@ -368,6 +387,39 @@ TeCommandBase * TeCommandFactory::createCommand(TeTypes::CmdId cmdId) const
 	TeCommandBase* p_cmd = nullptr;
 	if (m_commands.contains(cmdId)) {
 		p_cmd = m_commands[cmdId]->createCommand();
+	}else if (m_userCommands.contains(cmdId)) {
+		p_cmd = m_userCommands[cmdId]->createCommand();
 	}
 	return p_cmd;
+}
+
+void TeCommandFactory::loadUserCommands() {
+	m_userCommands.clear();
+	QSettings settings;
+
+	settings.beginGroup(SETTING_USER);
+	for (int i = 0; i < TeSettings::MAX_USER_COMMANDS; ++i) {
+		const QString key = QString("command%1").arg(i, 2, 10, QLatin1Char('0'));
+		if (!settings.contains(key)) {
+			continue;
+		}
+		const QString raw = settings.value(key).toString();
+
+		uint32_t id      = static_cast<quint16>(raw.section(QLatin1Char(';'), 0, 0).toUInt());
+		bool  shell   = raw.section(QLatin1Char(';'), 1, 1).toInt() != 0;
+		bool  output  = raw.section(QLatin1Char(';'), 2, 2).toInt() != 0;
+		QString name    = raw.section(QLatin1Char(';'), 3, 3);
+		QString iconPath  = raw.section(QLatin1Char(';'), 4, 4);
+		if(iconPath.isEmpty()) {
+			iconPath = ":/TableEngine/userCommand.png";
+		}
+		QString command = raw.section(QLatin1Char(';'), 5);
+		
+		TeTypes::CmdId cmdId = static_cast<TeTypes::CmdId>(TeTypes::CMDID_USER | id);
+		TeCmdParam param = {{TeCmdUserExecCommand::PARAM_WITH_SHELL, shell}, {TeCmdUserExecCommand::PARAM_OUTPUT, output}, {TeCmdUserExecCommand::PARAM_COMMAND, command}};
+
+		m_userCommands[cmdId] = new TeCommandInfo<TeCmdUserExecCommand>(cmdId, name, name, QIcon(new TeAdaptiveIconEngine(iconPath)), param);
+	}
+	settings.endGroup();
+
 }

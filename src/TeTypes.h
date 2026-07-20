@@ -141,7 +141,8 @@ public:
 	 */
 	enum CmdId {
 		CMDID_NONE,
-		CMDID_SYSTEM         = 0x00000000,
+		CMDID_SYSTEM            = 0x00000000,
+
 		CMDID_SYSTEM_FILE    = CMDID_SYSTEM + 0x1000,     // Menu Item : File
 		CMDID_SYSTEM_FILE_NEW,                            // #Create file
 		CMDID_SYSTEM_FILE_OPEN,                           // #Open file
@@ -250,15 +251,17 @@ public:
 		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN,             // #Navigate scroll detail view down
 		CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER, 			  // #Navigate open item's folder
 
-		CMDID_USER        = 0xD000,                       // User registed commands
-		CMDID_USER_REGIST_COMMAND,                        // Regist user commands
-		CMDID_USER_EXECUTE,                               // Execute User registed command with parameters
+		CMDID_SYSTEM_USER = CMDID_SYSTEM + 0xA000,        // Menu item : User
+		CMDID_SYSTEM_USER_REGIST_COMMAND,                 // Regist user commands
+		CMDID_SYSTEM_USER_EXECUTE,                        // Execute User registed command with parameters
 
-		CMDID_SPECIAL     = 0xE000,                       // Special IDs
+		CMDID_USER        = 0x00010000,                   // User registed commands
+
+		CMDID_SPECIAL     = 0x00020000,                   // Special IDs
 		CMDID_SPECIAL_FOLDER,                             // Folder for menu item
 		CMDID_SPECIAL_SEPARATOR,                          // Separetor for menu item
 
-		CMDID_MASK_TYPE   = 0xF000,
+		CMDID_MASK_TYPE   = 0xFFFF0000,                   // Mask isolating the top-level group (SYSTEM/USER/SPECIAL)
 	};
 
 	Q_ENUM(CmdId)

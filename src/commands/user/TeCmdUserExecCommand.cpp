@@ -18,38 +18,37 @@
 **
 ****************************************************************************/
 
-#include "TeCmdRunCommand.h"
-#include "TeViewStore.h"
+#include "TeCmdUserExecCommand.h"
 #include "utils/TeUtils.h"
 #include "utils/TeToolCommand.h"
-#include "dialogs/TeCommandInputDialog.h"
 
 /**
- * @file TeCmdRunCommand.cpp
- * @brief Implementation of TeCmdRunCommand.
+ * @file TeCmdUserExecCommand.cpp
+ * @brief Implementation of TeCmdUserExecCommand.
  * @ingroup commands
  */
 
-const char* TeCmdRunCommand::PARAM_COMMAND = "command";
-const char* TeCmdRunCommand::PARAM_WITH_SHELL = "shell";
-const char* TeCmdRunCommand::PARAM_OUTPUT = "output";
 
-TeCmdRunCommand::TeCmdRunCommand()
+const char* TeCmdUserExecCommand::PARAM_COMMAND = "command";
+const char* TeCmdUserExecCommand::PARAM_WITH_SHELL = "shell";
+const char* TeCmdUserExecCommand::PARAM_OUTPUT = "output";
+
+TeCmdUserExecCommand::TeCmdUserExecCommand()
 {
 }
 
-TeCmdRunCommand::~TeCmdRunCommand()
+TeCmdUserExecCommand::~TeCmdUserExecCommand()
 {
 }
 
-bool TeCmdRunCommand::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
+bool TeCmdUserExecCommand::isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam)
 {
 	NOT_USED(p_store);
 	NOT_USED(p_cmdParam);
 	return false;
 }
 
-QFlags<TeTypes::CmdType> TeCmdRunCommand::type()
+QFlags<TeTypes::CmdType> TeCmdUserExecCommand::type()
 {
 	return QFlags<TeTypes::CmdType>(
 		TeTypes::CMD_TRIGGER_NORMAL
@@ -64,7 +63,8 @@ QFlags<TeTypes::CmdType> TeCmdRunCommand::type()
 	);
 }
 
-bool TeCmdRunCommand::execute(TeViewStore* p_store)
+
+bool TeCmdUserExecCommand::execute(TeViewStore* p_store)
 {
 	//Macro
 	// %F : Replace current file path.
@@ -76,23 +76,14 @@ bool TeCmdRunCommand::execute(TeViewStore* p_store)
 	QString command;
 	bool shell = false;
 	bool output = false;
+
 	if (cmdParam()->contains(PARAM_COMMAND)) {
 		command = cmdParam()->value(PARAM_COMMAND).toString();
 		shell = cmdParam()->value(PARAM_WITH_SHELL).toBool();
 		output = cmdParam()->value(PARAM_OUTPUT).toBool();
-	}
-	else {
-		TeCommandInputDialog dlg;
-		dlg.setWindowTitle(QObject::tr("Run command"));
-		if (dlg.exec() == QDialog::Accepted) {
-			command = dlg.command();
-			shell = dlg.shell();
-			output = dlg.output();
-		}
-	}
 
-	TeToolCommand::runCommand(p_store, command, shell, output);
+		TeToolCommand::runCommand(p_store, command, shell, output);
+	}
 
 	return true;
 }
-

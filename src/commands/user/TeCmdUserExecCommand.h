@@ -22,26 +22,33 @@
 
 #include "commands/TeCommandBase.h"
 
+#include <QList>
+#include <QFlags>
+
 /**
- * @file TeCmdRunCommand.h
- * @brief Declaration of TeCmdRunCommand.
+ * @file TeCmdUserExecCommand.h
+ * @brief Declaration of TeCmdUserExecCommand.
  * @ingroup commands
  */
 
-class TeCmdRunCommand :
+
+class TeViewStore;
+
+class TeCmdUserExecCommand :
     public TeCommandBase
 {
 public:
-	static const char* PARAM_COMMAND;
-	static const char* PARAM_WITH_SHELL;
-	static const char* PARAM_OUTPUT;
+	static const char* PARAM_COMMAND; ///< Parameter key for the target command (QString).
+	static const char* PARAM_WITH_SHELL; ///< Parameter key for whether to run the command in a shell (bool).
+	static const char* PARAM_OUTPUT; ///< Parameter key for whether to capture the command's output (bool).
+
 public:
-	TeCmdRunCommand();
-	virtual ~TeCmdRunCommand();
+	TeCmdUserExecCommand();
+	virtual ~TeCmdUserExecCommand();
+
 
 	// Check if this command is selected when item is selected.
 	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
-
 
 	// type of command
 	static QFlags<TeTypes::CmdType> type();
