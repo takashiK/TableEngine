@@ -77,16 +77,29 @@ bool TeCmdToolFile::execute(TeViewStore* p_store)
 				p_store->createArchiveFolderView(path);
 			}
 			else {
-				// show message dialog box.
-				int result = QMessageBox::warning(p_store->mainWindow(), "Unsupported file.\n open in hex viewer?", path, QMessageBox::Ok,QMessageBox::Cancel);
-				if (result == QMessageBox::Ok) {
-					TeBinaryViewer* binaryViewer = new TeBinaryViewer();
-					if (binaryViewer->open(path)) {
-						p_store->registerFloatingWidget(binaryViewer);
-						binaryViewer->show();
+				// text check by binary read
+				if(isTextFile(path)) {
+					TeDocViewer* docViewer = new TeDocViewer();
+					if (docViewer->open(path)) {
+						p_store->registerFloatingWidget(docViewer);
+						docViewer->show();
 					}
 					else {
-						delete binaryViewer;
+						delete docViewer;
+					}
+				}
+				else {
+					// show message dialog box.
+					int result = QMessageBox::warning(p_store->mainWindow(), "Unsupported file.\n open in hex viewer?", path, QMessageBox::Ok,QMessageBox::Cancel);
+					if (result == QMessageBox::Ok) {
+						TeBinaryViewer* binaryViewer = new TeBinaryViewer();
+						if (binaryViewer->open(path)) {
+							p_store->registerFloatingWidget(binaryViewer);
+							binaryViewer->show();
+						}
+						else {
+							delete binaryViewer;
+						}
 					}
 				}
 			}

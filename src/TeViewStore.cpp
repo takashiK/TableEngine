@@ -407,6 +407,9 @@ void TeViewStore::loadMenu()
 						action->setCheckable(true);
 						connect(menus.top(), &QMenu::aboutToShow, [this,p_info,action](){ action->setChecked(p_info->isSelected(this)); });
 					}
+				}else{
+					//Invalid Command Id
+					settings.remove(key);
 				}
 			}
 		}
@@ -449,6 +452,9 @@ void TeViewStore::loadToolbar()
 				QAction* action = new QAction(p_info->icon(), p_info->name());
 				connect(action, &QAction::triggered, [this, cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
 				mp_toolBar->addAction(action);
+			}else{
+				//Invalid Command Id
+				settings.remove(key);
 			}
 		}
 		else {

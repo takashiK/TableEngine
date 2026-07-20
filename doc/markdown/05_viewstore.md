@@ -156,12 +156,15 @@ classDiagram
 
 | 定数 | キー文字列 | 用途 |
 |---|---|---|
-| `SETTING_GENERAL_*` | `"general/*"` | 一般設定（多重起動許可・初期フォルダ・削除確認・コピー先ペイン等） |
+| `SETTING_GENERAL_*` | `"main/*"` | 一般設定（多重起動許可・初期フォルダ・削除確認・コピー先ペイン等） |
+| `SETTING_COMMAND_*` | `"command/*"` | コマンド実行設定（シェル・引数・シェル/ターミナル実行の有無） |
 | `SETTING_LAYOUT_*` | `"layout/*"` | ウィンドウ・ペインのレイアウト設定 |
 | `SETTING_KEY` | `"command_key"` | キー割り当て設定 |
 | `SETTING_TOOLBAR` | `"toolbar"` | ツールバー設定 |
-| `SETTING_MENU` | `"menu"` | メニュー設定 |
+| `SETTING_MENU` | `"menu"` | メニュー設定（子キー `menuGroup00`〜。メニューバー / ツリー・リストのポップアップ） |
 | `SETTING_FAVORITES` | `"Favorites"` | お気に入りフォルダ |
+| `SETTING_USER` | `"user"` | ユーザー登録コマンド（子キー `command00`〜`command30`、最大 `MAX_USER_COMMANDS` = 31 件） |
+| （ドライブバー） | `"QuickAccess"` | ドライブバーのクイックアクセス登録パスリスト |
 | `SETTING_FOLDER_*` | `"folder/appearance/*"` | フォルダビューの外観設定（フォント・色等） |
 | `SETTING_TOOLS_TEXT_EDIT` / `SETTING_TOOLS_IMAGE_EDIT` / `SETTING_TOOLS_BINARY_EDIT` | `"tools/text_edit"` 等 | 外部ツール実行コマンド文字列（text / image / binary 編集用） |
 | `SETTING_TOOLS_USER` | `"tools/user"` | ユーザー定義ツールリスト（グループ。子キー `tool01`〜`tool99`） |

@@ -46,6 +46,7 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	: QMainWindow(parent)
 {
 	mp_graphics = new QGraphicsView();
+	mp_graphics->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	mp_graphics->setScene(new QGraphicsScene());
 	mp_image = new QGraphicsPixmapItem();
 	mp_graphics->scene()->addItem(mp_image);

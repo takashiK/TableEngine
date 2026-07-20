@@ -184,7 +184,7 @@ void TeMenuSetting::storeDefaultMenuSettings(QSettings& settings)
 	for (const auto& groupItem : list) {
 		specialEntry(settings, index++, 0, TeTypes::CMDID_SPECIAL_FOLDER, groupItem.first);
 		for (const auto& item : factory->menuGroup(groupItem.second)) {
-			if ((item.cmdId & TeTypes::CMDID_MASK_TYPE) == TeTypes::CMDID_SPECIAL) {
+			if ((static_cast<quint32>(item.cmdId) & TeTypes::CMDID_MASK_TYPE) == TeTypes::CMDID_SPECIAL) {
 				specialEntry(settings, index++, item.rank, item.cmdId, item.name);
 			}
 			else {

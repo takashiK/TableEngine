@@ -35,6 +35,11 @@ classDiagram
         +actions() List~ActionFunc~
         +activate(info)
     }
+    class TeSystemFileInfoAcsr {
+        ファイルシステムエントリへのアクション実装
+        +actions() List~ActionFunc~
+        +activate(info)
+    }
     class TeArchive_Reader {
         アーカイブ読み込み
         +open(path) bool
@@ -96,6 +101,7 @@ classDiagram
     }
 
     TeFileInfoAcsr <|-- TeArchiveFileInfoAcsr
+    TeFileInfoAcsr <|-- TeSystemFileInfoAcsr
     TeFinder <|-- TeFileFinder
     TeFinder <|-- TeArchiveFinder
     TeFinder --> TeSearchQuery
@@ -121,7 +127,8 @@ classDiagram
 `QStandardItem` にアクション情報を関連付けるインタフェースクラスです。  
 `assignToStandardItem()` で `QStandardItem` の `UserRole` にポインタを埋め込み、  
 `fromStandardItem()` でアイテムからアクセサを取り出して `activate()` を呼ぶことで、  
-「そのアイテムをダブルクリックしたときに何をするか」を型安全に表現します。
+「そのアイテムをダブルクリックしたときに何をするか」を型安全に表現します。  
+具体実装は、ファイルシステムエントリ向けの `TeSystemFileInfoAcsr` と、アーカイブエントリ向けの `TeArchiveFileInfoAcsr` の 2 種類があります。
 
 詳細は [utils/TeArchiveFileInfoAcsr.md](TeArchiveFileInfoAcsr.md) を参照してください。
 

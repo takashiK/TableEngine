@@ -22,26 +22,28 @@
 
 #include "commands/TeCommandBase.h"
 
+#include <QList>
+#include <QFlags>
+
 /**
- * @file TeCmdRunCommand.h
- * @brief Declaration of TeCmdRunCommand.
+ * @file TeCmdUserRegistCommands.h
+ * @brief Declaration of TeCmdUserRegistCommands.
  * @ingroup commands
  */
 
-class TeCmdRunCommand :
+
+class TeViewStore;
+
+class TeCmdUserRegistCommands :
     public TeCommandBase
 {
 public:
-	static const char* PARAM_COMMAND;
-	static const char* PARAM_WITH_SHELL;
-	static const char* PARAM_OUTPUT;
-public:
-	TeCmdRunCommand();
-	virtual ~TeCmdRunCommand();
+	TeCmdUserRegistCommands();
+	virtual ~TeCmdUserRegistCommands();
+
 
 	// Check if this command is selected when item is selected.
 	static bool isSelected(TeViewStore* p_store, const TeCmdParam* p_cmdParam);
-
 
 	// type of command
 	static QFlags<TeTypes::CmdType> type();
