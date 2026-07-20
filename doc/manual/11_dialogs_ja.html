@@ -261,6 +261,50 @@
     </table>
   </div>
 
+  <!-- ソート設定ダイアログ -->
+  <div class="dialog-section" id="dialog-sort-setting">
+    <h3>ソート設定ダイアログ</h3>
+    <p>ファイルリストの並び替え基準と方向をまとめて設定するダイアログです。</p>
+    <table>
+      <thead><tr><th>項目</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>並び替え基準</td><td>名前 / サイズ / 拡張子 / 更新日時</td></tr>
+        <tr><td>順序</td><td>昇順 / 降順</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ツール設定ダイアログ -->
+  <div class="dialog-section" id="dialog-tool-setting">
+    <h3>ツール設定ダイアログ</h3>
+    <p>外部エディタとユーザー定義ツールを登録するダイアログです。「General」と「User」の 2 つのタブがあります。</p>
+    <table>
+      <thead><tr><th>タブ</th><th>説明</th></tr></thead>
+      <tbody>
+        <tr><td>General</td><td>テキスト編集・画像編集・バイナリ編集の各コマンドを登録します。<code>...</code> ボタンで実行ファイルを選択できます</td></tr>
+        <tr><td>User</td><td>ユーザー定義ツール（最大 99 件）を登録します。各エントリはコマンドと対象拡張子（<code>suffix1; suffix2</code> 形式）で構成されます</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      コマンド文字列では <code>%F</code> / <code>%f</code> / <code>%M</code> / <code>%m</code> / <code>%P</code> のプレースホルダが使用できます。
+    </div>
+  </div>
+
+  <!-- ユーザーコマンド登録ダイアログ -->
+  <div class="dialog-section" id="dialog-user-commands">
+    <h3>ユーザーコマンド登録ダイアログ</h3>
+    <p>
+      よく使う外部コマンドを登録・編集するダイアログです。最大 31 個まで登録できます。
+      コマンド文字列では <code>%F</code> / <code>%f</code> / <code>%M</code> / <code>%m</code> / <code>%P</code> のプレースホルダが使用できます。
+    </p>
+  </div>
+
+  <!-- パスワードダイアログ -->
+  <div class="dialog-section" id="dialog-password">
+    <h3>パスワードダイアログ</h3>
+    <p>暗号化されたアーカイブの展開時や、暗号化アーカイブの作成時にパスワードを入力するダイアログです。</p>
+  </div>
+
   <div class="page-nav">
     <a href="10_settings_ja.html">&larr; 第10章 設定</a>
     <a href="12_shortcuts_ja.html">第12章 キーボードショートカット &rarr;</a>

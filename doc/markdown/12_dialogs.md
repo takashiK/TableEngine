@@ -27,7 +27,11 @@
 | `TeOptionSetting` | `TeCmdOption` | グローバル設定（起動オプション等） |
 | `TeToolbarSetting` | `TeCmdToolbarSetting` | ツールバーに配置するボタンとコマンドのカスタマイズ |
 | `TeFontDialog` | `TeToolbarSetting` や外観設定 | フォント・文字色・背景色の入力 |
-| `TeToolDialog` | `TeCmdToolSetting` | 外部ツール設定（text/image/binary編集コマンドとユーザー定義ツールリスト）を編集するダイアログ |
+| `TeSortSettingDialog` | `TeCmdViewSortSetting` | ソート基準（名前 / サイズ / 拡張子 / 更新日時）と昇順 / 降順の設定 |
+| `TeEditToolSetting` | `TeCmdToolSetting` | 外部ツール設定（text/image/binary編集コマンドとユーザー定義ツールリスト）を編集するダイアログ |
+| `TeEditUserCommands` | `TeCmdUserRegistCommands` | ユーザー登録コマンド（`user/command00`〜`command30`）の編集 |
+| `TePasswordDialog` | `TeCmdExtract` / `TeCmdArchive` 等 | 暗号化アーカイブのパスワード入力 |
+| `TePropertiesDialog` | `TeCmdProperties` | ファイル / フォルダのプロパティ表示 |
 
 ---
 
@@ -68,7 +72,7 @@
 変更内容は `QSettings`（`SETTING_KEY` キー）に保存され、  
 `TeDispatcher::loadKeySetting()` が次回起動時に読み込みます。
 
-### TeToolDialog
+### TeEditToolSetting
 
 外部ツール設定（`TeCmdToolSetting` から起動）を編集するダイアログです。General タブと User タブを持ちます。
 

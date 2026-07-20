@@ -40,6 +40,8 @@ graph TD
 | `QTextEdit` | マークアップ表示ウィジェット（HTML/Markdown/PlainText を切替表示） |
 | `TeTextSyntaxHighlighter` | シンタックスハイライターの実装（`QSyntaxHighlighter` 継承） |
 | `TeTextSyntaxLoader` | JSON 形式のシンタックス定義ファイルを読み込む |
+| `TeTextSyntaxDialog` | シンタックス定義（キーワード / 領域 / シンボルの色・書式）を編集するダイアログ |
+| `TeDocumentSettings` | ビューワ設定（フォント / コーデック / タブ幅等）の QSettings キー定義 |
 
 ### Viewer Mode Selection
 
@@ -61,6 +63,20 @@ graph TD
 `TeTextSyntaxLoader` が設定ファイルを読み込み、`TeTextSyntax` オブジェクト（キーワード / 正規表現 / 領域の定義群）を構築します。  
 `TeTextSyntaxHighlighter` が `TeTextSyntax` を使用して `QPlainTextEdit` 内のテキストを着色します。
 
+### Text Sidebar Panels（`viewer/document/text/panel/`）
+
+テキストビューアはシンタックス定義を編集するためのサイドパネル群を備えます。  
+各パネルは `TeTextPanelList`（タイトル付きの `TeTextPanelItem` コンテナ）を基盤とし、色・書式は `TeTextStyleEditor` で編集します。
+
+| クラス | 役割 |
+|---|---|
+| `TeTextPanelList` | タイトルヘッダー付きの `TeTextPanelItem` 順序付きコンテナ |
+| `TeTextPanelItem` | 単一シンタックスエントリを表示・編集する基底ウィジェット |
+| `TeTextPanelSymbol` | `TeTextSyntax::SyntaxKeywords`（キーワード群）を編集 |
+| `TeTextPanelRegion` | `TeTextSyntax::SyntaxRegion`（領域定義）を編集 |
+| `TeTextPanelSyntax` | シンタックス全体（キーワード / 領域）を編集するパネル |
+| `TeTextStyleEditor` | 太字 / 斜体 / 下線・前景 / 背景色を編集する共通フォーマットエディタ |
+
 ---
 
 ## Binary Viewer (TeBinaryViewer)
@@ -71,8 +87,15 @@ graph TD
 | クラス | 役割 |
 |---|---|
 | `TeBinaryViewer` | バイナリビューワのメインウィンドウ |
+| `TeBinaryViewerSettings` | バイナリビューワ設定（ウィンドウサイズ・デコードペイン表示・検索設定等）の QSettings キー定義 |
 | `QHexView` | 外部ライブラリ。バイナリデータのヘキサダンプ表示ウィジェット |
 | `QHexDocument` | `QHexView` のデータモデル |
+
+検索・デコード機能を備えます：
+
+- **検索モード**（`TeBinaryViewer::SearchMode`）: `Text` / `Binary` / `Number`
+- **数値デコード**（`NumberType`）: `Int8`〜`Int64` / `UInt8`〜`UInt64`、エンディアン（`EndianMode::Little` / `Big`）を選択可能なデコードペイン
+- オフセット指定によるジャンプ（goto-offset）
 
 詳細は [viewer/TeBinaryViewer.md](viewer/TeBinaryViewer.md) を参照してください。
 

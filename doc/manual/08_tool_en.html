@@ -79,10 +79,53 @@
   <ul>
     <li>Side-by-side hexadecimal and ASCII display</li>
     <li>Offset (address) column</li>
+    <li>Search (text / binary / number)</li>
+    <li>Numeric decode pane (Int8–Int64 / endian switch)</li>
+    <li>Jump to a specified offset</li>
   </ul>
 
   <div class="note">
     Both viewers are read-only. File contents cannot be modified.
+  </div>
+
+  <h2>Editing with External Editors</h2>
+  <p>
+    In addition to the built-in viewers, you can open and edit files with registered external editors.
+    The editors to use are registered in advance via <em>Tool Setting</em>.
+  </p>
+  <h3>Edit File</h3>
+  <p>
+    <span class="menu-path">Tools &rsaquo; Edit File</span><br>
+    Opens the selected file in the registered external text editor.
+  </p>
+  <h3>Edit Binary</h3>
+  <p>
+    <span class="menu-path">Tools &rsaquo; Edit Binary</span><br>
+    Opens the selected file in the registered external binary editor.
+  </p>
+
+  <h2>Tool Setting</h2>
+  <p>
+    <span class="menu-path">Tools &rsaquo; Tool Setting</span><br>
+    Registers the text / image / binary edit commands and the list of user-defined tools.
+  </p>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-tool-setting">Tool Setting Dialog</a>
+  </div>
+
+  <h2>User Commands</h2>
+  <p>
+    Register frequently used external commands as “user commands” and run them against the selected items in the file list.
+    Up to 31 commands can be registered.
+  </p>
+  <h3>Register User Commands</h3>
+  <p>
+    <span class="menu-path">User &rsaquo; Register User Commands</span><br>
+    Registers and edits commands. Command strings can use placeholders that represent the selected file paths
+    (<code>%F</code> / <code>%f</code> / <code>%M</code> / <code>%m</code> / <code>%P</code>).
+  </p>
+  <div class="note">
+    &rarr; Dialog details: <a href="11_dialogs_en.html#dialog-user-commands">User Commands Dialog</a>
   </div>
 
   <div class="page-nav">
