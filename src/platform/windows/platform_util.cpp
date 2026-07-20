@@ -604,6 +604,74 @@ QPixmap getFileIcon(const QString& path, const QSize& size)
 	return pixmap.scaled(pixSize);
 }
 
+namespace {
+	QStringList EnumerateAssociatedApps(const QString& ext)
+	{
+		QStringList result;
+
+		IEnumAssocHandlers* enumHandlers = nullptr;
+		HRESULT hr = SHAssocEnumHandlers(ext.toStdWString().c_str(), ASSOC_FILTER_NONE, &enumHandlers);
+		if (FAILED(hr) || !enumHandlers) {
+			return result;
+		}
+
+		IAssocHandler* handler = nullptr;
+		ULONG fetched = 0;
+		while (enumHandlers->Next(1, &handler, &fetched) == S_OK) {
+			LPWSTR path = nullptr;
+
+			if (SUCCEEDED(handler->GetName(&path)) && path) {
+				result.push_back(QString::fromStdWString(path));
+				CoTaskMemFree(path);
+			}
+
+			handler->Release();
+			handler = nullptr;
+		}
+
+		enumHandlers->Release();
+		return result;
+	}
+}
+
+QString getAssociatedAppPath(const QString& suffix)
+{
+	QString asuffix = suffix;
+	if(!asuffix.startsWith('.')) {
+		asuffix.prepend('.');
+	}
+
+	// Try to get the default associated application for the given file extension using IQueryAssociations
+    IQueryAssociations* pQuery = nullptr;
+    HRESULT hr = AssocCreate(CLSID_QueryAssociations, IID_IQueryAssociations, (void**)&pQuery);
+    
+    if (SUCCEEDED(hr)) {
+        // 拡張子に関連付けを初期化
+        hr = pQuery->Init(ASSOCF_INIT_DEFAULTTOSTAR, asuffix.toStdWString().c_str(), nullptr, nullptr);
+        if (SUCCEEDED(hr)) {
+            wchar_t buffer[MAX_PATH] = { 0 };
+            DWORD cchBuffer = MAX_PATH;
+
+            // 既定の実行ファイルパスを取得
+            hr = pQuery->GetString(0, ASSOCSTR_EXECUTABLE, nullptr, buffer, &cchBuffer);
+            if (SUCCEEDED(hr)) {
+                return QString::fromStdWString(buffer);
+            }
+        }
+        pQuery->Release();
+    }
+
+	// Fallback: Enumerate associated applications and return the first valid one
+	QStringList associatedApps = EnumerateAssociatedApps(asuffix);
+	if (!associatedApps.isEmpty()) {
+		for (const QString& app : associatedApps) {
+			if (!app.isEmpty() && QFileInfo(app).exists()) {
+				return app;
+			}
+		}
+	}
+	return QString();
+}
 
 
 //////////////////////////////////////////////////////////
@@ -643,4 +711,15 @@ void setCopyAction(QMimeData* mime)
 TeNativeEvent* getNativeEvent()
 {
 	return &g_event;
+}
+
+
+//////////////////////////////////////////////////////////
+//
+// Shell
+//
+
+QString getDefaultShellCommand()
+{
+	return QStringLiteral("pwsh.exe");
 }

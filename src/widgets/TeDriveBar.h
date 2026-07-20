@@ -100,7 +100,9 @@ signals:
 public slots:
 	/**
 	 * @brief Rebuilds the drive-button section based on currently available drives.
-	 * @param state Unused; present to match QFileSystemWatcher::directoryChanged signal.
+	 * @param state Unused; present to match TeNativeEvent::mountStateChanged signal,
+	 *              to which this slot is connected so the bar refreshes automatically
+	 *              when a drive is mounted or unmounted.
 	 */
 	void updateDrive(bool state);
 
@@ -116,7 +118,6 @@ protected:
 private:
 	QChar    m_key;               ///< Current drive letter (unused after init).
 	QAction* mp_driveStart;       ///< Separator marking the start of the drive section.
-	QAction* mp_quickStart;       ///< Separator marking the start of the quick-access section.
 	QList<QAction*> m_driveActions;  ///< Per-drive toolbar actions.
 	QList<QAction*> m_quickActions;  ///< Per-quick-access toolbar actions.
 };

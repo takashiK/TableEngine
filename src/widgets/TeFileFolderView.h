@@ -71,6 +71,9 @@ public:
 	/** @brief Returns the list-view pane. */
 	virtual TeFileListView* list();
 
+	/** @brief Returns the TeFileInfo for the item currently focused in the list view. */
+	virtual TeFileInfo currentFileInfo() const override;
+
 	/**
 	 * @brief Sets the root path shown by the tree.
 	 * @param path Absolute directory path.
@@ -91,8 +94,13 @@ public:
 	virtual void moveNextPath();
 	/** @brief Navigates backward in the history stack. */
 	virtual void movePrevPath();
+	/** @brief Navigates to the parent directory of the current path. */
+	virtual void moveParentPath();
+
 	/** @brief Returns all paths in the navigation history. */
 	virtual QStringList getPathHistory() const;
+	/** @brief Returns all paths in the navigation history for a specific root. */
+	virtual QStringList getPathHistoryWithRoot(const QString& root) const;
 
 	/** @brief Creates and returns a TeFileFinder for this view. */
 	virtual TeFinder* makeFinder();

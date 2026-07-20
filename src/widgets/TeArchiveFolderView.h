@@ -96,6 +96,9 @@ public:
 	/** @brief Returns the list-view pane. */
 	virtual TeFileListView* list();
 
+	/** @brief Returns the TeFileInfo for the item currently focused in the list view. */
+	virtual TeFileInfo currentFileInfo() const override;
+
 	/**
 	 * @brief Sets the URI of the archive currently mounted.
 	 * @param path URI with URI_WRITE or URI_READ prefix followed by the
@@ -117,8 +120,13 @@ public:
 	virtual void moveNextPath();
 	/** @brief Navigates backward in the history stack. */
 	virtual void movePrevPath();
+	/** @brief Navigates to the parent directory of the current path. */
+	virtual void moveParentPath();
+
 	/** @brief Returns the virtual-path navigation history. */
 	virtual QStringList getPathHistory() const;
+	/** @brief Returns the virtual-path navigation history for a specific root. */
+	virtual QStringList getPathHistoryWithRoot(const QString& root) const;
 
 	/** @brief Creates and returns a TeArchiveFinder for this view. */
 	virtual TeFinder* makeFinder();

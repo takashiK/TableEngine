@@ -27,6 +27,11 @@
 | `TeOptionSetting` | `TeCmdOption` | グローバル設定（起動オプション等） |
 | `TeToolbarSetting` | `TeCmdToolbarSetting` | ツールバーに配置するボタンとコマンドのカスタマイズ |
 | `TeFontDialog` | `TeToolbarSetting` や外観設定 | フォント・文字色・背景色の入力 |
+| `TeSortSettingDialog` | `TeCmdViewSortSetting` | ソート基準（名前 / サイズ / 拡張子 / 更新日時）と昇順 / 降順の設定 |
+| `TeEditToolSetting` | `TeCmdToolSetting` | 外部ツール設定（text/image/binary編集コマンドとユーザー定義ツールリスト）を編集するダイアログ |
+| `TeEditUserCommands` | `TeCmdUserRegistCommands` | ユーザー登録コマンド（`user/command00`〜`command30`）の編集 |
+| `TePasswordDialog` | `TeCmdExtract` / `TeCmdArchive` 等 | 暗号化アーカイブのパスワード入力 |
+| `TePropertiesDialog` | `TeCmdProperties` | ファイル / フォルダのプロパティ表示 |
 
 ---
 
@@ -66,3 +71,17 @@
 コマンドとキーシーケンスの対応を編集するダイアログです。  
 変更内容は `QSettings`（`SETTING_KEY` キー）に保存され、  
 `TeDispatcher::loadKeySetting()` が次回起動時に読み込みます。
+
+### TeEditToolSetting
+
+外部ツール設定（`TeCmdToolSetting` から起動）を編集するダイアログです。General タブと User タブを持ちます。
+
+| タブ | 内容 |
+|---|---|
+| General | `tools/text_edit` / `tools/image_edit` / `tools/binary_edit` の3つの実行コマンドを編集する。各行は入力欄と Browse（`...`）ボタンで構成され、Browse でファイルを選択すると既存の引数を破棄して全文を置換する（キャンセル時は変更なし）。入力変更時に即座にメンバへ反映しつつ `TeToolCommand::isValidFormat()` で書式検証し、不正な場合は入力欄を赤枠表示する（入力はブロックしない） |
+| User | `tools/user/tool01`〜`tool99`（最大 `TeSettings::MAX_USER_TOOLS` = 99件）に対応する可変長のユーザー定義ツールリスト。1エントリは「Command」欄（削除ボタン付き）と「Suffixes」欄（`suffix1; suffix2; suffix3` 形式）の2段組で、`QScrollArea` で縦スクロールする。Add ボタンで末尾に空エントリを追加し、既存設定分のみ初期表示する（空行は作らない） |
+
+ダイアログ表示時（コンストラクタ）に `QSettings` から読み込みます。OK 時のみ書式検証を経て書き戻し（不正な場合は警告して閉じません）、Cancel 時は何も保存しません。  
+保存時、`tools/user` グループは毎回クリアしてから `tool01` 〜順に書き戻します。
+
+コマンド文字列で利用可能なマクロ（`%F` / `%f` / `%M` / `%m` / `%P`）の詳細は [10_utils.md](10_utils.md) の `TeToolCommand` を参照してください。

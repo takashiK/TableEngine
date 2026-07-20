@@ -457,16 +457,34 @@ namespace {
 			type = TeArchive::AR_7ZIP;
 			break;
 		case ARCHIVE_FORMAT_CPIO:
-		case ARCHIVE_FORMAT_SHAR:
+			type = TeArchive::AR_CPIO;
+			break;
 		case ARCHIVE_FORMAT_ISO9660:
+			type = TeArchive::AR_ISO9660;
+			break;
 		case ARCHIVE_FORMAT_AR:
+			type = TeArchive::AR_ARCHIVE;
+			break;
+		case ARCHIVE_FORMAT_CAB:
+			type = TeArchive::AR_CAB;
+			break;
+		case ARCHIVE_FORMAT_RAR:
+			type = TeArchive::AR_RAR;
+			break;
+		case ARCHIVE_FORMAT_LHA:
+			type = TeArchive::AR_LHA;
+			break;
+		case ARCHIVE_FORMAT_SHAR:
+			type = TeArchive::AR_SHAR;
+			break;
+		case ARCHIVE_FORMAT_WARC:
+			type = TeArchive::AR_WARC;
+			break;
 		case ARCHIVE_FORMAT_MTREE:
+			type = TeArchive::AR_MTREE;
+			break;
 		case ARCHIVE_FORMAT_RAW:
 		case ARCHIVE_FORMAT_XAR:
-		case ARCHIVE_FORMAT_LHA:
-		case ARCHIVE_FORMAT_CAB:
-		case ARCHIVE_FORMAT_RAR:
-		case ARCHIVE_FORMAT_WARC:
 		default:
 			break;
 		}
@@ -571,6 +589,10 @@ namespace {
 			archive_write_set_format_gnutar(arInfo->ar);
 			archive_write_set_compression_bzip2(arInfo->ar);
 			break;
+		default:
+			archive_write_free(arInfo->ar);
+			arInfo->ar = Q_NULLPTR;
+			return false;
 		}
 
 		// Encrypted archive creation is currently supported for ZIP (AES-256).

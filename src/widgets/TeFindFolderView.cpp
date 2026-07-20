@@ -6,11 +6,17 @@
 #include "TeFileListView.h"
 #include "utils/TeFinder.h"
 #include "utils/TeFileInfo.h"
+#include "utils/TeUtils.h"
+#include "utils/TeFileInfo.h"
+#include "commands/navi/TeCmdNaviItemFolder.h"
 
 #include <QStandardItemModel>
 #include <QHBoxLayout>
 #include <QFileInfo>
 #include <QFileIconProvider>
+#include <QMenu>
+#include <QAction>
+
 /**
  * @file TeFindFolderView.cpp
  * @brief Implementation of TeFindFolderView.
@@ -71,6 +77,7 @@ TeFindFolderView::TeFindFolderView(QWidget* parent)
 	mp_treeView->setModel(new QStandardItemModel(this));
 	mp_treeView->setHeaderHidden(true);
 	mp_treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+	mp_treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	// List model: hit results for the active entry
 	mp_listView->setModel(new QStandardItemModel(this));
@@ -79,9 +86,39 @@ TeFindFolderView::TeFindFolderView(QWidget* parent)
 	mp_listView->setResizeMode(QListView::Adjust);
 	mp_listView->setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
 	mp_listView->setContextMenuPolicy(Qt::CustomContextMenu);
+	mp_listView->setFileViewMode(TeTypes::FileInfo::FILEINFO_ALL, TeTypes::FileViewMode::FILEVIEW_DETAIL_LIST);
+	mp_listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	// Notify the detail panel / status bar when the focused list item changes
+	connect(mp_listView->selectionModel(), &QItemSelectionModel::currentChanged,
+		[this](const QModelIndex&, const QModelIndex&) {
+			emit currentFileChanged(currentFileInfo());
+		});
 
 	connect(mp_treeView->selectionModel(), &QItemSelectionModel::currentChanged,
 	        this, &TeFindFolderView::onTreeSelectionChanged);
+
+	connect(mp_listView, &QListView::customContextMenuRequested,
+		[this](const QPoint& pos)
+	{ showContextMenu(mp_listView, pos); });
+
+	connect(mp_listView, &QListView::activated, [this](const QModelIndex& index) {
+		if (!index.isValid()) return;
+		TeFileInfo info;
+		QStandardItem* item = listModel() ? listModel()->itemFromIndex(index) : nullptr;
+		if (item != nullptr)
+			info.importFromItem(item);
+
+		// if target is a directory createFolderView, else open file
+		if (info.type == TeFileInfo::EN_DIR) {
+			TeCmdParam param;
+			param.insert(TeCmdNaviItemFolder::PARAM_OPEN_TARGET_DIR, "true");
+			emit requestCommand(TeTypes::CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER, TeTypes::WT_FINDVIEW, nullptr, &param);
+		} else {
+			emit requestCommand(TeTypes::CMDID_SYSTEM_FILE_OPEN, TeTypes::WT_FINDVIEW, nullptr, nullptr);
+		}
+	});
+
 
 	mp_treeEvent = new TeEventFilter(this);
 	mp_treeEvent->setType(TeTypes::WT_TREEVIEW);
@@ -129,6 +166,19 @@ TeFileListView* TeFindFolderView::list()
 	return mp_listView;
 }
 
+TeFileInfo TeFindFolderView::currentFileInfo() const
+{
+	QModelIndex current = mp_listView->currentIndex();
+	if (!current.isValid())
+		return TeFileInfo();
+
+	QStandardItem* item = listModel() ? listModel()->itemFromIndex(current) : nullptr;
+	TeFileInfo info;
+	if (item != nullptr)
+		info.importFromItem(item);
+	return info;
+}
+
 void TeFindFolderView::setRootPath(const QString& /*path*/)
 {
 	// Not applicable for find view
@@ -173,6 +223,10 @@ void TeFindFolderView::movePrevPath()
 	}
 }
 
+void TeFindFolderView::moveParentPath() {
+	// Not applicable for find view; no parent directory concept
+}
+
 QStringList TeFindFolderView::getPathHistory() const
 {
 	QStringList list;
@@ -180,6 +234,11 @@ QStringList TeFindFolderView::getPathHistory() const
 		list.append(entry.query.targetPath);
 	}
 	return list;
+}
+
+QStringList TeFindFolderView::getPathHistoryWithRoot(const QString & root) const
+{
+	return getPathHistory();
 }
 
 TeFinder* TeFindFolderView::makeFinder()
@@ -228,18 +287,52 @@ void TeFindFolderView::onTreeSelectionChanged(const QModelIndex& current,
 	activateEntry(current.row());
 }
 
-void TeFindFolderView::onItemsFound(int offset, const QList<TeFileInfo>& newItems)
-{
-	// Guard: only handle signals from the currently active finder
-	auto* senderFinder = qobject_cast<TeFinder*>(sender());
-	if (m_activeIndex < 0 || m_activeIndex >= m_entries.size()) return;
-	if (m_entries[m_activeIndex].finder != senderFinder) return;
+void TeFindFolderView::showContextMenu(const QAbstractItemView* pView, const QPoint& pos) {
+    // update menu
 
-	// Skip items that are already rendered from the initial snapshot
-	const int skipCount = (std::max)(0, m_snapshotCount - offset);
-	for (int i = skipCount; i < newItems.size(); ++i) {
-		listModel()->appendRow(makeListRow(newItems[i]));
-	}
+    QMenu menu(this);
+
+    // Create Menu Item
+    QAction* action;
+
+    action = menu.addAction(tr("Open"));
+    connect(action, &QAction::triggered, [this](bool /*checked*/) { emit requestCommand(TeTypes::CMDID_SYSTEM_FILE_OPEN, TeTypes::WT_FINDVIEW, nullptr, nullptr); });
+
+    menu.addSeparator();
+
+    action = menu.addAction(tr("Copy"));
+    connect(action, &QAction::triggered, [this](bool /*checked*/) { emit requestCommand(TeTypes::CMDID_SYSTEM_EDIT_COPY, TeTypes::WT_FINDVIEW, nullptr, nullptr); });
+
+    action = menu.addAction(tr("Cut"));
+    connect(action, &QAction::triggered, [this](bool /*checked*/) { emit requestCommand(TeTypes::CMDID_SYSTEM_EDIT_CUT, TeTypes::WT_FINDVIEW, nullptr, nullptr); });
+
+    menu.addSeparator();
+
+    action = menu.addAction(tr("Property"));
+    connect(action, &QAction::triggered, [this](bool /*checked*/) { emit requestCommand(TeTypes::CMDID_SYSTEM_FILE_PROPERTY, TeTypes::WT_FINDVIEW, nullptr, nullptr); });
+
+    menu.addSeparator();
+
+    action = menu.addAction(tr("Open Folder"));
+    connect(action, &QAction::triggered, [this](bool /*checked*/) {
+        emit requestCommand(TeTypes::CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER, TeTypes::WT_FINDVIEW, nullptr, nullptr);
+    });
+
+    QPoint gpos = pView->mapToGlobal(pos);
+    menu.exec(gpos);
+}
+
+void TeFindFolderView::onItemsFound(int offset, const QList<TeFileInfo>& newItems) {
+    // Guard: only handle signals from the currently active finder
+    auto* senderFinder = qobject_cast<TeFinder*>(sender());
+    if (m_activeIndex < 0 || m_activeIndex >= m_entries.size()) return;
+    if (m_entries[m_activeIndex].finder != senderFinder) return;
+
+    // Skip items that are already rendered from the initial snapshot
+    const int skipCount = (std::max)(0, m_snapshotCount - offset);
+    for (int i = skipCount; i < newItems.size(); ++i) {
+        listModel()->appendRow(makeListRow(newItems[i]));
+    }
 }
 
 void TeFindFolderView::onSearchFinished()

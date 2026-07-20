@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QDialogButtonBox>
+#include <QSettings>
 
 /**
  * @file TeCommandInputDialog.cpp
@@ -30,6 +31,10 @@ TeCommandInputDialog::TeCommandInputDialog(QWidget *parent)
 	hlayout->addWidget(mp_shell);
 	mp_output= new QCheckBox("show output");
 	hlayout->addWidget(mp_output);
+
+	QSettings settings;
+	mp_shell->setChecked(settings.value(SETTING_COMMAND_ExecuteWithShell, true).toBool());
+	mp_output->setChecked(settings.value(SETTING_COMMAND_ExecuteWithTerminal, false).toBool());
 
 	layout->addLayout(hlayout);
 

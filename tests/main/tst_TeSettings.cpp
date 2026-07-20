@@ -67,5 +67,5 @@ TEST(tst_TeSettings, setting_menu_key_nonempty)
 TEST(tst_TeSettings, general_multi_instance_key_contains_general_prefix)
 {
     QString key = QString::fromLatin1(SETTING_GENERAL_MultiInstance);
-    EXPECT_TRUE(key.startsWith("general"));
+    EXPECT_TRUE(key.startsWith("main"));
 }

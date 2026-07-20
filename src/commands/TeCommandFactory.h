@@ -107,8 +107,14 @@ public:
 	 */
 	TeCommandBase* createCommand(TeTypes::CmdId cmdId) const;
 
+	/**
+	 * @brief Load user-registered commands from settings.
+	 */
+	void loadUserCommands();
+
 private:
 	QMap<TeTypes::CmdId, TeCommandInfoBase*>          m_commands;
+	QMap<TeTypes::CmdId, TeCommandInfoBase*>          m_userCommands;
 	QMap<TeTypes::CmdId, QList<TeMenuSpec>>            m_menuSpecs;
 	QMap<TeTypes::CmdId, QList<TeTypes::CmdId>>        m_group;
 };

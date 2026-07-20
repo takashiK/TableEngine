@@ -99,3 +99,8 @@ void TeFileInfo::importFromItem(const QStandardItem* item)
 	size = item->data(ROLE_SIZE).toULongLong();
 	lastModified = item->data(ROLE_DATE).toDateTime();
 }
+
+QString TeFileInfo::fileName() const
+{
+	return QFileInfo(path).fileName();
+}

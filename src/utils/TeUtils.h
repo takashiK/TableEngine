@@ -33,6 +33,14 @@ enum TeFileType {
 bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths);
 
 /**
+ * @brief Same as getSelectedItemList(), but excludes directories.
+ * @param p_store  The application-wide TeViewStore.
+ * @param p_paths  Output list populated with absolute file paths (directories skipped).
+ * @return true if at least one file path was collected.
+ */
+bool getSelectedFileList(TeViewStore* p_store, QStringList* p_paths);
+
+/**
  * @brief Returns the path of the focused (current) item in the active list view.
  * @param p_store The application-wide TeViewStore.
  * @return Absolute path string, or an empty string if no item is current.
@@ -109,6 +117,17 @@ TeFileType getFileType(const QString& path);
  * @return The name of the first matching codec, or an empty string.
  */
 QString detectTextCodec(const QByteArray& data, const QStringList& codecList);
+
+/**
+ * @brief Classifies a file from at most its first 1024 bytes.
+ *
+ * The detector recognizes UTF-8, UTF-16 (little/big endian), Shift-JIS,
+ * and EUC-JP. This is a heuristic content check; it does not inspect the
+ * file name or MIME type.
+ * @param path File path to inspect.
+ * @return true when the sample is likely text, otherwise false.
+ */
+bool isTextFile(const QString& path);
 
 /** @brief No-op macro to suppress unused-variable warnings. */
 #define NOT_USED(x) (void)x

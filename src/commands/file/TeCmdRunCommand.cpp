@@ -21,20 +21,18 @@
 #include "TeCmdRunCommand.h"
 #include "TeViewStore.h"
 #include "utils/TeUtils.h"
+#include "utils/TeToolCommand.h"
 #include "dialogs/TeCommandInputDialog.h"
-
-#include <QProcess>
-#include <QMessageBox>
-#include <QPlainTextEdit>
-#include <QByteArray>
-#include <QString>
-#include <QStringDecoder>
 
 /**
  * @file TeCmdRunCommand.cpp
  * @brief Implementation of TeCmdRunCommand.
  * @ingroup commands
  */
+
+const char* TeCmdRunCommand::PARAM_COMMAND = "command";
+const char* TeCmdRunCommand::PARAM_WITH_SHELL = "shell";
+const char* TeCmdRunCommand::PARAM_OUTPUT = "output";
 
 TeCmdRunCommand::TeCmdRunCommand()
 {
@@ -69,17 +67,19 @@ QFlags<TeTypes::CmdType> TeCmdRunCommand::type()
 bool TeCmdRunCommand::execute(TeViewStore* p_store)
 {
 	//Macro
-	// %F : Replace current file name.
-	// %M : Replace selected file names.
+	// %F : Replace current file path.
+	// %f : Replace current file name.
+	// %M : Replace selected file paths.
+	// %m : Replace selected file names.
 	// %P : Replace current folder path.
 
 	QString command;
 	bool shell = false;
 	bool output = false;
-	if (cmdParam()->contains("command")) {
-		command = cmdParam()->value("command").toString();
-		shell = cmdParam()->value("shell").toBool();
-		output = cmdParam()->value("output").toBool();
+	if (cmdParam()->contains(PARAM_COMMAND)) {
+		command = cmdParam()->value(PARAM_COMMAND).toString();
+		shell = cmdParam()->value(PARAM_WITH_SHELL).toBool();
+		output = cmdParam()->value(PARAM_OUTPUT).toBool();
 	}
 	else {
 		TeCommandInputDialog dlg;
@@ -91,59 +91,8 @@ bool TeCmdRunCommand::execute(TeViewStore* p_store)
 		}
 	}
 
-	if (!command.isEmpty()) {
-		//replace %F to current file
-		if (command.contains("%F")) {
-			command.replace("%F", getCurrentItem(p_store));
-		}
-
-		//replace %M to selected file list
-		if (command.contains("%M")) {
-			QStringList selected;
-			if (getSelectedItemList(p_store, &selected)) {
-				command.replace("%M", selected.join(" "));
-			}
-		}
-
-		//replace %P to current folder path
-		if (command.contains("%P")) {
-			command.replace("%P", getCurrentFolder(p_store));
-		}
-		
-		//run command
-		QProcess process;
-		process.setWorkingDirectory(getCurrentFolder(p_store));
-
-		if (shell) {
-			command = "cmd.exe /c " + command;
-		}
-
-		process.startCommand(command, QProcess::ReadOnly);
-
-		if (!process.waitForStarted()) {
-			// TODO: shell variation
-			QMessageBox::critical(p_store->mainWindow(), QObject::tr("Run command"), QObject::tr("Failed to start command."));
-		}
-		else {
-			process.waitForFinished();
-			if (output) {
-				QPlainTextEdit* edit = new QPlainTextEdit();
-
-				QByteArray out = process.readAllStandardOutput();
-				QString codecName = detectTextCodec(out, QStringList({ "UTF-8","Shift_JIS","EUC-JP","ISO-2022-JP" }));
-				QStringDecoder decoder(codecName.toLatin1().constData());
-				if (!decoder.isValid()) {
-					decoder = QStringDecoder("UTF-8");
-				}
-				QString outText = decoder(out);
-
-				edit->setPlainText(outText);
-				edit->setReadOnly(true);
-				p_store->registerFloatingWidget(edit);
-				edit->show();
-			}
-		}
-	}
+	TeToolCommand::runCommand(p_store, command, shell, output);
 
 	return true;
 }
+

@@ -32,6 +32,10 @@ class TeCmdRunCommand :
     public TeCommandBase
 {
 public:
+	static const char* PARAM_COMMAND;
+	static const char* PARAM_WITH_SHELL;
+	static const char* PARAM_OUTPUT;
+public:
 	TeCmdRunCommand();
 	virtual ~TeCmdRunCommand();
 

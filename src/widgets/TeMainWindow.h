@@ -44,5 +44,11 @@ class TeMainWindow : public QMainWindow
 public:
 	TeMainWindow(QWidget *parent = Q_NULLPTR);
 
+protected:
+	void closeEvent(QCloseEvent *event) override;
+
+signals:
+	void closing();
+
 private:
 };

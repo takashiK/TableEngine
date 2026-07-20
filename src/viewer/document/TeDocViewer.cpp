@@ -25,6 +25,7 @@
 #include <QApplication>
 #include <QStyle>
 #include <QTextEdit>
+#include <QScrollBar>
 
 #include <QDir>
 #include <QDebug>
@@ -320,6 +321,8 @@ void TeDocViewer::setupMenu()
             go to line
             go to top
             go to end
+            page up
+            page down
 
         Option
             Font
@@ -379,15 +382,37 @@ void TeDocViewer::setupMenu()
     connect(action, &QAction::triggered, [this](bool /*checked*/) { showGotoLineDialog(); });
     menu->addAction(action);
 
-    action = new QAction(tr("&Go to top"));
+    menu->addSeparator();
+
+    action = new QAction(tr("Go to &Top"));
     connect(action, &QAction::triggered, [this](bool /*checked*/) {
         mp_textView->moveCursor(QTextCursor::Start); mp_markupView->moveCursor(QTextCursor::Start);
         });
     menu->addAction(action);
 
-    action = new QAction(tr("&Go to end"));
+    action = new QAction(tr("Go to &End"));
     connect(action, &QAction::triggered, [this](bool /*checked*/) {
         mp_textView->moveCursor(QTextCursor::End); mp_markupView->moveCursor(QTextCursor::End);
+        });
+    menu->addAction(action);
+
+    menu->addSeparator();
+
+    // Page up as 1/3 of the page
+    action = new QAction(tr("Scroll &Up"));
+    action->setShortcut(QKeySequence(tr("K")));
+    connect(action, &QAction::triggered, [this](bool /*checked*/) {
+        mp_textView->verticalScrollBar()->triggerAction(QAbstractSlider::SliderSingleStepSub);
+        mp_markupView->verticalScrollBar()->triggerAction(QAbstractSlider::SliderSingleStepSub);
+        });
+    menu->addAction(action);
+
+    // Page down as 1/3 of the page
+    action = new QAction(tr("Scroll &Down"));
+    action->setShortcut(QKeySequence(tr("J")));
+    connect(action, &QAction::triggered, [this](bool /*checked*/) {
+        mp_textView->verticalScrollBar()->triggerAction(QAbstractSlider::SliderSingleStepAdd);
+        mp_markupView->verticalScrollBar()->triggerAction(QAbstractSlider::SliderSingleStepAdd);
         });
     menu->addAction(action);
 

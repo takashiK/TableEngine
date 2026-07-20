@@ -20,6 +20,7 @@
 
 #include "TeKeyMap.h"
 #include "TeSettings.h"
+#include "commands/TeCommandFactory.h"
 
 #include <QKeyEvent>
 #include <QKeySequence>
@@ -62,11 +63,16 @@ QHash<std::pair<int,int>, TeTypes::CmdId> TeKeyMap::loadKeyMap()
 	QSettings settings;
 	settings.beginGroup(SETTING_KEY);
 
+	TeCommandFactory* p_factory = TeCommandFactory::factory();
+
 	for (const int key : assignableKeys()) {
 		const int cmdId = settings.value(QKeySequence(key).toString().replace("+", "_")).toInt();
-		if (cmdId != TeTypes::CMDID_NONE) {
+		if (cmdId != TeTypes::CMDID_NONE && p_factory->commandInfo(static_cast<TeTypes::CmdId>(cmdId)) != nullptr) {
 			map.insert({key & modifierMask, key & ~modifierMask},
 			           static_cast<TeTypes::CmdId>(cmdId));
+		}else{
+			// Invalid command ID; remove the setting to avoid future confusion.
+			settings.remove(QKeySequence(key).toString().replace("+", "_"));
 		}
 	}
 

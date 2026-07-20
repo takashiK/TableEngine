@@ -63,9 +63,9 @@ QFlags<TeTypes::CmdType> TeCmdGotoParent::type()
 
 bool TeCmdGotoParent::execute(TeViewStore* p_store)
 {
-	QDir dir(getCurrentFolder(p_store));
-	if (dir.cdUp()) {
-		p_store->currentFolderView()->setCurrentPath(dir.absolutePath());
+	auto folderView =p_store->currentFolderView();
+	if(folderView != nullptr) {
+		folderView->moveParentPath();
 	}
 	return true;
 }

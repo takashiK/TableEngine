@@ -22,6 +22,8 @@
 #include <QDebug>
 #include <QSettings>
 #include <QMimeDatabase>
+#include <QFile>
+#include <QVector>
 
 #include <icu.h>
 
@@ -39,9 +41,9 @@
 
 
 namespace {
-	const QSet<const QString> txtSuffixes{ "txt","html","htm","md","h","c","cpp","ini","py","json","ts","js","sh"};
+	const QSet<const QString> txtSuffixes{ "txt","html","htm","md","h","c","cpp","ini","py","json","ts","js","sh","bat","cmd","ps1","yml","yaml","xml","csv","log" };
 	const QSet<const QString> imageSuffixes{ "jpg","jpeg","png","gif","bmp","tiff","svg" };
-	const QSet<const QString> archiveSuffixes{ "zip","lzh","cab","7z","rar","tar","gz","bz2","xz","tgz","cpio" };
+	const QSet<const QString> archiveSuffixes{ "zip","lzh","cab","7z","rar","tar","gz","bz2","xz","tgz","cpio","ar","iso","warc","shar","mtree" };
 
 	// Resolves the path string for a model index, supporting both filesystem
 	// items (QFileInfo via FileInfoRole) and archive items (virtual path via
@@ -102,6 +104,21 @@ bool getSelectedItemList(TeViewStore* p_store, QStringList* p_paths)
 		}
 	}
 	return (p_paths != nullptr) && !p_paths->isEmpty();
+}
+
+bool getSelectedFileList(TeViewStore* p_store, QStringList* p_paths)
+{
+	if (p_paths == nullptr) {
+		return false;
+	}
+	QStringList allItems;
+	getSelectedItemList(p_store, &allItems);
+	for (const QString& path : allItems) {
+		if (!QFileInfo(path).isDir()) {
+			p_paths->append(path);
+		}
+	}
+	return !p_paths->isEmpty();
 }
 
 QString getCurrentItem(TeViewStore* p_store)
@@ -420,4 +437,142 @@ QString detectTextCodec(const QByteArray& data, const QStringList& codecList) {
 
 	ucsdet_close(detector);
 	return QString(kDefaultCodec);
+}
+
+namespace {
+constexpr int kTextSampleBytes = 1024;
+// Minimum sample length required before the NUL-lane heuristic below is
+// trusted; shorter samples don't carry enough signal to avoid false positives.
+constexpr qsizetype kMinUtf16HeuristicBytes = 8;
+
+// Validates that data fully decodes under the named codec. The sample is a
+// bounded prefix of the file (see kTextSampleBytes), so a multi-byte sequence
+// may be cut off at the very end; that trailing truncation is expected and
+// must not be treated as an encoding error.
+bool isValidTextEncoding(const QByteArray& data, const QString& codec)
+{
+	UErrorCode status = U_ZERO_ERROR;
+	const QByteArray codecName = codec.toLatin1();
+	UConverter* converter = ucnv_open(codecName.constData(), &status);
+	if (U_FAILURE(status)) {
+		return false;
+	}
+
+	UConverterToUCallback oldAction = nullptr;
+	const void* oldContext = nullptr;
+	ucnv_setToUCallBack(converter, UCNV_TO_U_CALLBACK_STOP, nullptr,
+		&oldAction, &oldContext, &status);
+	QVector<UChar> output(data.size() * 2 + 1);
+	ucnv_toUChars(converter, output.data(), output.size(), data.constData(), data.size(), &status);
+	ucnv_close(converter);
+	return U_SUCCESS(status) || status == U_TRUNCATED_CHAR_FOUND;
+}
+
+QString detectTextCodecStrict(const QByteArray& data, const QStringList& codecList)
+{
+	UErrorCode status = U_ZERO_ERROR;
+	UCharsetDetector* detector = ucsdet_open(&status);
+	if (U_FAILURE(status)) {
+		return QString();
+	}
+
+	ucsdet_setText(detector, data.constData(), data.size(), &status);
+	if (U_FAILURE(status)) {
+		ucsdet_close(detector);
+		return QString();
+	}
+
+	int count = 0;
+	const UCharsetMatch** matches = ucsdet_detectAll(detector, &count, &status);
+	QString result;
+	for (int i = 0; i < count && U_SUCCESS(status); ++i) {
+		const char* name = ucsdet_getName(matches[i], &status);
+		const int confidence = ucsdet_getConfidence(matches[i], &status);
+		if (U_SUCCESS(status) && confidence >= 50 && codecList.contains(QString::fromUtf8(name), Qt::CaseInsensitive)) {
+			result = QString::fromUtf8(name);
+			break;
+		}
+	}
+
+	ucsdet_close(detector);
+	return result;
+}
+
+// Recognizes UTF-16 samples that lack a byte-order mark. BOM-less UTF-16 text
+// dominated by ASCII/Latin characters has a NUL byte in every other position
+// (the widened high byte); this only holds reliably for a long-enough sample
+// with one lane consistently NUL and the other lane essentially NUL-free, so
+// both conditions are required to avoid mistaking small binaries for UTF-16.
+bool looksLikeBomLessUtf16(const QByteArray& data)
+{
+	if (data.size() < kMinUtf16HeuristicBytes) {
+		return false;
+	}
+
+	int evenPositionNuls = 0;
+	int oddPositionNuls = 0;
+	for (qsizetype i = 0; i < data.size(); ++i) {
+		if (data.at(i) == '\0') {
+			(i % 2 == 0 ? evenPositionNuls : oddPositionNuls)++;
+		}
+	}
+
+	const qsizetype pairs = data.size() / 2;
+	const bool evenLaneDominant = evenPositionNuls >= pairs * 0.4 && oddPositionNuls <= pairs * 0.05;
+	const bool oddLaneDominant = oddPositionNuls >= pairs * 0.4 && evenPositionNuls <= pairs * 0.05;
+	return evenLaneDominant || oddLaneDominant;
+}
+
+bool hasControlByte(const QByteArray& data)
+{
+	for (const auto byte : data) {
+		const auto value = static_cast<unsigned char>(byte);
+		if (value == 0 || (value < 0x20 && value != '\t' && value != '\n'
+			&& value != '\r' && value != '\f')) {
+			return true;
+		}
+	}
+	return false;
+}
+}
+
+bool isTextFile(const QString& path)
+{
+	if (QFileInfo(path).isDir()) {
+		return false;
+	}
+
+	QFile file(path);
+	if (!file.open(QIODevice::ReadOnly)) {
+		return false;
+	}
+
+	const QByteArray data = file.read(kTextSampleBytes);
+	if (data.isEmpty()) {
+		return true;
+	}
+
+	const bool hasUtf16Bom = data.startsWith("\xFF\xFE") || data.startsWith("\xFE\xFF");
+	if (hasUtf16Bom || looksLikeBomLessUtf16(data)) {
+		// UTF-16 is checked in its own branch so that binary or Shift-JIS/
+		// EUC-JP samples can never be misclassified through an overly
+		// permissive UTF-16 fallback (see review notes).
+		return isValidTextEncoding(data, "UTF-16LE") || isValidTextEncoding(data, "UTF-16BE");
+	}
+
+	if (hasControlByte(data)) {
+		return false;
+	}
+
+	const QStringList codecs = { "UTF-8", "Shift_JIS", "EUC-JP" };
+	if (!detectTextCodecStrict(data, codecs).isEmpty()) {
+		return true;
+	}
+
+	for (const QString& codec : codecs) {
+		if (isValidTextEncoding(data, codec)) {
+			return true;
+		}
+	}
+	return false;
 }

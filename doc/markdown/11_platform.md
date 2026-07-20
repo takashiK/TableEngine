@@ -18,6 +18,7 @@ Linux / macOS 対応を追加する際は `platform/` 配下に OS 別の実装�
 platform/
 ├── platform_util.h            # プラットフォーム中立な関数宣言（上位レイヤーが参照する唯一のヘッダ）
 ├── TeNativeEvent.h/cpp        # ネイティブイベント通知の抽象クラス
+├── TeFileOperationManager.h/cpp  # 非同期シェルファイル操作マネージャ（ワーカースレッド）
 └── windows/
     ├── platform_util.cpp      # Windows 向け platform_util.h の実装
     └── TeWindowsEventFilter.h/cpp  # Windows ネイティブイベントフィルタ
@@ -99,6 +100,19 @@ OS レベルのイベント（ドライブの接続 / 切断等）を `Qt` の�
 `QAbstractNativeEventFilter` を継承し、Windows の `WM_DEVICECHANGE` メッセージを検知して  
 `TeNativeEvent::changeMountState()` を呼び出します。  
 `threadInitialize()` で `QApplication` にインストールされます。
+
+---
+
+## TeFileOperationManager
+
+コピー / 移動 / 削除といったシェルファイル操作を専用のワーカースレッド上で実行し、  
+操作中もメインウィンドウの応答性を保つためのマネージャです（モードレス動作）。
+
+- 操作はワーカースレッド（`TeFileOpWorker`）のイベントキューで**逐次**処理され、  
+  新しい操作を投入しても GUI スレッドやコマンドディスパッチャのキューをブロックしません。
+- `TeFileOpWorker` はキュー接続経由で呼び出される `doCopyFiles` / `doCopyFile` / `doMoveFiles` / `doDeleteFiles` を持ち、  
+  完了時にワーカースレッド上で `operationFinished(id, success)` シグナルを発行します。
+- オーナーウィンドウのハンドルはキュー接続の引数型を登録可能に保つため整数（`quint64`）で受け渡します。
 
 ---
 

@@ -49,6 +49,15 @@ enum ArchiveType {
 	AR_TAR,         ///< Tar archive.
 	AR_TAR_GZIP,    ///< Tar archive with gzip compression.
 	AR_TAR_BZIP2,   ///< Tar archive with bzip2 compression.
+	AR_CPIO,        ///< CPIO archive.
+	AR_RAR,         ///< RAR archive.
+	AR_CAB,         ///< Microsoft Cabinet archive.
+	AR_ISO9660,     ///< ISO 9660 CD-ROM image.
+	AR_ARCHIVE,     ///< Unix archive (ar).
+	AR_LHA,         ///< LHA archive.
+	AR_WARC,        ///< Web ARChive (WARC) file.
+	AR_SHAR,        ///< Shell archive (shar).
+	AR_MTREE,       ///< MTree archive.
 };
 
 /**

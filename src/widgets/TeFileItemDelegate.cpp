@@ -59,11 +59,6 @@ void TeFileItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 {
     QStyleOptionViewItem opt = option;
     
-    if(index.data(Qt::DisplayRole).toString() == "..") {
-        // Special handling for ".." entry to ensure it gets the correct icon
-        qDebug() << "Painting '..' entry, ensuring folder up icon is used.";
-    }
-
     initStyleOption(&opt, index);
 
     const QWidget* widget = opt.widget;

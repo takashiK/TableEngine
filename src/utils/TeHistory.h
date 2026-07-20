@@ -68,6 +68,8 @@ public:
 	QStringList get() const;
 	/** @brief Returns all (root, current) pairs in history order. */
 	QList<PathPair> getPair() const;
+	/** @brief Returns all current-path strings in history order for a specific root. */
+	QStringList getWithRoot(const QString& root) const;
 
 	/**
 	 * @brief Replaces the history list with @p list and resets the cursor.

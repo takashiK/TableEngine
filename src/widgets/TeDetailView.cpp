@@ -95,9 +95,9 @@ void TeDetailView::registerSection(TeDetailSection* section)
     m_entries.append(Entry{header, section});
 }
 
-void TeDetailView::setFileInfo(const QFileInfo& info)
+void TeDetailView::setFileInfo(const TeFileInfo& info)
 {
-    m_pendingInfo  = info;
+    m_pendingInfo  = QFileInfo(info.path);
     m_pendingDirty = true;
     if (isVisible())
         applyFileInfo();

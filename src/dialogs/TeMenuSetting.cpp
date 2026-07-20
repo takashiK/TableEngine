@@ -184,7 +184,7 @@ void TeMenuSetting::storeDefaultMenuSettings(QSettings& settings)
 	for (const auto& groupItem : list) {
 		specialEntry(settings, index++, 0, TeTypes::CMDID_SPECIAL_FOLDER, groupItem.first);
 		for (const auto& item : factory->menuGroup(groupItem.second)) {
-			if ((item.cmdId & TeTypes::CMDID_MASK_TYPE) == TeTypes::CMDID_SPECIAL) {
+			if ((static_cast<quint32>(item.cmdId) & TeTypes::CMDID_MASK_TYPE) == TeTypes::CMDID_SPECIAL) {
 				specialEntry(settings, index++, item.rank, item.cmdId, item.name);
 			}
 			else {
@@ -200,7 +200,7 @@ void TeMenuSetting::storeDefaultTreeMenuSettings(QSettings& settings )
 	int index = 0;
 	int indent = 0;
 	QString group = QString("menuGroup01");
-	defaultEntry(settings, group, tr("Popup menu on TreeView"));
+	defaultEntry(settings, group, tr("Popup for TreeView"));
 
 	settings.beginGroup(group);
 	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FOLDER_OPEN_UNDER);
@@ -217,7 +217,7 @@ void TeMenuSetting::storeDefaultListMenuSettings(QSettings& settings )
 	int index = 0;
 	int indent = 0;
 	QString group = QString("menuGroup02");
-	defaultEntry(settings, group, tr("Popup menu on ListView"));
+	defaultEntry(settings, group, tr("Popup for ListView"));
 
 	settings.beginGroup(group);
 	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_EDIT_CUT);

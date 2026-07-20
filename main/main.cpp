@@ -26,6 +26,7 @@
 #include <dialogs/TeKeySetting.h>
 #include <dialogs/TeMenuSetting.h>
 #include <dialogs/TeToolbarSetting.h>
+#include <dialogs/TeEditToolSetting.h>
 #include <viewer/document/TeDocumentSettings.h>
 
 #include "version.h"
@@ -51,6 +52,9 @@ int main(int argc, char *argv[])
 	TeKeySetting::storeDefaultSettings();
 	TeMenuSetting::storeDefaultSettings();
 	TeToolbarSetting::storeDefaultSettings();
+	TeEditToolSetting::storeDefaultSettings();
+
+	TeCommandFactory::factory()->loadUserCommands();
 
 	//set document viewer
 	QSettings settings;

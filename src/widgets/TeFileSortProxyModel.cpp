@@ -151,6 +151,18 @@ bool TeFileSortProxyModel::showHiddenFiles() const
     return m_showHiddenFiles;
 }
 
+void TeFileSortProxyModel::setVirtualRootPath(const QString& path) {
+    QString rootPath = QFileInfo(path).absoluteFilePath();
+    if (m_virtualRootPath == rootPath)
+        return;
+    m_virtualRootPath = rootPath;
+    invalidateFilter();
+}
+
+QString TeFileSortProxyModel::virtualRootPath() const {
+    return m_virtualRootPath;
+}
+
 void TeFileSortProxyModel::onImageReady(const QString& filePath)
 {
     QFileSystemModel* fsModel = qobject_cast<QFileSystemModel*>(sourceModel());
@@ -190,9 +202,15 @@ bool TeFileSortProxyModel::filterAcceptsRow(int source_row, const QModelIndex &s
         // Filter Unix-style hidden files (dot-prefix) cross-platform.
         // QFileInfo::isHidden() is not used because on Windows it checks the
         // Windows hidden attribute rather than the dot-prefix convention.
-        if (!m_showHiddenFiles && fileName.startsWith(QLatin1Char('.')) && fileName != QLatin1String("..")
-) {
+        if (!m_showHiddenFiles && fileName.startsWith(QLatin1Char('.')) && fileName != QLatin1String("..")) {
             return false;
+        }
+
+        if ( fileName == QLatin1String("..") ) {
+            if (!m_virtualRootPath.isEmpty() && !fileInfo.absoluteFilePath().startsWith(m_virtualRootPath)) {
+                return false; // Do not include ".." if it points outside the virtual root
+            }
+            return true;
         }
 
         if(m_fileRegex.pattern().isEmpty()){
