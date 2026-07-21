@@ -286,6 +286,10 @@ void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint
 		else {
 			//Create Menu Item
 			const TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
+			if (p_info == nullptr) {
+				qDebug() << "Setting File Error: Invalid command ID.";
+				continue;
+			}
 			QAction* action = new QAction(p_info->icon(), p_info->name());
 			connect(action, &QAction::triggered, [this, cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
 			menus.top()->addAction(action);
