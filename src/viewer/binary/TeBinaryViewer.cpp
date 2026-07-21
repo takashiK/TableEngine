@@ -73,6 +73,7 @@ bool TeBinaryViewer::open(const QString& path)
 	{
 		mp_hexEdit->setDocument(mp_hexDocument);
 		updateDecodePane();
+		setWindowTitle(tr("TableEngine - %1").arg(info.fileName()));
 		return true;
 	}
 	return false;

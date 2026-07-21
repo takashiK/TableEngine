@@ -90,6 +90,7 @@ bool TeDocViewer::open(const QString& filepath)
         else {
             textViewMode();
         }
+        setWindowTitle(tr("TableEngine - %1").arg(info.fileName()));
         return true;
     }
     return false;
