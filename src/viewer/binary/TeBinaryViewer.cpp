@@ -106,7 +106,13 @@ void TeBinaryViewer::setupViewer()
 	font.setPointSize(10);
 	mp_hexEdit->setFont(font);
 
-	connect(mp_hexEdit, &QHexView::positionChanged, this, [this]() { updateDecodePane(); });
+	QLabel* addressLabel = new QLabel(tr("Address: 00000000"));
+	statusBar()->addPermanentWidget(addressLabel);
+
+	connect(mp_hexEdit, &QHexView::positionChanged, this, [this, addressLabel]() {
+		addressLabel->setText(tr("Address: %1").arg(mp_hexEdit->address(), 8, 16, QChar('0')).toUpper());
+		updateDecodePane();
+	});
 
 	setCentralWidget(mp_hexEdit);
 }
