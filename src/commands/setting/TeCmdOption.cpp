@@ -70,6 +70,7 @@ bool TeCmdOption::execute(TeViewStore * p_store)
 	if (dlg.exec() == QDialog::Accepted) {
 		//設定を反映
 		p_store->loadSetting();
+		p_store->loadMenu();
 	}
 	return true;
 }

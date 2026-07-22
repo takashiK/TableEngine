@@ -417,9 +417,36 @@ void TeViewStore::loadMenu()
 	settings.endGroup();
 	settings.endGroup();
 
+	// User Commands Menu
+	if(settings.value(SETTING_COMMAND_AutoReconstructUserMenu, true).toBool()) {
+		std::pair<QString, TeTypes::CmdId> userGroup = TeCommandFactory::userCmdGroup();
+		QMenu* userMenu = mp_mainWindow->menuBar()->addMenu(userGroup.first);
+		QList<TeTypes::CmdId> userStaticMenus;
+		for(const auto& item : p_factory->menuGroup(userGroup.second)) {
+			userStaticMenus.append(item.cmdId);
+			auto p_info = p_factory->commandInfo(item.cmdId); // Ensure command info is registered
+			QAction* action = new QAction(p_info->icon(), p_info->name());
+			connect(action, &QAction::triggered, [this, item](bool /*checked*/) { emit requestCommand(item.cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
+			userMenu->addAction(action);
+		}
+
+		auto userItems = p_factory->commandGroup(userGroup.second);
+		if (!userItems.isEmpty()) {
+			userMenu->addSeparator();
+
+			for (const auto& item : userItems) {
+				if(userStaticMenus.contains(item->cmdId())) {
+					continue;
+				}
+				QAction* action = new QAction(item->icon(), item->name());
+				connect(action, &QAction::triggered, [this, item](bool /*checked*/) { emit requestCommand(item->cmdId(), TeTypes::WT_NONE, nullptr, nullptr); });
+				userMenu->addAction(action);
+			}
+		}
+	}
+	
+	// Static Menu Groups
 	QList<std::pair<QString, TeTypes::CmdId>>  list = TeCommandFactory::static_groupList();
-
-
 	for (const auto& groupItem : list) {
 		QMenu* menu = mp_mainWindow->menuBar()->addMenu(groupItem.first);
 		for (const auto& item : p_factory->commandGroup(groupItem.second)) {

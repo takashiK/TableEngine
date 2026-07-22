@@ -86,6 +86,7 @@ SETTING_STR(SETTING_COMMAND_Shell, "command/shell");
 SETTING_STR(SETTING_COMMAND_ShellArg, "command/shellarg");
 SETTING_STR(SETTING_COMMAND_ExecuteWithShell, "command/isExecuteWithShell");
 SETTING_STR(SETTING_COMMAND_ExecuteWithTerminal, "command/isExecuteWithTerminal");
+SETTING_STR(SETTING_COMMAND_AutoReconstructUserMenu, "command/auto_reconstruct_user_menu");
 
 SETTING_STR(SETTING_LAYOUT, "layout");
 SETTING_STR(SETTING_LAYOUT_WINDOW_SIZE_MODE, "layout/window_size_mode");

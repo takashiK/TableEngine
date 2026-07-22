@@ -213,6 +213,7 @@ void TeOptionSetting::storeDefaultSettings(bool force)
 		}
 		SETTING(SETTING_COMMAND_ExecuteWithShell, true);
 		SETTING(SETTING_COMMAND_ExecuteWithTerminal, false);
+		SETTING(SETTING_COMMAND_AutoReconstructUserMenu, true);
 	}
 
 	if (force || !settings.childGroups().contains(SETTING_LAYOUT)) {
@@ -352,6 +353,11 @@ QWidget * TeOptionSetting::createPagesCommand()
 	cbOutput->setChecked(settings.value(SETTING_COMMAND_ExecuteWithTerminal, false).toBool());
 	connect(cbOutput, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_COMMAND_ExecuteWithTerminal] = (state == Qt::Checked); });
 	layout->addWidget(cbOutput);
+
+	QCheckBox* cbUserMenu = new QCheckBox(tr("Auto reconstruct user menu"));
+	cbUserMenu->setChecked(settings.value(SETTING_COMMAND_AutoReconstructUserMenu, true).toBool());
+	connect(cbUserMenu, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_COMMAND_AutoReconstructUserMenu] = (state == Qt::Checked); });
+	layout->addWidget(cbUserMenu);
 
 	layout->addStretch();
 
