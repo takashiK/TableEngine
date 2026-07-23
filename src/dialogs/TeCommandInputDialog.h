@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDialog>
+#include "utils/TeToolCommand.h"
 
 /**
  * @file TeCommandInputDialog.h
@@ -11,6 +12,7 @@
 
 class QLineEdit;
 class QCheckBox;
+class QComboBox;
 
 class TeCommandInputDialog : public QDialog
 {
@@ -22,10 +24,10 @@ public:
 
 	QString command() const;
 	bool shell() const;
-	bool output() const;
+	TeToolCommand::OUTPUT_MODE output() const;
 
 private:
 	QLineEdit* mp_command;
 	QCheckBox* mp_shell;
-	QCheckBox* mp_output;
+	QComboBox* mp_output;
 };

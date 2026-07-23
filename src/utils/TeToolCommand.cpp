@@ -22,6 +22,7 @@
 #include "TeViewStore.h"
 #include "TeSettings.h"
 #include "utils/TeUtils.h"
+#include "widgets/TeTerminalWidget.h"
 
 #include <QProcess>
 #include <QFileInfo>
@@ -114,23 +115,22 @@ QString TeToolCommand::workingDirectory(TeViewStore* p_store)
 	return getCurrentFolder(p_store);
 }
 
-void TeToolCommand::runCommand(TeViewStore* p_store, const QString& commandTemplate, bool shell, bool output)
+void TeToolCommand::runCommand(TeViewStore* p_store, const QString& commandTemplate, bool shell, OUTPUT_MODE mode)
 {
 	if (commandTemplate.isEmpty()) {
 		return;
 	}
 
 	bool hasTarget = true;
-	const QString command = expandMacros(commandTemplate, p_store, &hasTarget);
+	const QString commandline = expandMacros(commandTemplate, p_store, &hasTarget);
 	if (!hasTarget) {
 		return; // %F/%f/%M/%m specified but no target file exists: do nothing.
 	}
 
-	//run command
-	QProcess process;
+	QString command;
+	QStringList environment = QProcess::systemEnvironment();
+	QString workingDir = workingDirectory(p_store);
 
-	process.setEnvironment(QProcess::systemEnvironment());
-	process.setWorkingDirectory(workingDirectory(p_store));
 
 	// Resolve the configured shell only when requested. If "shell" is enabled
 	// but no shell command is configured, fall back to direct execution
@@ -138,7 +138,7 @@ void TeToolCommand::runCommand(TeViewStore* p_store, const QString& commandTempl
 	QSettings settings;
 	const QString shellCommand = shell ? settings.value(SETTING_COMMAND_Shell).toString() : QString();
 
-	QStringList args = QProcess::splitCommand(command);
+	QStringList args = QProcess::splitCommand(commandline);
 	if (!args.isEmpty()) {
 		if (!shellCommand.isEmpty()) {
 			// execute with the configured shell
@@ -146,39 +146,52 @@ void TeToolCommand::runCommand(TeViewStore* p_store, const QString& commandTempl
 			if (!shellArg.isEmpty()) {
 				args.prepend(shellArg);
 			}
-			process.setProgram(shellCommand);
-			process.setArguments(args);
+			command = shellCommand;
 		} else {
 			// execute without shell
-			process.setProgram(args.takeFirst());
-			process.setArguments(args);
+			command = args.takeFirst();
 		}
 	}
 
-	process.start(QProcess::ReadOnly);
+	if(mode == OUTPUT_TERMINAL){
+		TeTerminalWidget* terminal = new TeTerminalWidget();
+		terminal->setWindowTitle(QObject::tr("Run command"));
+		terminal->setMinimumSize(600, 400);
+		p_store->registerFloatingWidget(terminal);
+		terminal->startProcess(command, args, workingDir, environment);
+		terminal->show();
+	}else{
+		//run command
+		QProcess process;
+		process.setProgram(command);
+		process.setArguments(args);
+		process.setEnvironment(environment);
+		process.setWorkingDirectory(workingDir);
+		process.start(QProcess::ReadOnly);
 
-	if (!process.waitForStarted()) {
-		// TODO: shell variation
-		QMessageBox::critical(p_store->mainWindow(), QObject::tr("Run command"), QObject::tr("Failed to start command."));
-	}
-	else {
-		process.waitForFinished();
-		if (output) {
-			QPlainTextEdit* edit = new QPlainTextEdit();
+		if (!process.waitForStarted()) {
+			// TODO: shell variation
+			QMessageBox::critical(p_store->mainWindow(), QObject::tr("Run command"), QObject::tr("Failed to start command."));
+		}
+		else {
+			process.waitForFinished();
+			if (mode == OUTPUT_STDOUT) {
+				QPlainTextEdit* edit = new QPlainTextEdit();
 
-			QByteArray out = process.readAllStandardOutput();
-			QString codecName = detectTextCodec(out, QStringList({ "UTF-8","Shift_JIS","EUC-JP","ISO-2022-JP" }));
-			QStringDecoder decoder(codecName.toLatin1().constData());
-			if (!decoder.isValid()) {
-				decoder = QStringDecoder("UTF-8");
+				QByteArray out = process.readAllStandardOutput();
+				QString codecName = detectTextCodec(out, QStringList({ "UTF-8","Shift_JIS","EUC-JP","ISO-2022-JP" }));
+				QStringDecoder decoder(codecName.toLatin1().constData());
+				if (!decoder.isValid()) {
+					decoder = QStringDecoder("UTF-8");
+				}
+				QString outText = decoder(out);
+
+				edit->setPlainText(outText);
+				edit->setReadOnly(true);
+				edit->setMinimumSize(600, 400);
+				p_store->registerFloatingWidget(edit);
+				edit->show();
 			}
-			QString outText = decoder(out);
-
-			edit->setPlainText(outText);
-			edit->setReadOnly(true);
-			edit->setMinimumSize(600, 400);
-			p_store->registerFloatingWidget(edit);
-			edit->show();
 		}
 	}
 }

@@ -22,8 +22,9 @@
 #include "TeSettings.h"
 #include "TeSelectPathDialog.h"
 #include "TeFontDialog.h"
-#include "../widgets/TeFileListView.h"
-#include "../platform/platform_util.h"
+#include "widgets/TeFileListView.h"
+#include "platform/platform_util.h"
+#include "utils/TeToolCommand.h"
 
 #include <QApplication>
 #include <QColorDialog>
@@ -43,6 +44,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QSpinBox>
+#include <QComboBox>
 
 /**
  * @file TeOptionSetting.cpp
@@ -212,7 +214,7 @@ void TeOptionSetting::storeDefaultSettings(bool force)
 			SETTING(SETTING_COMMAND_ShellArg, defaultShellArg(shellDefault));
 		}
 		SETTING(SETTING_COMMAND_ExecuteWithShell, true);
-		SETTING(SETTING_COMMAND_ExecuteWithTerminal, false);
+		SETTING(SETTING_COMMAND_ExecuteWithTerminal, TeToolCommand::OUTPUT_NONE);
 		SETTING(SETTING_COMMAND_AutoReconstructUserMenu, true);
 	}
 
@@ -344,15 +346,27 @@ QWidget * TeOptionSetting::createPagesCommand()
 	groupBox->setLayout(grid);
 	layout->addWidget(groupBox);
 
-	QCheckBox* cbShell = new QCheckBox(tr("Enable shell by default in command input dialog."));
+	QGroupBox* runGroup = new QGroupBox(tr("Run Command Defaults"));
+	QHBoxLayout* runHbox = new QHBoxLayout();
+	QHBoxLayout* runHHbox = new QHBoxLayout();
+	QCheckBox* cbShell = new QCheckBox(tr("shell"));
 	cbShell->setChecked(settings.value(SETTING_COMMAND_ExecuteWithShell, true).toBool());
 	connect(cbShell, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_COMMAND_ExecuteWithShell] = (state == Qt::Checked); });
-	layout->addWidget(cbShell);
+	runHHbox->addWidget(cbShell);
 
-	QCheckBox* cbOutput = new QCheckBox(tr("Enable output by default in command input dialog."));
-	cbOutput->setChecked(settings.value(SETTING_COMMAND_ExecuteWithTerminal, false).toBool());
-	connect(cbOutput, &QCheckBox::stateChanged, [this](int state) { m_option[SETTING_COMMAND_ExecuteWithTerminal] = (state == Qt::Checked); });
-	layout->addWidget(cbOutput);
+	QLabel* cbOutput = new QLabel(tr("output:"));
+	runHHbox->addWidget(cbOutput);
+	runHHbox->setAlignment(cbOutput, Qt::AlignRight | Qt::AlignVCenter);
+	runHbox->addLayout(runHHbox);
+	QComboBox* outputCombo = new QComboBox();
+	outputCombo->addItem("none", QVariant(TeToolCommand::OUTPUT_NONE));
+	outputCombo->addItem("stdout", QVariant(TeToolCommand::OUTPUT_STDOUT));
+	outputCombo->addItem("terminal", QVariant(TeToolCommand::OUTPUT_TERMINAL));
+	outputCombo->setCurrentIndex(outputCombo->findData(QVariant(settings.value(SETTING_COMMAND_ExecuteWithTerminal, TeToolCommand::OUTPUT_NONE).toInt())));
+	connect(outputCombo, &QComboBox::currentIndexChanged, [this, outputCombo](int index) { m_option[SETTING_COMMAND_ExecuteWithTerminal] = outputCombo->itemData(index).toInt(); });
+	runHbox->addWidget(outputCombo);
+	runGroup->setLayout(runHbox);
+	layout->addWidget(runGroup);
 
 	QCheckBox* cbUserMenu = new QCheckBox(tr("Auto reconstruct user menu"));
 	cbUserMenu->setChecked(settings.value(SETTING_COMMAND_AutoReconstructUserMenu, true).toBool());
