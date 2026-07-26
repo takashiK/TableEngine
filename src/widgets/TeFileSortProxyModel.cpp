@@ -307,3 +307,50 @@ bool TeFileSortProxyModel::stringLessThan(const QString &left, const QString &ri
         return left.compare(right, cs) < 0;
     }
 }
+
+void TeFileSortProxyModel::setDropTarget(const DropTarget target) {
+    m_dropTarget = target;
+}
+
+TeFileSortProxyModel::DropTarget TeFileSortProxyModel::dropTarget() const {
+    return m_dropTarget;
+}
+
+void TeFileSortProxyModel::setDropFunction(std::function<bool(const QMimeData*, Qt::DropAction, int, int, const QModelIndex&)> func) {
+    mp_dropFunction = func;
+}
+
+Qt::ItemFlags TeFileSortProxyModel::flags(const QModelIndex& index) const {
+    Qt::ItemFlags defaultFlags = QSortFilterProxyModel::flags(index);
+    if (mp_dropFunction && (m_dropTarget != DropTargetNone)) {
+        EntryAttr entry = entryAttr(index);
+        if(entry.isDir) {
+            return defaultFlags | Qt::ItemIsDropEnabled;
+        }
+        return defaultFlags;
+    }
+    return defaultFlags;
+}
+
+bool TeFileSortProxyModel::canDropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) const {
+    if( mp_dropFunction && (m_dropTarget != DropTargetNone)) {
+        bool canDrop = QSortFilterProxyModel::canDropMimeData(data, action, row, column, parent);
+
+        if(canDrop && action == Qt::CopyAction){
+            //only CopyAction is allowed for drop
+            return canDrop;
+        }
+    }
+    return false;
+}
+
+bool TeFileSortProxyModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) {
+    if (mp_dropFunction) {
+        return mp_dropFunction(data, action, row, column, parent);
+    }
+    return QSortFilterProxyModel::dropMimeData(data, action, row, column, parent);
+}
+
+Qt::DropActions TeFileSortProxyModel::supportedDropActions() const {
+    return Qt::CopyAction;
+}

@@ -41,6 +41,9 @@
  * @ingroup commands
  */
 
+const char* TeCmdCopyTo::PARAM_TARGET_PATH = "target_path";
+const char* TeCmdCopyTo::PARAM_FILE_LIST = "file_list";
+
 TeCmdCopyTo::TeCmdCopyTo() {
 }
 
@@ -68,73 +71,82 @@ QFlags<TeTypes::CmdType> TeCmdCopyTo::type() {
  */
 bool TeCmdCopyTo::execute(TeViewStore* p_store) {
     QStringList paths;
-
     QString targetPath;
-    if (QSettings().value(SETTING_GENERAL_CopyToOppositePane, true).toBool()) {
-        int tabPlace = p_store->currentTabPlace() == TeViewStore::TAB_RIGHT ? TeViewStore::TAB_LEFT : TeViewStore::TAB_RIGHT;
-        TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->getFolderView(tabPlace));
-        if (p_folder != nullptr) {
-            targetPath = p_folder->currentPath();
+
+    if (cmdParam() != nullptr) {
+        if (cmdParam()->contains(PARAM_TARGET_PATH)) {
+            targetPath = cmdParam()->value(PARAM_TARGET_PATH).toString();
         }
-    }
-
-    if (getSelectedItemList(p_store, &paths)) {
-        TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
-
-        if (p_folder != nullptr) {
-            // get distination folder.
-            TeFilePathDialog dlg(p_store->mainWindow());
-            dlg.setCurrentPath(p_folder->currentPath());
-            dlg.setFavorites(getFavorites());
-            dlg.setHistory(p_folder->getPathHistory());
-            if(!targetPath.isEmpty()) {
-                dlg.setTargetPath(targetPath);
-            }
-
-            dlg.setWindowTitle(TeFilePathDialog::tr("Copy to"));
-            if (dlg.exec() == QDialog::Accepted) {
-                if (dlg.targetPath().isEmpty()) {
-                    QMessageBox msg(p_store->mainWindow());
-                    msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-                    msg.setText(QObject::tr("Faild CopyTo Function.\nTarget path is not set."));
-                    msg.exec();
-                } else {
-                    copyItems(p_store, paths, dlg.targetPath());
-                }
+        if (cmdParam()->contains(PARAM_FILE_LIST)) {
+            paths = cmdParam()->value(PARAM_FILE_LIST).toStringList();
+        }
+        copyItems(p_store, paths, targetPath);
+    }else{
+        if (QSettings().value(SETTING_GENERAL_CopyToOppositePane, true).toBool()) {
+            int tabPlace = p_store->currentTabPlace() == TeViewStore::TAB_RIGHT ? TeViewStore::TAB_LEFT : TeViewStore::TAB_RIGHT;
+            TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->getFolderView(tabPlace));
+            if (p_folder != nullptr) {
+                targetPath = p_folder->currentPath();
             }
         }
-		else {
-			TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
-			if (p_arc != nullptr) {
-				// get distination folder.
-				TeFilePathDialog dlg(p_store->mainWindow());
 
-				QFileInfo info(p_arc->archivePath());
-				dlg.setCurrentPath(info.absolutePath());
-				dlg.setFavorites(getFavorites());
+        if (getSelectedItemList(p_store, &paths)) {
+            TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
+
+            if (p_folder != nullptr) {
+                // get distination folder.
+                TeFilePathDialog dlg(p_store->mainWindow());
+                dlg.setCurrentPath(p_folder->currentPath());
+                dlg.setFavorites(getFavorites());
+                dlg.setHistory(p_folder->getPathHistory());
                 if(!targetPath.isEmpty()) {
                     dlg.setTargetPath(targetPath);
-                }else{
-                    dlg.setTargetPath(info.absolutePath());
                 }
 
-				dlg.setWindowTitle(TeFilePathDialog::tr("Extract to"));
-				if (dlg.exec() == QDialog::Accepted) {
-					if (dlg.targetPath().isEmpty()) {
-						QMessageBox msg(p_store->mainWindow());
-						msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-						msg.setText(QObject::tr("Faild ExtractTo Function.\nTarget path is not set."));
-						msg.exec();
-					} else {
-						QString targetPath = dlg.targetPath();
-						QString basePath = p_arc->currentPath();
-						extractArchiveSelectionToPath(p_store, basePath, paths, targetPath);
-					}
-				}
-			}
-		}
-    }
+                dlg.setWindowTitle(TeFilePathDialog::tr("Copy to"));
+                if (dlg.exec() == QDialog::Accepted) {
+                    if (dlg.targetPath().isEmpty()) {
+                        QMessageBox msg(p_store->mainWindow());
+                        msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
+                        msg.setText(QObject::tr("Faild CopyTo Function.\nTarget path is not set."));
+                        msg.exec();
+                    } else {
+                        copyItems(p_store, paths, dlg.targetPath());
+                    }
+                }
+            }
+            else {
+                TeArchiveFolderView* p_arc = qobject_cast<TeArchiveFolderView*>(p_store->currentFolderView());
+                if (p_arc != nullptr) {
+                    // get distination folder.
+                    TeFilePathDialog dlg(p_store->mainWindow());
 
+                    QFileInfo info(p_arc->archivePath());
+                    dlg.setCurrentPath(info.absolutePath());
+                    dlg.setFavorites(getFavorites());
+                    if(!targetPath.isEmpty()) {
+                        dlg.setTargetPath(targetPath);
+                    }else{
+                        dlg.setTargetPath(info.absolutePath());
+                    }
+
+                    dlg.setWindowTitle(TeFilePathDialog::tr("Extract to"));
+                    if (dlg.exec() == QDialog::Accepted) {
+                        if (dlg.targetPath().isEmpty()) {
+                            QMessageBox msg(p_store->mainWindow());
+                            msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
+                            msg.setText(QObject::tr("Faild ExtractTo Function.\nTarget path is not set."));
+                            msg.exec();
+                        } else {
+                            QString targetPath = dlg.targetPath();
+                            QString basePath = p_arc->currentPath();
+                            extractArchiveSelectionToPath(p_store, basePath, paths, targetPath);
+                        }
+                    }
+                }
+            }
+        }
+    }
     return true;
 }
 

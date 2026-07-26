@@ -31,6 +31,10 @@ class TeCmdMoveTo :
 	public TeCommandBase
 {
 public:
+	static const char* PARAM_TARGET_PATH;
+	static const char* PARAM_FILE_LIST;
+	
+public:
 	TeCmdMoveTo();
 	virtual ~TeCmdMoveTo();
 	// Check if this command is selected when item is selected.
