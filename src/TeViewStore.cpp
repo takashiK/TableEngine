@@ -48,6 +48,7 @@
 #include "utils/TeUtils.h"
 #include "dialogs/TeFilePathDialog.h"
 #include "platform/TeFileOperationManager.h"
+#include "platform/platform_util.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -213,6 +214,17 @@ void TeViewStore::initialize()
 			mp_driveBar->removeQuickAccess(path);
 			mp_driveBar->storeQuickAccesses();
 			});
+		
+		menu.addSeparator();
+
+		QAction* act3 = menu.addAction(tr("Properties"));
+		if (act == nullptr) {
+			act3->setEnabled(false);
+		}
+		connect(act3, &QAction::triggered, [this, path](bool) {
+			showFilesProperties(QStringList() << path);
+			});
+
 		menu.exec(mp_driveBar->mapToGlobal(pos));
 		});
 
