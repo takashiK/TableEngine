@@ -7,3 +7,6 @@
 [submodule "support/valijson"]
 	path = support/valijson
 	url = https://github.com/tristanpenman/valijson
+[submodule "support/QLightTerminal"]
+	path = support/QLightTerminal
+	url = https://github.com/takashiK/QLightTerminal.git
