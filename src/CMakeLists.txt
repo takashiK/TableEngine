@@ -34,10 +34,9 @@ set(SUPPORT_LIBS )
 if(WIN32)
     list(APPEND SOURCES_PLATFORM ${SOURCES_WIN})    
     list(APPEND HEADERS_PLATFORM ${HEADERS_WIN})    
-
-    list(APPEND SUPPORT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../support/valijson/include)
-    
 endif(WIN32)
+
+list(APPEND SUPPORT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../support/valijson/include)
 
 qt_add_library(tablelibs STATIC
     ${SOURCES_BASE}
@@ -61,7 +60,7 @@ qt_add_library(tablelibs STATIC
     ${HEADERS_UTILS}
 )
 
-target_link_libraries(tablelibs QHexView ptyqt Qt6::Widgets Qt6::Gui)
+target_link_libraries(tablelibs QLightTerminal QHexView Qt6::Widgets Qt6::Gui)
 target_include_directories(tablelibs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${SUPPORT_INCLUDE_DIR})
 
 if(WIN32)

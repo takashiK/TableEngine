@@ -16,7 +16,7 @@ add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(viewer_tests)
 add_subdirectory(support/QHexView)
-add_subdirectory(support/libptyqt)
+add_subdirectory(support/QLightTerminal)
 
 # --- CPack packaging ---
 set(CPACK_PACKAGE_NAME              "TableEngine")

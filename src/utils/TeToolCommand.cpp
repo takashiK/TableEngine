@@ -22,7 +22,6 @@
 #include "TeViewStore.h"
 #include "TeSettings.h"
 #include "utils/TeUtils.h"
-#include "widgets/TeTerminalWidget.h"
 
 #include <QProcess>
 #include <QFileInfo>
@@ -32,6 +31,7 @@
 #include <QPlainTextEdit>
 #include <QByteArray>
 #include <QStringDecoder>
+#include <qlightterminal.h>
 
 /**
  * @file TeToolCommand.cpp
@@ -154,7 +154,7 @@ void TeToolCommand::runCommand(TeViewStore* p_store, const QString& commandTempl
 	}
 
 	if(mode == OUTPUT_TERMINAL){
-		TeTerminalWidget* terminal = new TeTerminalWidget();
+		QLightTerminal* terminal = new QLightTerminal();
 		terminal->setWindowTitle(QObject::tr("Run command"));
 		terminal->setMinimumSize(600, 400);
 		p_store->registerFloatingWidget(terminal);
