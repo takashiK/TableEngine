@@ -68,7 +68,7 @@ bool TeCmdToolBinaryEdit::execute(TeViewStore* p_store)
 	QSettings settings;
 	const QString command = settings.value(SETTING_TOOLS_BINARY_EDIT).toString();
 
-	TeToolCommand::runCommand(p_store, command, false, false);
+	TeToolCommand::runCommand(p_store, command, false);
 
 	return true;
 }

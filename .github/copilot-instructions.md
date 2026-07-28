@@ -249,7 +249,7 @@ TableEngine/
 │   └── widgets/   # UI ウィジェット群
 ├── tests/         # ユニットテスト (gtest/gmock)
 ├── viewer_tests/  # Viewer モジュールテスト
-└── support/       # 外部ライブラリ (QHexView, valijson, vcpkg)
+└── support/       # 外部ライブラリ (QHexView, valijson, vcpkg, ptyqt)
 ```
 
 ## Project Language

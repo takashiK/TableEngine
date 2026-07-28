@@ -75,11 +75,11 @@ bool TeCmdRunCommand::execute(TeViewStore* p_store)
 
 	QString command;
 	bool shell = false;
-	bool output = false;
+	TeToolCommand::OUTPUT_MODE output = TeToolCommand::OUTPUT_NONE;
 	if (cmdParam()->contains(PARAM_COMMAND)) {
 		command = cmdParam()->value(PARAM_COMMAND).toString();
 		shell = cmdParam()->value(PARAM_WITH_SHELL).toBool();
-		output = cmdParam()->value(PARAM_OUTPUT).toBool();
+		output = static_cast<TeToolCommand::OUTPUT_MODE>(cmdParam()->value(PARAM_OUTPUT).toInt());
 	}
 	else {
 		TeCommandInputDialog dlg;

@@ -26,6 +26,8 @@
 #include "TeSettings.h"
 #include "commands/TeCommandFactory.h"
 #include "commands/TeCommandInfo.h"
+#include "commands/file/TeCmdCopyTo.h"
+#include "commands/file/TeCmdMoveTo.h"
 #include "utils/TeFileFinder.h"
 #include "utils/TeFileInfo.h"
 #include "TeFileSortProxyModel.h"
@@ -38,6 +40,7 @@
 #include <QMenu>
 #include <QSettings>
 #include <QStack>
+#include <QMimeData>
 /**
  * @file TeFileFolderView.cpp
  * @brief Implementation of TeFileFolderView.
@@ -141,7 +144,50 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 		}});
 
 	//Enable Drag & Drop
+	auto dropFunc = [this](TeTypes::WidgetType type, TeFileSortProxyModel const* proxyModel, QFileSystemModel const* sourceModel, const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) {
+		//drag & drop support for listview.
+		TeTypes::CmdId cmdId = TeTypes::CMDID_NONE;
+		TeCmdParam param;
+		QString targetPath = sourceModel->filePath(proxyModel->mapToSource(parent));
+		QStringList files;
+		for (const auto& url : data->urls()) {
+			files.append(url.toLocalFile());
+		}
+
+		switch(action) {
+		case Qt::CopyAction:
+			cmdId = TeTypes::CMDID_SYSTEM_FILE_COPY_TO;
+			param.insert(TeCmdCopyTo::PARAM_TARGET_PATH, targetPath);
+			param.insert(TeCmdCopyTo::PARAM_FILE_LIST, files);
+			break;
+		case Qt::MoveAction:
+			// but not supported. because it needs to interactive action. so, we couldn't use quequed command.
+			// cmdId = TeTypes::CMDID_SYSTEM_FILE_MOVE_TO;
+			// param.insert(TeCmdMoveTo::PARAM_TARGET_PATH, targetPath);
+			// param.insert(TeCmdMoveTo::PARAM_FILE_LIST, files);
+			// break;
+		default:
+			return false;
+		}
+		execCommand(cmdId, type, nullptr, &param);
+		return true;
+	};
+
 	mp_listView->setDragDropMode(QListView::DragDrop);
+	mp_listView->setAcceptDrops(true);
+	mp_listSortModel->setDropTarget(TeFileSortProxyModel::DropTargetFolder);
+	mp_listSortModel->setDropFunction([this,dropFunc](const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) {
+		//drag & drop support for listview.
+		return dropFunc(TeTypes::WT_LISTVIEW, mp_listSortModel, mp_listModel, data, action, row, column, parent);
+	});
+
+	mp_treeView->setDragDropMode(QListView::DropOnly);
+	mp_treeView->setAcceptDrops(true);
+	mp_treeSortModel->setDropTarget(TeFileSortProxyModel::DropTargetFolder);
+	mp_treeSortModel->setDropFunction([this,dropFunc](const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) {
+		//drag & drop support for treeview.
+		return dropFunc(TeTypes::WT_TREEVIEW, mp_treeSortModel, mp_treeModel, data, action, row, column, parent);
+	});
 
 	//Install TeDispatcher.
 	mp_treeEvent = new TeEventFilter();
@@ -286,6 +332,10 @@ void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint
 		else {
 			//Create Menu Item
 			const TeCommandInfoBase* p_info = p_factory->commandInfo(cmdId);
+			if (p_info == nullptr) {
+				qDebug() << "Setting File Error: Invalid command ID.";
+				continue;
+			}
 			QAction* action = new QAction(p_info->icon(), p_info->name());
 			connect(action, &QAction::triggered, [this, cmdId](bool /*checked*/) { emit requestCommand(cmdId, TeTypes::WT_NONE, nullptr, nullptr); });
 			menus.top()->addAction(action);

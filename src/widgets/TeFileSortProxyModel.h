@@ -53,6 +53,13 @@ class TeImageLoader;
 class TeFileSortProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
+
+public:
+    enum DropTarget {
+        DropTargetNone,     ///< No drop target is set.
+        DropTargetFolder,   ///< A folder is a valid drop target.
+    };
+
 public:
     /**
      * @brief Custom model data roles.
@@ -121,6 +128,42 @@ public:
     /** @brief Returns the current virtual root path. */
     QString virtualRootPath() const;
 
+    void setDropTarget(const DropTarget target);
+    DropTarget dropTarget() const;
+    /**
+     * @brief Sets a custom drop handler function.
+     * @param func Function to call when a drop occurs.
+     *
+     * @details The function should return true if the drop was accepted, false
+     *          otherwise.  If no function is set, the default behavior of
+     *          QSortFilterProxyModel::dropMimeData() is used.
+     */
+    void setDropFunction(std::function<bool(const QMimeData*, Qt::DropAction, int, int, const QModelIndex&)> func);
+
+    /**
+     * @brief Returns the current item flags for @p index.
+     * @param index The model index.
+     * @return The item flags for the index.
+     */
+    Qt::ItemFlags	flags(const QModelIndex &index) const override;    
+
+    bool	canDropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) const override; 
+    /**
+     * @brief Overrides QSortFilterProxyModel::dropMimeData() to emit a signal.
+     * @param data   The dropped MIME data.
+     * @param action The drop action requested.
+     * @param row    Row index in the proxy model where the drop occurred.
+     * @param column Column index in the proxy model where the drop occurred.
+     * @param parent Parent index in the proxy model where the drop occurred.
+     * @return true if the drop was accepted, false otherwise.
+     *
+     * @note This override emits dropMimeDataSignal() after calling the base
+     *       class implementation.  The signal is only emitted if
+     *       isDropSignalEnabled() returns true.
+     */
+    bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
+
+    Qt::DropActions	supportedDropActions() const override;
 protected:
     /**
      * @brief Filters rows based on file type flags and the filename regex.
@@ -190,4 +233,6 @@ private:
     QRegularExpression m_fileRegex;       ///< Optional filename filter.
     bool m_showHiddenFiles = true;        ///< Whether dot-files are visible.
     QString m_virtualRootPath;            ///< Virtual root path for the model.
+    std::function<bool(const QMimeData*, Qt::DropAction, int, int, const QModelIndex&)> mp_dropFunction; ///< Optional drop handler function.
+    DropTarget m_dropTarget = DropTargetNone; ///< Current drop target setting.
 };

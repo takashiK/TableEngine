@@ -52,6 +52,12 @@ class TeViewStore;
  */
 namespace TeToolCommand {
 
+	enum OUTPUT_MODE {
+		OUTPUT_NONE,
+		OUTPUT_STDOUT,
+		OUTPUT_TERMINAL,
+	};
+
 	/**
 	 * @brief Checks whether a (not yet expanded) command template is syntactically usable.
 	 *
@@ -107,7 +113,7 @@ namespace TeToolCommand {
 	 * @param shell           Whether to run the command through the configured shell.
 	 * @param output          Whether to capture and display standard output.
 	 */
-	void runCommand(TeViewStore* p_store, const QString& commandTemplate, bool shell, bool output);
+	void runCommand(TeViewStore* p_store, const QString& commandTemplate, bool shell, OUTPUT_MODE mode = OUTPUT_NONE);
 
 	/**
 	 * @brief Finds a user-defined tool command (tools/user/tool01..MAX_USER_TOOLS) matching

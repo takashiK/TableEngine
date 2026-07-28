@@ -107,7 +107,7 @@ bool TeCmdToolFileEdit::execute(TeViewStore* p_store)
 		command = settings.value(SETTING_TOOLS_BINARY_EDIT).toString();
 	}
 
-	TeToolCommand::runCommand(p_store, command, false, false);
+	TeToolCommand::runCommand(p_store, command, false);
 
 	return true;
 }

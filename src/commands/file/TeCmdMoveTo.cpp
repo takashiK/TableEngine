@@ -39,6 +39,9 @@
  * @ingroup commands
  */
 
+const char* TeCmdMoveTo::PARAM_TARGET_PATH = "target_path";
+const char* TeCmdMoveTo::PARAM_FILE_LIST = "file_list";
+
 TeCmdMoveTo::TeCmdMoveTo()
 {
 }

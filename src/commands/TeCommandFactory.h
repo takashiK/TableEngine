@@ -78,6 +78,9 @@ public:
 	/** @brief Returns only user-registered (custom) command groups. */
 	static QList<std::pair<QString, TeTypes::CmdId>> custom_groupList();
 
+	/** @brief Returns the user command group. */
+	static std::pair<QString, TeTypes::CmdId> userCmdGroup();
+
 	/** @brief Returns only built-in (static) command groups. */
 	static QList<std::pair<QString, TeTypes::CmdId>> static_groupList();
 
