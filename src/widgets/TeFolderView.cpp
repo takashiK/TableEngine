@@ -67,3 +67,17 @@ void TeFolderView::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, Q
 		mp_dispatcher->execCommand(cmdId, type, event, p_param);
 	}
 }
+
+void TeFolderView::moveFirstItem()
+{
+	if (list() != nullptr) {
+		list()->setCurrentIndex(list()->model()->index(0, 0, list()->rootIndex()));
+	}
+}
+
+void TeFolderView::moveLastItem()
+{
+	if (list() != nullptr) {
+		list()->setCurrentIndex(list()->model()->index(list()->model()->rowCount(list()->rootIndex()) - 1, 0, list()->rootIndex()));
+	}
+}

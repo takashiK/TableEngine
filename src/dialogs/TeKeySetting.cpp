@@ -252,6 +252,8 @@ void TeKeySetting::storeDefaultSettings(bool force)
 	SETTING(Qt::Key_J, TeTypes::CMDID_SYSTEM_NAVI_DOWN);
 	SETTING(Qt::Key_K, TeTypes::CMDID_SYSTEM_NAVI_UP);
 	SETTING(Qt::Key_O, TeTypes::CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER);
+	SETTING(Qt::Key_Home, TeTypes::CMDID_SYSTEM_NAVI_GOTO_FIRST_ITEM);
+	SETTING(Qt::Key_End, TeTypes::CMDID_SYSTEM_NAVI_GOTO_LAST_ITEM);
 
 
 #undef SETTING	
