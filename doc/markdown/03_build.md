@@ -19,6 +19,7 @@
 |---|---|---|
 | libarchive | vcpkg (自動) | `out/build/<preset>/vcpkg_installed/` |
 | gtest / gmock | vcpkg (自動) | 同上 |
+| ptyqt | git submodule (v0.6.5) | `support/libptyqt/` |
 | QHexView | git submodule (v5.1.0) | `support/QHexView/` |
 | valijson | git submodule (v1.1.0) | `support/valijson/` |
 | ICU | Qt 付属 | Qt インストール先 |

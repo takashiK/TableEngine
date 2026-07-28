@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+
 qt_standard_project_setup()
 
 enable_testing()
@@ -15,6 +16,7 @@ add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(viewer_tests)
 add_subdirectory(support/QHexView)
+add_subdirectory(support/QLightTerminal)
 
 # --- CPack packaging ---
 set(CPACK_PACKAGE_NAME              "TableEngine")

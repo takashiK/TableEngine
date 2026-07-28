@@ -31,6 +31,10 @@ class TeCmdCopyTo :
 	public TeCommandBase
 {
 public:
+	static const char* PARAM_TARGET_PATH;
+	static const char* PARAM_FILE_LIST;
+	
+public:
 	TeCmdCopyTo();
 	virtual ~TeCmdCopyTo();
 	// Check if this command is selected when item is selected.

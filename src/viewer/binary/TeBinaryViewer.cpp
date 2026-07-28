@@ -73,6 +73,7 @@ bool TeBinaryViewer::open(const QString& path)
 	{
 		mp_hexEdit->setDocument(mp_hexDocument);
 		updateDecodePane();
+		setWindowTitle(tr("TableEngine - %1").arg(info.fileName()));
 		return true;
 	}
 	return false;
@@ -105,7 +106,13 @@ void TeBinaryViewer::setupViewer()
 	font.setPointSize(10);
 	mp_hexEdit->setFont(font);
 
-	connect(mp_hexEdit, &QHexView::positionChanged, this, [this]() { updateDecodePane(); });
+	QLabel* addressLabel = new QLabel(tr("Address: 00000000"));
+	statusBar()->addPermanentWidget(addressLabel);
+
+	connect(mp_hexEdit, &QHexView::positionChanged, this, [this, addressLabel]() {
+		addressLabel->setText(tr("Address: %1").arg(mp_hexEdit->address(), 8, 16, QChar('0')).toUpper());
+		updateDecodePane();
+	});
 
 	setCentralWidget(mp_hexEdit);
 }

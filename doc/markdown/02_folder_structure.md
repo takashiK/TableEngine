@@ -12,6 +12,7 @@ TableEngine/
 ├── viewer_tests/      # Viewer モジュール向けテスト
 ├── support/           # 外部サポートライブラリ（git submodule / vcpkg）
 │   ├── vcpkg/         #   vcpkg パッケージマネージャ（git submodule）
+|   ├── libptyqt/         #   ptyqt ライブラリ（git submodule, v0.6.5）
 │   ├── QHexView/      #   QHexView ウィジェット（git submodule, v5.1.0）
 │   └── valijson/      #   valijson ヘッダオンリーライブラリ（git submodule, v1.1.0）
 ├── doc/               # ドキュメント
@@ -89,6 +90,8 @@ support/
 ├── vcpkg/       # vcpkg 本体（git submodule）
 │                #   vcpkg.json により libarchive / gtest を
 │                #   x64-windows-static-md トリプレットで自動ビルド
+├── libptyqt/       # ptyqt v0.6.5（git submodule）
+|                #   Windows での擬似端末（PTY）サポート
 ├── QHexView/    # QHexView v5.1.0（git submodule）
 │                #   バイナリビューワで使用するヘックスビューウィジェット
 └── valijson/    # valijson v1.1.0（git submodule）

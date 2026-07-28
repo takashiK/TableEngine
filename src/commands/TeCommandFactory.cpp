@@ -274,8 +274,6 @@ TeCommandFactory::TeCommandFactory()
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_USER);
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_USER_REGIST_COMMAND, TeCmdUserRegistCommands, tr("Regist User Commands"), tr("Regist user commands."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/userRegist.png")));
-		BEGIN_FOLDER(tr("User commands"));
-		END_FOLDER();
 	END_GROUP();
 
 #undef BEGIN_GROUP
@@ -324,9 +322,12 @@ QList<std::pair<QString, TeTypes::CmdId>> TeCommandFactory::custom_groupList()
 		{ tr("&View"), TeTypes::CMDID_SYSTEM_VIEW },
 		{ tr("&Tool"), TeTypes::CMDID_SYSTEM_TOOL },
 		{ tr("&Window"), TeTypes::CMDID_SYSTEM_WINDOW },
-		{ tr("&User"), TeTypes::CMDID_SYSTEM_USER },
 	};
 	return list;
+}
+
+std::pair<QString, TeTypes::CmdId> TeCommandFactory::userCmdGroup() {
+    return std::pair<QString, TeTypes::CmdId>(tr("&User"), TeTypes::CMDID_SYSTEM_USER );
 }
 
 QList<std::pair<QString, TeTypes::CmdId>> TeCommandFactory::static_groupList()
