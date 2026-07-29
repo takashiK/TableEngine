@@ -29,6 +29,7 @@
 #include <Shobjidl.h>
 #include <QMimeData>
 #include <QImage>
+#include <QDir>
 
 #include <commoncontrols.h>
 #include <Windows.h>
@@ -721,5 +722,5 @@ TeNativeEvent* getNativeEvent()
 
 QString getDefaultShellCommand()
 {
-	return QStringLiteral("pwsh.exe");
+	return QDir::rootPath() + QString("Windows/System32/cmd.exe");
 }

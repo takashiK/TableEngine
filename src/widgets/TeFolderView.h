@@ -118,6 +118,12 @@ public:
 	/** @brief Navigates to the parent directory of the current path. */
 	virtual void moveParentPath() = 0;
 
+	/** @brief Navigates to the first item in the list view. */
+	virtual void moveFirstItem();
+
+	/** @brief Navigates to the last item in the list view. */
+	virtual void moveLastItem();
+
 	/** @brief Returns the navigation history as a list of path strings. */
 	virtual QStringList getPathHistory() const = 0;
 
