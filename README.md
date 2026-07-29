@@ -17,6 +17,8 @@ I'm user of FD at MS-DOS and 卓駆☆ at Windows. but both are not compatible o
 * valijson — git submodule (`support/valijson`)
 * QHexView — git submodule (`support/QHexView`)
 * ICU libs (bundled with Qt)
+* QLightTerminal — git submodule (`support/QLightTerminal`)
+* ptyqt — git submodule (`support/QLightTerminal/libptyqt`)
 
 ## Folder tree
 
@@ -28,7 +30,8 @@ I'm user of FD at MS-DOS and 卓駆☆ at Windows. but both are not compatible o
     + vcpkg         :  vcpkg package manager (git submodule).
     + QHexView      :  QHexView widget (git submodule, v5.1.0).
     + valijson      :  valijson header-only library (git submodule, v1.1.0).
-  + support_package : valijson headers (legacy location, kept for reference).
+    + QLightTerminal:  QLightTerminal widget (git submodule).
+      + ptyqt         :  ptyqt library (git submodule).
 ```
 
 ## How to Build

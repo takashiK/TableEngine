@@ -250,6 +250,8 @@ public:
 		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_UP,               // #Navigate scroll detail view up
 		CMDID_SYSTEM_NAVI_DETAIL_SCROLL_DOWN,             // #Navigate scroll detail view down
 		CMDID_SYSTEM_NAVI_OPEN_ITEM_FOLDER, 			  // #Navigate open item's folder
+		CMDID_SYSTEM_NAVI_GOTO_FIRST_ITEM,                // #Navigate go to first item of listview
+		CMDID_SYSTEM_NAVI_GOTO_LAST_ITEM,        		  // #Navigate go to last item of listview
 
 		CMDID_SYSTEM_USER = CMDID_SYSTEM + 0xA000,        // Menu item : User
 		CMDID_SYSTEM_USER_REGIST_COMMAND,                 // Regist user commands
