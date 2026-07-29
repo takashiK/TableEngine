@@ -1,13 +1,16 @@
 cmake_minimum_required(VERSION 3.19)
 
-project(TableEngine VERSION 0.2.0 LANGUAGES CXX)
+project(TableEngine VERSION 0.2.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
 
-qt_standard_project_setup()
+qt_standard_project_setup(
+	I18N_SOURCE_LANGUAGE en
+	I18N_TRANSLATED_LANGUAGES ja
+)
 
 enable_testing()
 
@@ -17,6 +20,12 @@ add_subdirectory(tests)
 add_subdirectory(viewer_tests)
 add_subdirectory(support/QHexView)
 add_subdirectory(support/QLightTerminal)
+
+qt_add_translations(TableEngine
+	SOURCE_TARGETS TableEngine tablelibs
+	TS_FILES ${CMAKE_SOURCE_DIR}/translations/tableengine_ja.ts
+	RESOURCE_PREFIX /i18n
+)
 
 # --- CPack packaging ---
 set(CPACK_PACKAGE_NAME              "TableEngine")
