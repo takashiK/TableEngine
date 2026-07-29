@@ -73,7 +73,7 @@ bool TeCmdCopyTo::execute(TeViewStore* p_store) {
     QStringList paths;
     QString targetPath;
 
-    if (cmdParam() != nullptr) {
+    if (!cmdParam()->isEmpty()) {
         if (cmdParam()->contains(PARAM_TARGET_PATH)) {
             targetPath = cmdParam()->value(PARAM_TARGET_PATH).toString();
         }
