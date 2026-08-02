@@ -632,973 +632,983 @@ Open with the binary editor instead?</source>
 <context>
     <name>TeCommandFactory</name>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="137"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="138"/>
         <source>&amp;New</source>
         <translation>新規ファイル作成 (&amp;N)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="137"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="138"/>
         <source>Create New file.</source>
         <translation>新規のファイルを作成する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="138"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="139"/>
         <source>&amp;Open</source>
         <translation>開く (&amp;O)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="138"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="139"/>
         <source>Open file by shell.</source>
         <translation>関連アプリでファイルを開く</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="139"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="140"/>
         <source>&amp;Copy To</source>
         <translation>ファイルをコピー (&amp;C)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="139"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="140"/>
         <source>Copy selected files to other folder.</source>
         <translation>選択したファイルをフォルダへコピーする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="140"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="141"/>
         <source>&amp;Move To</source>
         <translation>ファイルを移動 (&amp;M)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="140"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="141"/>
         <source>Move selected files to other folder.</source>
         <translation>選択したファイルをフォルダへ移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="141"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="142"/>
         <source>&amp;Delete</source>
         <translation>削除 (&amp;D)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="141"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="142"/>
         <source>Delete selected files.</source>
         <translation>選択したファイルを削除する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="142"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="143"/>
         <source>&amp;Rename</source>
         <translation>名前変更 (&amp;R)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="142"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="143"/>
         <source>Rename selected files.</source>
         <translation>選択したファイルの名前を変更する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="143"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="144"/>
         <source>RenameMulti</source>
         <translation>一括名前変更</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="143"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="144"/>
         <source>Rename multiple files with sequential numbers.</source>
         <translation>選択されたファイル群を連番ファイル名に変更する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="145"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="146"/>
         <source>Divide</source>
         <translation>分割</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="146"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="147"/>
         <source>Divide file</source>
         <translation>ファイル分割</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="146"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="147"/>
         <source>Divide file.</source>
         <translation>ファイルを分割する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="147"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="148"/>
         <source>Combine files</source>
         <translation>ファイル結合</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="147"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="148"/>
         <source>Combine files.</source>
         <translation>ファイルを結合する</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="149"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="150"/>
         <source>Archive</source>
         <translation>アーカイブ</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="150"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="151"/>
         <source>&amp;Archive files</source>
         <translation>アーカイブ (&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="150"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="151"/>
         <source>Archive selected files.</source>
         <translation>選択したファイルをアーカイブする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="151"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="152"/>
         <source>&amp;Extract files</source>
         <translation>アーカイブ展開 (&amp;E)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="151"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="152"/>
         <source>Extract from selected file.</source>
         <translation>選択したアーカイブファイルを展開する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="154"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="155"/>
         <source>&amp;Properties</source>
         <translation>プロパティ (&amp;P)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="154"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="155"/>
         <source>Show item properties.</source>
         <translation>プロパティダイアログを表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="155"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="156"/>
         <source>&amp;Run command</source>
         <translation>コマンド実行 (&amp;R)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="155"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="156"/>
         <source>Run command line.</source>
         <translation>入力されたコマンドを実行する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="157"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="158"/>
         <source>&amp;Quit</source>
         <translation>終了 (&amp;Q)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="157"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="158"/>
         <source>Quit application.</source>
         <translation>アプリケーションを終了する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="161"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="162"/>
         <source>Cut</source>
         <translation>切り取り</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="161"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="162"/>
         <source>Clipboard Cut operation.</source>
         <translation>切り取り</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="162"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="163"/>
         <source>Copy</source>
         <translation>コピー</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="162"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="163"/>
         <source>Clipboard Copy operation.</source>
         <translation>コピー</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="163"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="164"/>
         <source>Paste</source>
         <translation>貼り付け</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="163"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="164"/>
         <source>Clipboard Paste operation.</source>
         <translation>貼り付け</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="165"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="166"/>
         <source>Select &amp;All</source>
         <translation>全て選択 (&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="165"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="166"/>
         <source>Select all files.</source>
         <translation>現在のリストビューの全ファイルを選択する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="166"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="167"/>
         <source>&amp;Toggle</source>
         <translation>選択反転 (&amp;T)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="166"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="167"/>
         <source>Toggle selection.</source>
         <translation>選択を反転させる。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="167"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="168"/>
         <source>Select by &amp;Filter</source>
         <translation>ファルターで選択 (&amp;F)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="167"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="168"/>
         <source>Select by filter.</source>
         <translation>ファルター文字列を用いてファイルを選択する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="168"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="169"/>
         <source>Selection Style</source>
         <translation>選択方式</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="169"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="170"/>
         <source>&amp;Explorer</source>
         <translation>エクスプローラ (&amp;E)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="169"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="170"/>
         <source>Use explorer style selection.</source>
         <translation>ファイル選択アクションをエクスプローラー風にする</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="170"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="171"/>
         <source>&amp;TableEngine</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="170"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="171"/>
         <source>Use TableEngine style selection.</source>
         <translation>TableEngine独自方式でファイルを選択する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="175"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="176"/>
         <source>&amp;New Folder</source>
         <translation>新規フォルダ (&amp;N)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="175"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="176"/>
         <source>Create new folder.</source>
         <translation>新規フォルダを作成する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="177"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="178"/>
         <source>Expand&amp;One</source>
         <translation>展開 (&amp;O)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="177"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="178"/>
         <source>Expand current Folder.</source>
         <translation>ツリービューで選択されているフォルダ以下を一階層展開する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="178"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="179"/>
         <source>Expand &amp;Under</source>
         <translation>再起展開 (&amp;U)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="178"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="179"/>
         <source>Expand current Folder and children.</source>
         <translation>ツリービューで選択されているフォルダ以下を全て層展開する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="179"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="180"/>
         <source>&amp;Expand All</source>
         <translation>全て展開 (&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="179"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="180"/>
         <source>Expand all Folders.</source>
         <translation>ツリー上の全てのフォルダを展開する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="180"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="181"/>
         <source>Colla&amp;pse</source>
         <translation>折り畳む (&amp;P)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="180"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="181"/>
         <source>Collapse current Folder.</source>
         <translation>ツリービューで選択されているフォルダを折り畳む。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="181"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="182"/>
         <source>&amp;Collapse All</source>
         <translation>全て折り畳む (&amp;C)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="181"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="182"/>
         <source>Collapse all Folders.</source>
         <translation>全てのフォルダを折り畳む。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="183"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="184"/>
         <source>Add Quick Access</source>
         <translation>クイックアクセスに追加</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="183"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="184"/>
         <source>Add a folder to quick access on Drivebar.</source>
         <translation>ドライブビュー上のクイックアクセスボタンにフォルダパスを追加する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="184"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="185"/>
         <source>Edit Quick Access</source>
         <translation>クイックアクセス編集</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="184"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="185"/>
         <source>Edit quick access on Drivebar.</source>
         <translation>ドライブビュー上のクイックアクセスボタンのフォルダパスリストを編集する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="186"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="187"/>
         <source>Add Favorite</source>
         <translation>お気に入り追加</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="186"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="187"/>
         <source>Add a folder to favorites list.</source>
         <translation>お気に入りリストにフォルダを追加する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="187"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="188"/>
         <source>Edit Favorites</source>
         <translation>お気に入り編集</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="187"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="188"/>
         <source>Edit favorites list.</source>
         <translation>お気に入りリストを編集する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="189"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="190"/>
         <source>Previous Folder</source>
         <translation>前のフォルダに移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="189"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="190"/>
         <source>Go to previous folder.</source>
         <translation>現在のリストビュー上で一つ前に表示したフォルダに移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="190"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="191"/>
         <source>Next Folder</source>
         <translation>次のフォルダに移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="190"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="191"/>
         <source>Go to next folder.</source>
         <translation>前のフォルダに移動で移動する前のフォルダに巻戻る。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="191"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="192"/>
         <source>Go to Parent</source>
         <translation>親フォルダへ移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="191"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="192"/>
         <source>Go to parent folder.</source>
         <translation>親フォルダヘ移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="192"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="193"/>
         <source>Go to Root</source>
         <translation>ルートフォルダへ移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="192"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="193"/>
         <source>Go to root folder.</source>
         <translation>ルートフォルダへ移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="193"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="194"/>
         <source>&amp;Go to folder</source>
         <translation>フォルダへ移動 (&amp;G)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="193"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="194"/>
         <source>Go to folder.</source>
         <translation>指定したフォルダへ移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="194"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="195"/>
         <source>Change Root folder</source>
         <translation>ルートフォルダ変更</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="194"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="195"/>
         <source>Change root folder.</source>
         <translation>フォルダツリーのルートフォルダを変更する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="196"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="197"/>
         <source>Find</source>
         <translation>検索</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="196"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="197"/>
         <source>Find items.</source>
         <translation>ファイル・フォルダを検索する</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="200"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="201"/>
+        <source>&amp;Refresh</source>
+        <translation>更新 (&amp;R)</translation>
+    </message>
+    <message>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="201"/>
+        <source>Refresh view.</source>
+        <translation>表示を更新する。</translation>
+    </message>
+    <message>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="203"/>
         <source>File Size</source>
         <translation>ファイルサイズ</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="200"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="203"/>
         <source>Show or hide file size.</source>
         <translation>ファイルサイズを表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="201"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="211"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="204"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="214"/>
         <source>Modified Date</source>
         <translation>更新日時</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="201"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="204"/>
         <source>Show or hide modified date.</source>
         <translation>更新日時を表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="202"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="205"/>
         <source>Hidden Files</source>
         <translation>隠しファイル</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="202"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="205"/>
         <source>Show or hide hidden files.</source>
         <translation>各誌ファイルを表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="203"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="206"/>
         <source>System Files</source>
         <translation>システム</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="203"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="206"/>
         <source>Show or hide system files.</source>
         <translation>システムファイルを表示する</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="205"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="208"/>
         <source>Filter</source>
         <translation>フィルター</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="205"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="208"/>
         <source>Filter files by name.</source>
         <translation>表示するファイルをフィルタする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="207"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="210"/>
         <source>Sort by</source>
         <translation>ソート方式</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="208"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="211"/>
         <source>Name</source>
         <translation>ファイル名</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="208"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="211"/>
         <source>Sort by name.</source>
         <translation>ファイル・フォルダ名でソートする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="209"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="212"/>
         <source>Size</source>
         <translation>ファイルサイズ</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="209"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="212"/>
         <source>Sort by file size.</source>
         <translation>ファイルサイズでソートする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="210"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="213"/>
         <source>Extension</source>
         <translation>拡張子</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="210"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="213"/>
         <source>Sort by file extension.</source>
         <translation>拡張子でソートする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="211"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="214"/>
         <source>Sort by modified date.</source>
         <translation>更新日時</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="213"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="216"/>
         <source>Order</source>
         <translation>ソート順序</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="214"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="217"/>
         <source>Ascending</source>
         <translation>昇順</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="214"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="217"/>
         <source>Sort in ascending order.</source>
         <translation>小さいアイテムから順に表示</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="215"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="218"/>
         <source>Descending</source>
         <translation>降順</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="215"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="218"/>
         <source>Sort in descending order.</source>
         <translation>大きいアイテムから順に表示</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="218"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="221"/>
         <source>Layout</source>
         <translation>レイアウト</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="219"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="222"/>
         <source>Small Icon</source>
         <translation>小さいアイコン</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="219"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="222"/>
         <source>Show small icons.</source>
         <translation>小さいアイコンでリスト表示する</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="220"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="223"/>
         <source>Large Icon</source>
         <translation>大きいアイコン</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="220"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="223"/>
         <source>Show large icons.</source>
         <translation>大きいアイコンでアイコン表示する</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="221"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="224"/>
         <source>Huge Icon</source>
         <translation>特大アイコン</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="221"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="224"/>
         <source>Show huge icons.</source>
         <translation>特大アイコンで表示する。 画像ファイルは画像を表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="222"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="225"/>
         <source>Detail List</source>
         <translation>詳細リスト</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="222"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="225"/>
         <source>Show detail list.</source>
         <translation>詳細情報をリスト表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="224"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="227"/>
         <source>Sort Setting</source>
         <translation>ソート設定</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="224"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="227"/>
         <source>Show sort setting dialog.</source>
         <translation>ソート設定ダイアログを表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="229"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="232"/>
         <source>Tool Setting</source>
         <translation>ツール設定</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="229"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="232"/>
         <source>Show tool setting dialog.</source>
         <translation>ツール設定ダイアログを表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="231"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="234"/>
         <source>View File</source>
         <translation>ファイル表示</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="231"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="234"/>
         <source>View file.</source>
         <translation>ファイル種別に応じた方法でファイルの中身を表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="232"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="235"/>
         <source>View Binary</source>
         <translation>バイナリ表示</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="232"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="235"/>
         <source>View binary file.</source>
         <translation>ファイルの中身をバイナリ表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="234"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="237"/>
         <source>Edit File</source>
         <translation>ファイル編集</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="234"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="237"/>
         <source>Edit file.</source>
         <translation>ファイル種別に応じてたエディタでファイルを編集する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="235"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="238"/>
         <source>Edit Binary</source>
         <translation>バイナリ編集</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="235"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="238"/>
         <source>Edit binary file.</source>
         <translation>バイナリエティタでファイルを編集する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="239"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="242"/>
         <source>New Tab</source>
         <translation>新しいタブ</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="239"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="242"/>
         <source>Open new tab.</source>
         <translation>現在のフォルダで新しいタブを開く</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="240"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="243"/>
         <source>Close Tab</source>
         <translation>タブを閉じる</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="240"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="243"/>
         <source>Close current tab.</source>
         <translation>現在のタブを閉じる。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="241"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="244"/>
         <source>Move Tab</source>
         <translation>タブを移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="241"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="244"/>
         <source>Move current tab to other window.</source>
         <translation>タブを反対側に移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="242"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="245"/>
         <source>Next Tab</source>
         <translation>次のタブ</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="242"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="245"/>
         <source>Move to next tab.</source>
         <translation>次のタブに移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="243"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="246"/>
         <source>Previous Tab</source>
         <translation>前のタブ</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="243"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="246"/>
         <source>Move to previous tab.</source>
         <translation>前のタブに移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="245"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="248"/>
         <source>Show ToolBar</source>
         <translation>ツールバー</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="245"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="248"/>
         <source>Show or hide ToolBar.</source>
         <translation>ツールバーを表示をトグルする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="246"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="249"/>
         <source>Show DriveBar</source>
         <translation>ドライブバー</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="246"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="249"/>
         <source>Show or hide DriveBar.</source>
         <translation>ドライブバーを表示をトグルする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="247"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="250"/>
         <source>Show StatusBar</source>
         <translation>ステータスバー</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="247"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="250"/>
         <source>Show or hide StatusBar.</source>
         <translation>ステータスバー表示をトグルする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="248"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="251"/>
         <source>Show Navigation</source>
         <translation>ナビゲーション</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="248"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="251"/>
         <source>Show or hide Navigation.</source>
         <translation>ナビゲーションウィンドウ (ツリービュー)の表示をトグルする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="249"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="252"/>
         <source>Show Detail</source>
         <translation>詳細表示</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="249"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="252"/>
         <source>Show or hide Detail.</source>
         <translation>詳細表示パネルの表示をトグルする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="253"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="256"/>
         <source>&amp;Option</source>
         <translation>オプション (&amp;O)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="253"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="256"/>
         <source>General options.</source>
         <translation>一般設定ダイアログを表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="254"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="257"/>
         <source>&amp;Key</source>
         <translation>ショートカットキー設定 (&amp;K)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="254"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="257"/>
         <source>Customize key operations.</source>
         <translation>ショートカットキーの設定ダイアログを表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="255"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="258"/>
         <source>&amp;Toolbar</source>
         <translation>ツールバー設定 (&amp;T)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="255"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="258"/>
         <source>Customize Toolbar.</source>
         <translation>ツールバーを設定するダイアログを開く。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="256"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="259"/>
         <source>&amp;Menu</source>
         <translation>メニュー設定 (&amp;M)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="256"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="259"/>
         <source>Customize Menu item.</source>
         <translation>メニュー設定を変更するダイアログを開く。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="260"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="313"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="341"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="263"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="316"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="344"/>
         <source>&amp;Help</source>
         <translation>ヘルプ (&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="260"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="263"/>
         <source>Show help by default browser.</source>
         <translation>ヘルプページを表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="261"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="264"/>
         <source>&amp;Version</source>
         <translation>バージョン (&amp;V)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="261"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="264"/>
         <source>Show version information.</source>
         <translation>バージョン情報を表示する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="265"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="268"/>
         <source>Cursor Up</source>
         <translation>上へ移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="265"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="268"/>
         <source>Cursor up.</source>
         <translation>カーソルを上へ移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="266"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="269"/>
         <source>Cursor Down</source>
         <translation>下へ移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="266"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="269"/>
         <source>Cursor down.</source>
         <translation>カーソルを下へ移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="267"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="270"/>
         <source>Cursor Left</source>
         <translation>左へ移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="267"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="270"/>
         <source>Cursor left.</source>
         <translation>カーソルを左へ移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="268"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="271"/>
         <source>Cursor Right</source>
         <translation>右へ移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="268"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="271"/>
         <source>Cursor right.</source>
         <translation>カーソルを右へ移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="269"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="272"/>
         <source>Navigate DriveBar</source>
         <translation>ドライバーに移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="269"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="272"/>
         <source>Focus to drive bar.</source>
         <translation>ドライブバーへ入力フォーカスを移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="270"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="273"/>
         <source>Toggle Folder Left/Right</source>
         <translation>フォルダフォーカス移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="270"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="273"/>
         <source>Toggle focus folder between left and right side.</source>
         <translation>フォルダフォーカスを左右のペイン間で移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="271"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="274"/>
         <source>Toggle Folder/Tree</source>
         <translation>フォルダ/ツリーを移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="271"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="274"/>
         <source>Toggle focus between folder and tree view.</source>
         <translation>フォルダー/ツリービュー間を移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="272"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="275"/>
         <source>Scroll Detail Up</source>
         <translation>詳細表示スクロールアップ</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="272"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="275"/>
         <source>Scroll detail view up.</source>
         <translation>詳細表示パネルをスクロールアップする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="273"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="276"/>
         <source>Scroll Detail Down</source>
         <translation>詳細表示スクロールダウン</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="273"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="276"/>
         <source>Scroll detail view down.</source>
         <translation>詳細表示パネルをスクロールダウンする。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="274"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="277"/>
         <source>Open Item&apos;s Folder</source>
         <translation>ファイルの場所を開く</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="274"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="277"/>
         <source>Open item&apos;s Parent folder.</source>
         <translation>ファイルが存在する場所を開く。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="275"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="278"/>
         <source>Go to First Item</source>
         <translation>最初のアイテムに移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="275"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="278"/>
         <source>Go to first item in current folder.</source>
         <translation>現在のフォルダリストビュー上の最初のアイテムに移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="276"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="279"/>
         <source>Go to Last Item</source>
         <translation>最後のアイテムに移動</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="276"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="279"/>
         <source>Go to last item in current folder.</source>
         <translation>現在のフォルダリストビュー上の最後のアイテムに移動する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="280"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="283"/>
         <source>Regist User Commands</source>
         <translation>ユーザーコマンド登録</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="280"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="283"/>
         <source>Regist user commands.</source>
         <translation>ユーザーコマンドを登録する。</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="306"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="323"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="309"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="326"/>
         <source>&amp;File</source>
         <translation>ファイル (&amp;F)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="307"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="324"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="310"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="327"/>
         <source>&amp;Edit</source>
         <translation>編集 (&amp;E)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="308"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="325"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="311"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="328"/>
         <source>&amp;Folder</source>
         <translation>フォルダ (&amp;F)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="309"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="326"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="312"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="329"/>
         <source>&amp;View</source>
         <translation>表示 (&amp;V)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="310"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="327"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="313"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="330"/>
         <source>&amp;Tool</source>
         <translation>ツール (&amp;T)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="311"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="328"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="314"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="331"/>
         <source>&amp;Window</source>
         <translation>ウィンドウ (&amp;W)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="312"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="340"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="315"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="343"/>
         <source>&amp;Setting</source>
         <translation>設定 (&amp;S)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="314"/>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="334"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="317"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="337"/>
         <source>&amp;User</source>
         <translation>ユーザー (&amp;U)</translation>
     </message>
     <message>
-        <location filename="../src/commands/TeCommandFactory.cpp" line="315"/>
+        <location filename="../src/commands/TeCommandFactory.cpp" line="318"/>
         <source>&amp;Navigation</source>
         <translation>ナビゲーション (&amp;N)</translation>
     </message>
