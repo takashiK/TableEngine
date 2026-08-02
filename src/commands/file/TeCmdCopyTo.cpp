@@ -73,14 +73,13 @@ bool TeCmdCopyTo::execute(TeViewStore* p_store) {
     QStringList paths;
     QString targetPath;
 
-    if (!cmdParam()->isEmpty()) {
+    if (cmdParam()->contains(PARAM_FILE_LIST)) {
         if (cmdParam()->contains(PARAM_TARGET_PATH)) {
             targetPath = cmdParam()->value(PARAM_TARGET_PATH).toString();
         }
-        if (cmdParam()->contains(PARAM_FILE_LIST)) {
-            paths = cmdParam()->value(PARAM_FILE_LIST).toStringList();
-        }
+        paths = cmdParam()->value(PARAM_FILE_LIST).toStringList();
         copyItems(p_store, paths, targetPath);
+        return true;
     }else{
         if (QSettings().value(SETTING_GENERAL_CopyToOppositePane, true).toBool()) {
             int tabPlace = p_store->currentTabPlace() == TeViewStore::TAB_RIGHT ? TeViewStore::TAB_LEFT : TeViewStore::TAB_RIGHT;

@@ -111,12 +111,12 @@ graph TD
 | `QGraphicsView` + `QGraphicsPixmapItem` | 画像の表示（拡大 / 縮小 / フィット表示） |
 | `QFileSystemModel` + `QListView` | サイドパネルでの同フォルダ内画像一覧表示 |
 
-表示モード（`Strech`）：
+表示モード（`Stretch`）：
 
 | モード | 説明 |
 |---|---|
-| `StrechNone` | 原寸表示 |
-| `StrechFit` | ウィンドウに合わせてアスペクト比を維持して縮小 |
-| `StrechFill` | ウィンドウに合わせてアスペクト比を無視して引き伸ばし |
+| `StretchNone` | 原寸表示 |
+| `StretchFit` | ウィンドウに合わせてアスペクト比を維持して縮小 |
+| `StretchFill` | ウィンドウに合わせてアスペクト比を無視して引き伸ばし |
 
 `TeEventEmitter` を内部で使用し、フローティングウィンドウのクローズを `TeViewStore` に通知します。

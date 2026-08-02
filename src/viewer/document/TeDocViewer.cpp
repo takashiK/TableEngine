@@ -363,7 +363,7 @@ void TeDocViewer::setupMenu()
 
     menu->addSeparator();
 
-    action = menu->addAction(tr("&Exit"));
+    action = menu->addAction(tr("&Quit"));
     action->setShortcuts({ QKeySequence(Qt::Key_Escape) });
     connect(action, &QAction::triggered, this, &TeDocViewer::close);
 

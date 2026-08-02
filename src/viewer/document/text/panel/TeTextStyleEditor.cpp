@@ -31,7 +31,7 @@ TeTextStyleEditor::TeTextStyleEditor(QWidget* parent)
 	layout->addWidget(mp_fgEnable);
 	layout->addWidget(mp_foreground);
 
-	mp_bgEnable = new QCheckBox(tr("Back"));
+	mp_bgEnable = new QCheckBox(tr("Background"));
 	mp_background = new QToolButton();
 	mp_background->setToolTip(tr("Background color"));
 	layout->addWidget(mp_bgEnable);
