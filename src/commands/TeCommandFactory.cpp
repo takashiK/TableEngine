@@ -72,6 +72,7 @@
 #include "view/TeCmdViewFileOrder.h"
 #include "view/TeCmdViewLayout.h"
 #include "view/TeCmdViewSortSetting.h"
+#include "view/TeCmdViewRefresh.h"
 
 #include "tool/TeCmdToolSetting.h"
 #include "tool/TeCmdToolFile.h"
@@ -197,6 +198,8 @@ TeCommandFactory::TeCommandFactory()
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_VIEW);
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_VIEW_REFRESH, TeCmdViewRefresh, tr("&Refresh"), tr("Refresh view."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/refresh.png")));
+		SEPARATOR();
 		MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_FILESIZE, TeCmdViewShowInfo, TeCmdViewShowInfo::FileSize, tr("File Size"), tr("Show or hide file size."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/fileSize.png")));
 		MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_MODIFIED, TeCmdViewShowInfo, TeCmdViewShowInfo::ModifiedDate, tr("Modified Date"), tr("Show or hide modified date."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/modifiedDate.png")));
 		MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_SHOW_HIDDEN, TeCmdViewShowFile, TeCmdViewShowFile::Hidden, tr("Hidden Files"), tr("Show or hide hidden files."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/hidden.png")));

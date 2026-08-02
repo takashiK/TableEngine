@@ -207,6 +207,7 @@ public:
 		CMDID_SYSTEM_VIEW_LARGE_ICON,					  // #Show large icon
 		CMDID_SYSTEM_VIEW_HUGE_ICON,					  // #Show huge icon
 		CMDID_SYSTEM_VIEW_DETAIL_LIST,			          // #Show detail list
+		CMDID_SYSTEM_VIEW_REFRESH,						  // #Refresh view
 
 		CMDID_SYSTEM_TOOL    = CMDID_SYSTEM + 0x5000,     // Menu item : Tool
 		CMDID_SYSTEM_TOOL_VIEW_FILE,					  // #View file

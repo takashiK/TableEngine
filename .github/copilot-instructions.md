@@ -70,7 +70,7 @@
 
 | 層 | エージェント / モデル | 責務 | やらないこと |
 |----|------|------|------------|
-| L0 オーケストレーター（main） | default / Opus 固定 | 意図理解・**計画タスク分解**・単位委譲・結果統合・設計判断・承認ゲート | 個別 read/grep・一括編集・細粒度の単発委譲 |
+| L0 オーケストレーター（main） | default / GPT Sol 固定 | 意図理解・**計画タスク分解**・単位委譲・結果統合・設計判断・承認ゲート | 個別 read/grep・一括編集・細粒度の単発委譲 |
 | L1 タスク実行 | `Task Executor` / mid | 受領した1単位を調査→実装→検証まで自己完結。単位内の細粒度作業を自文脈で処理 | 設計の最終確定・ユーザー承認・スコープ外変更 |
 | L2 サブサブ | `Explore`(read-only) / `Task Executor`(nested) / low〜mid | 重い読解の隔離・独立並列調査・大きな独立サブ単位の実装 | スコープ外変更 |
 
@@ -154,8 +154,6 @@ Thoroughness: {quick|medium|thorough}
 
 ## Model Selection (Agent Auto)
 
-**運用方針: Agent は Auto モードをメインとして使用する。**
-Auto モードの場合、タスク種別に応じてモデルを選択する。
 モデルは常に各系列の**最新版**を使用する（版名は固定しない）。
 
 | タスク種別 | 複雑度 | 推奨モデル |
@@ -163,15 +161,15 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 | コード読解・検索 | 低 | GPT 最新 Luna / MAI 最新 |
 | サブエージェント探索 | 低 | GPT 最新 Luna / MAI 最新 |
 | 一括置換・機械的修正 | 低 | GPT 最新 Luna / MAI 最新 |
-| ドキュメント更新 | 中 | Claude 最新 Sonnet |
-| ビルドエラー修正 | 中 | Claude 最新 Sonnet |
-| 設計レポート生成 | 高 | Claude 最新 Opus |
-| アーキテクチャ設計 | 高 | Claude 最新 Opus |
+| ドキュメント更新 | 中 | GPT 最新 Terra |
+| ビルドエラー修正 | 中 | GPT 最新 Terra |
+| 設計レポート生成 | 高 | GPT 最新 Sol |
+| アーキテクチャ設計 | 高 | GPT 最新 Sol |
 
 - 優先順位: 品質 > トークンコスト
 - 軽量タスクは GPT 最新 Luna または MAI 最新に集約しコストを削減する
 - モデルは着手前に確定し、セッション途中で切り替えない（プロンプトキャッシュ失効を防ぐ。→ Token Efficiency 参照）
-- オーケストレーター層は Opus 固定とする（→ Orchestration Strategy 参照）
+- オーケストレーター層は Sol 固定とする（→ Orchestration Strategy 参照）
 - 上表の選択は **subagent 層**がタスク難易度に応じて行う。オーケストレーターは委譲時に推奨 tier を明示する
 
 ## Generic Workflow Rules
