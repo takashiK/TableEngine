@@ -92,6 +92,16 @@ public:
 	virtual void execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, QEvent* event, const TeCmdParam* p_param);
 
 	/**
+	 * @brief Forces cached filesystem metadata to be re-read and repaints the view.
+	 *
+	 * Default implementation only repaints (there is no stale metadata to
+	 * discard for non-filesystem-backed views).  TeFileFolderView overrides
+	 * this to recreate its QFileSystemModel, since Qt exposes no public
+	 * QFileSystemModel::refresh() API.
+	 */
+	virtual void refresh();
+
+	/**
 	 * @brief Sets the root path displayed at the top of the tree.
 	 * @param path The new root path.
 	 */

@@ -208,7 +208,7 @@ void extractArchives(TeViewStore* p_store, const QStringList & list, const QStri
 				}
 			}
 
-			QString targetInfo = QObject::tr("Extact ") + QString::asprintf("(%d/%d) : ",i,list.size()) + info.fileName() + "\n";
+			QString targetInfo = QObject::tr("Extract ") + QString::asprintf("(%d/%d) : ",i,list.size()) + info.fileName() + "\n";
 
 			QObject::connect(&reader, &TeArchive::Reader::maximumValue, &progress, &QProgressDialog::setMaximum);
 			QObject::connect(&reader, &TeArchive::Reader::valueChanged, &progress, &QProgressDialog::setValue);
@@ -254,7 +254,7 @@ QStringList extractArchiveSelectionToPath(TeViewStore* p_store, const QString& b
 	progress.setWindowTitle(QObject::tr("Extract"));
 	progress.setWindowModality(Qt::WindowModal);
 
-	QString targetInfo = QObject::tr("Extact : ") + reader->path() + "\n";
+	QString targetInfo = QObject::tr("Extract : ") + reader->path() + "\n";
 
 	QObject::connect(reader, &TeArchive::Reader::maximumValue, &progress, &QProgressDialog::setMaximum);
 	QObject::connect(reader, &TeArchive::Reader::valueChanged, &progress, &QProgressDialog::setValue);

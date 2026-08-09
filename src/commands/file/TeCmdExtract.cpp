@@ -73,7 +73,7 @@ bool TeCmdExtract::execute(TeViewStore* p_store) {
 		TeFileFolderView* p_folder = qobject_cast<TeFileFolderView*>(p_store->currentFolderView());
         if (p_folder != nullptr) {
             // get distination folder.
-            QStringList extraFlags = {QObject::tr("Create new folder by archive file name.")};
+            QStringList extraFlags = {QObject::tr("Create a folder with the archive file name.")};
 
             TeFilePathDialog dlg(p_store->mainWindow(), extraFlags);
             dlg.setExtraFlag(0, true);

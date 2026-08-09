@@ -68,6 +68,14 @@ void TeFolderView::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, Q
 	}
 }
 
+void TeFolderView::refresh()
+{
+	update();
+	if (list() != nullptr) {
+		list()->update();
+	}
+}
+
 void TeFolderView::moveFirstItem()
 {
 	if (list() != nullptr) {

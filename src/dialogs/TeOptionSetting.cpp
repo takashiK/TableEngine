@@ -318,7 +318,8 @@ QWidget * TeOptionSetting::createPagesCommand()
 	grid->addWidget(shellEdit, 0, 1);
 	connect(shellEdit, &QLineEdit::textChanged, [this](const QString& text) { m_option[SETTING_COMMAND_Shell] = text; });
 
-	QPushButton* browseButton = new QPushButton(tr("Browse"));
+	QPushButton* browseButton = new QPushButton(tr("..."));
+	browseButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 	connect(browseButton, &QPushButton::clicked, [shellEdit, this](bool /*checked*/) {
 		const QString path = QFileDialog::getOpenFileName(this, tr("Select Shell"), shellEdit->text());
 		if (!path.isEmpty()) {
@@ -326,6 +327,7 @@ QWidget * TeOptionSetting::createPagesCommand()
 		}
 	});
 	grid->addWidget(browseButton, 0, 2);
+	grid->setColumnStretch(2, 0);
 
 	grid->addWidget(new QLabel(tr("Shell argument:")), 1, 0);
 	QLineEdit* shellArgEdit = new QLineEdit(settings.value(SETTING_COMMAND_ShellArg).toString());
@@ -614,11 +616,11 @@ QWidget * TeOptionSetting::createPagePanel()
 
 	QGroupBox* paneGroup = new QGroupBox(tr("Pane Widths"));
 	QGridLayout* paneLayout = new QGridLayout();
-	QLabel* treeMinLabel = new QLabel(tr("Tree min width:"));
+	QLabel* treeMinLabel = new QLabel(tr("Tree(Navigation) min width:"));
 	QSpinBox* treeMinSpin = new QSpinBox();
 	treeMinSpin->setRange(120, 2400);
 	treeMinSpin->setValue(treeMinWidth);
-	QLabel* treeMaxLabel = new QLabel(tr("Tree max width:"));
+	QLabel* treeMaxLabel = new QLabel(tr("Tree(Navigation) max width:"));
 	QSpinBox* treeMaxSpin = new QSpinBox();
 	treeMaxSpin->setRange(120, 2400);
 	treeMaxSpin->setValue(treeMaxWidth);

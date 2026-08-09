@@ -32,6 +32,7 @@
 #include "version.h"
 
 #include <QtWidgets/QApplication>
+#include <QLocale>
 #include <QTranslator>
 
 #include <QPixmapCache>
@@ -44,6 +45,13 @@ int main(int argc, char *argv[])
 	QApplication::setApplicationName("TableEngine");
 	QApplication::setApplicationVersion(APP_VERSION_STR);
 	QApplication a(argc, argv);
+
+	//Load translation file.
+	QTranslator myappTranslator;
+	const QString languageCode = QLocale::system().name().section('_', 0, 0);
+	bool res = myappTranslator.load(":/i18n/tableengine_" + languageCode + ".qm");
+	if (res)
+		a.installTranslator(&myappTranslator);
 
 	//setup setting folder and load settings.
 	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QApplication::applicationDirPath());
@@ -68,12 +76,6 @@ int main(int argc, char *argv[])
 	dispatcher.setFactory(TeCommandFactory::factory());
 
 
-	//Load translation file.
-	QTranslator myappTranslator;
-	bool res = myappTranslator.load("tableengine_" + QLocale::system().name());
-	if (res)
-		a.installTranslator(&myappTranslator);
-	
 	//initialize com thread. it use for windows shell.
 	threadInitialize(&a);
 

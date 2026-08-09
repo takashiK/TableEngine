@@ -22,10 +22,10 @@ class TePictureViewer  : public QMainWindow
 	Q_OBJECT
 
 public:
-	enum Strech {
-		StrechNone,
-		StrechFit,
-		StrechFill
+	enum Stretch {
+		StretchNone,
+		StretchFit,
+		StretchFill
 	};
 
 public:
@@ -34,17 +34,17 @@ public:
 
 	bool open(const QString& path);
 
-	Strech strechMode() const;
+	Stretch stretchMode() const;
 	std::pair<int, Qt::SortOrder> sortOrder() const;
 
 signals:
-	void strechChanged(Strech mode);
+	void stretchChanged(Stretch mode);
 
 public slots:
 	void nextImage();
 	void prevImage();
 	void showImageList(bool flag);
-	void setStrechMode(Strech mode);
+	void setStretchMode(Stretch mode);
 	void setSortOrder(int column, Qt::SortOrder order);
 	void rotateLeft();
 	void rotateRight();
@@ -62,7 +62,7 @@ private:
 	QListView* mp_list;
 	QDockWidget* mp_dock;
 	QFileSystemModel* mp_model;
-	Strech m_strechMode = StrechFit;
+	Stretch m_stretchMode = StretchFit;
 	int m_sortColumn = 0;
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 	QModelIndex m_imageIndex;

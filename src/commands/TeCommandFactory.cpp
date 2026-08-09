@@ -72,6 +72,7 @@
 #include "view/TeCmdViewFileOrder.h"
 #include "view/TeCmdViewLayout.h"
 #include "view/TeCmdViewSortSetting.h"
+#include "view/TeCmdViewRefresh.h"
 
 #include "tool/TeCmdToolSetting.h"
 #include "tool/TeCmdToolFile.h"
@@ -140,13 +141,13 @@ TeCommandFactory::TeCommandFactory()
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_MOVE_TO, TeCmdMoveTo, tr("&Move To"), tr("Move selected files to other folder."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/moveTo.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_DELETE, TeCmdDelete, tr("&Delete"), tr("Delete selected files."), QIcon(new TeAdaptiveIconEngine(":TableEngine/trash.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_RENAME, TeCmdRename, tr("&Rename"), tr("Rename selected files."), QIcon(new TeAdaptiveIconEngine(":TableEngine/rename.png")));
-		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_RENAME_MULTI, TeCmdRenameMulti, tr("RenameMulti"), tr("Rename multiple files with filter."), QIcon(new TeAdaptiveIconEngine(":TableEngine/renameMulti.png")));
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_RENAME_MULTI, TeCmdRenameMulti, tr("RenameMulti"), tr("Rename multiple files with sequential numbers."), QIcon(new TeAdaptiveIconEngine(":TableEngine/renameMulti.png")));
 		//MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_CHANGE_ATTRIBUTE, TeCmdChangeAttribute, tr("Attribute"), tr("Change file attribute."), QIcon(new TeAdaptiveIconEngine(":TableEngine/attribute.png")));
-		BEGIN_FOLDER("Divide");
+		BEGIN_FOLDER(tr("Divide"));
 			MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_DIVIDE, TeCmdDivideFile, tr("Divide file"), tr("Divide file."), QIcon(new TeAdaptiveIconEngine(":TableEngine/divide.png")));
 			MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_COMBINE, TeCmdCombineFile, tr("Combine files"), tr("Combine files."), QIcon(new TeAdaptiveIconEngine(":TableEngine/combine.png")));
 		END_FOLDER();
-		BEGIN_FOLDER("Archive");
+		BEGIN_FOLDER(tr("Archive"));
 			MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_ARCHIVE, TeCmdArchive, tr("&Archive files"), tr("Archive selected files."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/archiveBox.png")));
 			MENU_ENTRY(TeTypes::CMDID_SYSTEM_FILE_EXTRACT, TeCmdExtract, tr("&Extract files"), tr("Extract from selected file."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/extract.png")));
 		END_FOLDER();
@@ -165,7 +166,7 @@ TeCommandFactory::TeCommandFactory()
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_ALL, TeCmdSelectAll, tr("Select &All"), tr("Select all files."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/selectAll.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_TOGGLE, TeCmdSelectToggle, tr("&Toggle"), tr("Toggle selection."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/selectToggle.png")));
 		MENU_ENTRY(TeTypes::CMDID_SYSTEM_EDIT_SELECT_BY_FILTER, TeCmdSelectFilter, tr("Select by &Filter"), tr("Select by filter."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/selectFilter.png")));
-		BEGIN_FOLDER("Selection Style");
+		BEGIN_FOLDER(tr("Selection Style"));
 			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_EDIT_SELECTION_STYLE_EXPLORER, TeCmdSelectionStyle, TeCmdSelectionStyle::Explorer, tr("&Explorer"), tr("Use explorer style selection."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/selectionExplorer.png")));
 			MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_EDIT_SELECTION_STYLE_TABLEENGINE, TeCmdSelectionStyle, TeCmdSelectionStyle::TableEngine, tr("&TableEngine"), tr("Use TableEngine style selection."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/selectionTableEngine.png")));
 		END_FOLDER();
@@ -197,6 +198,8 @@ TeCommandFactory::TeCommandFactory()
 	END_GROUP();
 
 	BEGIN_GROUP(TeTypes::CMDID_SYSTEM_VIEW);
+		MENU_ENTRY(TeTypes::CMDID_SYSTEM_VIEW_REFRESH, TeCmdViewRefresh, tr("&Refresh"), tr("Refresh view."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/refresh.png")));
+		SEPARATOR();
 		MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_FILESIZE, TeCmdViewShowInfo, TeCmdViewShowInfo::FileSize, tr("File Size"), tr("Show or hide file size."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/fileSize.png")));
 		MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_MODIFIED, TeCmdViewShowInfo, TeCmdViewShowInfo::ModifiedDate, tr("Modified Date"), tr("Show or hide modified date."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/modifiedDate.png")));
 		MENU_ENTRY_WITH_SELECT(TeTypes::CMDID_SYSTEM_VIEW_SHOW_HIDDEN, TeCmdViewShowFile, TeCmdViewShowFile::Hidden, tr("Hidden Files"), tr("Show or hide hidden files."), QIcon(new TeAdaptiveIconEngine(":/TableEngine/hidden.png")));

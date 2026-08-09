@@ -123,7 +123,7 @@ void TeBinaryViewer::setupMenu()
 	QAction* action = nullptr;
 
 	menu = menuBar()->addMenu(tr("&File"));
-	action = menu->addAction(tr("&Exit"));
+	action = menu->addAction(tr("&Quit"));
 	action->setShortcuts({ QKeySequence(Qt::Key_Escape) });
 	connect(action, &QAction::triggered, this, &TeBinaryViewer::close);
 
@@ -136,7 +136,7 @@ void TeBinaryViewer::setupMenu()
 	action->setShortcut(QKeySequence(tr("Ctrl+G")));
 	connect(action, &QAction::triggered, this, [this]() { showGotoOffsetDialog(); });
 
-	action = menu->addAction(tr("&Go to top"));
+	action = menu->addAction(tr("Go to &Top"));
 	connect(action, &QAction::triggered, this, [this]() {
 		if (mp_hexEdit && mp_hexEdit->hexCursor()) {
 			mp_hexEdit->hexCursor()->move(0);
@@ -144,7 +144,7 @@ void TeBinaryViewer::setupMenu()
 		}
 	});
 
-	action = menu->addAction(tr("&Go to end"));
+	action = menu->addAction(tr("Go to &End"));
 	connect(action, &QAction::triggered, this, [this]() {
 		if (mp_hexEdit && mp_hexEdit->hexCursor() && mp_hexDocument) {
 			const qint64 len = mp_hexDocument->length();
@@ -174,7 +174,7 @@ void TeBinaryViewer::setupMenu()
 	});
 	connect(mp_decodeDock, &QDockWidget::visibilityChanged, action, &QAction::setChecked);
 
-	QMenu* endianMenu = menu->addMenu(tr("&Decode Endian"));
+	QMenu* endianMenu = menu->addMenu(tr("Decode &Endian"));
 	action = endianMenu->addAction(tr("&Little Endian"));
 	action->setCheckable(true);
 	action->setChecked(m_endianMode == EndianMode::Little);
@@ -326,7 +326,8 @@ void TeBinaryViewer::showFindDialog()
 		form->addRow(tr("Mode"), mp_findModeCombo);
 		form->addRow(tr("Find"), mp_findLineEdit);
 		form->addRow(QString(), mp_caseSensitiveCheck);
-		form->addRow(tr("Number type"), mp_numberTypeCombo);
+		mp_numberTypeLabel = new QLabel(tr("Number type"));
+		form->addRow(mp_numberTypeLabel, mp_numberTypeCombo);
 
 		root->addLayout(form);
 
@@ -352,6 +353,7 @@ void TeBinaryViewer::showFindDialog()
 			}
 			const SearchMode mode = static_cast<SearchMode>(mp_findModeCombo->currentData().toInt());
 			mp_caseSensitiveCheck->setVisible(mode == SearchMode::Text);
+			mp_numberTypeLabel->setVisible(mode == SearchMode::Number);
 			mp_numberTypeCombo->setVisible(mode == SearchMode::Number);
 		};
 
@@ -470,8 +472,6 @@ void TeBinaryViewer::findNext(bool backward)
 		showSearchStatus(tr("Not found"));
 		return;
 	}
-
-	showSearchStatus(tr("Found at 0x%1").arg(found, 0, 16));
 }
 
 void TeBinaryViewer::updateDecodePane()

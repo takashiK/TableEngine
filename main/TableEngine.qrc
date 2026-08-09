@@ -82,6 +82,7 @@
         <file alias="selectionTableEngine.png">Resources/icon/iconmonstr-dashboard-7-64.png</file>
         <file alias="userCommand.png">Resources/icon/iconmonstr-keyboard-15-64.png</file>
         <file alias="userRegist.png">Resources/icon/iconmonstr-user-25-64.png</file>
+        <file alias="refresh.png">Resources/icon/iconmonstr-synchronization-19-64.png</file>
     </qresource>
     <qresource prefix="/Style">
         <file alias="stylesheet_dark.css">Resources/stylesheet/stylesheet_dark.css</file>

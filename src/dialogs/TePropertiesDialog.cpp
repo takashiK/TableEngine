@@ -167,7 +167,7 @@ void TePropertiesDialog::buildUi(const QList<TeFileInfo>& items, bool filesystem
 	}
 
 	if (!filesystem) {
-		QLabel* note = new QLabel(tr("Some attributes are unavailable for archive entries."));
+		QLabel* note = new QLabel(tr("Some attributes are unavailable."));
 		note->setWordWrap(true);
 		topLayout->addWidget(note);
 	}

@@ -103,9 +103,9 @@ bool TePictureViewer::open(const QString & path)
 	return false;
 }
 
-TePictureViewer::Strech TePictureViewer::strechMode() const
+TePictureViewer::Stretch TePictureViewer::stretchMode() const
 {
-	return m_strechMode;
+	return m_stretchMode;
 }
 
 std::pair<int, Qt::SortOrder> TePictureViewer::sortOrder() const
@@ -139,12 +139,12 @@ void TePictureViewer::showImageList(bool flag)
 	}
 }
 
-void TePictureViewer::setStrechMode(Strech mode)
+void TePictureViewer::setStretchMode(Stretch mode)
 {
-	if (mode != m_strechMode) {
-		m_strechMode = mode;
+	if (mode != m_stretchMode) {
+		m_stretchMode = mode;
 		updateView();
-		emit strechChanged(mode);
+		emit stretchChanged(mode);
 	}
 }
 
@@ -167,13 +167,13 @@ void TePictureViewer::updateView(const QModelIndex& index)
 	mp_graphics->setSceneRect(mp_image->boundingRect());
 	mp_graphics->setTransform(exifViewTransform(m_orientation));
 	mp_graphics->rotate(m_rotation);
-	switch (m_strechMode) {
-		case StrechNone:
+	switch (m_stretchMode) {
+		case StretchNone:
 			break;
-		case StrechFit:
+		case StretchFit:
 			mp_graphics->fitInView(mp_image, Qt::KeepAspectRatio);
 			break;
-		case StrechFill:
+		case StretchFill:
 			mp_graphics->fitInView(mp_image, Qt::IgnoreAspectRatio);
 			break;
 
@@ -210,7 +210,7 @@ void TePictureViewer::setupMenu()
 	QAction* action = nullptr;
 
 	menu = menuBar()->addMenu(tr("&File"));
-	action = menu->addAction(tr("&Exit"));
+	action = menu->addAction(tr("&Quit"));
 	action->setShortcuts({ QKeySequence(Qt::Key_Escape)});
 	connect(action, &QAction::triggered, this, &TePictureViewer::close);
 
@@ -234,20 +234,20 @@ void TePictureViewer::setupMenu()
 	action->setShortcuts({ QKeySequence(Qt::Key_BracketLeft), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_R) });
 	connect(action, &QAction::triggered, this, &TePictureViewer::rotateLeft);
 	menu->addSeparator();
-	QMenu* subMenu = menu->addMenu(tr("Strech Mode"));
+	QMenu* subMenu = menu->addMenu(tr("Stretch Mode"));
 	action = subMenu->addAction(tr("None"));
 	action->setCheckable(true);
-	action->setChecked(strechMode() == TePictureViewer::StrechNone);
-	connect(this, &TePictureViewer::strechChanged, [action](TePictureViewer::Strech mode) {action->setChecked(mode == TePictureViewer::StrechNone); });
-	connect(action, &QAction::triggered, this, [this]() {setStrechMode(StrechNone); });
+	action->setChecked(stretchMode() == TePictureViewer::StretchNone);
+	connect(this, &TePictureViewer::stretchChanged, [action](TePictureViewer::Stretch mode) {action->setChecked(mode == TePictureViewer::StretchNone); });
+	connect(action, &QAction::triggered, this, [this]() {setStretchMode(StretchNone); });
 	action = subMenu->addAction(tr("Fit"));
 	action->setCheckable(true);
-	action->setChecked(strechMode() == TePictureViewer::StrechFit);
-	connect(this, &TePictureViewer::strechChanged, [action](TePictureViewer::Strech mode) {action->setChecked(mode == TePictureViewer::StrechFit); });
-	connect(action, &QAction::triggered, this, [this]() {setStrechMode(StrechFit); });
+	action->setChecked(stretchMode() == TePictureViewer::StretchFit);
+	connect(this, &TePictureViewer::stretchChanged, [action](TePictureViewer::Stretch mode) {action->setChecked(mode == TePictureViewer::StretchFit); });
+	connect(action, &QAction::triggered, this, [this]() {setStretchMode(StretchFit); });
 	action = subMenu->addAction(tr("Fill"));
 	action->setCheckable(true);
-	action->setChecked(strechMode() == TePictureViewer::StrechFill);
-	connect(this, &TePictureViewer::strechChanged, [action](TePictureViewer::Strech mode) {action->setChecked(mode == TePictureViewer::StrechFill); });
-	connect(action, &QAction::triggered, this, [this]() {setStrechMode(StrechFill); });
+	action->setChecked(stretchMode() == TePictureViewer::StretchFill);
+	connect(this, &TePictureViewer::stretchChanged, [action](TePictureViewer::Stretch mode) {action->setChecked(mode == TePictureViewer::StretchFill); });
+	connect(action, &QAction::triggered, this, [this]() {setStretchMode(StretchFill); });
 }
