@@ -69,3 +69,13 @@ TEST(tst_TeSettings, general_multi_instance_key_contains_general_prefix)
     QString key = QString::fromLatin1(SETTING_GENERAL_MultiInstance);
     EXPECT_TRUE(key.startsWith("main"));
 }
+
+TEST(tst_TeSettings, filename_width_keys_are_folder_appearance_settings)
+{
+    EXPECT_TRUE(QString::fromLatin1(SETTING_FOLDER_FILENAME_MIN_CHARS)
+        .startsWith("folder/appearance/"));
+    EXPECT_TRUE(QString::fromLatin1(SETTING_FOLDER_FILENAME_MAX_CHARS)
+        .startsWith("folder/appearance/"));
+    EXPECT_EQ(TeSettings::FILENAME_WIDTH_DISABLED, 0);
+    EXPECT_GT(TeSettings::MAX_FILENAME_WIDTH_CHARS, TeSettings::FILENAME_WIDTH_DISABLED);
+}

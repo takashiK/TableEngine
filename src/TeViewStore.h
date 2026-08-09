@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QMainWindow>
 #include "TeDispatcher.h"
+#include "TeSettings.h"
 
 /**
  * @file TeViewStore.h
@@ -289,6 +290,8 @@ signals:
 	void selectionModeChanged(TeTypes::SelectionMode mode);
 	/** @brief Emitted when the file list view mode or info flags change. */
 	void fileListViewModeChanged(TeTypes::FileInfoFlags infoFlags, TeTypes::FileViewMode viewMode);
+	/** @brief Emitted when non-icon filename display-width limits change. */
+	void fileNameWidthChanged(int minChars, int maxChars);
 	/** @brief Emitted when file type filters or sort order changes. */
 	void fileListShowModeChanged(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed);
 
@@ -356,6 +359,8 @@ private:
 	TeTypes::OrderType m_fileOrderBy = TeTypes::ORDER_NAME;
 	bool m_fileOrderReversed = false;
 	TeTypes::FileViewMode m_viewMode = TeTypes::FILEVIEW_SMALL_ICON;
+	int m_minFileNameWidthChars = TeSettings::FILENAME_WIDTH_DISABLED;
+	int m_maxFileNameWidthChars = TeSettings::FILENAME_WIDTH_DISABLED;
 
 	TeDispatcher* mp_dispatcher = nullptr;
 	TeEventEmitter* mp_closeEventEmitter = nullptr;

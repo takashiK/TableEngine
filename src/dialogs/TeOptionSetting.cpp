@@ -234,6 +234,8 @@ void TeOptionSetting::storeDefaultSettings(bool force)
 		SETTING(SETTING_LAYOUT_DETAIL_DEFAULT_FLOATING, true);
 	}
 
+	SETTING(SETTING_FOLDER_FILENAME_MIN_CHARS, TeSettings::FILENAME_WIDTH_DISABLED);
+	SETTING(SETTING_FOLDER_FILENAME_MAX_CHARS, TeSettings::FILENAME_WIDTH_DISABLED);
 
 #undef SETTING
 }
@@ -513,6 +515,46 @@ QWidget * TeOptionSetting::createPageFolder()
 		accent->setStyleSheet(QString("background-color: %1").arg(m_folderAppearance.accentColor.name()));
 		prioritize->setChecked(m_folderAppearance.focusPriority == TeFolderAppearance::FocusFirst);
 	});
+
+	QSettings settings;
+	int minFileNameChars = qBound(TeSettings::FILENAME_WIDTH_DISABLED,
+		settings.value(SETTING_FOLDER_FILENAME_MIN_CHARS, TeSettings::FILENAME_WIDTH_DISABLED).toInt(),
+		TeSettings::MAX_FILENAME_WIDTH_CHARS);
+	const int maxFileNameChars = qBound(TeSettings::FILENAME_WIDTH_DISABLED,
+		settings.value(SETTING_FOLDER_FILENAME_MAX_CHARS, TeSettings::FILENAME_WIDTH_DISABLED).toInt(),
+		TeSettings::MAX_FILENAME_WIDTH_CHARS);
+	if (maxFileNameChars > TeSettings::FILENAME_WIDTH_DISABLED && minFileNameChars > maxFileNameChars) {
+		minFileNameChars = maxFileNameChars;
+	}
+
+	QGroupBox* widthGroup = new QGroupBox(tr("File Name Width (List Views)"));
+	QGridLayout* widthLayout = new QGridLayout();
+	QSpinBox* minWidthSpin = new QSpinBox();
+	minWidthSpin->setRange(TeSettings::FILENAME_WIDTH_DISABLED, TeSettings::MAX_FILENAME_WIDTH_CHARS);
+	minWidthSpin->setSpecialValueText(tr("Disabled"));
+	minWidthSpin->setValue(minFileNameChars);
+	QSpinBox* maxWidthSpin = new QSpinBox();
+	maxWidthSpin->setRange(TeSettings::FILENAME_WIDTH_DISABLED, TeSettings::MAX_FILENAME_WIDTH_CHARS);
+	maxWidthSpin->setSpecialValueText(tr("Disabled"));
+	maxWidthSpin->setValue(maxFileNameChars);
+	widthLayout->addWidget(new QLabel(tr("Minimum width (characters):")), 0, 0);
+	widthLayout->addWidget(minWidthSpin, 0, 1);
+	widthLayout->addWidget(new QLabel(tr("Maximum width (characters):")), 1, 0);
+	widthLayout->addWidget(maxWidthSpin, 1, 1);
+	connect(minWidthSpin, &QSpinBox::valueChanged, [this, maxWidthSpin](int value) {
+		if (maxWidthSpin->value() > TeSettings::FILENAME_WIDTH_DISABLED && value > maxWidthSpin->value()) {
+			maxWidthSpin->setValue(value);
+		}
+		m_option[SETTING_FOLDER_FILENAME_MIN_CHARS] = value;
+	});
+	connect(maxWidthSpin, &QSpinBox::valueChanged, [this, minWidthSpin](int value) {
+		if (value > TeSettings::FILENAME_WIDTH_DISABLED && value < minWidthSpin->value()) {
+			minWidthSpin->setValue(value);
+		}
+		m_option[SETTING_FOLDER_FILENAME_MAX_CHARS] = value;
+	});
+	widthGroup->setLayout(widthLayout);
+	layout->addWidget(widthGroup);
 
 	layout->addStretch();
 

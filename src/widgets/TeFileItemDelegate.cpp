@@ -55,6 +55,15 @@ TeTypes::FileInfoFlags TeFileItemDelegate::infoFlags() const
     return m_infoFlags;
 }
 
+void TeFileItemDelegate::setFileNameWidthLimits(int minChars, int maxChars)
+{
+    m_minFileNameChars = qMax(0, minChars);
+    m_maxFileNameChars = qMax(0, maxChars);
+    if (m_maxFileNameChars > 0 && m_minFileNameChars > m_maxFileNameChars) {
+        m_minFileNameChars = m_maxFileNameChars;
+    }
+}
+
 void TeFileItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyleOptionViewItem opt = option;
@@ -78,7 +87,7 @@ void TeFileItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
         // ListMode: check for QFileSystemModel extended info
         QVariant fileInfoVar = index.data(QFileSystemModel::FileInfoRole);
         bool hasInfo = fileInfoVar.isValid() || index.data(TeFileInfo::ROLE_TYPE).isValid();
-        if (hasInfo && m_infoFlags != TeTypes::FILEINFO_NONE) {
+        if ((hasInfo && m_infoFlags != TeTypes::FILEINFO_NONE) || m_maxFileNameChars > 0) {
             paintListMode(painter, opt, index, style, widget);
         } else {
             // Standard rendering
@@ -120,8 +129,9 @@ void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& 
     // Support both QFileSystemModel items (QFileInfo via FileInfoRole) and
     // archive items (TeFileInfo custom roles, which have no QFileInfo).
     QVariant fileInfoVar = index.data(QFileSystemModel::FileInfoRole);
-    bool entryIsDir;
-    qint64 entrySize;
+    const bool hasInfo = fileInfoVar.isValid() || index.data(TeFileInfo::ROLE_TYPE).isValid();
+    bool entryIsDir = false;
+    qint64 entrySize = 0;
     QDateTime entryModified;
     if (fileInfoVar.isValid()) {
         QFileInfo fileInfo = qvariant_cast<QFileInfo>(fileInfoVar);
@@ -134,6 +144,7 @@ void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& 
         entrySize = index.data(TeFileInfo::ROLE_SIZE).toLongLong();
         entryModified = index.data(TeFileInfo::ROLE_DATE).toDateTime();
     }
+    const bool showAttributes = hasInfo && m_infoFlags != TeTypes::FILEINFO_NONE;
 
     // Save text, draw item without text (icon + background + selection highlight)
     QString displayText = opt.text;
@@ -154,19 +165,23 @@ void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& 
     QRect dateTimeRect;
     QRect sizeRect;
 
-    if (m_infoFlags & TeTypes::FILEINFO_MODIFIED) {
+    if (showAttributes && (m_infoFlags & TeTypes::FILEINFO_MODIFIED)) {
         int dtWidth = fm.horizontalAdvance(QLatin1String("0000/00/00 00:00:00")) + margin * 2;
         dateTimeRect = QRect(rightEdge - dtWidth, textRect.top(), dtWidth, textRect.height());
         rightEdge -= dtWidth;
     }
 
-    if (m_infoFlags & TeTypes::FILEINFO_SIZE) {
+    if (showAttributes && (m_infoFlags & TeTypes::FILEINFO_SIZE)) {
         int sizeWidth = fm.horizontalAdvance(QLatin1String("0,000MB")) + margin * 2;
         sizeRect = QRect(rightEdge - sizeWidth, textRect.top(), sizeWidth, textRect.height());
         rightEdge -= sizeWidth;
     }
 
     QRect displayRect(textRect.left(), textRect.top(), rightEdge - textRect.left(), textRect.height());
+    if (m_maxFileNameChars > 0) {
+        const int maxWidth = fm.horizontalAdvance(QStringLiteral("M")) * m_maxFileNameChars;
+        displayRect.setWidth(qMin(displayRect.width(), maxWidth));
+    }
 
     // Determine palette role for text color
     QPalette::ColorRole role = (opt.state & QStyle::State_Selected) ? QPalette::HighlightedText : QPalette::Text;
@@ -177,7 +192,7 @@ void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& 
     style->drawItemText(painter, displayRect, Qt::AlignLeft | Qt::AlignVCenter, opt.palette, enabled, elidedText, role);
 
     // Draw FileSize (right-aligned within fixed-width area)
-    if (m_infoFlags & TeTypes::FILEINFO_SIZE) {
+    if (showAttributes && (m_infoFlags & TeTypes::FILEINFO_SIZE)) {
         if (entryIsDir) {
             style->drawItemText(painter, sizeRect, Qt::AlignRight | Qt::AlignVCenter, opt.palette, enabled, QString(), role);
         } else {
@@ -187,7 +202,7 @@ void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& 
     }
 
     // Draw FileModifiedDateTime (right-aligned within fixed-width area)
-    if (m_infoFlags & TeTypes::FILEINFO_MODIFIED) {
+    if (showAttributes && (m_infoFlags & TeTypes::FILEINFO_MODIFIED)) {
         QString dtText = entryModified.toString(QLatin1String("yyyy/MM/dd hh:mm:ss"));
         style->drawItemText(painter, dateTimeRect, Qt::AlignRight | Qt::AlignVCenter, opt.palette, enabled, dtText, role);
     }
@@ -285,12 +300,26 @@ QSize TeFileItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QMo
         return baseSize;
     }
 
-    // ListMode: add width for extra fields if applicable
+    // ListMode: constrain only the filename portion. Icon-mode sizing remains
+    // entirely independent of these settings.
     QSize baseSize = QStyledItemDelegate::sizeHint(option, index);
+    QFontMetrics fm(opt.font);
+    if (m_minFileNameChars > 0 || m_maxFileNameChars > 0) {
+        const int naturalFileNameWidth = fm.horizontalAdvance(opt.text);
+        int constrainedFileNameWidth = naturalFileNameWidth;
+        const int mWidth = fm.horizontalAdvance(QStringLiteral("M"));
+        if (m_maxFileNameChars > 0) {
+            constrainedFileNameWidth = qMin(constrainedFileNameWidth, mWidth * m_maxFileNameChars);
+        }
+        if (m_minFileNameChars > 0) {
+            constrainedFileNameWidth = qMax(constrainedFileNameWidth, mWidth * m_minFileNameChars);
+        }
+        const int nonFileNameWidth = qMax(0, baseSize.width() - naturalFileNameWidth);
+        baseSize.setWidth(nonFileNameWidth + constrainedFileNameWidth);
+    }
 
     QVariant fileInfoVar = index.data(QFileSystemModel::FileInfoRole);
     if ((fileInfoVar.isValid() || index.data(TeFileInfo::ROLE_TYPE).isValid()) && m_infoFlags != TeTypes::FILEINFO_NONE) {
-        QFontMetrics fm(opt.font);
         int margin = fm.horizontalAdvance(QLatin1Char(' '));
 
         if (m_infoFlags & TeTypes::FILEINFO_SIZE) {
@@ -303,4 +332,3 @@ QSize TeFileItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QMo
 
     return baseSize;
 }
-

@@ -45,6 +45,8 @@ namespace TeSettings {
 		MAX_USER_TOOLS     = 99, ///< Maximum number of user-defined tool entries.
 		MAX_USER_COMMANDS  = 31, ///< Maximum number of user-registered commands (command00..command30).
 	};
+	inline constexpr int FILENAME_WIDTH_DISABLED = 0; ///< Disables a filename display-width limit.
+	inline constexpr int MAX_FILENAME_WIDTH_CHARS = 200; ///< Maximum configurable filename display width in characters.
 
 	/**
 	 * @brief Startup folder initialisation behaviour.
@@ -125,6 +127,8 @@ SETTING_STR(SETTING_FOLDER_PRIO_STYLESHEET,  "folder/appearance/priority_stylesh
 
 SETTING_STR(SETTING_FOLDER_FONT_FAMILY,      "folder/appearance/font_family");
 SETTING_STR(SETTING_FOLDER_FONT_SIZE,        "folder/appearance/font_size");
+SETTING_STR(SETTING_FOLDER_FILENAME_MIN_CHARS, "folder/appearance/filename_min_chars");
+SETTING_STR(SETTING_FOLDER_FILENAME_MAX_CHARS, "folder/appearance/filename_max_chars");
 
 SETTING_STR(SETTING_FOLDER_NORMAL_FG,        "folder/appearance/normal/fg_color");
 SETTING_STR(SETTING_FOLDER_NORMAL_BG,        "folder/appearance/normal/bg_color");
