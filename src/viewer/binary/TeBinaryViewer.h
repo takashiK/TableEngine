@@ -89,6 +89,7 @@ private:
 	QDockWidget* mp_decodeDock = nullptr;
 	QLineEdit* mp_findLineEdit = nullptr;
 	QComboBox* mp_findModeCombo = nullptr;
+	QLabel*    mp_numberTypeLabel = nullptr;
 	QComboBox* mp_numberTypeCombo = nullptr;
 	QCheckBox* mp_caseSensitiveCheck = nullptr;
 	QLabel* mp_decodeValueInt8 = nullptr;

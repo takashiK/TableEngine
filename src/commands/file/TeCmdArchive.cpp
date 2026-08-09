@@ -93,7 +93,7 @@ bool TeCmdArchive::execute(TeViewStore* p_store)
 		if (type == TeArchive::AR_NONE) {
 			QMessageBox msg(p_store->mainWindow());
 			msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-			msg.setText(QObject::tr("Archive type is not supported.") + QString("\n") + targetPath);
+			msg.setText(QObject::tr("Unsupported archive type.") + QString("\n") + targetPath);
 			msg.exec();
 			return true;
 		}
@@ -101,7 +101,7 @@ bool TeCmdArchive::execute(TeViewStore* p_store)
 		if (!p_arc->commit(targetPath, type)) {
 			QMessageBox msg(p_store->mainWindow());
 			msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-			msg.setText(QObject::tr("Archive to following path failed.") + QString("\n") + targetPath);
+			msg.setText(QObject::tr("Failed to create the following archive file.") + QString("\n") + targetPath);
 			msg.exec();
 		}
 		return true;
@@ -119,7 +119,7 @@ bool TeCmdArchive::execute(TeViewStore* p_store)
 			if (targetPath.isEmpty()) {
 				QMessageBox msg(p_store->mainWindow());
 				msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-				msg.setText(QObject::tr("Faild Archive Function.\nArchive file path is not set."));
+				msg.setText(QObject::tr("Failed Archive Function.\nArchive file path is not set."));
 				msg.exec();
 			}
 			else {
@@ -180,7 +180,7 @@ void TeCmdArchive::archiveItems(TeViewStore* p_store, const QStringList & list, 
 	if (type == TeArchive::AR_NONE) {
 		QMessageBox msg(p_store->mainWindow());
 		msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-		msg.setText(QObject::tr("Archive type is not supported.") + QString("\n") + targetPath);
+		msg.setText(QObject::tr("Unsupported archive type.") + QString("\n") + targetPath);
 		msg.exec();
 		bSuccess = false;
 	}
@@ -224,7 +224,7 @@ void TeCmdArchive::archiveItems(TeViewStore* p_store, const QStringList & list, 
 	if (!bSuccess) {
 		QMessageBox msg(p_store->mainWindow());
 		msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-		msg.setText(QObject::tr("Archive to following path failed.") + QString("\n") + targetPath);
+		msg.setText(QObject::tr("Failed to create the following archive file.") + QString("\n") + targetPath);
 		msg.exec();
 	}
 }

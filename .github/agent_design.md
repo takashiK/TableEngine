@@ -29,7 +29,7 @@ graph TD
 
 ```mermaid
 graph TD
-    L0["L0 オーケストレーター (main / Opus)<br/>計画タスク分解・単位委譲・承認ゲート"]
+    L0["L0 オーケストレーター (main / Sol)<br/>計画タスク分解・単位委譲・承認ゲート"]
     L1["L1 Task Executor (mid)<br/>1単位を調査→実装→検証で自己完結"]
     L2a["L2 Explore (read-only / low)<br/>重い読解の隔離"]
     L2b["L2 Task Executor nested (mid)<br/>独立サブ単位"]
@@ -90,15 +90,15 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 | コード読解・検索 | 低 | GPT 最新 Luna / MAI 最新 |
 | サブエージェント探索 | 低 | GPT 最新 Luna / MAI 最新 |
 | 一括置換・機械的修正 | 低 | GPT 最新 Luna / MAI 最新 |
-| ドキュメント更新 | 中 | Claude 最新 Sonnet |
-| ビルドエラー修正 | 中 | Claude 最新 Sonnet |
-| 設計レポート生成 | 高 | Claude 最新 Opus |
-| アーキテクチャ設計 | 高 | Claude 最新 Opus |
+| ドキュメント更新 | 中 | GPT 最新 Terra |
+| ビルドエラー修正 | 中 | GPT 最新 Terra |
+| 設計レポート生成 | 高 | GPT 最新 Sol |
+| アーキテクチャ設計 | 高 | GPT 最新 Sol |
 
 - モデルは常に各系列の最新版を使用する（版名は固定しない）
 - 軽量タスクは GPT 最新 Luna または MAI 最新に集約しコスト削減
 - 優先順位: 品質 > トークンコスト
-- オーケストレーション運用では、上表の tier 選択は **subagent 層**が担う。オーケストレーター（main）は Opus 固定とし、委譲時に推奨 tier を明示する（詳細は instructions の Orchestration Strategy）
+- オーケストレーション運用では、上表の tier 選択は **subagent 層**が担う。オーケストレーター（main）は Sol 固定とし、委譲時に推奨 tier を明示する（詳細は instructions の Orchestration Strategy）
 
 ## 6. 設計判断の根拠記録
 
@@ -108,9 +108,8 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 | 言語フラグメント分割 | 無関係言語分のトークン削減（-45%以上）＋焦点化で品質向上 | 2026-06-06 |
 | 軽量モデル=GPT mini / MAI | 最新 mini および MAI が低コスト・高速で read-only に最適 | 2026-06-06 |
 | prompt は言語非依存維持 | 全文ロードされるため、言語固有部は SKILL に委譲 | 2026-06-06 |
-| Opus → Sonnet （高複雑タスク） | Opus は GitHub Copilot 標準プラン対象外のため Sonnet に変更 | 2026-06-06 |
-| Sonnet → Opus （高複雑タスク） | プラン変更により Opus が利用可能になったため高複雑タスクで再採用 | 2026-06-19 |
-| Auto モードをメインに | Sonnet 4.6固定運用から Auto 標準に移行。今後のモデル進化に対応 | 2026-06-06 |
+| Sol → Terra （高複雑タスク） | Sol は GitHub Copilot 標準プラン対象外のため Terra に変更 | 2026-06-06 |
+| Terra → Sol （高複雑タスク） | プラン変更により Sol が利用可能になったため高複雑タスクで再採用 | 2026-06-19 |
 | clang-format CLI 不使用 | C/C++ 拡張の保存時自動フォーマットに一元化。CLI 並用は二重化と差分発生のリスク | 2026-06-06 |
 | doc/ 古資料対策=update-docs 定期実行 | コード変更ごとに手動更新するよりも定期実行プロンプトで一括保全する方がトークン効率が高い | 2026-06-06 |
 | カスタマイズを `.github/` 公式配置へ移設 | `.vscode/` は gitignore 対象で未共有・非標準。prompts/skills/instructions を GitHub Copilot 公式の既定配置 `.github/` に集約し、設定不要で版管理・チーム共有を両立 | 2026-06-22 |
@@ -118,7 +117,7 @@ Auto モードの場合、タスク種別に応じてモデルを選択する。
 | SKILL.md に `name`/`description` 付与 | Agent Skills 仕様で必須。`name` は親ディレクトリ名と一致（小文字・ハイフン） | 2026-06-22 |
 | ビルドプリセット名を小文字 `-debug` に修正 | `CMakePresets.json` の実名は小文字。`-Debug` 表記は実行失敗の原因 | 2026-06-22 |
 | vcvars 検出に vswhere `-products *` 採用 | ハードコードの Community パスは BuildTools 版で不一致。vswhere 自動検出で環境非依存化 | 2026-06-22 |
-| オーケストレーション運用を導入 | main(Opus) は委譲・統合・承認に専念し、実作業は subagent へ委譲。subagent が難易度別にモデルを選択し、中間情報を遮断することでコンテキスト肥大とトークンコストを抑制 | 2026-06-24 |
+| オーケストレーション運用を導入 | main(Sol) は委譲・統合・承認に専念し、実作業は subagent へ委譲。subagent が難易度別にモデルを選択し、中間情報を遮断することでコンテキスト肥大とトークンコストを抑制 | 2026-06-24 |
 | 粗粒度・3層階層委譲へ移行 | 細かい単発 subagent 呼び出しは往復・要約オーバーヘッドが大きい（コスト分析で確認）。L0 は Phase/計画タスクを1単位として custom agent `Task Executor` にまるごと委譲し、executor が単位内の細粒度作業と L2（Explore / nested executor）起動を自律管理。委譲回数を削減し文脈分離を維持 | 2026-06-26 |
 
 ## 7. ブラッシュアップ手順

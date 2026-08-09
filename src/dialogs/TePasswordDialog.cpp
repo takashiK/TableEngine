@@ -41,7 +41,7 @@ TePasswordDialog::TePasswordDialog(QWidget* parent)
 
 	QVBoxLayout* layout = new QVBoxLayout();
 
-	mp_prompt = new QLabel(tr("Enter the password for the archive:"));
+	mp_prompt = new QLabel(tr("Enter the password:"));
 	mp_prompt->setWordWrap(true);
 	layout->addWidget(mp_prompt);
 

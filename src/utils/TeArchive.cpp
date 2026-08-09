@@ -820,7 +820,7 @@ void Reader::clearCancel()
 }
 
 /*!
-	Extact all of data in archive to \a destPath.
+	Extract all of data in archive to \a destPath.
 	If any file success to extract then this function return true.
 	but If all of data failed to extract then this function return false.
 

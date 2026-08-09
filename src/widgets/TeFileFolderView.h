@@ -105,6 +105,17 @@ public:
 	/** @brief Creates and returns a TeFileFinder for this view. */
 	virtual TeFinder* makeFinder();
 
+	/**
+	 * @brief Recreates the list-pane QFileSystemModel to force fresh metadata.
+	 *
+	 * Keeps the existing TeFileSortProxyModel and TeFileListView, reloads the
+	 * directory currently shown by the list pane, and restores the current
+	 * item, multi-selection, and vertical scroll position once the new
+	 * model's directoryLoaded() fires for that directory.  The tree pane and
+	 * its model are left untouched.
+	 */
+	virtual void refresh() override;
+
 public slots:
 	/**
 	 * @brief Updates file-type visibility flags and sort order.
@@ -137,6 +148,9 @@ protected:
 	void showUserContextMenu(const QString& menuName, const QPoint& pos);
 
 private:
+	/** @brief Connects mp_listModel::directoryLoaded() to the "select first row when current is invalid" behavior. */
+	void connectListModelSignals();
+
 	TeFileTreeView* mp_treeView;         ///< Left-pane tree widget.
 	TeFileListView* mp_listView;         ///< Right-pane list widget.
 

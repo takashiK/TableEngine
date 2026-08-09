@@ -41,6 +41,8 @@
 #include <QSettings>
 #include <QStack>
 #include <QMimeData>
+#include <QScrollBar>
+#include <QItemSelection>
 /**
  * @file TeFileFolderView.cpp
  * @brief Implementation of TeFileFolderView.
@@ -135,13 +137,7 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	{ showContextMenu(mp_listView, pos); });
 
 	//SetCurrentIndex to ListView if its currentIndex is invalid when listModel is updated.
-	connect(mp_listModel, &QFileSystemModel::directoryLoaded,
-				[this](const QString& )
-		{ if (mp_listView->currentIndex().isValid() == false) {
-			QModelIndex sourceRoot = mp_listSortModel->mapToSource(mp_listView->rootIndex());
-			QModelIndex index = mp_listSortModel->mapFromSource(mp_listModel->index(0, 0, sourceRoot));
-			mp_listView->setCurrentIndex(index);
-		}});
+	connectListModelSignals();
 
 	//Enable Drag & Drop
 	auto dropFunc = [this](TeTypes::WidgetType type, TeFileSortProxyModel const* proxyModel, QFileSystemModel const* sourceModel, const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) {
@@ -231,6 +227,95 @@ TeFileTreeView * TeFileFolderView::tree()
 TeFileListView * TeFileFolderView::list()
 {
 	return mp_listView;
+}
+
+void TeFileFolderView::connectListModelSignals()
+{
+	connect(mp_listModel, &QFileSystemModel::directoryLoaded,
+				[this](const QString& )
+		{ if (mp_listView->currentIndex().isValid() == false) {
+			QModelIndex sourceRoot = mp_listSortModel->mapToSource(mp_listView->rootIndex());
+			QModelIndex index = mp_listSortModel->mapFromSource(mp_listModel->index(0, 0, sourceRoot));
+			mp_listView->setCurrentIndex(index);
+		}});
+}
+
+void TeFileFolderView::refresh()
+{
+	const QString path = mp_listModel->rootPath();
+	if (path.isEmpty()) {
+		TeFolderView::refresh();
+		return;
+	}
+
+	const QDir::Filters filters = mp_listModel->filter();
+	const QFileSystemModel::Options options = mp_listModel->options();
+	const bool readOnly = mp_listModel->isReadOnly();
+	const QStringList nameFilters = mp_listModel->nameFilters();
+	const bool nameFilterDisables = mp_listModel->nameFilterDisables();
+
+	//Capture current item / multi-selection / scroll position to restore after reload.
+	const QModelIndex curProxy = mp_listView->currentIndex();
+	const QString curPath = curProxy.isValid()
+		? mp_listModel->filePath(mp_listSortModel->mapToSource(curProxy))
+		: QString();
+
+	QStringList selectedPaths;
+	if (mp_listView->selectionModel() != nullptr) {
+		for (const QModelIndex& proxyIndex : mp_listView->selectionModel()->selectedIndexes()) {
+			selectedPaths.append(mp_listModel->filePath(mp_listSortModel->mapToSource(proxyIndex)));
+		}
+	}
+
+	const int scrollValue = mp_listView->verticalScrollBar()->value();
+
+	QFileSystemModel* oldModel = mp_listModel;
+	QFileSystemModel* newModel = new QFileSystemModel;
+	newModel->setOptions(options);
+	newModel->setReadOnly(readOnly);
+	newModel->setFilter(filters);
+	newModel->setNameFilters(nameFilters);
+	newModel->setNameFilterDisables(nameFilterDisables);
+	mp_listModel = newModel;
+
+	//TeFileSortProxyModel::setSourceModel() disconnects oldModel and connects newModel internally.
+	mp_listSortModel->setSourceModel(newModel);
+	connectListModelSignals();
+
+	//Restore view state once newModel reports the same directory loaded; guard against
+	//a stale callback firing after mp_listModel has since been replaced again.
+	connect(newModel, &QFileSystemModel::directoryLoaded, this,
+		[this, newModel, path, curPath, selectedPaths, scrollValue](const QString& loadedPath)
+	{
+		if (mp_listModel != newModel || QDir::cleanPath(loadedPath) != QDir::cleanPath(path)) {
+			return;
+		}
+
+		if (!selectedPaths.isEmpty() && mp_listView->selectionModel() != nullptr) {
+			QItemSelection selection;
+			for (const QString& selPath : selectedPaths) {
+				QModelIndex idx = mp_listSortModel->mapFromSource(newModel->index(selPath));
+				if (idx.isValid())
+					selection.select(idx, idx);
+			}
+			if (!selection.isEmpty())
+				mp_listView->selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
+		}
+
+		if (!curPath.isEmpty()) {
+			QModelIndex idx = mp_listSortModel->mapFromSource(newModel->index(curPath));
+			if (idx.isValid())
+				mp_listView->setCurrentIndex(idx);
+		}
+
+		mp_listView->verticalScrollBar()->setValue(scrollValue);
+	}, Qt::SingleShotConnection);
+
+	QModelIndex rootIndex = newModel->setRootPath(path);
+	auto listSortRoot = mp_listSortModel->mapFromSource(rootIndex);
+	mp_listView->setRootIndex(listSortRoot);
+
+	delete oldModel;
 }
 
 TeFileInfo TeFileFolderView::currentFileInfo() const
