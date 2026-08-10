@@ -53,6 +53,7 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	mp_list = new QListView();
 	mp_model = new QFileSystemModel();
 	mp_thumbnailModel = new TePictureThumbnailProxyModel(this);
+	mp_thumbnailModel->setThumbnailLoadingEnabled(false);
 	mp_thumbnailModel->setSourceModel(mp_model);
 
 	mp_list->setIconSize(QSize(96, 96));
@@ -73,6 +74,8 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	mp_dock = new QDockWidget("Image List");
 	mp_dock->setWidget(mp_list);
 	mp_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	connect(mp_dock, &QDockWidget::visibilityChanged, mp_thumbnailModel,
+		&TePictureThumbnailProxyModel::setThumbnailLoadingEnabled);
 	addDockWidget(Qt::LeftDockWidgetArea, mp_dock);
 	mp_dock->close();
 

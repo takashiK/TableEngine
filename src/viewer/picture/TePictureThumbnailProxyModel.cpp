@@ -8,6 +8,8 @@
 #include <QStyle>
 #include <QThreadPool>
 
+#include <utility>
+
 class TePictureThumbnailLoadTask : public QRunnable
 {
 public:
@@ -25,6 +27,11 @@ public:
 	{
 		QImageReader reader(m_filePath);
 		reader.setAutoTransform(true);
+		const QSize sourceSize = reader.size();
+		if (sourceSize.isValid()
+			&& (sourceSize.width() > m_thumbnailSize.width() || sourceSize.height() > m_thumbnailSize.height())) {
+			reader.setScaledSize(sourceSize.scaled(m_thumbnailSize, Qt::KeepAspectRatio));
+		}
 		QImage image = reader.read();
 		if (!image.isNull() && (image.width() > m_thumbnailSize.width() || image.height() > m_thumbnailSize.height())) {
 			image = image.scaled(m_thumbnailSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -51,6 +58,15 @@ private:
 TePictureThumbnailProxyModel::TePictureThumbnailProxyModel(QObject* parent)
 	: QSortFilterProxyModel(parent)
 {
+	m_thumbnailThreadPool.setMaxThreadCount(1);
+	m_thumbnailThreadPool.setThreadPriority(QThread::LowPriority);
+}
+
+TePictureThumbnailProxyModel::~TePictureThumbnailProxyModel()
+{
+	++m_generation;
+	m_thumbnailThreadPool.clear();
+	m_thumbnailThreadPool.waitForDone();
 }
 
 QVariant TePictureThumbnailProxyModel::data(const QModelIndex& index, int role) const
@@ -67,6 +83,11 @@ QVariant TePictureThumbnailProxyModel::data(const QModelIndex& index, int role) 
 	if (!info.isFile() || QImageReader::imageFormat(info.absoluteFilePath()).isEmpty())
 		return QSortFilterProxyModel::data(index, role);
 
+	if (!m_thumbnailLoadingEnabled) {
+		m_deferredIndexes.insert(index);
+		return QApplication::style()->standardIcon(QStyle::SP_FileIcon);
+	}
+
 	const QString key = cacheKey(info);
 	const QPixmap* cached = m_thumbnailCache.find(key);
 	if (cached)
@@ -77,7 +98,7 @@ QVariant TePictureThumbnailProxyModel::data(const QModelIndex& index, int role) 
 		auto* task = new TePictureThumbnailLoadTask(key, info.absoluteFilePath(), m_thumbnailSize, m_generation,
 			const_cast<TePictureThumbnailProxyModel*>(this));
 		task->setAutoDelete(true);
-		QThreadPool::globalInstance()->start(task);
+		m_thumbnailThreadPool.start(task);
 	}
 
 	return QApplication::style()->standardIcon(QStyle::SP_FileIcon);
@@ -88,6 +109,27 @@ void TePictureThumbnailProxyModel::clearThumbnailCache()
 	++m_generation;
 	m_thumbnailCache.clear();
 	m_pendingRequests.clear();
+	m_deferredIndexes.clear();
+}
+
+void TePictureThumbnailProxyModel::setThumbnailLoadingEnabled(bool enabled)
+{
+	if (m_thumbnailLoadingEnabled == enabled)
+		return;
+
+	m_thumbnailLoadingEnabled = enabled;
+	if (!enabled) {
+		++m_generation;
+		m_thumbnailThreadPool.clear();
+		m_pendingRequests.clear();
+		return;
+	}
+
+	const auto deferredIndexes = std::exchange(m_deferredIndexes, {});
+	for (const QPersistentModelIndex& index : deferredIndexes) {
+		if (index.isValid())
+			emit dataChanged(index, index, {Qt::DecorationRole});
+	}
 }
 
 void TePictureThumbnailProxyModel::thumbnailLoaded(quint64 generation, const QString& key, const QString& filePath,
