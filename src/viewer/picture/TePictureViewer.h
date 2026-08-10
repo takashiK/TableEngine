@@ -16,6 +16,7 @@ class QGraphicsView;
 class QGraphicsPixmapItem;
 class QListView;
 class QFileSystemModel;
+class TePictureThumbnailProxyModel;
 
 class TePictureViewer  : public QMainWindow
 {
@@ -62,6 +63,7 @@ private:
 	QListView* mp_list;
 	QDockWidget* mp_dock;
 	QFileSystemModel* mp_model;
+	TePictureThumbnailProxyModel* mp_thumbnailModel;
 	Stretch m_stretchMode = StretchFit;
 	int m_sortColumn = 0;
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;

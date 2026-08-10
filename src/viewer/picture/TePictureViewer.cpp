@@ -1,5 +1,5 @@
 #include "TePictureViewer.h"
-#include "utils/TeThumbnailProvider.h"
+#include "TePictureThumbnailProxyModel.h"
 #include "utils/TeQImageExifReader.h"
 
 #include <QMenuBar>
@@ -52,17 +52,16 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	mp_graphics->scene()->addItem(mp_image);
 	mp_list = new QListView();
 	mp_model = new QFileSystemModel();
+	mp_thumbnailModel = new TePictureThumbnailProxyModel(this);
+	mp_thumbnailModel->setSourceModel(mp_model);
 
 	mp_list->setIconSize(QSize(96, 96));
 
 	mp_list->setLayoutMode(QListView::Batched);
-	mp_list->setModel(mp_model);
+	mp_list->setModel(mp_thumbnailModel);
 
 	connect(mp_list->selectionModel(),&QItemSelectionModel::currentChanged, this, &TePictureViewer::updateView);
 
-	mp_model->setIconProvider(TeThumbnailProvider::iconProvider());
-
-	
 	mp_emitter = new TeEventEmitter();
 	mp_emitter->addEmitter(mp_graphics->viewport());
 	mp_emitter->addEventType(QEvent::Resize);
@@ -82,6 +81,7 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 
 TePictureViewer::~TePictureViewer()
 {
+	delete mp_thumbnailModel;
 	delete mp_model;
 	delete mp_emitter;
 }
@@ -95,9 +95,10 @@ bool TePictureViewer::open(const QString & path)
 		mp_model->setNameFilters(QStringList({ "*." + info.suffix() }));
 		mp_model->setNameFilterDisables(false);
 		mp_model->sort(m_sortColumn, m_sortOrder);
-		mp_list->setRootIndex(mp_model->index(info.absolutePath()));
+		mp_thumbnailModel->clearThumbnailCache();
+		mp_list->setRootIndex(mp_thumbnailModel->mapFromSource(mp_model->index(info.absolutePath())));
 
-		mp_list->setCurrentIndex(mp_model->index(info.absoluteFilePath()));
+		mp_list->setCurrentIndex(mp_thumbnailModel->mapFromSource(mp_model->index(info.absoluteFilePath())));
 		return true;
 	}
 	return false;
@@ -115,7 +116,7 @@ std::pair<int, Qt::SortOrder> TePictureViewer::sortOrder() const
 
 void TePictureViewer::nextImage()
 {
-	QModelIndex index = mp_model->index(mp_list->currentIndex().row() + 1, 0, mp_list->currentIndex().parent());
+	QModelIndex index = mp_thumbnailModel->index(mp_list->currentIndex().row() + 1, 0, mp_list->currentIndex().parent());
 	if (index.isValid()) {
 		mp_list->setCurrentIndex(index);
 	}
@@ -123,7 +124,7 @@ void TePictureViewer::nextImage()
 
 void TePictureViewer::prevImage()
 {
-	QModelIndex index = mp_model->index(mp_list->currentIndex().row() - 1, 0, mp_list->currentIndex().parent());
+	QModelIndex index = mp_thumbnailModel->index(mp_list->currentIndex().row() - 1, 0, mp_list->currentIndex().parent());
 	if (index.isValid()) {
 		mp_list->setCurrentIndex(index);
 	}
@@ -153,7 +154,7 @@ void TePictureViewer::setSortOrder(int column, Qt::SortOrder order)
 	if (column != m_sortColumn || order != m_sortOrder) {
 		m_sortColumn = column;
 		m_sortOrder = order;
-		mp_model->sort(column, order);
+		mp_thumbnailModel->sort(column, order);
 	}
 }
 
@@ -182,7 +183,7 @@ void TePictureViewer::updateView(const QModelIndex& index)
 
 void TePictureViewer::loadImage(const QModelIndex& index)
 {
-	const QString path = mp_model->filePath(index);
+	const QString path = mp_model->filePath(mp_thumbnailModel->mapToSource(index));
 
 	TeQImageExifReader reader;
 	const QMap<QString, QString> meta = reader.read(path);
