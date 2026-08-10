@@ -70,6 +70,6 @@ bool TeCmdWindowNewTab::execute(TeViewStore* p_store)
 	if (!folderView)
 		return true;
 
-	p_store->createFolderView(folderView->rootPath(), p_store->currentTabPlace());
+	p_store->createFolderView(folderView->currentPath(), p_store->currentTabPlace());
 	return true;
 }
