@@ -1,4 +1,5 @@
 #include "TePictureViewer.h"
+#include "TePictureThumbnailDelegate.h"
 #include "TePictureThumbnailProxyModel.h"
 #include "utils/TeQImageExifReader.h"
 
@@ -57,8 +58,9 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	mp_thumbnailModel->setSourceModel(mp_model);
 
 	mp_list->setIconSize(QSize(96, 96));
-
-	mp_list->setLayoutMode(QListView::Batched);
+	mp_list->setUniformItemSizes(true);
+	mp_list->setLayoutMode(QListView::SinglePass);
+	mp_list->setItemDelegate(new TePictureThumbnailDelegate(mp_list));
 	mp_list->setModel(mp_thumbnailModel);
 
 	connect(mp_list->selectionModel(),&QItemSelectionModel::currentChanged, this, &TePictureViewer::updateView);

@@ -1,0 +1,6 @@
+[0/2] Re-checking globbed directories...
+[1/3] Building CXX object tests\CMakeFiles\tst_tengine.dir\Debug\viewer\picture\tst_TePictureThumbnailProxyModel.cpp.obj
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\__msvc_ostream.hpp(781): warning C4530: C++ 例外処理を使っていますが、アンワインド セマンティクスは有効にはなりません。/EHsc を指定してください。
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\include\__msvc_ostream.hpp(781): note: テンプレートインスタンス化コンテキスト (最初に最も古いもの) は
+C:\Project\git\TableEngine\out\build\Qt-MSVC2022-amd64-Ninja\vcpkg_installed\x64-windows-static-md\include\gtest/gtest-message.h(118): note: コンパイル対象の関数 テンプレート インスタンス化 'std::basic_ostream<char,std::char_traits<char>> &std::operator <<<std::char_traits<char>>(std::basic_ostream<char,std::char_traits<char>> &,const char *)' のリファレンスを確認してください
+[2/3] Linking CXX executable Debug\tst_tengine.exe

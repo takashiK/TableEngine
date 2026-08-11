@@ -1,4 +1,5 @@
 #include <gmock/gmock.h>
+#include <QFile>
 #include <QFileSystemModel>
 #include <QImage>
 #include <QPixmapCache>
@@ -49,14 +50,26 @@ protected:
 		return path;
 	}
 
+	QString writeTextFile(const QString& name) const
+	{
+		const QString path = m_directory.path() + QLatin1Char('/') + name;
+		QFile file(path);
+		if (file.open(QIODevice::WriteOnly)) {
+			file.write("not an image");
+			file.close();
+		}
+		return path;
+	}
+
 	QTemporaryDir m_directory;
 };
 
-TEST_F(tst_TePictureThumbnailProxyModel, thumbnail_pool_is_single_threaded_and_low_priority)
+TEST_F(tst_TePictureThumbnailProxyModel, thumbnail_pool_is_bounded_and_low_priority)
 {
 	const TePictureThumbnailProxyModel model;
 
-	EXPECT_EQ(thumbnailPoolMaxThreadCount(model), 1);
+	EXPECT_GE(thumbnailPoolMaxThreadCount(model), 1);
+	EXPECT_LE(thumbnailPoolMaxThreadCount(model), 4);
 	EXPECT_EQ(thumbnailPoolThreadPriority(model), QThread::LowPriority);
 }
 
@@ -93,7 +106,7 @@ TEST_F(tst_TePictureThumbnailProxyModel, thumbnail_cache_respects_budget_and_rej
 	EXPECT_EQ(defaultCache.budgetBytes(), 64LL * 1024 * 1024);
 }
 
-TEST_F(tst_TePictureThumbnailProxyModel, decoration_loads_thumbnail_asynchronously)
+TEST_F(tst_TePictureThumbnailProxyModel, decoration_shows_file_type_icon_while_thumbnail_loads)
 {
 	ASSERT_TRUE(m_directory.isValid());
 	const QString path = writeImage("thumbnail.png");
@@ -109,14 +122,19 @@ TEST_F(tst_TePictureThumbnailProxyModel, decoration_loads_thumbnail_asynchronous
 	ASSERT_TRUE(index.isValid());
 
 	QSignalSpy dataChangedSpy(&model, &QAbstractItemModel::dataChanged);
+	// The file type icon of the source model stays available without waiting for any decoding.
 	EXPECT_TRUE(model.data(index, Qt::DecorationRole).canConvert<QIcon>());
-	ASSERT_TRUE(dataChangedSpy.wait(5000));
+	EXPECT_FALSE(model.data(index, TePictureThumbnailProxyModel::ThumbnailPixmap).isValid());
+	QTRY_VERIFY_WITH_TIMEOUT(
+		model.data(index, TePictureThumbnailProxyModel::ThumbnailPixmap).canConvert<QPixmap>(), 5000);
+	EXPECT_FALSE(dataChangedSpy.isEmpty());
 
-	const QVariant thumbnail = model.data(index, Qt::DecorationRole);
+	const QVariant thumbnail = model.data(index, TePictureThumbnailProxyModel::ThumbnailPixmap);
 	ASSERT_TRUE(thumbnail.canConvert<QPixmap>());
 	const QPixmap thumbnailPixmap = qvariant_cast<QPixmap>(thumbnail);
 	EXPECT_FALSE(thumbnailPixmap.isNull());
 	EXPECT_EQ(thumbnailPixmap.size(), QSize(96, 48));
+	EXPECT_TRUE(model.data(index, Qt::DecorationRole).canConvert<QIcon>());
 
 	QPixmap fileListThumbnail;
 	EXPECT_FALSE(QPixmapCache::find(
@@ -124,7 +142,25 @@ TEST_F(tst_TePictureThumbnailProxyModel, decoration_loads_thumbnail_asynchronous
 		&fileListThumbnail));
 }
 
-TEST_F(tst_TePictureThumbnailProxyModel, decoration_waits_until_thumbnail_loading_is_enabled)
+TEST_F(tst_TePictureThumbnailProxyModel, thumbnail_is_not_requested_for_unsupported_extension)
+{
+	ASSERT_TRUE(m_directory.isValid());
+	const QString path = writeTextFile("document.txt");
+
+	QFileSystemModel sourceModel;
+	sourceModel.setRootPath(m_directory.path());
+	ASSERT_TRUE(sourceModel.index(path).isValid());
+
+	TePictureThumbnailProxyModel model;
+	model.setSourceModel(&sourceModel);
+	const QModelIndex index = model.mapFromSource(sourceModel.index(path));
+	ASSERT_TRUE(index.isValid());
+
+	EXPECT_FALSE(model.data(index, TePictureThumbnailProxyModel::ThumbnailPixmap).isValid());
+	EXPECT_FALSE(hasPendingThumbnailRequests(model));
+}
+
+TEST_F(tst_TePictureThumbnailProxyModel, thumbnail_waits_until_thumbnail_loading_is_enabled)
 {
 	ASSERT_TRUE(m_directory.isValid());
 	const QString path = writeImage("deferred-thumbnail.png");
@@ -141,6 +177,7 @@ TEST_F(tst_TePictureThumbnailProxyModel, decoration_waits_until_thumbnail_loadin
 	model.setThumbnailLoadingEnabled(false);
 	QSignalSpy dataChangedSpy(&model, &QAbstractItemModel::dataChanged);
 	EXPECT_TRUE(model.data(index, Qt::DecorationRole).canConvert<QIcon>());
+	EXPECT_FALSE(model.data(index, TePictureThumbnailProxyModel::ThumbnailPixmap).isValid());
 	EXPECT_EQ(activeThumbnailThreadCount(model), 0);
 	EXPECT_FALSE(hasPendingThumbnailRequests(model));
 
@@ -149,9 +186,10 @@ TEST_F(tst_TePictureThumbnailProxyModel, decoration_waits_until_thumbnail_loadin
 	const QPersistentModelIndex refreshedIndex = qvariant_cast<QModelIndex>(dataChangedSpy.takeFirst().at(0));
 	ASSERT_TRUE(refreshedIndex.isValid());
 	EXPECT_TRUE(model.data(refreshedIndex, Qt::DecorationRole).canConvert<QIcon>());
-	QTRY_VERIFY_WITH_TIMEOUT(model.data(refreshedIndex, Qt::DecorationRole).canConvert<QPixmap>(), 5000);
+	QTRY_VERIFY_WITH_TIMEOUT(
+		model.data(refreshedIndex, TePictureThumbnailProxyModel::ThumbnailPixmap).canConvert<QPixmap>(), 5000);
 
-	const QVariant thumbnail = model.data(refreshedIndex, Qt::DecorationRole);
+	const QVariant thumbnail = model.data(refreshedIndex, TePictureThumbnailProxyModel::ThumbnailPixmap);
 	ASSERT_TRUE(thumbnail.canConvert<QPixmap>());
 	EXPECT_FALSE(qvariant_cast<QPixmap>(thumbnail).isNull());
 }
