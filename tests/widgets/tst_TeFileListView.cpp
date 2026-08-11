@@ -1466,7 +1466,7 @@ TEST_F(tst_TeFileListView, mouse_ctrl_drag)
 
 }
 
-TEST(tst_TeFileListView, filename_width_limits_use_active_font_M_unit)
+TEST_F(tst_TeFileListView, filename_width_limits_use_active_font_M_unit)
 {
     QStandardItemModel model;
     const QString fileName(12, QLatin1Char('M'));
@@ -1504,7 +1504,7 @@ TEST(tst_TeFileListView, filename_width_limits_use_active_font_M_unit)
         + (mWidth * 16 - metrics.horizontalAdvance(fileName)));
 }
 
-TEST(tst_TeFileListView, filename_width_limits_do_not_change_icon_mode_size_hint)
+TEST_F(tst_TeFileListView, filename_width_limits_do_not_change_icon_mode_size_hint)
 {
     QStandardItemModel model;
     model.appendRow(new QStandardItem(QStringLiteral("MMMMMMMMMMMM")));

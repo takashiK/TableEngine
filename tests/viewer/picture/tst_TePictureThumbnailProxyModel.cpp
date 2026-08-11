@@ -113,21 +113,24 @@ TEST_F(tst_TePictureThumbnailProxyModel, decoration_shows_file_type_icon_while_t
 	QPixmapCache::clear();
 
 	QFileSystemModel sourceModel;
-	const QModelIndex rootIndex = sourceModel.setRootPath(m_directory.path());
+	sourceModel.setRootPath(m_directory.path());
 	ASSERT_TRUE(sourceModel.index(path).isValid());
 
 	TePictureThumbnailProxyModel model;
 	model.setSourceModel(&sourceModel);
-	const QModelIndex index = model.mapFromSource(sourceModel.index(path));
+	// QFileSystemModel populates asynchronously and drops the proxy mapping, so plain indexes go stale.
+	const QPersistentModelIndex index = model.mapFromSource(sourceModel.index(path));
 	ASSERT_TRUE(index.isValid());
 
 	QSignalSpy dataChangedSpy(&model, &QAbstractItemModel::dataChanged);
 	// The file type icon of the source model stays available without waiting for any decoding.
 	EXPECT_TRUE(model.data(index, Qt::DecorationRole).canConvert<QIcon>());
 	EXPECT_FALSE(model.data(index, TePictureThumbnailProxyModel::ThumbnailPixmap).isValid());
-	QTRY_VERIFY_WITH_TIMEOUT(
-		model.data(index, TePictureThumbnailProxyModel::ThumbnailPixmap).canConvert<QPixmap>(), 5000);
-	EXPECT_FALSE(dataChangedSpy.isEmpty());
+	ASSERT_TRUE(QTest::qWaitFor(
+		[&] { return model.data(index, TePictureThumbnailProxyModel::ThumbnailPixmap).canConvert<QPixmap>(); },
+		5000));
+	// dataChanged is coalesced by a timer, so it lags behind the cached thumbnail becoming available.
+	ASSERT_TRUE(QTest::qWaitFor([&] { return !dataChangedSpy.isEmpty(); }, 5000));
 
 	const QVariant thumbnail = model.data(index, TePictureThumbnailProxyModel::ThumbnailPixmap);
 	ASSERT_TRUE(thumbnail.canConvert<QPixmap>());
@@ -186,8 +189,11 @@ TEST_F(tst_TePictureThumbnailProxyModel, thumbnail_waits_until_thumbnail_loading
 	const QPersistentModelIndex refreshedIndex = qvariant_cast<QModelIndex>(dataChangedSpy.takeFirst().at(0));
 	ASSERT_TRUE(refreshedIndex.isValid());
 	EXPECT_TRUE(model.data(refreshedIndex, Qt::DecorationRole).canConvert<QIcon>());
-	QTRY_VERIFY_WITH_TIMEOUT(
-		model.data(refreshedIndex, TePictureThumbnailProxyModel::ThumbnailPixmap).canConvert<QPixmap>(), 5000);
+	ASSERT_TRUE(QTest::qWaitFor(
+		[&] {
+			return model.data(refreshedIndex, TePictureThumbnailProxyModel::ThumbnailPixmap).canConvert<QPixmap>();
+		},
+		5000));
 
 	const QVariant thumbnail = model.data(refreshedIndex, TePictureThumbnailProxyModel::ThumbnailPixmap);
 	ASSERT_TRUE(thumbnail.canConvert<QPixmap>());
