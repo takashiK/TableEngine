@@ -21,8 +21,11 @@
 #include "TeQImageExifReader.h"
 
 #include <QFile>
+#include <QFileInfo>
 #include <QImageReader>
 #include <QStringList>
+
+#include <limits>
 
 /**
  * @file TeQImageExifReader.cpp
@@ -88,12 +91,13 @@ struct ExifCtx
     quint32  tiffBase;   // absolute byte offset of the TIFF "II"/"MM" marker
     bool     le;         // true = little-endian (II), false = big-endian (MM)
 
-    bool     boundsOk(quint32 relOff, quint32 len) const
+    bool     boundsOk(qint64 relOff, qint64 len) const
     {
-        return (tiffBase + relOff + len) <= (quint32)data.size();
+        return relOff >= 0 && len >= 0 && tiffBase <= quint32(data.size()) &&
+               relOff <= data.size() - tiffBase - len;
     }
 
-    quint16 u16(quint32 relOff) const
+    quint16 u16(qint64 relOff) const
     {
         if (!boundsOk(relOff, 2)) return 0;
         const auto* p = reinterpret_cast<const uchar*>(data.constData()) + tiffBase + relOff;
@@ -101,7 +105,7 @@ struct ExifCtx
                   : ((quint16(p[0]) << 8) | quint16(p[1]));
     }
 
-    quint32 u32(quint32 relOff) const
+    quint32 u32(qint64 relOff) const
     {
         if (!boundsOk(relOff, 4)) return 0;
         const auto* p = reinterpret_cast<const uchar*>(data.constData()) + tiffBase + relOff;
@@ -110,7 +114,7 @@ struct ExifCtx
     }
 
     // Read a null-terminated ASCII string stored at relOff with byte length `count`.
-    QString ascii(quint32 relOff, quint32 count) const
+    QString ascii(qint64 relOff, quint32 count) const
     {
         if (count == 0 || !boundsOk(relOff, count)) return {};
         const char* s = data.constData() + tiffBase + relOff;
@@ -119,7 +123,7 @@ struct ExifCtx
     }
 
     // Format a RATIONAL (num/den) stored at relOff as a fraction string.
-    QString rational(quint32 relOff) const
+    QString rational(qint64 relOff) const
     {
         if (!boundsOk(relOff, 8)) return {};
         quint32 num = u32(relOff);
@@ -130,7 +134,7 @@ struct ExifCtx
         return QStringLiteral("%1/%2").arg(num).arg(den);
     }
 
-    void parseIFD(quint32 ifdOff, QMap<QString,QString>& out, bool subIfd) const;
+    void parseIFD(qint64 ifdOff, QMap<QString,QString>& out, bool subIfd) const;
 };
 
 // Converts "YYYY:MM:DD HH:MM:SS" → "YYYY/MM/DD HH:MM:SS"
@@ -171,15 +175,15 @@ static QString fmtFNumber(const QString& frac)
     return QStringLiteral("F") + frac;
 }
 
-void ExifCtx::parseIFD(quint32 ifdOff, QMap<QString,QString>& out, bool subIfd) const
+void ExifCtx::parseIFD(qint64 ifdOff, QMap<QString,QString>& out, bool subIfd) const
 {
     if (!boundsOk(ifdOff, 2)) return;
     quint16 n = u16(ifdOff);
     if (n > 512) return;  // sanity guard
 
-    quint32 base = ifdOff + 2;
+    qint64 base = ifdOff + 2;
     for (quint16 i = 0; i < n; i++) {
-        quint32 e = base + i * 12u;
+        qint64 e = base + qint64(i) * 12;
         if (!boundsOk(e, 12)) break;
 
         quint16 tag   = u16(e + 0);
@@ -187,10 +191,10 @@ void ExifCtx::parseIFD(quint32 ifdOff, QMap<QString,QString>& out, bool subIfd) 
         quint32 count = u32(e + 4);
 
         // Determine where the actual data lives (inline vs. offset)
-        quint32 valSize   = count * tiffTypeSize(type);
+        qint64 valSize = qint64(count) * tiffTypeSize(type);
         // If value fits in 4 bytes it is stored inline in the value field;
         // otherwise the 4-byte field is an offset from the TIFF header.
-        quint32 dataOff = (valSize <= 4) ? (e + 8) : u32(e + 8);
+        qint64 dataOff = (valSize <= 4) ? (e + 8) : u32(e + 8);
 
         if (!subIfd) {
             switch (tag) {
@@ -263,46 +267,335 @@ void ExifCtx::parseIFD(quint32 ifdOff, QMap<QString,QString>& out, bool subIfd) 
 // ---------------------------------------------------------------------------
 // Parse the EXIF APP1 block out of a JPEG byte buffer.
 // ---------------------------------------------------------------------------
-static QMap<QString,QString> parseJpegExif(const QByteArray& data)
+struct Segment
 {
-    QMap<QString,QString> result;
-    const int sz = data.size();
-    if (sz < 4) return result;
+    quint8 marker = 0;
+    qint64 payloadOffset = 0;
+    qint64 payloadLength = 0;
+};
 
-    // Verify SOI
-    if ((uchar)data[0] != 0xFF || (uchar)data[1] != 0xD8) return result;
+static bool readAt(QFile& file, qint64 offset, char* data, qint64 length)
+{
+    return offset >= 0 && length >= 0 && file.seek(offset) && file.read(data, length) == length;
+}
 
-    int pos = 2;
-    while (pos + 4 <= sz) {
-        if ((uchar)data[pos] != 0xFF) break;
-        uchar marker = (uchar)data[pos + 1];
-        quint16 segLen = (quint16(uchar(data[pos+2])) << 8) | quint16(uchar(data[pos+3]));
-        if (segLen < 2) break;
+static bool readU16Be(QFile& file, qint64 offset, quint16* value)
+{
+    char bytes[2];
+    if (!readAt(file, offset, bytes, sizeof(bytes)))
+        return false;
+    *value = (quint16(uchar(bytes[0])) << 8) | quint16(uchar(bytes[1]));
+    return true;
+}
 
-        if (marker == 0xE1 && pos + 10 <= sz) {
-            // Check "Exif\0\0" header
-            if (data[pos+4]=='E' && data[pos+5]=='x' && data[pos+6]=='i' &&
-                data[pos+7]=='f' && data[pos+8]==0   && data[pos+9]==0)
-            {
-                quint32 tiffBase = (quint32)(pos + 10);
-                if ((int)(tiffBase + 8) > sz) break;
-
-                bool le = ((uchar)data[tiffBase] == 'I' && (uchar)data[tiffBase+1] == 'I');
-                ExifCtx ctx{data, tiffBase, le};
-
-                // Verify TIFF magic 0x002A
-                if (ctx.u16(2) != 0x002A) break;
-
-                quint32 ifd0Off = ctx.u32(4);
-                ctx.parseIFD(ifd0Off, result, false);
-            }
-            break;  // Only one APP1 segment matters
-        }
-
-        // Skip to next segment (marker 2 bytes + length includes the 2 length bytes)
-        if (segLen == 0) break;
-        pos += 2 + segLen;
+static bool readSegment(QFile& file, qint64* position, Segment* segment)
+{
+    const qint64 fileSize = file.size();
+    if (*position < 0 || *position > fileSize - 2)
+        return false;
+    char value = 0;
+    if (!readAt(file, *position, &value, 1) || uchar(value) != 0xff)
+        return false;
+    qint64 cursor = *position + 1;
+    do {
+        if (cursor >= fileSize || !readAt(file, cursor++, &value, 1))
+            return false;
+    } while (uchar(value) == 0xff);
+    segment->marker = uchar(value);
+    if (segment->marker == 0x00 || segment->marker == 0xd8 ||
+        segment->marker == 0xd9 || (segment->marker >= 0xd0 && segment->marker <= 0xd7)) {
+        return false;
     }
+    quint16 length = 0;
+    if (!readU16Be(file, cursor, &length) || length < 2)
+        return false;
+    segment->payloadOffset = cursor + 2;
+    segment->payloadLength = length - 2;
+    if (segment->payloadOffset > fileSize - segment->payloadLength)
+        return false;
+    *position = segment->payloadOffset + segment->payloadLength;
+    return true;
+}
+
+static bool isSof(quint8 marker)
+{
+    return (marker >= 0xc0 && marker <= 0xc3) || (marker >= 0xc5 && marker <= 0xc7) ||
+           (marker >= 0xc9 && marker <= 0xcb) || (marker >= 0xcd && marker <= 0xcf);
+}
+
+struct JpegHeaders
+{
+    QSize size;
+    qint64 entropyOffset = -1;
+    QVector<QPair<qint64, QByteArray>> exif;
+    QVector<QPair<qint64, QByteArray>> mpf;
+};
+
+static bool scanHeaders(QFile& file, qint64 start, JpegHeaders* headers)
+{
+    char soi[2];
+    if (!readAt(file, start, soi, sizeof(soi)) || uchar(soi[0]) != 0xff || uchar(soi[1]) != 0xd8)
+        return false;
+    qint64 position = start + 2;
+    while (true) {
+        Segment segment;
+        if (!readSegment(file, &position, &segment))
+            return false;
+        if (isSof(segment.marker) && segment.payloadLength >= 5) {
+            char sof[5];
+            if (!readAt(file, segment.payloadOffset, sof, sizeof(sof)))
+                return false;
+            headers->size = QSize((quint16(uchar(sof[3])) << 8) | uchar(sof[4]),
+                                  (quint16(uchar(sof[1])) << 8) | uchar(sof[2]));
+        }
+        if ((segment.marker == 0xe1 || segment.marker == 0xe2) && segment.payloadLength >= 4) {
+            if (segment.payloadLength > 65533)
+                return false;
+            QByteArray payload(segment.payloadLength, Qt::Uninitialized);
+            if (!readAt(file, segment.payloadOffset, payload.data(), payload.size()))
+                return false;
+            if (segment.marker == 0xe1 && payload.startsWith("Exif\0\0"))
+                headers->exif.append(qMakePair(segment.payloadOffset, payload));
+            if (segment.marker == 0xe2 && payload.startsWith("MPF\0"))
+                headers->mpf.append(qMakePair(segment.payloadOffset, payload));
+        }
+        if (segment.marker == 0xda) {
+            headers->entropyOffset = position;
+            return true;
+        }
+    }
+}
+
+static qint64 findJpegEnd(QFile& file, qint64 entropyOffset, qint64 scanEnd)
+{
+    qint64 position = entropyOffset;
+    const qint64 fileSize = file.size();
+    const qint64 limit = scanEnd > 0 && scanEnd < fileSize ? scanEnd : fileSize;
+    while (position + 1 < limit) {
+        char byte = 0;
+        if (!readAt(file, position++, &byte, 1))
+            return -1;
+        if (uchar(byte) != 0xff)
+            continue;
+        do {
+            if (position >= limit || !readAt(file, position++, &byte, 1))
+                return -1;
+        } while (uchar(byte) == 0xff);
+        const quint8 marker = uchar(byte);
+        if (marker == 0x00 || (marker >= 0xd0 && marker <= 0xd7))
+            continue;
+        if (marker == 0xd9)
+            return position;
+        if (marker == 0xd8)
+            return -1;
+        position -= 2;
+        Segment segment;
+        if (!readSegment(file, &position, &segment))
+            return -1;
+    }
+    return -1;
+}
+
+struct TiffView
+{
+    const QByteArray& data;
+    qint64 base = 0;
+    bool littleEndian = false;
+
+    bool contains(qint64 offset, qint64 length) const
+    {
+        return offset >= 0 && length >= 0 && base >= 0 && base <= data.size() &&
+               offset <= data.size() - base - length;
+    }
+
+    bool u16(qint64 offset, quint16* value) const
+    {
+        if (!contains(offset, 2)) return false;
+        const auto* p = reinterpret_cast<const uchar*>(data.constData() + base + offset);
+        *value = littleEndian ? quint16(p[0]) | (quint16(p[1]) << 8)
+                              : (quint16(p[0]) << 8) | quint16(p[1]);
+        return true;
+    }
+
+    bool u32(qint64 offset, quint32* value) const
+    {
+        if (!contains(offset, 4)) return false;
+        const auto* p = reinterpret_cast<const uchar*>(data.constData() + base + offset);
+        *value = littleEndian ? quint32(p[0]) | (quint32(p[1]) << 8) |
+                                     (quint32(p[2]) << 16) | (quint32(p[3]) << 24)
+                              : (quint32(p[0]) << 24) | (quint32(p[1]) << 16) |
+                                     (quint32(p[2]) << 8) | quint32(p[3]);
+        return true;
+    }
+};
+
+static qint64 tiffValueSize(quint16 type, quint32 count)
+{
+    qint64 unit = 0;
+    switch (type) {
+    case 1: case 2: case 6: case 7: unit = 1; break;
+    case 3: case 8: unit = 2; break;
+    case 4: case 9: case 11: unit = 4; break;
+    case 5: case 10: case 12: unit = 8; break;
+    default: return -1;
+    }
+    return count <= std::numeric_limits<qint64>::max() / unit ? count * unit : -1;
+}
+
+static bool tiffEntry(const TiffView& view, qint64 ifd, quint16 wantedTag,
+                      quint16* type, quint32* count, qint64* valueOffset)
+{
+    quint16 entries = 0;
+    if (!view.u16(ifd, &entries) || entries > 512 || ifd > std::numeric_limits<qint64>::max() - 2)
+        return false;
+    const qint64 first = ifd + 2;
+    if (entries > (view.data.size() - view.base - first) / 12)
+        return false;
+    for (quint16 index = 0; index < entries; ++index) {
+        const qint64 entry = first + qint64(index) * 12;
+        quint16 tag = 0;
+        quint16 entryType = 0;
+        quint32 entryCount = 0;
+        if (!view.u16(entry, &tag) || !view.u16(entry + 2, &entryType) ||
+            !view.u32(entry + 4, &entryCount))
+            return false;
+        const qint64 size = tiffValueSize(entryType, entryCount);
+        if (size < 0)
+            continue;
+        quint32 offset = 0;
+        if (!view.u32(entry + 8, &offset))
+            return false;
+        const qint64 actualOffset = size <= 4 ? entry + 8 : offset;
+        if (!view.contains(actualOffset, size))
+            continue;
+        if (tag == wantedTag) {
+            *type = entryType;
+            *count = entryCount;
+            *valueOffset = actualOffset;
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool tiffNextIfd(const TiffView& view, qint64 ifd, quint32* next)
+{
+    quint16 entries = 0;
+    if (!view.u16(ifd, &entries) || entries > 512 ||
+        ifd > std::numeric_limits<qint64>::max() - 2 ||
+        entries > (view.data.size() - view.base - (ifd + 2)) / 12)
+        return false;
+    return view.u32(ifd + 2 + qint64(entries) * 12, next);
+}
+
+static bool makeTiffView(const QByteArray& payload, qint64 base, TiffView* view, quint32* ifd0)
+{
+    if (base < 0 || base > payload.size() - 8)
+        return false;
+    if (&view->data != &payload)
+        return false;
+    const bool little = payload[base] == 'I' && payload[base + 1] == 'I';
+    const bool big = payload[base] == 'M' && payload[base + 1] == 'M';
+    if (!little && !big)
+        return false;
+    view->base = base;
+    view->littleEndian = little;
+    quint16 magic = 0;
+    return view->u16(2, &magic) && magic == 42 && view->u32(4, ifd0);
+}
+
+struct ExifThumbnail
+{
+    qint64 offset = -1;
+    qint64 length = -1;
+    int primaryOrientation = 0;
+    int thumbnailOrientation = 0;
+};
+
+static ExifThumbnail parseExifThumbnail(const QByteArray& payload)
+{
+    ExifThumbnail thumbnail;
+    TiffView view{payload, 0, false};
+    quint32 ifd0 = 0;
+    if (!makeTiffView(payload, 6, &view, &ifd0))
+        return thumbnail;
+    quint16 type = 0;
+    quint32 count = 0;
+    qint64 valueOffset = 0;
+    if (tiffEntry(view, ifd0, 0x0112, &type, &count, &valueOffset) && type == 3 && count == 1) {
+        quint16 orientation = 0;
+        if (view.u16(valueOffset, &orientation))
+            thumbnail.primaryOrientation = orientation;
+    }
+    quint32 ifd1 = 0;
+    if (!tiffNextIfd(view, ifd0, &ifd1) || ifd1 == 0)
+        return thumbnail;
+    if (tiffEntry(view, ifd1, 0x0112, &type, &count, &valueOffset) && type == 3 && count == 1) {
+        quint16 orientation = 0;
+        if (view.u16(valueOffset, &orientation))
+            thumbnail.thumbnailOrientation = orientation;
+    }
+    quint32 offset = 0;
+    quint32 length = 0;
+    if (tiffEntry(view, ifd1, 0x0201, &type, &count, &valueOffset) && type == 4 && count == 1)
+        view.u32(valueOffset, &offset);
+    if (tiffEntry(view, ifd1, 0x0202, &type, &count, &valueOffset) && type == 4 && count == 1)
+        view.u32(valueOffset, &length);
+    if (offset != 0 && length != 0 && view.contains(offset, length)) {
+        thumbnail.offset = offset;
+        thumbnail.length = length;
+    }
+    return thumbnail;
+}
+
+struct MpfEntry
+{
+    quint32 attributes = 0;
+    quint32 size = 0;
+    quint32 offset = 0;
+};
+
+static QVector<MpfEntry> parseMpf(const QByteArray& payload)
+{
+    QVector<MpfEntry> entries;
+    TiffView view{payload, 0, false};
+    quint32 ifd0 = 0;
+    if (!makeTiffView(payload, 4, &view, &ifd0))
+        return entries;
+    quint16 type = 0;
+    quint32 count = 0;
+    qint64 valueOffset = 0;
+    quint32 imageCount = 0;
+    if (!tiffEntry(view, ifd0, 0xb001, &type, &count, &valueOffset) ||
+        type != 4 || count != 1 || !view.u32(valueOffset, &imageCount) || imageCount == 0 ||
+        imageCount > 128)
+        return entries;
+    if (!tiffEntry(view, ifd0, 0xb002, &type, &count, &valueOffset) ||
+        count != imageCount * 16u || !view.contains(valueOffset, count))
+        return entries;
+    for (quint32 index = 0; index < imageCount; ++index) {
+        const qint64 entry = valueOffset + qint64(index) * 16;
+        MpfEntry image;
+        if (!view.u32(entry, &image.attributes) || !view.u32(entry + 4, &image.size) ||
+            !view.u32(entry + 8, &image.offset))
+            return {};
+        entries.append(image);
+    }
+    return entries;
+}
+
+static QMap<QString, QString> parseExifMetadata(const QByteArray& payload)
+{
+    QMap<QString, QString> result;
+    if (payload.size() < 14 || !payload.startsWith("Exif\0\0"))
+        return result;
+    const bool little = payload[6] == 'I' && payload[7] == 'I';
+    const bool big = payload[6] == 'M' && payload[7] == 'M';
+    if (!little && !big)
+        return result;
+    ExifCtx context{payload, 6, little};
+    if (context.u16(2) == 0x002a)
+        context.parseIFD(context.u32(4), result, false);
     return result;
 }
 
@@ -335,14 +628,121 @@ QMap<QString,QString> TeQImageExifReader::read(const QString& path) const
     if (fmt == "jpeg" || fmt == "jpg") {
         QFile file(path);
         if (file.open(QFile::ReadOnly)) {
-            // APP1 segment is always within the first 64 KB
-            const QByteArray head = file.read(65536);
-            file.close();
-            const QMap<QString,QString> exif = parseJpegExif(head);
-            for (auto it = exif.cbegin(); it != exif.cend(); ++it)
-                result[it.key()] = it.value();
+            JpegHeaders headers;
+            scanHeaders(file, 0, &headers);
+            for (const auto& app1 : headers.exif) {
+                const QMap<QString, QString> exif = parseExifMetadata(app1.second);
+                for (auto it = exif.cbegin(); it != exif.cend(); ++it)
+                    result[it.key()] = it.value();
+            }
         }
     }
 
+    return result;
+}
+
+TeEmbeddedImageSet TeQImageExifReader::scanImages(const QString& path) const
+{
+    TeEmbeddedImageSet result;
+    const QFileInfo fileInfo(path);
+    if (!fileInfo.isFile() || fileInfo.size() < 4)
+        return result;
+
+    QFile file(path);
+    if (!file.open(QFile::ReadOnly))
+        return result;
+    JpegHeaders primary;
+    if (!scanHeaders(file, 0, &primary))
+        return result;
+    const qint64 primaryEnd = findJpegEnd(file, primary.entropyOffset, 0);
+    if (primaryEnd <= 0)
+        return result;
+
+    result.m_path = path;
+    result.m_fileSize = fileInfo.size();
+    result.m_lastModified = fileInfo.lastModified();
+    auto appendImage = [&](qint64 offset, qint64 length, const QSize& encodedSize,
+                           TeEmbeddedImageKind kind, TeEmbeddedImageOrigin origin,
+                           const QString& detail, int orientation) {
+        if (offset < 0 || length <= 0 || offset > result.m_fileSize - length)
+            return;
+        for (int index = 0; index < result.m_ranges.size(); ++index) {
+            if (result.m_ranges[index] == qMakePair(offset, length))
+                return;
+        }
+        TeEmbeddedImageInfo info;
+        info.id = quint32(result.m_images.size());
+        info.encodedSize = encodedSize;
+        info.byteSize = length;
+        info.format = QStringLiteral("JPEG");
+        info.kind = kind;
+        info.origin = origin;
+        info.originDetail = detail;
+        info.orientation = orientation;
+        result.m_ranges.append(qMakePair(offset, length));
+        result.m_images.append(info);
+    };
+    int primaryOrientation = 0;
+    for (const auto& app1 : primary.exif) {
+        const ExifThumbnail thumbnail = parseExifThumbnail(app1.second);
+        if (thumbnail.primaryOrientation != 0) {
+            primaryOrientation = thumbnail.primaryOrientation;
+            break;
+        }
+    }
+    appendImage(0, primaryEnd, primary.size, TeEmbeddedImageKind::Primary,
+                TeEmbeddedImageOrigin::JpegPrimary, QStringLiteral("SOI"), primaryOrientation);
+
+    for (const auto& app1 : primary.exif) {
+        const ExifThumbnail thumbnail = parseExifThumbnail(app1.second);
+        if (thumbnail.offset < 0 || thumbnail.length < 0 ||
+            thumbnail.offset > result.m_fileSize - thumbnail.length)
+            continue;
+        const qint64 offset = app1.first + 6 + thumbnail.offset;
+        if (offset < 0 || offset > result.m_fileSize - thumbnail.length)
+            continue;
+        JpegHeaders embedded;
+        if (!scanHeaders(file, offset, &embedded))
+            continue;
+        const qint64 end = findJpegEnd(file, embedded.entropyOffset,
+                           offset + thumbnail.length);
+        if (end < offset || end - offset > thumbnail.length)
+            continue;
+        appendImage(offset, end - offset, embedded.size, TeEmbeddedImageKind::Thumbnail,
+                    TeEmbeddedImageOrigin::ExifIfd1, QStringLiteral("IFD1"),
+                    thumbnail.thumbnailOrientation);
+    }
+
+    for (const auto& app2 : primary.mpf) {
+        const QVector<MpfEntry> entries = parseMpf(app2.second);
+        for (int index = 0; index < entries.size(); ++index) {
+            const MpfEntry& entry = entries[index];
+            const qint64 offset = index == 0 ? 0 : app2.first + 4 + qint64(entry.offset);
+            const qint64 declaredLength = entry.size;
+            if (declaredLength <= 0 || offset < 0 || offset > result.m_fileSize - declaredLength)
+                continue;
+            JpegHeaders embedded;
+            if (!scanHeaders(file, offset, &embedded))
+                continue;
+            const qint64 end = findJpegEnd(file, embedded.entropyOffset,
+                                           offset + declaredLength);
+            if (end < offset || end - offset > declaredLength)
+                continue;
+            int mpfOrientation = 0;
+            for (const auto& app1 : embedded.exif) {
+                const ExifThumbnail info = parseExifThumbnail(app1.second);
+                if (info.primaryOrientation != 0) {
+                    mpfOrientation = info.primaryOrientation;
+                    break;
+                }
+            }
+            const quint32 mpType = entry.attributes & 0x00ffffffu;
+            const TeEmbeddedImageKind kind = index == 0 ? TeEmbeddedImageKind::Primary :
+                (mpType == 0x010001u || mpType == 0x010002u ? TeEmbeddedImageKind::Preview :
+                                                             TeEmbeddedImageKind::Auxiliary);
+            appendImage(offset, end - offset, embedded.size, kind, TeEmbeddedImageOrigin::Mpf,
+                        QStringLiteral("MPF image %1").arg(index), mpfOrientation);
+        }
+    }
     return result;
 }

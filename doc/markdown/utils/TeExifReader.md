@@ -3,7 +3,7 @@
 ## Overview
 
 `TeExifReader` は画像ファイルから EXIF / メタデータを読み出す **ストラテジーインタフェース** です。  
-`TeQImageExifReader` はデフォルト実装で、外部ライブラリを使用せずに `QImageReader` と独自の JPEG EXIF バイナリパーサーを組み合わせてメタデータを取得します。
+`TeQImageExifReader` はデフォルト実装で、外部ライブラリを使用せずに `QImageReader` と独自の JPEG EXIF バイナリパーサーを組み合わせてメタデータを取得します。また `TeEmbeddedImageReader` を実装し、JPEG 内の符号化済み画像へ遅延アクセスできます。
 
 ---
 
@@ -17,6 +17,11 @@ classDiagram
     }
     class TeQImageExifReader {
         +read(path) QMap~QString,QString~ override
+        +scanImages(path) TeEmbeddedImageSet
+    }
+    class TeEmbeddedImageReader {
+        <<interface>>
+        +scanImages(path) TeEmbeddedImageSet
     }
     class ExternalExifReader {
         <<example>>
@@ -24,6 +29,7 @@ classDiagram
     }
 
     TeExifReader <|-- TeQImageExifReader
+    TeEmbeddedImageReader <|-- TeQImageExifReader
     TeExifReader <|-- ExternalExifReader
 ```
 
@@ -60,7 +66,7 @@ section->setExifReader(std::make_unique<Exiv2ExifReader>());
 
 ### アプローチ 2: JPEG EXIF バイナリパーサー
 
-ファイル先頭 64 KB を読み込み、JPEG APP1 セグメントを探して TIFF IFD を解析します。  
+SOI から SOS まで JPEG セグメントを seek 走査し、すべての APP1 セグメントから TIFF IFD を解析します。
 リトルエンディアン（`II`）とビッグエンディアン（`MM`）の両方に対応します。
 
 ---
@@ -90,7 +96,22 @@ section->setExifReader(std::make_unique<Exiv2ExifReader>());
 ## 実装上の制約
 
 - JPEG のみ IFD パーサーが動作します（PNG/BMP/GIF 等は `QImageReader::text()` のみ）
-- ファイル先頭 **64 KB** のみ読み込むため、APP1 がそれ以降にある異常ファイルは部分取得になります
+- JPEG セグメント長、TIFF オフセット、MPF 範囲はファイル境界内であることを検証します
+
+---
+
+## TeEmbeddedImageReader
+
+```cpp
+TeEmbeddedImageSet images = reader.scanImages(path);
+for (const TeEmbeddedImageInfo& image : images.images()) {
+    std::unique_ptr<QIODevice> device = images.openImageDevice(image.id);
+}
+```
+
+`scanImages()` は主 JPEG、Exif IFD1 thumbnail、MPF 追加画像を返します。各 `TeEmbeddedImageInfo` はセット内 ID、SOF サイズ、符号化サイズ、形式、種別、出所、向き（利用可能な場合）を持ちます。Sony ScreenNail は MPF の `Preview` として扱います。
+
+`openImageDevice()` は独立した `TeFileSliceDevice` を返します。この read-only device は検出済み範囲を超えて read/seek せず、スキャン後に元ファイルのサイズまたは更新時刻が変わった場合は open に失敗します。
 
 ---
 

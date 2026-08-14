@@ -161,8 +161,8 @@ Thoroughness: {quick|medium|thorough}
 | コード読解・検索 | 低 | GPT-5.6 Luna / MAI 最新 |
 | サブエージェント探索 | 低 | GPT-5.6 Luna / MAI 最新 |
 | 一括置換・機械的修正 | 低 | GPT-5.6 Luna / MAI 最新 |
-| ドキュメント更新 | 中 | GPT-5.6 Terra |
-| 実装 | 中 | GPT-5.6 Terra |
+| ドキュメント更新 | 中 | Claude Sonnet 5 |
+| 実装 | 中 | Claude Sonnet 5 |
 | 分析・設計レポート生成 | 高 | Claude Opus 5 |
 | アーキテクチャ設計 | 高 | Claude Opus 5 |
 | 設計・実装のレビュー | 高 | Claude Opus 5 |
