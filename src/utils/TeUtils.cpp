@@ -25,7 +25,12 @@
 #include <QFile>
 #include <QVector>
 
+#ifdef Q_OS_WIN
 #include <icu.h>
+#else
+#include <unicode/ucnv.h>
+#include <unicode/ucsdet.h>
+#endif
 
 /**
  * @file TeUtils.cpp

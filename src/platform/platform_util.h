@@ -34,6 +34,13 @@
 class QMimeData;
 class TeNativeEvent;
 
+// Platform-neutral colour scheme, kept independent of Qt::ColorScheme so this
+// header compiles unchanged against Qt versions that lack that API (< 6.5).
+enum class TeStyleColorScheme {
+	Light,
+	Dark
+};
+
 //Initialize and uninitialize platform system
 extern bool threadInitialize(QApplication* a);
 extern void threadUninitialize();
@@ -76,3 +83,7 @@ extern TeNativeEvent* getNativeEvent();
 //shell
 // OS-specific fallback shell command, used when the SHELL environment variable is not set.
 extern QString getDefaultShellCommand();
+
+// Current system/application colour scheme. Returns TeStyleColorScheme::Light
+// when detection is unavailable (e.g. Qt < 6.5 or no platform support).
+extern TeStyleColorScheme getStyleColorScheme();

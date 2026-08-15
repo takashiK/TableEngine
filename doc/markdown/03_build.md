@@ -1,6 +1,6 @@
 # Build Instructions
 
-## Prerequisites
+## Windows Prerequisites
 
 | ツール | バージョン | 備考 |
 |---|---|---|
@@ -26,9 +26,32 @@
 
 vcpkg のトリプレットは `x64-windows-static-md`（`/MD` スタティックリンク）を使用します。
 
+## Ubuntu 24.04 Prerequisites
+
+Linux ビルドでは vcpkg を使用せず、Ubuntu の `apt` パッケージだけで依存関係を解決します。
+
+```bash
+sudo apt update
+sudo apt install -y \
+	build-essential cmake ninja-build git pkg-config dpkg-dev \
+	qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-l10n-tools qt6-qpa-plugins \
+	libarchive-dev libicu-dev libgtest-dev libgmock-dev
+```
+
+| パッケージ | 用途 |
+|---|---|
+| `qt6-base-dev` / `qt6-base-dev-tools` | Qt Core、Gui、Widgets、Test とビルドツール |
+| `qt6-tools-dev` / `qt6-l10n-tools` | LinguistTools、翻訳ツール |
+| `libarchive-dev` | archive API |
+| `libicu-dev` | ICU の文字コード検出・変換 API |
+| `libgtest-dev` / `libgmock-dev` | ユニットテスト |
+| `dpkg-dev` | DEB の共有ライブラリ依存関係解析 |
+
+Ubuntu 24.04 の Qt 6.4 パッケージをサポートします。qmake（`*.pro`）によるビルドはサポートしません。
+
 ---
 
-## Build with CMake (推奨)
+## Windows Build with CMake
 
 ### 1. リポジトリのクローンとサブモジュールの初期化
 
@@ -99,8 +122,42 @@ cmake --build out/build/Qt-MSVC2022-amd64-Ninja --config Release
 ## Running Tests
 
 ```powershell
-ctest --preset Qt-MSVC2022-amd64-Ninja-debug
+ctest --test-dir out/build/Qt-MSVC2022-amd64-Ninja -C Debug --output-on-failure
 ```
+
+---
+
+## Ubuntu Build with CMake
+
+### 1. リポジトリとサブモジュールを取得する
+
+```bash
+git clone <repo-url> TableEngine
+cd TableEngine
+git submodule update --init --recursive
+```
+
+### 2. 構成・ビルド・テストする
+
+```bash
+cmake --preset Ubuntu-GCC-Ninja-release
+cmake --build --preset Ubuntu-GCC-Ninja-release
+ctest --preset Ubuntu-GCC-Ninja-release
+```
+
+Linux プリセットは vcpkg のツールチェーンと triplet を継承しません。
+
+### 3. DEB パッケージを作成する
+
+```bash
+cpack --preset ubuntu-deb
+dpkg-deb -I out/build/Ubuntu-GCC-Ninja-release/tableengine-*.deb
+dpkg-deb -c out/build/Ubuntu-GCC-Ninja-release/tableengine-*.deb
+```
+
+実行ファイルは `/usr/bin/TableEngine`、ハイライト定義は
+`/usr/share/tableengine/highlight/`、ライセンスは
+`/usr/share/doc/tableengine/` に配置されます。
 
 ---
 
@@ -111,10 +168,13 @@ ctest --preset Qt-MSVC2022-amd64-Ninja-debug
 | `TableEngine.exe` | `out/build/Qt-MSVC2022-amd64-Ninja/main/Debug/` または `Release/` |
 | `tablelibs.lib` | `out/build/Qt-MSVC2022-amd64-Ninja/src/Debug/` または `Release/` |
 | ZIP パッケージ | `out/build/Qt-MSVC2022-amd64-Ninja/TableEngine-*.zip` |
+| `TableEngine` | `out/build/Ubuntu-GCC-Ninja-release/main/` |
+| `libtablelibs.a` | `out/build/Ubuntu-GCC-Ninja-release/src/` |
+| DEB パッケージ | `out/build/Ubuntu-GCC-Ninja-release/tableengine-*.deb` |
 
 ---
 
 ## Notes
 
-- `libarchive` と `gtest` は vcpkg によりスタティックリンクされるため、DLL の同梱は不要です
-- Linux 等への移植時は `src/platform/windows/` の代替実装が必要です（詳細: [11_platform.md](11_platform.md)）
+- Windows では `libarchive` と `gtest` は vcpkg によりスタティックリンクされるため、DLL の同梱は不要です
+- macOS へ移植する場合は、`src/platform/windows/` と `src/platform/linux/` に対応するプラットフォーム実装が必要です（詳細: [11_platform.md](11_platform.md)）

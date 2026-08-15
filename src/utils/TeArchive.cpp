@@ -28,7 +28,12 @@
 #include <QVarLengthArray>
 #include <algorithm>
 
+#ifdef Q_OS_WIN
 #include <icu.h>
+#else
+#include <unicode/ucnv.h>
+#include <unicode/ucsdet.h>
+#endif
 
 /**
  * @file TeArchive.cpp

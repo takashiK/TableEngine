@@ -40,6 +40,9 @@
 #include <thumbcache.h>
 #include <GdiPlus.h>
 
+#include <QGuiApplication>
+#include <QStyleHints>
+
 #include <vector>
 
 /**
@@ -712,6 +715,21 @@ void setCopyAction(QMimeData* mime)
 TeNativeEvent* getNativeEvent()
 {
 	return &g_event;
+}
+
+//////////////////////////////////////////////////////////
+//
+// Colour scheme
+//
+
+TeStyleColorScheme getStyleColorScheme()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+	return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark
+		? TeStyleColorScheme::Dark : TeStyleColorScheme::Light;
+#else
+	return TeStyleColorScheme::Light;
+#endif
 }
 
 

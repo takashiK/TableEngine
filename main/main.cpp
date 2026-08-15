@@ -22,6 +22,7 @@
 #include <TeDispatcher.h>
 #include <commands/TeCommandFactory.h>
 #include <platform/platform_util.h>
+#include <utils/TeAppPaths.h>
 #include <dialogs/TeOptionSetting.h>
 #include <dialogs/TeKeySetting.h>
 #include <dialogs/TeMenuSetting.h>
@@ -54,7 +55,12 @@ int main(int argc, char *argv[])
 		a.installTranslator(&myappTranslator);
 
 	//setup setting folder and load settings.
+#ifdef Q_OS_WIN
+	// Portable layout: keep the ini file next to the executable.
 	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, QApplication::applicationDirPath());
+#endif
+	// On Linux the default IniFormat/UserScope path already resolves under
+	// QStandardPaths::AppConfigLocation (~/.config/<org>/<app>.ini).
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 	TeOptionSetting::storeDefaultSettings();
 	TeKeySetting::storeDefaultSettings();
@@ -67,7 +73,7 @@ int main(int argc, char *argv[])
 	//set document viewer
 	QSettings settings;
 	settings.setValue(SETTING_TEXT_HIGHLIGHT_SCHEMA,":/Schema/text_highlight.json");
-	settings.setValue(SETTING_TEXT_HIGHLIGHT_FOLDER, QApplication::applicationDirPath() + "/highlight");
+	settings.setValue(SETTING_TEXT_HIGHLIGHT_FOLDER, teUserAssetDir() + "/highlight");
 
 	QPixmapCache::setCacheLimit(51200); // 50MB
 

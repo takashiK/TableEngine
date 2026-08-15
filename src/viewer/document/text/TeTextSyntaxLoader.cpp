@@ -1,6 +1,7 @@
 ﻿#include "TeTextSyntaxLoader.h"
 
 #include "viewer/document/TeDocumentSettings.h"
+#include "utils/TeAppPaths.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -110,7 +111,7 @@ bool TeTextSyntaxLoader::loadAll()
     
     //Load syntaxes
     QSettings setting;
-    QString path = setting.value(SETTING_TEXT_HIGHLIGHT_FOLDER, QApplication::applicationDirPath() + "/highlight").toString();
+    QString path = setting.value(SETTING_TEXT_HIGHLIGHT_FOLDER, teUserAssetDir() + "/highlight").toString();
     QDir dir(path);
     if (!dir.exists()) {
         return false;
@@ -143,7 +144,7 @@ bool TeTextSyntaxLoader::loadAll()
 bool TeTextSyntaxLoader::saveAll()
 {
     QSettings setting;
-    QString path = setting.value(SETTING_TEXT_HIGHLIGHT_FOLDER, QApplication::applicationDirPath() + "/highlight").toString();
+    QString path = setting.value(SETTING_TEXT_HIGHLIGHT_FOLDER, teUserAssetDir() + "/highlight").toString();
     QDir dir;
     dir.mkpath(path);
     dir.setPath(path);

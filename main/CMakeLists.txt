@@ -39,6 +39,19 @@ if(WIN32)
             "$<TARGET_FILE_DIR:TableEngine>/highlight"
         VERBATIM
     )
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(HIGHLIGHT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Resources/highlight")
+
+    # Mirror the Windows convention so running the freshly built executable
+    # directly from the build tree (before install/packaging) finds the
+    # read-only default highlight assets next to it (see TeAppPaths.cpp).
+    add_custom_command(TARGET TableEngine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:TableEngine>/highlight"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${HIGHLIGHT_SOURCE_DIR}"
+            "$<TARGET_FILE_DIR:TableEngine>/highlight"
+        VERBATIM
+    )
 endif()
 
 # --- Installation rules (used by cmake --install and CPack) ---
@@ -86,4 +99,20 @@ if(WIN32)
     else()
         message(WARNING "windeployqt6 not found - Qt runtime DLLs will not be collected automatically")
     endif()
-endif(WIN32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # Ubuntu (FHS layout): executable in bindir, read-only defaults under datadir.
+    include(GNUInstallDirs)
+
+    install(TARGETS TableEngine RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+    install(DIRECTORY
+        "${CMAKE_CURRENT_SOURCE_DIR}/Resources/highlight/"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/tableengine/highlight"
+    )
+
+    install(FILES
+        "${CMAKE_SOURCE_DIR}/LICENSE"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/tableengine"
+        RENAME "copyright"
+    )
+endif()
