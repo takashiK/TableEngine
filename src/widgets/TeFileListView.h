@@ -101,6 +101,17 @@ public slots:
 	 */
 	void setFileViewMode(TeTypes::FileInfoFlags infoFlags, TeTypes::FileViewMode viewMode);
 
+	/**
+	 * @brief Applies filename display-width limits to non-icon list layouts.
+	 * @param minChars Minimum width in active-font "M" units; zero disables it.
+	 * @param maxChars Maximum width in active-font "M" units; zero disables it.
+	 */
+	void setFileNameWidthLimits(int minChars, int maxChars);
+	/** @brief Returns the applied minimum filename width in "M" units. */
+	int minFileNameWidthChars() const;
+	/** @brief Returns the applied maximum filename width in "M" units. */
+	int maxFileNameWidthChars() const;
+
 protected:
 	/** @brief Handles keyboard navigation; implements TABLE_ENGINE Space-key toggle. */
 	virtual void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
@@ -124,4 +135,6 @@ private:
 	QPoint                m_pressedPos;     ///< Cursor position at press time (for drag detection).
 	QRubberBand*          mp_rubberBand = nullptr;    ///< Rubber-band selection rectangle.
 	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE; ///< Current selection mode.
+	int m_minFileNameWidthChars = 0; ///< Minimum non-icon filename width in "M" units.
+	int m_maxFileNameWidthChars = 0; ///< Maximum non-icon filename width in "M" units.
 };

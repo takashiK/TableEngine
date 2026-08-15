@@ -41,6 +41,13 @@ public:
     TeTypes::FileInfoFlags infoFlags() const;
 
     /**
+     * @brief Sets optional filename display-width limits for non-icon layouts.
+     * @param minChars Minimum width in active-font "M" units; zero disables it.
+     * @param maxChars Maximum width in active-font "M" units; zero disables it.
+     */
+    void setFileNameWidthLimits(int minChars, int maxChars);
+
+    /**
      * @brief Renders an item using the icon or list-mode layout.
      * @param painter The painter to draw with.
      * @param option  Style options including the view's current state.
@@ -71,4 +78,6 @@ private:
     static QString formatFileSize(qint64 bytes);
 
     TeTypes::FileInfoFlags m_infoFlags = TeTypes::FILEINFO_NONE; ///< Active attribute display flags.
+    int m_minFileNameChars = 0; ///< Minimum non-icon filename width in "M" units; zero disables it.
+    int m_maxFileNameChars = 0; ///< Maximum non-icon filename width in "M" units; zero disables it.
 };

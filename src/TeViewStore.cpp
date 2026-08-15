@@ -522,9 +522,22 @@ void TeViewStore::loadSetting()
 	m_fileOrderBy = static_cast<TeTypes::OrderType>(settings.value(SETTING_VIEW_SORT_ORDER_BY, uint32_t(m_fileOrderBy)).toUInt());
 	m_fileOrderReversed = settings.value(SETTING_VIEW_SORT_ORDER_REVERSED, m_fileOrderReversed).toBool();
 	m_viewMode = static_cast<TeTypes::FileViewMode>(settings.value(SETTING_VIEW_LAYOUT_MODE, uint32_t(m_viewMode)).toUInt());
+	m_minFileNameWidthChars = qBound(TeSettings::FILENAME_WIDTH_DISABLED,
+		settings.value(SETTING_FOLDER_FILENAME_MIN_CHARS, TeSettings::FILENAME_WIDTH_DISABLED).toInt(),
+		TeSettings::MAX_FILENAME_WIDTH_CHARS);
+	m_maxFileNameWidthChars = qBound(TeSettings::FILENAME_WIDTH_DISABLED,
+		settings.value(SETTING_FOLDER_FILENAME_MAX_CHARS, TeSettings::FILENAME_WIDTH_DISABLED).toInt(),
+		TeSettings::MAX_FILENAME_WIDTH_CHARS);
+	if (m_maxFileNameWidthChars > TeSettings::FILENAME_WIDTH_DISABLED
+		&& m_minFileNameWidthChars > m_maxFileNameWidthChars) {
+		m_minFileNameWidthChars = m_maxFileNameWidthChars;
+	}
+	settings.setValue(SETTING_FOLDER_FILENAME_MIN_CHARS, m_minFileNameWidthChars);
+	settings.setValue(SETTING_FOLDER_FILENAME_MAX_CHARS, m_maxFileNameWidthChars);
 	setSelectionMode(static_cast<TeTypes::SelectionMode>(settings.value(SETTING_EDIT_SELECTION_STYLE, uint32_t(m_selectionMode)).toUInt()));
 	applyStyleSheet();
 	applyLayoutSettings();
+	emit fileNameWidthChanged(m_minFileNameWidthChars, m_maxFileNameWidthChars);
 }
 
 void TeViewStore::loadKeySetting()
@@ -879,6 +892,7 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	TeFileFolderView * folderView = new TeFileFolderView;
 	folderView->setDispatcher(this);
 	folderView->list()->setFileViewMode(fileInfoFlags(), viewMode());
+	folderView->list()->setFileNameWidthLimits(m_minFileNameWidthChars, m_maxFileNameWidthChars);
 	folderView->setFileShowMode(fileTypeFlags(), fileOrderBy(), isFileOrderReversed());
 	folderView->list()->setFocusPolicy(Qt::ClickFocus);
 	folderView->list()->setSelectionMode(selectionMode());
@@ -895,6 +909,7 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	});
 
 	connect(this, &TeViewStore::fileListViewModeChanged, folderView->list(), &TeFileListView::setFileViewMode);
+	connect(this, &TeViewStore::fileNameWidthChanged, folderView->list(), &TeFileListView::setFileNameWidthLimits);
 	connect(this, &TeViewStore::fileListShowModeChanged, folderView, &TeFileFolderView::setFileShowMode);
 
 	folderView->setRootPath(path);
@@ -909,6 +924,7 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 	folderView->setDispatcher(this);
 	folderView->list()->setFocusPolicy(Qt::ClickFocus);
 	folderView->list()->setSelectionMode(selectionMode());
+	folderView->list()->setFileNameWidthLimits(m_minFileNameWidthChars, m_maxFileNameWidthChars);
 	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
 	bool ok = folderView->setArchive(path);
@@ -917,6 +933,7 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 		return nullptr;
 	}
 	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
+	connect(this, &TeViewStore::fileNameWidthChanged, folderView->list(), &TeFileListView::setFileNameWidthLimits);
 
 	addFolderView(folderView, place);
 
@@ -930,8 +947,11 @@ TeFindFolderView* TeViewStore::findFolderView()
 		mp_findView->setDispatcher(this);
 		mp_findView->list()->setFocusPolicy(Qt::ClickFocus);
 		mp_findView->list()->setSelectionMode(selectionMode());
+		mp_findView->list()->setFileNameWidthLimits(m_minFileNameWidthChars, m_maxFileNameWidthChars);
 		connect(this, &TeViewStore::selectionModeChanged,
 		        mp_findView->list(), &TeFileListView::setSelectionMode);
+		connect(this, &TeViewStore::fileNameWidthChanged,
+		        mp_findView->list(), &TeFileListView::setFileNameWidthLimits);
 		mp_findView->tree()->setFocusPolicy(Qt::ClickFocus);
 		addFolderView(mp_findView, TAB_LEFT);
 	} else if (tabPlace(mp_findView) < 0) {

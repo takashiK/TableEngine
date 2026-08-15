@@ -21,8 +21,10 @@
 #include "TeCmdNaviItemFolder.h"
 #include "utils/TeUtils.h"
 #include "TeViewStore.h"
+#include "widgets/TeFileFolderView.h"
 
 #include <QFileInfo>
+#include <QDir>
 
 /**
  * @file TeCmdNaviItemFolder.cpp
@@ -75,24 +77,33 @@ bool TeCmdNaviItemFolder::execute(TeViewStore* p_store)
 		return true;
 	}
 
+	QString targetFolder = fileInfo.absolutePath();
 	if (cmdParam() && cmdParam()->contains(PARAM_OPEN_TARGET_DIR)) {
-		QString parentFolder = fileInfo.absoluteFilePath();
-		QString currentFolder = getCurrentFolder(p_store);
-		if (parentFolder == currentFolder) {
-			return true;
-		}
-
-		// Open the parent folder
-		p_store->createFolderView(parentFolder, TeViewStore::TAB_LEFT);
-	}else{
-		QString parentFolder = fileInfo.absolutePath();
-		QString currentFolder = getCurrentFolder(p_store);
-		if (parentFolder == currentFolder) {
-			return true;
-		}
-
-		// Open the parent folder
-		p_store->createFolderView(parentFolder, TeViewStore::TAB_LEFT);
+		// If the command parameter specifies a target folder, use it instead of the item's parent folder.
+		// ie. value of PARAM_OPEN_TARGET_DIR is "true" only. 
+		targetFolder = fileInfo.absoluteFilePath();
 	}
+	
+	QString currentFolder = getCurrentFolder(p_store);
+	if (targetFolder == currentFolder) {
+		return true;
+	}
+
+	// get root path of the target folder
+	QDir dir(targetFolder);
+	while (dir.cdUp()) {
+		if (dir.isRoot()) {
+			break;
+		}
+	}
+	QString rootPath = dir.absolutePath();
+
+	// Open the root path of the target folder in the left tab panel.
+	// and set the current folder to the target folder.
+	auto p_view = p_store->createFolderView(rootPath, TeViewStore::TAB_LEFT);
+	if (p_view) {
+		p_view->setCurrentPath(targetFolder);
+	}
+
 	return true;
 }

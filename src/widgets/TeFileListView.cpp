@@ -20,6 +20,7 @@
 
 #include "TeFileListView.h"
 #include "TeFileItemDelegate.h"
+#include "TeSettings.h"
 
 #include <QKeyEvent>
 #include <QRubberBand>
@@ -396,4 +397,34 @@ void TeFileListView::setFileViewMode(TeTypes::FileInfoFlags infoFlags, TeTypes::
 		QListView::setResizeMode(QListView::Adjust);
 		break;
 	}
+}
+
+void TeFileListView::setFileNameWidthLimits(int minChars, int maxChars)
+{
+	m_minFileNameWidthChars = qBound(TeSettings::FILENAME_WIDTH_DISABLED, minChars,
+		TeSettings::MAX_FILENAME_WIDTH_CHARS);
+	m_maxFileNameWidthChars = qBound(TeSettings::FILENAME_WIDTH_DISABLED, maxChars,
+		TeSettings::MAX_FILENAME_WIDTH_CHARS);
+	if (m_maxFileNameWidthChars > TeSettings::FILENAME_WIDTH_DISABLED
+		&& m_minFileNameWidthChars > m_maxFileNameWidthChars) {
+		m_minFileNameWidthChars = m_maxFileNameWidthChars;
+	}
+
+	TeFileItemDelegate* delegate = qobject_cast<TeFileItemDelegate*>(itemDelegate());
+	if (delegate) {
+		delegate->setFileNameWidthLimits(m_minFileNameWidthChars, m_maxFileNameWidthChars);
+	}
+	doItemsLayout();
+	updateGeometry();
+	viewport()->update();
+}
+
+int TeFileListView::minFileNameWidthChars() const
+{
+	return m_minFileNameWidthChars;
+}
+
+int TeFileListView::maxFileNameWidthChars() const
+{
+	return m_maxFileNameWidthChars;
 }

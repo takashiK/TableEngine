@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "TeEmbeddedImageReader.h"
 #include "TeExifReader.h"
 
 /**
@@ -40,8 +41,8 @@
  *    Make, Model, Orientation, DateTime, ExposureTime, FNumber, ISO,
  *    DateTimeOriginal, FocalLength, PixelXDimension, PixelYDimension.
  *
- * The binary parser reads at most 64 KB from the file head, which covers
- * virtually all JPEG APP1 segments.
+ * The binary parser seeks through JPEG segments up to SOS and handles all
+ * APP1 segments, including metadata placed beyond the file head.
  *
  * Keys returned (subset, always English):
  *   "Width", "Height", "Make", "Model", "Orientation", "DateTime",
@@ -50,8 +51,9 @@
  *
  * @see TeExifReader
  */
-class TeQImageExifReader : public TeExifReader
+class TeQImageExifReader : public TeExifReader, public TeEmbeddedImageReader
 {
 public:
     QMap<QString, QString> read(const QString& path) const override;
+    TeEmbeddedImageSet scanImages(const QString& path) const override;
 };

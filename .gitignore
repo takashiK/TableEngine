@@ -41,6 +41,7 @@
 *.manifest
 *.ilk
 *.aps
+*.log
 
 # qmake project
 .qmake.stash

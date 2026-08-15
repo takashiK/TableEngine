@@ -25,6 +25,7 @@
 #include <QSize>
 #include <QDateTime>
 #include <QImage>
+#include <QPointer>
 #include <QRunnable>
 
 /**
@@ -93,6 +94,7 @@ private slots:
 
 private:
     QSet<QString> m_pendingRequests; ///< Set of file paths currently being loaded.
+    QSet<QString> m_failedRequests; ///< Failed (path, size, mtime) requests.
 };
 
 /**
@@ -122,5 +124,5 @@ public:
 private:
     QString        m_filePath;  ///< Absolute path to the image file.
     QSize          m_maxSize;   ///< Maximum bounding size.
-    TeImageLoader* mp_loader;   ///< Loader to notify when done.
+    QPointer<TeImageLoader> mp_loader;   ///< Loader to notify when done.
 };

@@ -63,8 +63,11 @@
 #include <QStandardItem>
 #include <QString>
 #include <QWindow>
+#include <QFontMetrics>
+#include <QStyleOptionViewItem>
 
 #include "widgets/TeFileListView.h"
+#include "widgets/TeFileItemDelegate.h"
 
 class tst_TeFileListView : public ::testing::Test {
 public:
@@ -1461,4 +1464,62 @@ TEST_F(tst_TeFileListView, mouse_ctrl_drag)
     EXPECT_TRUE(view.selectionModel()->isSelected(view.model()->index(17, 0)));
     EXPECT_TRUE(view.selectionModel()->isSelected(view.model()->index(19, 0)));
 
+}
+
+TEST_F(tst_TeFileListView, filename_width_limits_use_active_font_M_unit)
+{
+    QStandardItemModel model;
+    const QString fileName(12, QLatin1Char('M'));
+    model.appendRow(new QStandardItem(fileName));
+
+    TeFileListView view;
+    view.setModel(&model);
+    view.setFont(QFont(QStringLiteral("Courier New"), 10));
+    TeFileItemDelegate* delegate = qobject_cast<TeFileItemDelegate*>(view.itemDelegate());
+    ASSERT_NE(delegate, nullptr);
+
+    QStyleOptionViewItem listOption;
+    listOption.widget = &view;
+    listOption.font = view.font();
+    listOption.decorationPosition = QStyleOptionViewItem::Left;
+
+    const QModelIndex index = model.index(0, 0);
+    const QSize unrestricted = delegate->sizeHint(listOption, index);
+    const QFontMetrics metrics(listOption.font);
+    const int mWidth = metrics.horizontalAdvance(QStringLiteral("M"));
+
+    view.setFileNameWidthLimits(0, 4);
+    const QSize maximumLimited = delegate->sizeHint(listOption, index);
+    EXPECT_EQ(maximumLimited.width(), unrestricted.width()
+        - (metrics.horizontalAdvance(fileName) - mWidth * 4));
+
+    view.setFileNameWidthLimits(12, 4);
+    EXPECT_EQ(view.minFileNameWidthChars(), 4);
+    EXPECT_EQ(view.maxFileNameWidthChars(), 4);
+    EXPECT_EQ(delegate->sizeHint(listOption, index), maximumLimited);
+
+    view.setFileNameWidthLimits(16, 0);
+    const QSize minimumLimited = delegate->sizeHint(listOption, index);
+    EXPECT_EQ(minimumLimited.width(), unrestricted.width()
+        + (mWidth * 16 - metrics.horizontalAdvance(fileName)));
+}
+
+TEST_F(tst_TeFileListView, filename_width_limits_do_not_change_icon_mode_size_hint)
+{
+    QStandardItemModel model;
+    model.appendRow(new QStandardItem(QStringLiteral("MMMMMMMMMMMM")));
+
+    TeFileListView view;
+    view.setModel(&model);
+    QStyleOptionViewItem iconOption;
+    iconOption.widget = &view;
+    iconOption.font = view.font();
+    iconOption.decorationPosition = QStyleOptionViewItem::Top;
+
+    TeFileItemDelegate* delegate = qobject_cast<TeFileItemDelegate*>(view.itemDelegate());
+    ASSERT_NE(delegate, nullptr);
+    const QSize original = delegate->sizeHint(iconOption, model.index(0, 0));
+
+    view.setFileNameWidthLimits(4, 8);
+    EXPECT_EQ(delegate->sizeHint(iconOption, model.index(0, 0)), original);
 }
