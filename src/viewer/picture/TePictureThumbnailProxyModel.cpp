@@ -1,4 +1,5 @@
 #include "TePictureThumbnailProxyModel.h"
+#include "utils/TeEmbeddedImageLoader.h"
 
 #include <QFileSystemModel>
 #include <QHash>
@@ -34,17 +35,7 @@ public:
 
 	void run() override
 	{
-		QImageReader reader(m_filePath);
-		reader.setAutoTransform(true);
-		const QSize sourceSize = reader.size();
-		if (sourceSize.isValid()
-			&& (sourceSize.width() > m_thumbnailSize.width() || sourceSize.height() > m_thumbnailSize.height())) {
-			reader.setScaledSize(sourceSize.scaled(m_thumbnailSize, Qt::KeepAspectRatio));
-		}
-		QImage image = reader.read();
-		if (!image.isNull() && (image.width() > m_thumbnailSize.width() || image.height() > m_thumbnailSize.height())) {
-			image = image.scaled(m_thumbnailSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-		}
+		const QImage image = teDecodeEmbeddedImage(m_filePath, m_thumbnailSize);
 
 		const QPointer<TePictureThumbnailProxyModel> model = mp_model;
 		if (!model)

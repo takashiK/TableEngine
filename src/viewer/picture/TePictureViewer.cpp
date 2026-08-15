@@ -1,6 +1,27 @@
+/****************************************************************************
+**
+** Copyright (C) 2021 Takashi Kuwabara.
+** Contact: laffile@gmail.com
+**
+**  This program is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 2 of the License, or
+**  (at your option) any later version.
+**
+**  This program is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**
+****************************************************************************/
+
 #include "TePictureViewer.h"
 #include "TePictureThumbnailDelegate.h"
 #include "TePictureThumbnailProxyModel.h"
+#include "utils/TeEmbeddedImageLoader.h"
 #include "utils/TeQImageExifReader.h"
 
 #include <QMenuBar>
@@ -12,6 +33,9 @@
 #include <QListView>
 #include <QDockWidget>
 #include <QFileSystemModel>
+#include <QMetaObject>
+#include <QRunnable>
+#include <QThreadPool>
 #include <QTransform>
 
 /**
@@ -42,6 +66,35 @@ QTransform exifViewTransform(int orientation)
 }
 } // namespace
 
+class TePicturePrimaryLoadTask : public QRunnable
+{
+public:
+	TePicturePrimaryLoadTask(const QString& path, int orientation, quint64 generation,
+		TePictureViewer* viewer)
+		: m_path(path)
+		, m_orientation(orientation)
+		, m_generation(generation)
+		, mp_viewer(viewer)
+	{
+	}
+
+	void run() override
+	{
+		TeEmbeddedImageSelection selection;
+		selection.primaryOrientation = m_orientation;
+		const QImage image = teDecodeEmbeddedImage(m_path, TeEmbeddedImageSet{}, selection,
+			QSize(), m_orientation);
+		QMetaObject::invokeMethod(mp_viewer, [viewer = mp_viewer, generation = m_generation, image]() {
+			viewer->primaryImageLoaded(generation, image);
+		}, Qt::QueuedConnection);
+	}
+
+private:
+	QString m_path;
+	int m_orientation;
+	quint64 m_generation;
+	TePictureViewer* mp_viewer;
+};
 
 TePictureViewer::TePictureViewer(QWidget *parent)
 	: QMainWindow(parent)
@@ -82,10 +135,14 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	mp_dock->close();
 
 	setupMenu();
+	m_primaryImageThreadPool.setMaxThreadCount(1);
 }
 
 TePictureViewer::~TePictureViewer()
 {
+	++m_loadGeneration;
+	m_primaryImageThreadPool.clear();
+	m_primaryImageThreadPool.waitForDone();
 	delete mp_thumbnailModel;
 	delete mp_model;
 	delete mp_emitter;
@@ -191,11 +248,40 @@ void TePictureViewer::loadImage(const QModelIndex& index)
 	const QString path = mp_model->filePath(mp_thumbnailModel->mapToSource(index));
 
 	TeQImageExifReader reader;
-	const QMap<QString, QString> meta = reader.read(path);
-	m_orientation = meta.value(QStringLiteral("Orientation"), QStringLiteral("1")).toInt();
+	const QSize targetSize = mp_graphics->viewport()->size();
+	const TeEmbeddedImageSet images = reader.scanImages(path);
+	TeEmbeddedImageSelection selection = teSelectEmbeddedImage(images, targetSize);
+	m_orientation = selection.primaryOrientation;
+	if (images.images().isEmpty()) {
+		m_orientation = reader.read(path).value(QStringLiteral("Orientation"), QStringLiteral("1")).toInt();
+		if (m_orientation < 1 || m_orientation > 8)
+			m_orientation = 1;
+		selection.primaryOrientation = m_orientation;
+	}
 
-	mp_image->setPixmap(QPixmap(path));
+	if (selection.useEmbeddedImage && selection.image.byteSize > 0 &&
+		selection.image.byteSize <= 4 * 1024 * 1024) {
+		const QImage preview = teDecodeEmbeddedImage(path, images, selection, targetSize,
+			m_orientation, false);
+		mp_image->setPixmap(preview.isNull() ? QPixmap() : QPixmap::fromImage(preview));
+	} else {
+		mp_image->setPixmap(QPixmap());
+	}
+
 	m_rotation = 0;
+	const quint64 generation = ++m_loadGeneration;
+	m_primaryImageThreadPool.clear();
+	auto* task = new TePicturePrimaryLoadTask(path, m_orientation, generation, this);
+	task->setAutoDelete(true);
+	m_primaryImageThreadPool.start(task);
+}
+
+void TePictureViewer::primaryImageLoaded(quint64 generation, const QImage& image)
+{
+	if (generation != m_loadGeneration || image.isNull())
+		return;
+	mp_image->setPixmap(QPixmap::fromImage(image));
+	updateView();
 }
 
 void TePictureViewer::rotateRight()

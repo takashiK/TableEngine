@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/TeEmbeddedImageLoader.h"
 #include "utils/TeQImageExifReader.h"
 
 #include <QBuffer>
@@ -116,6 +117,24 @@ QByteArray orientationExifPayload(quint16 orientation)
     put16(payload, 24, orientation);
     put32(payload, 28, 0);
     return payload;
+}
+
+QByteArray orientedJpeg()
+{
+    QImage image(QSize(3, 2), QImage::Format_RGB32);
+    image.setPixelColor(0, 0, Qt::red);
+    image.setPixelColor(1, 0, Qt::green);
+    image.setPixelColor(2, 0, Qt::blue);
+    image.setPixelColor(0, 1, Qt::yellow);
+    image.setPixelColor(1, 1, Qt::magenta);
+    image.setPixelColor(2, 1, Qt::cyan);
+    QBuffer buffer;
+    buffer.open(QIODevice::WriteOnly);
+    QImageWriter writer(&buffer, "jpeg");
+    writer.setQuality(100);
+    EXPECT_TRUE(writer.write(image));
+    const QByteArray encoded = buffer.data();
+    return encoded.left(2) + segment(0xe1, orientationExifPayload(6)) + encoded.mid(2);
 }
 
 QByteArray mpfPayload(quint32 primarySize, quint32 previewOffset, quint32 previewSize,
@@ -306,4 +325,133 @@ TEST(tst_TeEmbeddedImageReader, rejects_open_when_file_changes_after_scan)
     file.write("x", 1);
     file.close();
     EXPECT_FALSE(device->open(QIODevice::ReadOnly));
+}
+
+TEST(tst_TeEmbeddedImageReader, selects_smallest_adequate_orientation_aware_preview)
+{
+    TeEmbeddedImageInfo primary;
+    primary.id = 1;
+    primary.encodedSize = QSize(4000, 3000);
+    primary.orientation = 6;
+    primary.origin = TeEmbeddedImageOrigin::JpegPrimary;
+
+    TeEmbeddedImageInfo tooSmall;
+    tooSmall.id = 2;
+    tooSmall.encodedSize = QSize(599, 449);
+    tooSmall.origin = TeEmbeddedImageOrigin::ExifIfd1;
+
+    TeEmbeddedImageInfo candidate;
+    candidate.id = 3;
+    candidate.encodedSize = QSize(1200, 900);
+    candidate.origin = TeEmbeddedImageOrigin::Mpf;
+
+    TeEmbeddedImageInfo largerCandidate = candidate;
+    largerCandidate.id = 4;
+    largerCandidate.encodedSize = QSize(1800, 1350);
+
+    const TeEmbeddedImageSelection selection = teSelectEmbeddedImage(
+        QVector<TeEmbeddedImageInfo>{primary, tooSmall, largerCandidate, candidate}, QSize(800, 600));
+
+    EXPECT_TRUE(selection.useEmbeddedImage);
+    EXPECT_EQ(selection.image.id, candidate.id);
+    EXPECT_EQ(selection.primaryOrientation, 6);
+}
+
+TEST(tst_TeEmbeddedImageReader, rejects_aspect_mismatched_embedded_candidate)
+{
+    TeEmbeddedImageInfo primary;
+    primary.id = 1;
+    primary.encodedSize = QSize(4000, 3000);
+    primary.origin = TeEmbeddedImageOrigin::JpegPrimary;
+
+    TeEmbeddedImageInfo candidate;
+    candidate.id = 2;
+    candidate.encodedSize = QSize(1600, 900);
+    candidate.origin = TeEmbeddedImageOrigin::Mpf;
+
+    const TeEmbeddedImageSelection selection = teSelectEmbeddedImage(
+        QVector<TeEmbeddedImageInfo>{primary, candidate}, QSize(800, 600));
+
+    EXPECT_FALSE(selection.useEmbeddedImage);
+    EXPECT_EQ(selection.image.id, primary.id);
+}
+
+TEST(tst_TeEmbeddedImageReader, direct_fallback_uses_scaled_decode_with_explicit_orientation)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = directory.filePath(QStringLiteral("primary.jpg"));
+    QFile file(path);
+    ASSERT_TRUE(file.open(QIODevice::WriteOnly));
+    ASSERT_GT(file.write(jpeg(QSize(160, 100), qRgb(255, 0, 0))), 0);
+    file.close();
+
+    TeEmbeddedImageSelection selection;
+    selection.primaryOrientation = 6;
+    const QImage image = teDecodeEmbeddedImage(path, TeEmbeddedImageSet{}, selection,
+                                                QSize(50, 30), 6);
+    ASSERT_FALSE(image.isNull());
+    EXPECT_LE(image.width(), 30);
+    EXPECT_LE(image.height(), 50);
+    EXPECT_LE(teEmbeddedImageDisplaySize(image.size(), 6).width(), 50);
+    EXPECT_LE(teEmbeddedImageDisplaySize(image.size(), 6).height(), 30);
+}
+
+TEST(tst_TeEmbeddedImageReader, decodes_direct_path_when_embedded_scan_is_empty)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = directory.filePath(QStringLiteral("image.png"));
+    QImage image(QSize(32, 16), QImage::Format_RGB32);
+    image.fill(Qt::red);
+    ASSERT_TRUE(image.save(path, "PNG"));
+
+    const QImage decoded = teDecodeEmbeddedImage(path, QSize(16, 16));
+    EXPECT_EQ(decoded.size(), QSize(16, 8));
+}
+
+TEST(tst_TeEmbeddedImageReader, direct_fallback_applies_reader_exif_transformation)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = directory.filePath(QStringLiteral("oriented.jpg"));
+    QFile file(path);
+    ASSERT_TRUE(file.open(QIODevice::WriteOnly));
+    ASSERT_GT(file.write(orientedJpeg()), 0);
+    file.close();
+
+    QImageReader expectedReader(path);
+    expectedReader.setAutoTransform(true);
+    const QImage expected = expectedReader.read();
+    ASSERT_FALSE(expected.isNull());
+
+    TeEmbeddedImageSelection selection;
+    const QImage actual = teDecodeEmbeddedImage(path, TeEmbeddedImageSet{}, selection, QSize(), 1);
+    ASSERT_FALSE(actual.isNull());
+    ASSERT_EQ(actual.size(), expected.size());
+    for (int y = 0; y < expected.height(); ++y) {
+        for (int x = 0; x < expected.width(); ++x)
+            EXPECT_EQ(actual.pixel(x, y), expected.pixel(x, y));
+    }
+}
+
+TEST(tst_TeEmbeddedImageReader, decodes_selected_embedded_slice_with_expected_color)
+{
+    QTemporaryDir directory;
+    ASSERT_TRUE(directory.isValid());
+    const QString path = writeContainer(directory);
+    TeQImageExifReader reader;
+    const TeEmbeddedImageSet images = reader.scanImages(path);
+    const TeEmbeddedImageSelection selection = teSelectEmbeddedImage(images, QSize(4, 8));
+    ASSERT_TRUE(selection.useEmbeddedImage);
+    ASSERT_EQ(selection.image.origin, TeEmbeddedImageOrigin::Mpf);
+
+    const QImage image = teDecodeEmbeddedImage(path, images, selection, QSize(4, 8),
+                                               selection.primaryOrientation, false);
+    ASSERT_FALSE(image.isNull());
+    EXPECT_EQ(image.size(), QSize(6, 4));
+    const QColor color = image.pixelColor(image.width() / 2, image.height() / 2);
+    EXPECT_GT(color.blue(), 200);
+    EXPECT_LT(color.red(), 60);
+    EXPECT_LT(color.green(), 60);
 }

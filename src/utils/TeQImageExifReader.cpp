@@ -371,27 +371,41 @@ static qint64 findJpegEnd(QFile& file, qint64 entropyOffset, qint64 scanEnd)
     qint64 position = entropyOffset;
     const qint64 fileSize = file.size();
     const qint64 limit = scanEnd > 0 && scanEnd < fileSize ? scanEnd : fileSize;
-    while (position + 1 < limit) {
-        char byte = 0;
-        if (!readAt(file, position++, &byte, 1))
+    constexpr qint64 BufferSize = 64 * 1024;
+    bool markerPending = false;
+    qint64 markerStart = -1;
+    while (position < limit) {
+        if (!file.seek(position))
             return -1;
-        if (uchar(byte) != 0xff)
-            continue;
-        do {
-            if (position >= limit || !readAt(file, position++, &byte, 1))
+        const QByteArray buffer = file.read(qMin(BufferSize, limit - position));
+        if (buffer.isEmpty())
+            return -1;
+        for (int index = 0; index < buffer.size(); ++index, ++position) {
+            const quint8 byte = uchar(buffer.at(index));
+            if (!markerPending) {
+                if (byte == 0xff) {
+                    markerPending = true;
+                    markerStart = position;
+                }
+                continue;
+            }
+            if (byte == 0xff)
+                continue;
+
+            markerPending = false;
+            if (byte == 0x00 || (byte >= 0xd0 && byte <= 0xd7))
+                continue;
+            if (byte == 0xd9)
+                return position + 1;
+            if (byte == 0xd8)
                 return -1;
-        } while (uchar(byte) == 0xff);
-        const quint8 marker = uchar(byte);
-        if (marker == 0x00 || (marker >= 0xd0 && marker <= 0xd7))
-            continue;
-        if (marker == 0xd9)
-            return position;
-        if (marker == 0xd8)
-            return -1;
-        position -= 2;
-        Segment segment;
-        if (!readSegment(file, &position, &segment))
-            return -1;
+
+            position = markerStart;
+            Segment segment;
+            if (!readSegment(file, &position, &segment))
+                return -1;
+            break;
+        }
     }
     return -1;
 }
