@@ -366,7 +366,7 @@ private:
 	TeEventEmitter* mp_closeEventEmitter = nullptr;
 	TeEventEmitter* mp_focusEventEmitter = nullptr;
 	TeEventEmitter* mp_paletteEmitter = nullptr;
-	Qt::ColorScheme m_lastColorScheme = Qt::ColorScheme::Unknown;
+	Qt::ColorScheme m_lastColorScheme = Qt::ColorScheme::Light;
 	QList<QWidget*> m_floatingWidgets;
 	TeFindFolderView* mp_findView = nullptr;
 	TeFileOperationManager* mp_fileOpManager = nullptr;
