@@ -109,7 +109,7 @@ for (const TeEmbeddedImageInfo& image : images.images()) {
 }
 ```
 
-`scanImages()` は主 JPEG、Exif IFD1 thumbnail、MPF 追加画像を返します。各 `TeEmbeddedImageInfo` はセット内 ID、SOF サイズ、符号化サイズ、形式、種別、出所、向き（利用可能な場合）を持ちます。Sony ScreenNail は MPF の `Preview` として扱います。
+`scanImages()` は主 JPEG、Exif IFD1 thumbnail、MPF 追加画像を返します。各 `TeEmbeddedImageInfo` はセット内 ID、SOF サイズ、符号化サイズ、形式、種別、出所、向き（利用可能な場合）を持ちます。
 
 `openImageDevice()` は独立した `TeFileSliceDevice` を返します。この read-only device は検出済み範囲を超えて read/seek せず、スキャン後に元ファイルのサイズまたは更新時刻が変わった場合は open に失敗します。
 
