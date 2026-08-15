@@ -23,6 +23,7 @@
 #include "TePictureThumbnailProxyModel.h"
 #include "utils/TeEmbeddedImageLoader.h"
 #include "utils/TeQImageExifReader.h"
+#include "TePictureSettings.h"
 
 #include <QMenuBar>
 #include <QMenu>
@@ -37,6 +38,7 @@
 #include <QRunnable>
 #include <QThreadPool>
 #include <QTransform>
+#include <QSettings>
 
 /**
  * @file TePictureViewer.cpp
@@ -136,11 +138,20 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 
 	setupMenu();
 	m_primaryImageThreadPool.setMaxThreadCount(1);
+
+	QSettings settings;
+	resize(settings.value(SETTING_PIC_VIEWER_WINDOW_WIDTH, 800).toInt(),
+	       settings.value(SETTING_PIC_VIEWER_WINDOW_HEIGHT, 600).toInt());
 }
 
 TePictureViewer::~TePictureViewer()
 {
 	++m_loadGeneration;
+
+	QSettings settings;
+	settings.setValue(SETTING_PIC_VIEWER_WINDOW_WIDTH, width());
+	settings.setValue(SETTING_PIC_VIEWER_WINDOW_HEIGHT, height());
+	
 	m_primaryImageThreadPool.clear();
 	m_primaryImageThreadPool.waitForDone();
 	delete mp_thumbnailModel;

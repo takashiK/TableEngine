@@ -349,7 +349,7 @@ private:
 	TeDetailView*  mp_detailView = nullptr;
 	QDockWidget*   mp_detailDock = nullptr;
 	QLabel*        mp_statusRightLabel = nullptr; ///< Status bar label showing the focused item's full name.
-	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE;
+	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_TABLE_ENGINE;
 
 	int  m_currentTabPlace = TAB_LEFT;
 	bool m_isNavigationVisible = true;
