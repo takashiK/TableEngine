@@ -19,8 +19,8 @@
 ****************************************************************************/
 
 #include "TeImageLoader.h"
+#include "TeEmbeddedImageLoader.h"
 
-#include <QImageReader>
 #include <QFileInfo>
 #include <QPixmap>
 #include <QPixmapCache>
@@ -50,6 +50,11 @@ TeImageLoader::~TeImageLoader()
 
 void TeImageLoader::requestLoad(const QString& filePath, const QSize& maxSize)
 {
+    const QFileInfo fileInfo(filePath);
+    const QString failedKey = cacheKey(filePath, maxSize, fileInfo.lastModified());
+    if (m_failedRequests.contains(failedKey))
+        return;
+
     QString pendingKey = QStringLiteral("%1|%2x%3").arg(filePath).arg(maxSize.width()).arg(maxSize.height());
     if (m_pendingRequests.contains(pendingKey))
         return;
@@ -90,6 +95,8 @@ void TeImageLoader::onImageLoaded(const QString& filePath, const QSize& size,
         QString cacheKey = TeImageLoader::cacheKey(filePath, size, lastModified);
         QPixmap pixmap = QPixmap::fromImage(image);
         QPixmapCache::insert(cacheKey, pixmap);
+    } else {
+        m_failedRequests.insert(cacheKey(filePath, size, lastModified));
     }
 
     emit imageReady(filePath);
@@ -105,24 +112,13 @@ TeImageLoadTask::TeImageLoadTask(const QString& filePath, const QSize& maxSize,
 
 void TeImageLoadTask::run()
 {
-    QByteArray format = QImageReader::imageFormat(m_filePath);
-    if (format.isEmpty())
-        return;
-
-    QImageReader reader(m_filePath);
-    reader.setAutoTransform(true);
-    QImage image = reader.read();
-
-    if (image.isNull())
-        return;
-
-    if (image.width() > m_maxSize.width() || image.height() > m_maxSize.height()) {
-        image = image.scaled(m_maxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    }
+    const QImage image = teDecodeEmbeddedImage(m_filePath, m_maxSize);
 
     QFileInfo fileInfo(m_filePath);
     QDateTime lastModified = fileInfo.lastModified();
 
+    if (!mp_loader)
+        return;
     QMetaObject::invokeMethod(mp_loader, "onImageLoaded", Qt::QueuedConnection,
                               Q_ARG(QString, m_filePath),
                               Q_ARG(QSize, m_maxSize),

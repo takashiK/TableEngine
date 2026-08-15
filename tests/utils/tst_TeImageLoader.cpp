@@ -119,6 +119,50 @@ TEST_F(tst_TeImageLoader, duplicate_request_does_not_double_emit)
     EXPECT_LE(spy.count(), 1);
 }
 
+TEST_F(tst_TeImageLoader, failed_decode_still_emits_image_ready)
+{
+    const QString path = tmpDir.path() + "/not-an-image.png";
+    QFile file(path);
+    ASSERT_TRUE(file.open(QIODevice::WriteOnly));
+    file.write("not an image");
+    file.close();
+
+    TeImageLoader loader;
+    QSignalSpy spy(&loader, &TeImageLoader::imageReady);
+    loader.requestLoad(path, QSize(32, 32));
+
+    ASSERT_TRUE(spy.wait(5000));
+    EXPECT_EQ(spy.count(), 1);
+    EXPECT_EQ(spy[0][0].toString(), path);
+}
+
+TEST_F(tst_TeImageLoader, failed_decode_is_suppressed_until_file_changes)
+{
+    const QString path = tmpDir.path() + "/not-an-image.png";
+    QFile file(path);
+    ASSERT_TRUE(file.open(QIODevice::WriteOnly));
+    file.write("not an image");
+    file.close();
+
+    TeImageLoader loader;
+    QSignalSpy spy(&loader, &TeImageLoader::imageReady);
+    loader.requestLoad(path, QSize(32, 32));
+    ASSERT_TRUE(spy.wait(5000));
+    ASSERT_EQ(spy.count(), 1);
+
+    loader.requestLoad(path, QSize(32, 32));
+    QTest::qWait(200);
+    EXPECT_EQ(spy.count(), 1);
+
+    ASSERT_TRUE(file.open(QIODevice::ReadWrite));
+    ASSERT_TRUE(file.setFileTime(QDateTime::currentDateTimeUtc().addSecs(2),
+                                 QFileDevice::FileModificationTime));
+    file.close();
+    loader.requestLoad(path, QSize(32, 32));
+    ASSERT_TRUE(spy.wait(5000));
+    EXPECT_EQ(spy.count(), 2);
+}
+
 // ── clearPendingRequests ──────────────────────────────────────────────────────
 
 TEST_F(tst_TeImageLoader, clear_pending_requests_does_not_crash)

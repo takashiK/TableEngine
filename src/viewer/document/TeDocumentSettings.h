@@ -7,7 +7,7 @@
  */
 
 
-#ifdef _STTING_STR_DEF_
+#ifdef _SETTING_STR_DEF_
 #define SETTING_STR( name , str) const char* name = str
 #else
 #define SETTING_STR( name , str) extern const char* name

@@ -19,12 +19,12 @@
 ****************************************************************************/
 
 #define _SETTING_STR_DEF_
-#include "TeDocumentSettings.h"
+#include "TePictureSettings.h"
 
 /**
- * @file TeDocumentSettings.cpp
- * @brief Declaration of TeDocumentSettings.
+ * @file TePictureSettings.cpp
+ * @brief Declaration of TePictureSettings.
  * @ingroup viewer
  */
 
-#include "TeDocumentSettings.h"
+#include "TePictureSettings.h"

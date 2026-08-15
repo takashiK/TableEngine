@@ -70,7 +70,7 @@
 
 | 層 | エージェント / モデル | 責務 | やらないこと |
 |----|------|------|------------|
-| L0 オーケストレーター（main） | default / GPT Sol 固定 | 意図理解・**計画タスク分解**・単位委譲・結果統合・設計判断・承認ゲート | 個別 read/grep・一括編集・細粒度の単発委譲 |
+| L0 オーケストレーター（main） | 意図理解・**計画タスク分解**・単位委譲・結果統合・設計判断・承認ゲート | 個別 read/grep・一括編集・細粒度の単発委譲 | コード読解・実装・検証 |
 | L1 タスク実行 | `Task Executor` / mid | 受領した1単位を調査→実装→検証まで自己完結。単位内の細粒度作業を自文脈で処理 | 設計の最終確定・ユーザー承認・スコープ外変更 |
 | L2 サブサブ | `Explore`(read-only) / `Task Executor`(nested) / low〜mid | 重い読解の隔離・独立並列調査・大きな独立サブ単位の実装 | スコープ外変更 |
 
@@ -158,21 +158,30 @@ Thoroughness: {quick|medium|thorough}
 
 | タスク種別 | 複雑度 | 推奨モデル |
 |-----------|--------|-----------|
-| コード読解・検索 | 低 | GPT 最新 Luna / MAI 最新 |
-| サブエージェント探索 | 低 | GPT 最新 Luna / MAI 最新 |
-| 一括置換・機械的修正 | 低 | GPT 最新 Luna / MAI 最新 |
-| ドキュメント更新 | 中 | GPT 最新 Terra |
-| ビルドエラー修正 | 中 | GPT 最新 Terra |
-| 設計レポート生成 | 高 | GPT 最新 Sol |
-| アーキテクチャ設計 | 高 | GPT 最新 Sol |
+| コード読解・検索 | 低 | GPT-5.6 Luna / MAI 最新 |
+| サブエージェント探索 | 低 | GPT-5.6 Luna / MAI 最新 |
+| 一括置換・機械的修正 | 低 | GPT-5.6 Luna / MAI 最新 |
+| ドキュメント更新 | 中 | Claude Sonnet 5 |
+| 実装 | 中 | Claude Sonnet 5 |
+| 分析・設計レポート生成 | 高 | Claude Opus 5 |
+| アーキテクチャ設計 | 高 | Claude Opus 5 |
+| 設計・実装のレビュー | 高 | Claude Opus 5 |
 
 - 優先順位: 品質 > トークンコスト
-- 軽量タスクは GPT 最新 Luna または MAI 最新に集約しコストを削減する
 - モデルは着手前に確定し、セッション途中で切り替えない（プロンプトキャッシュ失効を防ぐ。→ Token Efficiency 参照）
-- オーケストレーター層は Sol 固定とする（→ Orchestration Strategy 参照）
 - 上表の選択は **subagent 層**がタスク難易度に応じて行う。オーケストレーターは委譲時に推奨 tier を明示する
 
 ## Generic Workflow Rules
+
+基本的な作業フローは
+1. Analysis Phase
+2. Implementation Phase
+3. Testing Phase
+4. Review Phase
+5. Documentation Phase
+の5段階で実施する。各フェーズの完了時に session memory に要約を書き出し、次フェーズへ進む。
+各フェーズ毎に次のフェーズへの承認ゲートを設ける。承認前は read-only の調査とレポート提示までに留め、変更系ツール（編集・実行）を開始しない。
+Implementation PhaseおよびTesting Phaseで、同一の検討スコープが3回以上繰り返される場合は、作業内容をまとめて、一旦作業を中断し、Analysis Phaseに戻って再度設計検討を行う。
 
 ### Analysis Phase
 
@@ -187,6 +196,21 @@ Thoroughness: {quick|medium|thorough}
 2. import 追加は言語標準のフォーマッタを意識し、グループ単位で整理する
 3. 中間ビルド検証: インターフェース変更後、利用側修正前にビルドを実行する
 4. 利用側更新完了後に全体ビルドを確認する（言語別コマンドは refactoring SKILL の lang/ 参照）
+
+### Testing Phase
+
+1. ユニットテストは `tests/` 以下に配置する
+2. テストフレームワークは gtest/gmock を使用する
+3. テストは可能な限り独立して実行可能にする
+
+### Review Phase
+
+1. コードレビューは Pull Request ベースで実施する
+2. レビュー担当者は設計レポートを参照し、実装が設計に沿っているか確認する。
+3. リファクタリングすべきと判断した場合、以下の要素を満した案を提示する。
+   - 変更範囲を最小化する
+   - 変更理由を明確にする
+   - 変更前後の比較を表形式で示す
 
 ### Documentation Phase
 

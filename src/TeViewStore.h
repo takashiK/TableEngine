@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QMainWindow>
 #include "TeDispatcher.h"
+#include "TeSettings.h"
 
 /**
  * @file TeViewStore.h
@@ -289,6 +290,8 @@ signals:
 	void selectionModeChanged(TeTypes::SelectionMode mode);
 	/** @brief Emitted when the file list view mode or info flags change. */
 	void fileListViewModeChanged(TeTypes::FileInfoFlags infoFlags, TeTypes::FileViewMode viewMode);
+	/** @brief Emitted when non-icon filename display-width limits change. */
+	void fileNameWidthChanged(int minChars, int maxChars);
 	/** @brief Emitted when file type filters or sort order changes. */
 	void fileListShowModeChanged(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed);
 
@@ -346,7 +349,7 @@ private:
 	TeDetailView*  mp_detailView = nullptr;
 	QDockWidget*   mp_detailDock = nullptr;
 	QLabel*        mp_statusRightLabel = nullptr; ///< Status bar label showing the focused item's full name.
-	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE;
+	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_TABLE_ENGINE;
 
 	int  m_currentTabPlace = TAB_LEFT;
 	bool m_isNavigationVisible = true;
@@ -356,12 +359,14 @@ private:
 	TeTypes::OrderType m_fileOrderBy = TeTypes::ORDER_NAME;
 	bool m_fileOrderReversed = false;
 	TeTypes::FileViewMode m_viewMode = TeTypes::FILEVIEW_SMALL_ICON;
+	int m_minFileNameWidthChars = TeSettings::FILENAME_WIDTH_DISABLED;
+	int m_maxFileNameWidthChars = TeSettings::FILENAME_WIDTH_DISABLED;
 
 	TeDispatcher* mp_dispatcher = nullptr;
 	TeEventEmitter* mp_closeEventEmitter = nullptr;
 	TeEventEmitter* mp_focusEventEmitter = nullptr;
 	TeEventEmitter* mp_paletteEmitter = nullptr;
-	Qt::ColorScheme m_lastColorScheme = Qt::ColorScheme::Unknown;
+	Qt::ColorScheme m_lastColorScheme = Qt::ColorScheme::Light;
 	QList<QWidget*> m_floatingWidgets;
 	TeFindFolderView* mp_findView = nullptr;
 	TeFileOperationManager* mp_fileOpManager = nullptr;

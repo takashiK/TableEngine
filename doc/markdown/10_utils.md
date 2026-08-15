@@ -216,8 +216,10 @@ virtual QMap<QString, QString> read(const QString& path) const = 0;
 
 - JPEG APP1 マーカー (`FF E1`) から TIFF IFD をバイナリパース
 - リトルエンディアン (`II`) ・ビッグエンディアン (`MM`) 両対応
-- 先頭 64 KB のみ読んで無駄な I/O を排除
+- SOI から SOS までを seek 走査して複数の APP1 / APP2 を検証
 - `QImageReader::size()` / `::text()` で PNG 等の汎用メタデータも取得
+
+`TeQImageExifReader` は `TeEmbeddedImageReader` も実装します。`scanImages()` は主 JPEG、Exif IFD1 thumbnail、MPF 追加画像を `TeEmbeddedImageSet` として返し、`openImageDevice(id)` は変更検出と範囲制限を行う read-only `QIODevice` を遅延生成します。
 
 exいv2 などの外部ライブラリを利用する場合は `TeExifReader` を実装したクラスを作成して `setExifReader()` で注入します。
 

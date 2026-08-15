@@ -1,6 +1,29 @@
+/****************************************************************************
+**
+** Copyright (C) 2021 Takashi Kuwabara.
+** Contact: laffile@gmail.com
+**
+**  This program is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 2 of the License, or
+**  (at your option) any later version.
+**
+**  This program is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+**
+****************************************************************************/
+
 #include "TePictureViewer.h"
-#include "utils/TeThumbnailProvider.h"
+#include "TePictureThumbnailDelegate.h"
+#include "TePictureThumbnailProxyModel.h"
+#include "utils/TeEmbeddedImageLoader.h"
 #include "utils/TeQImageExifReader.h"
+#include "TePictureSettings.h"
 
 #include <QMenuBar>
 #include <QMenu>
@@ -11,7 +34,11 @@
 #include <QListView>
 #include <QDockWidget>
 #include <QFileSystemModel>
+#include <QMetaObject>
+#include <QRunnable>
+#include <QThreadPool>
 #include <QTransform>
+#include <QSettings>
 
 /**
  * @file TePictureViewer.cpp
@@ -41,6 +68,35 @@ QTransform exifViewTransform(int orientation)
 }
 } // namespace
 
+class TePicturePrimaryLoadTask : public QRunnable
+{
+public:
+	TePicturePrimaryLoadTask(const QString& path, int orientation, quint64 generation,
+		TePictureViewer* viewer)
+		: m_path(path)
+		, m_orientation(orientation)
+		, m_generation(generation)
+		, mp_viewer(viewer)
+	{
+	}
+
+	void run() override
+	{
+		TeEmbeddedImageSelection selection;
+		selection.primaryOrientation = m_orientation;
+		const QImage image = teDecodeEmbeddedImage(m_path, TeEmbeddedImageSet{}, selection,
+			QSize(), m_orientation);
+		QMetaObject::invokeMethod(mp_viewer, [viewer = mp_viewer, generation = m_generation, image]() {
+			viewer->primaryImageLoaded(generation, image);
+		}, Qt::QueuedConnection);
+	}
+
+private:
+	QString m_path;
+	int m_orientation;
+	quint64 m_generation;
+	TePictureViewer* mp_viewer;
+};
 
 TePictureViewer::TePictureViewer(QWidget *parent)
 	: QMainWindow(parent)
@@ -52,17 +108,18 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	mp_graphics->scene()->addItem(mp_image);
 	mp_list = new QListView();
 	mp_model = new QFileSystemModel();
+	mp_thumbnailModel = new TePictureThumbnailProxyModel(this);
+	mp_thumbnailModel->setThumbnailLoadingEnabled(false);
+	mp_thumbnailModel->setSourceModel(mp_model);
 
 	mp_list->setIconSize(QSize(96, 96));
-
-	mp_list->setLayoutMode(QListView::Batched);
-	mp_list->setModel(mp_model);
+	mp_list->setUniformItemSizes(true);
+	mp_list->setLayoutMode(QListView::SinglePass);
+	mp_list->setItemDelegate(new TePictureThumbnailDelegate(mp_list));
+	mp_list->setModel(mp_thumbnailModel);
 
 	connect(mp_list->selectionModel(),&QItemSelectionModel::currentChanged, this, &TePictureViewer::updateView);
 
-	mp_model->setIconProvider(TeThumbnailProvider::iconProvider());
-
-	
 	mp_emitter = new TeEventEmitter();
 	mp_emitter->addEmitter(mp_graphics->viewport());
 	mp_emitter->addEventType(QEvent::Resize);
@@ -74,14 +131,30 @@ TePictureViewer::TePictureViewer(QWidget *parent)
 	mp_dock = new QDockWidget("Image List");
 	mp_dock->setWidget(mp_list);
 	mp_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	connect(mp_dock, &QDockWidget::visibilityChanged, mp_thumbnailModel,
+		&TePictureThumbnailProxyModel::setThumbnailLoadingEnabled);
 	addDockWidget(Qt::LeftDockWidgetArea, mp_dock);
 	mp_dock->close();
 
 	setupMenu();
+	m_primaryImageThreadPool.setMaxThreadCount(1);
+
+	QSettings settings;
+	resize(settings.value(SETTING_PIC_VIEWER_WINDOW_WIDTH, 800).toInt(),
+	       settings.value(SETTING_PIC_VIEWER_WINDOW_HEIGHT, 600).toInt());
 }
 
 TePictureViewer::~TePictureViewer()
 {
+	++m_loadGeneration;
+
+	QSettings settings;
+	settings.setValue(SETTING_PIC_VIEWER_WINDOW_WIDTH, width());
+	settings.setValue(SETTING_PIC_VIEWER_WINDOW_HEIGHT, height());
+	
+	m_primaryImageThreadPool.clear();
+	m_primaryImageThreadPool.waitForDone();
+	delete mp_thumbnailModel;
 	delete mp_model;
 	delete mp_emitter;
 }
@@ -95,9 +168,10 @@ bool TePictureViewer::open(const QString & path)
 		mp_model->setNameFilters(QStringList({ "*." + info.suffix() }));
 		mp_model->setNameFilterDisables(false);
 		mp_model->sort(m_sortColumn, m_sortOrder);
-		mp_list->setRootIndex(mp_model->index(info.absolutePath()));
+		mp_thumbnailModel->clearThumbnailCache();
+		mp_list->setRootIndex(mp_thumbnailModel->mapFromSource(mp_model->index(info.absolutePath())));
 
-		mp_list->setCurrentIndex(mp_model->index(info.absoluteFilePath()));
+		mp_list->setCurrentIndex(mp_thumbnailModel->mapFromSource(mp_model->index(info.absoluteFilePath())));
 		return true;
 	}
 	return false;
@@ -115,7 +189,7 @@ std::pair<int, Qt::SortOrder> TePictureViewer::sortOrder() const
 
 void TePictureViewer::nextImage()
 {
-	QModelIndex index = mp_model->index(mp_list->currentIndex().row() + 1, 0, mp_list->currentIndex().parent());
+	QModelIndex index = mp_thumbnailModel->index(mp_list->currentIndex().row() + 1, 0, mp_list->currentIndex().parent());
 	if (index.isValid()) {
 		mp_list->setCurrentIndex(index);
 	}
@@ -123,7 +197,7 @@ void TePictureViewer::nextImage()
 
 void TePictureViewer::prevImage()
 {
-	QModelIndex index = mp_model->index(mp_list->currentIndex().row() - 1, 0, mp_list->currentIndex().parent());
+	QModelIndex index = mp_thumbnailModel->index(mp_list->currentIndex().row() - 1, 0, mp_list->currentIndex().parent());
 	if (index.isValid()) {
 		mp_list->setCurrentIndex(index);
 	}
@@ -153,7 +227,7 @@ void TePictureViewer::setSortOrder(int column, Qt::SortOrder order)
 	if (column != m_sortColumn || order != m_sortOrder) {
 		m_sortColumn = column;
 		m_sortOrder = order;
-		mp_model->sort(column, order);
+		mp_thumbnailModel->sort(column, order);
 	}
 }
 
@@ -182,14 +256,43 @@ void TePictureViewer::updateView(const QModelIndex& index)
 
 void TePictureViewer::loadImage(const QModelIndex& index)
 {
-	const QString path = mp_model->filePath(index);
+	const QString path = mp_model->filePath(mp_thumbnailModel->mapToSource(index));
 
 	TeQImageExifReader reader;
-	const QMap<QString, QString> meta = reader.read(path);
-	m_orientation = meta.value(QStringLiteral("Orientation"), QStringLiteral("1")).toInt();
+	const QSize targetSize = mp_graphics->viewport()->size();
+	const TeEmbeddedImageSet images = reader.scanImages(path);
+	TeEmbeddedImageSelection selection = teSelectEmbeddedImage(images, targetSize);
+	m_orientation = selection.primaryOrientation;
+	if (images.images().isEmpty()) {
+		m_orientation = reader.read(path).value(QStringLiteral("Orientation"), QStringLiteral("1")).toInt();
+		if (m_orientation < 1 || m_orientation > 8)
+			m_orientation = 1;
+		selection.primaryOrientation = m_orientation;
+	}
 
-	mp_image->setPixmap(QPixmap(path));
+	if (selection.useEmbeddedImage && selection.image.byteSize > 0 &&
+		selection.image.byteSize <= 4 * 1024 * 1024) {
+		const QImage preview = teDecodeEmbeddedImage(path, images, selection, targetSize,
+			m_orientation, false);
+		mp_image->setPixmap(preview.isNull() ? QPixmap() : QPixmap::fromImage(preview));
+	} else {
+		mp_image->setPixmap(QPixmap());
+	}
+
 	m_rotation = 0;
+	const quint64 generation = ++m_loadGeneration;
+	m_primaryImageThreadPool.clear();
+	auto* task = new TePicturePrimaryLoadTask(path, m_orientation, generation, this);
+	task->setAutoDelete(true);
+	m_primaryImageThreadPool.start(task);
+}
+
+void TePictureViewer::primaryImageLoaded(quint64 generation, const QImage& image)
+{
+	if (generation != m_loadGeneration || image.isNull())
+		return;
+	mp_image->setPixmap(QPixmap::fromImage(image));
+	updateView();
 }
 
 void TePictureViewer::rotateRight()

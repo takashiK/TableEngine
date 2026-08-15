@@ -2465,197 +2465,218 @@ Open with the binary editor instead?</source>
         <translation>パネル</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="256"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="258"/>
         <source>Allow multi instance.</source>
         <translation>複数起動を許可</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="261"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="263"/>
         <source>Confirm before delete.</source>
         <translation>削除前に確認する</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="266"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="268"/>
         <source>Copy/Move to opposite pane.</source>
         <translation>ファイルのコピー/移動先に反対側パネルのフォルダを表示</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="271"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="273"/>
         <source>Startup Folder</source>
         <translation>開始フォルダ</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="274"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="276"/>
         <source>Hold previous state.</source>
         <translation>前回の終了時の場所を開く。</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="278"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="280"/>
         <source>Selected Folder.</source>
         <translation>選択したフォルダを開く。</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="287"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="289"/>
         <source>Find</source>
         <translation>検索</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="313"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="315"/>
         <source>Shell</source>
         <translation>シェル</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="316"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="318"/>
         <source>Shell command:</source>
         <translation>シェルコマンド :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="321"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="323"/>
         <source>...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="324"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="326"/>
         <source>Select Shell</source>
         <translation>シェルコマンド選択</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="332"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="334"/>
         <source>Shell argument:</source>
         <translation>引数 :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="337"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="339"/>
         <source>Reset Shell settings</source>
         <translation>シェル設定をリセット</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="351"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="353"/>
         <source>Run Command Defaults</source>
         <translation>コマンドを実行 デフォルト設定</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="354"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="356"/>
         <source>shell</source>
         <translation>シェル</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="359"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="361"/>
         <source>output:</source>
         <translation>出力 :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="373"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="375"/>
         <source>Auto reconstruct user menu</source>
         <translation>ユーザーコマンドメニューを自動生成する</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="394"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="396"/>
         <source>Use priority stylesheet (ignore other settings)</source>
         <translation>スタイルシートに従う (本メニューでの設定は利用しない)</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="401"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="403"/>
         <source>Colors</source>
         <translation>色</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="405"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="407"/>
         <source>Normal:</source>
         <translation>通常 :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="410"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="412"/>
         <source>Reset</source>
         <translation>リセット</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="414"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="416"/>
         <source>Selected:</source>
         <translation>選択 :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="420"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="422"/>
         <source>Accent:</source>
         <translation>アクセント :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="425"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="427"/>
         <source>Select Accent Color</source>
         <translation>選択時アクセント色</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="434"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="436"/>
         <source>Focused:</source>
         <translation>フォーカス :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="440"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="442"/>
         <source>Prioritize:</source>
         <translation>優先 :</translation>
     </message>
     <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="530"/>
+        <source>File Name Width (List Views)</source>
+        <translation>ファイル名の幅 (List Views)</translation>
+    </message>
+    <message>
         <location filename="../src/dialogs/TeOptionSetting.cpp" line="534"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="538"/>
+        <source>Disabled</source>
+        <translation>自動</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="540"/>
+        <source>Minimum width (characters):</source>
+        <translation>最小文字数</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="542"/>
+        <source>Maximum width (characters):</source>
+        <translation>最大文字数</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="576"/>
         <source>Startup Window Size</source>
         <translation>開始時ウィンドウサイズ :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="536"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="578"/>
         <source>Remember at exit</source>
         <translation>前回終了時のサイズ</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="537"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="579"/>
         <source>Fixed setting</source>
         <translation>固定サイズ</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="543"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="585"/>
         <source>Width:</source>
         <translation>横幅 :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="547"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="589"/>
         <source>Height:</source>
         <translation>縦幅 :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="585"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="627"/>
         <source>Dialogs</source>
         <translation>ダイアログ設定</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="587"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="629"/>
         <source>Dialog minimum width:</source>
         <translation>ダイアログ最小幅 :</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="617"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="659"/>
         <source>Pane Widths</source>
         <translation>パネル幅</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="619"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="661"/>
         <source>Tree(Navigation) min width:</source>
         <translation>ツリー(ナビゲーション) 最小幅</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="623"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="665"/>
         <source>Tree(Navigation) max width:</source>
         <translation>ツリー(ナビゲーション) 最大幅</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="627"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="669"/>
         <source>Detail min width:</source>
         <translation>詳細パネル最小幅</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="631"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="673"/>
         <source>Detail max width:</source>
         <translation>詳細パネル最大幅</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/TeOptionSetting.cpp" line="667"/>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="709"/>
         <source>Show Detail pane as floating window by default</source>
         <translation>詳細パネルをフローティングパネルとして表示する。</translation>
     </message>
