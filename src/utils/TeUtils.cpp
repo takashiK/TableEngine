@@ -51,14 +51,14 @@ namespace {
 	const QSet<const QString> archiveSuffixes{ "zip","lzh","cab","7z","rar","tar","gz","bz2","xz","tgz","cpio","ar","iso","warc","shar","mtree" };
 
 	// Resolves the path string for a model index, supporting both filesystem
-	// items (QFileInfo via FileInfoRole) and archive items (virtual path via
+	// items (path via FilePathRole) and archive items (virtual path via
 	// TeFileInfo::ROLE_PATH).  Returns an empty string for non-selectable
 	// synthetic entries such as "..".
 	QString resolveItemPath(const QModelIndex& index)
 	{
-		QVariant var = index.data(QFileSystemModel::FileInfoRole);
-		if (var.isValid() && var.canConvert<QFileInfo>()) {
-			return qvariant_cast<QFileInfo>(var).filePath();
+		QVariant var = index.data(QFileSystemModel::FilePathRole);
+		if (var.isValid()) {
+			return var.toString();
 		}
 
 		QVariant typeVar = index.data(TeFileInfo::ROLE_TYPE);
@@ -345,10 +345,10 @@ void updateFavorites(const QStringList& list)
 bool isDir(const QModelIndex& index)
 {
 	if (index.isValid()) {
-		QVariant var = index.data(QFileSystemModel::FileInfoRole);
-		Q_ASSERT(var.isValid() && var.canConvert<QFileInfo>());
-		QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
-		return fileInfo.isDir();
+		QVariant var = index.data(QFileSystemModel::FilePathRole);
+		if (var.isValid()) {
+			return QFileInfo(var.toString()).isDir();
+		}
 	}
 	return false;
 }

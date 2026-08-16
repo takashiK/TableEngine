@@ -29,7 +29,7 @@
 #include <QHBoxLayout>
 #include <QTreeWidget>
 #include <QHeaderView>
-#include <QCombobox>
+#include <QComboBox>
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <QSettings>

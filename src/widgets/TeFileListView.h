@@ -21,6 +21,7 @@
 #pragma once
 
 #include <QListView>
+#include <QPersistentModelIndex>
 #include "TeTypes.h"
 
 /**
@@ -86,7 +87,11 @@ public:
 	 * index.
 	 */
 	virtual QModelIndex	indexAt(const QPoint &point) const;
+	/** @brief Resets the range-selection anchor when the model changes. */
+	virtual void setModel(QAbstractItemModel* model) Q_DECL_OVERRIDE;
 
+	/** @brief Resets the range-selection anchor when the root index changes. */
+	virtual void setRootIndex(const QModelIndex& index) Q_DECL_OVERRIDE;
 public slots:
 	/**
 	 * @brief Switches the active selection mode.
@@ -128,11 +133,46 @@ protected:
 	 * unintended selection clearing.
 	 */
 	virtual QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event = Q_NULLPTR) const;
+	/**
+	 * @brief Synchronizes m_anchorIndex to the new current index in TABLE_ENGINE
+	 * mode, unless suspended by an active CurrentChangedBlockGuard. This is the
+	 * sole current-navigation anchor-update path (keyboard, mouse, and
+	 * programmatic setCurrentIndex() all funnel through here).
+	 */
+	virtual void currentChanged(const QModelIndex& current, const QModelIndex& previous) Q_DECL_OVERRIDE;
 
 private:
+	/** @brief Returns whether @p index is a valid, selectable item (excludes ".."). */
+	bool isSelectableIndex(const QModelIndex& index) const;
+	/**
+	 * @brief Applies the TABLE_ENGINE click selection rule explicitly, decoupled
+	 * from Qt's platform-dependent internal anchor handling.
+	 * @param index     Target item under the cursor (may be invalid).
+	 * @param wasSelected Whether @p index was already selected before this press.
+	 * @param button    Mouse button that triggered the press.
+	 * @param modifiers Keyboard modifiers held at press time.
+	 */
+	void applyPressSelection(const QModelIndex& index, bool wasSelected, Qt::MouseButton button, Qt::KeyboardModifiers modifiers);
+
+	/**
+	 * @brief RAII guard that suspends currentChanged()'s anchor synchronization
+	 * for its lifetime, so explicit press/drag selection logic (which reads or
+	 * sets m_anchorIndex itself) is not clobbered by the base class's own
+	 * setCurrentIndex() calls during mousePressEvent()/mouseMoveEvent().
+	 */
+	struct CurrentChangedBlockGuard
+	{
+		explicit CurrentChangedBlockGuard(bool& flag) : m_flag(flag), m_previous(flag) { m_flag = true; }
+		~CurrentChangedBlockGuard() { m_flag = m_previous; }
+		bool& m_flag;
+		bool m_previous;
+	};
+
 	TeFolderView*         mp_folderView = nullptr;    ///< Owning folder view.
-	QModelIndex           m_pressedIndex;   ///< Model index under the mouse at press time.
+	QPersistentModelIndex m_pressedIndex;   ///< Model index under the mouse at press time.
 	QPoint                m_pressedPos;     ///< Cursor position at press time (for drag detection).
+	QPersistentModelIndex m_anchorIndex;    ///< Explicit range-selection origin (never relies on Qt's internal anchor).
+	bool                  m_currentChangedBlocked = false; ///< Suspends currentChanged() anchor sync while true.
 	QRubberBand*          mp_rubberBand = nullptr;    ///< Rubber-band selection rectangle.
 	TeTypes::SelectionMode m_selectionMode = TeTypes::SELECTION_NONE; ///< Current selection mode.
 	int m_minFileNameWidthChars = 0; ///< Minimum non-icon filename width in "M" units.
