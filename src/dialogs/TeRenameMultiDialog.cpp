@@ -120,7 +120,7 @@ int TeRenameMultiDialog::order() const
 void TeRenameMultiDialog::updateSample()
 {
 	QString sample = mp_baseName->text();
-	sample += QString("%1").arg(mp_startNum->value(), mp_digits->value(), 10, u'0');
+	sample += QString("%1").arg(mp_startNum->value(), mp_digits->value(), 10, QChar{u'0'});
 	sample += mp_extention->text();
 	mp_sample->setText(sample);
 }

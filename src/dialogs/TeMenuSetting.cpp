@@ -163,12 +163,12 @@ void defaultEntry(QSettings& settings, const QString& key,  const QString& value
 void menuEntry(QSettings& settings, int index, int indent, TeTypes::CmdId cmdId, QString name= QString())
 {
 	const TeCommandInfoBase*p_info = TeCommandFactory::factory()->commandInfo(cmdId);
-	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, u'0'), QString("%1,%2,%3").arg(indent).arg(name.isNull() ?  p_info->name() : name ).arg(p_info->cmdId()));
+	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, QChar{u'0'}), QString("%1,%2,%3").arg(indent).arg(name.isNull() ?  p_info->name() : name ).arg(p_info->cmdId()));
 }
 
 void specialEntry(QSettings& settings, int index, int indent, TeTypes::CmdId cmdId, const QString& str)
 {
-	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, u'0'), QString("%1,%2,%3").arg(indent).arg(str).arg(cmdId));
+	defaultEntry(settings, QString("menu%1").arg(index, 3, 10, QChar{u'0'}), QString("%1,%2,%3").arg(indent).arg(str).arg(cmdId));
 }
 
 void TeMenuSetting::storeDefaultMenuSettings(QSettings& settings)
@@ -209,6 +209,13 @@ void TeMenuSetting::storeDefaultTreeMenuSettings(QSettings& settings )
 	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FOLDER_CLOSE_ALL);
 	specialEntry(settings, index++, indent, TeTypes::CMDID_SPECIAL_SEPARATOR,"---");
 	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FOLDER_CREATE_FOLDER);
+#ifdef Q_OS_LINUX
+	// Linux has no native shell context menu, so Rename/Properties are added
+	// to the default popup. Delete is intentionally omitted (see Windows parity notes).
+	specialEntry(settings, index++, indent, TeTypes::CMDID_SPECIAL_SEPARATOR, "---");
+	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FILE_RENAME);
+	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FILE_PROPERTY);
+#endif
 	settings.endGroup();
 }
 
@@ -225,6 +232,13 @@ void TeMenuSetting::storeDefaultListMenuSettings(QSettings& settings )
 	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_EDIT_PASTE);
 	specialEntry(settings, index++, indent, TeTypes::CMDID_SPECIAL_SEPARATOR, "---");
 	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FOLDER_CREATE_FOLDER);
+#ifdef Q_OS_LINUX
+	// Linux has no native shell context menu, so Rename/Properties are added
+	// to the default popup. Delete is intentionally omitted (see Windows parity notes).
+	specialEntry(settings, index++, indent, TeTypes::CMDID_SPECIAL_SEPARATOR, "---");
+	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FILE_RENAME);
+	menuEntry(settings, index++, indent, TeTypes::CMDID_SYSTEM_FILE_PROPERTY);
+#endif
 	settings.endGroup();
 }
 
@@ -327,7 +341,7 @@ void TeMenuSetting::updateSettings()
 	QTreeWidgetItem* item;
 
 	for (int i = 0; i < m_itemList.size(); i++ ) {
-		QString group = QString("menuGroup%1").arg(i,2,10,u'0');
+		QString group = QString("menuGroup%1").arg(i,2,10,QChar{u'0'});
 		settings.setValue(group, m_itemList[i]->windowTitle());
 
 		settings.beginGroup(group);
@@ -335,7 +349,7 @@ void TeMenuSetting::updateSettings()
 
 		for (int j = 0; j < m_itemList[i]->topLevelItemCount(); j++) {
 			item = m_itemList[i]->topLevelItem(j);
-			settings.setValue(QString("menu%1").arg(index++, 3, 10, u'0'),
+			settings.setValue(QString("menu%1").arg(index++, 3, 10, QChar{u'0'}),
 				QString("%1,%2,%3")
 				.arg(indent)
 				.arg(item->data(MENU_REGISTER, Qt::DisplayRole).toString())
@@ -355,7 +369,7 @@ int TeMenuSetting::storeMenuItemSettings(QSettings& settings, const QTreeWidgetI
 	
 	for (int i = 0; i < itemRoot->childCount(); i++) {
 		QTreeWidgetItem* item = itemRoot->child(i);
-		settings.setValue(QString("menu%1").arg(index++, 3, 10, u'0'), 
+		settings.setValue(QString("menu%1").arg(index++, 3, 10, QChar{u'0'}), 
 			QString("%1,%2,%3")
 			.arg(indent)
 			.arg(item->data(MENU_REGISTER,Qt::DisplayRole).toString())

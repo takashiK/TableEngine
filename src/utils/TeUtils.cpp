@@ -213,7 +213,7 @@ void extractArchives(TeViewStore* p_store, const QStringList & list, const QStri
 				}
 			}
 
-			QString targetInfo = QObject::tr("Extract ") + QString::asprintf("(%d/%d) : ",i,list.size()) + info.fileName() + "\n";
+			QString targetInfo = QObject::tr("Extract ") + QString::asprintf("(%d/%lld) : ",i,list.size()) + info.fileName() + "\n";
 
 			QObject::connect(&reader, &TeArchive::Reader::maximumValue, &progress, &QProgressDialog::setMaximum);
 			QObject::connect(&reader, &TeArchive::Reader::valueChanged, &progress, &QProgressDialog::setValue);
@@ -337,7 +337,7 @@ void updateFavorites(const QStringList& list)
 	settings.beginGroup(SETTING_FAVORITES);
 	settings.remove("");
 	for (int i = 0; i < list.size(); i++) {
-		settings.setValue(QString("path%1").arg(i, 2, 10, u'0'), list.at(i));
+		settings.setValue(QString("path%1").arg(i, 2, 10, QChar{u'0'}), list.at(i));
 	}
 	settings.endGroup();
 }

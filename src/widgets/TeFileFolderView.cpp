@@ -343,8 +343,18 @@ void TeFileFolderView::showContextMenu(const QAbstractItemView * pView, const QP
 	QPoint gpos = pView->mapToGlobal(pos);
 	QStringList files;
 	if (collectFileContextMenuTarget(pView, pos, files)) {
-		//ContextMenu for the item
+		//ContextMenu for the item.
+#ifdef Q_OS_LINUX
+		//No native shell context menu on Linux; fall back to the
+		//user-configurable popup menu. Windows always shows its native menu
+		//here, so this fallback is kept Linux-only to avoid changing its
+		//existing mixed-selection behaviour.
+		if (!::showFilesContext(gpos.x(), gpos.y(), files)) {
+			showUserContextMenu(pView == mp_treeView ? SETTING_TREEPOPUP_GROUP : SETTING_LISTPOPUP_GROUP, gpos);
+		}
+#else
 		::showFilesContext(gpos.x(), gpos.y(), files);
+#endif
 	}
 	else if (pView == mp_treeView) {
 		//ContextMenu at no selected / ".." for treeView

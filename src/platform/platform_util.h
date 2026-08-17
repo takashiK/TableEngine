@@ -33,6 +33,7 @@
 
 class QMimeData;
 class TeNativeEvent;
+class TeFileOpProgress;
 
 // Platform-neutral colour scheme, kept independent of Qt::ColorScheme so this
 // header compiles unchanged against Qt versions that lack that API (< 6.5).
@@ -60,12 +61,16 @@ extern void showFileProperties(const QString& path);
 
 extern void openFile(const QString& path);
 
-extern bool copyFiles(const QStringList& files, const QString& path, WId owner = 0);
-extern bool copyFile(const QString& fromFile, const QString& toFile, WId owner = 0);
+// The optional TeFileOpProgress* lets a background worker thread report
+// processed/total bytes and the current path to a GUI-thread progress
+// dialog without blocking cross-thread calls (see TeFileOpProgress.h).
+// Callers that don't need progress reporting can omit it.
+extern bool copyFiles(const QStringList& files, const QString& path, WId owner = 0, TeFileOpProgress* progress = nullptr);
+extern bool copyFile(const QString& fromFile, const QString& toFile, WId owner = 0, TeFileOpProgress* progress = nullptr);
 
-extern bool moveFiles(const QStringList& files, const QString& path, WId owner = 0);
+extern bool moveFiles(const QStringList& files, const QString& path, WId owner = 0, TeFileOpProgress* progress = nullptr);
 
-extern bool deleteFiles(const QStringList& files, WId owner = 0);
+extern bool deleteFiles(const QStringList& files, WId owner = 0, TeFileOpProgress* progress = nullptr);
 
 extern QPixmap getThumbnail(const QString& path, const QSize& size);
 extern QPixmap getFileIcon(const QString& path, const QSize& size);
@@ -74,6 +79,8 @@ extern QString getAssociatedAppPath(const QString& suffix);
 
 //clipboard action
 extern bool isMoveAction(const QMimeData* mime);
+// NOTE: mime->setUrls() must be called before setMoveAction()/setCopyAction();
+// the Linux implementation reads the URL list to build GNOME/KDE clipboard formats.
 extern void setMoveAction(QMimeData* mime);
 extern void setCopyAction(QMimeData* mime);
 
