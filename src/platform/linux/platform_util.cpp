@@ -21,6 +21,7 @@
 #include "platform/platform_util.h"
 #include "platform/TeNativeEvent.h"
 #include "platform/TeFileOpProgress.h"
+#include "platform/linux/TeLinuxMountMonitor.h"
 #include "dialogs/TePropertiesDialog.h"
 
 #include <QDesktopServices>
@@ -44,6 +45,7 @@
 #include <QStandardPaths>
 #include <QCryptographicHash>
 
+#include <algorithm>
 #include <sys/stat.h>
 
 /**
@@ -60,13 +62,16 @@
  * Thumbnails are read (never generated) from the freedesktop.org thumbnail
  * cache, file icons come from the MIME/icon-theme lookup, and clipboard
  * cut/copy interoperates with the GNOME and KDE conventions in addition to
- * the Windows-style hint already used for same-app drag/drop. Context menus,
- * "open with" association lookup, and mount-change monitoring have no
- * desktop-agnostic equivalent and remain no-op / caller-side fallback.
+ * the Windows-style hint already used for same-app drag/drop. Context menus
+ * and "open with" association lookup have no desktop-agnostic equivalent and
+ * remain no-op / caller-side fallback. Mount changes are monitored through
+ * /proc/self/mountinfo and only refresh the external-drive projection.
  */
 
 namespace {
 	TeNativeEvent g_event;
+	TeLinuxMountMonitor* g_mountMonitor = nullptr;
+	platform_util_test::DriveActionLabelAllocator g_driveActionLabelAllocator;
 
 	//////////////////////////////////////////////////////////////
 	//
@@ -442,13 +447,20 @@ namespace {
 //
 // Initialize and uninitialize platform system
 //
-bool threadInitialize(QApplication* /*a*/)
+bool threadInitialize(QApplication* a)
 {
+	if (a != nullptr && g_mountMonitor == nullptr) {
+		g_mountMonitor = new TeLinuxMountMonitor(&g_event, a);
+		QObject::connect(a, &QObject::destroyed, [] { g_mountMonitor = nullptr; });
+		g_mountMonitor->start();
+	}
 	return true;
 }
 
 void threadUninitialize()
 {
+	delete g_mountMonitor;
+	g_mountMonitor = nullptr;
 }
 
 void comInitializeThread()
@@ -478,8 +490,11 @@ QList<TeDriveAction> getDriveActions()
 		if (toolTip.isEmpty()) {
 			toolTip = mountPoint;
 		}
-		actions.append({ platform_util_test::driveActionLabel(actions.size()) + QLatin1Char(':') + mountName, mountPoint, toolTip });
+		const QString driveIdentity = (devicePath.isEmpty() ? drive.device() : devicePath)
+			+ QChar::Null + QDir::cleanPath(mountPoint);
+		actions.append({ mountName, mountPoint, toolTip, driveIdentity });
 	}
+	g_driveActionLabelAllocator.assign(&actions);
 	return actions;
 }
 
@@ -860,6 +875,27 @@ QString getDefaultShellCommand()
 }
 
 namespace platform_util_test {
+namespace {
+	QString driveActionKey(const TeDriveAction& action)
+	{
+		return QString::number(action.text.size()) + QLatin1Char(':') + action.text
+			+ QString::number(action.path.size()) + QLatin1Char(':') + action.path
+			+ QString::number(action.toolTip.size()) + QLatin1Char(':') + action.toolTip
+			+ QString::number(action.identity.size()) + QLatin1Char(':') + action.identity;
+	}
+
+	QStringList sortedDriveActionKeys(const QList<TeDriveAction>& actions)
+	{
+		QStringList keys;
+		keys.reserve(actions.size());
+		for (const TeDriveAction& action : actions) {
+			keys.append(driveActionKey(action));
+		}
+		std::sort(keys.begin(), keys.end());
+		return keys;
+	}
+}
+
 QString driveActionLabel(int index)
 {
 	QString label;
@@ -871,10 +907,68 @@ QString driveActionLabel(int index)
 	return label;
 }
 
+void DriveActionLabelAllocator::assign(QList<TeDriveAction>* actions)
+{
+	QSet<QString> presentIdentities;
+	presentIdentities.reserve(actions->size());
+	for (const TeDriveAction& action : *actions) {
+		presentIdentities.insert(action.identity);
+	}
+
+	for (auto it = m_labelIndices.begin(); it != m_labelIndices.end();) {
+		if (!presentIdentities.contains(it.key())) {
+			it = m_labelIndices.erase(it);
+		} else {
+			++it;
+		}
+	}
+
+	QSet<int> allocatedIndices;
+	for (auto it = m_labelIndices.cbegin(); it != m_labelIndices.cend(); ++it) {
+		allocatedIndices.insert(it.value());
+	}
+	for (TeDriveAction& action : *actions) {
+		const QString& identity = action.identity;
+		int labelIndex = m_labelIndices.value(identity, -1);
+		if (labelIndex < 0) {
+			labelIndex = 0;
+			while (allocatedIndices.contains(labelIndex)) {
+				++labelIndex;
+			}
+			m_labelIndices.insert(identity, labelIndex);
+			allocatedIndices.insert(labelIndex);
+		}
+		action.text = driveActionLabel(labelIndex) + QLatin1Char(':') + action.text;
+	}
+}
+
 bool isExternalBlockDevice(const QString& blockDevice, const QString& sysfsRoot)
 {
 	QSet<QString> visited;
 	return isExternalBlockDeviceImpl(blockDevice, sysfsRoot, &visited);
+}
+
+DriveActionChange compareDriveActionSnapshots(const QList<TeDriveAction>& previous, const QList<TeDriveAction>& current)
+{
+	const QStringList previousKeys = sortedDriveActionKeys(previous);
+	const QStringList currentKeys = sortedDriveActionKeys(current);
+	if (previousKeys == currentKeys) {
+		return {};
+	}
+
+	int previousIndex = 0;
+	int currentIndex = 0;
+	while (previousIndex < previousKeys.size() && currentIndex < currentKeys.size()) {
+		if (previousKeys[previousIndex] == currentKeys[currentIndex]) {
+			++previousIndex;
+			++currentIndex;
+		} else if (previousKeys[previousIndex] < currentKeys[currentIndex]) {
+			++previousIndex;
+		} else {
+			return { true, true };
+		}
+	}
+	return { true, currentIndex < currentKeys.size() };
 }
 }
 

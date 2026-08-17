@@ -21,6 +21,7 @@
 #pragma once
 #include <QString>
 #include <QList>
+#include <QHash>
 #include <QPixmap>
 #include <QSize>
 #include <QApplication>
@@ -47,6 +48,7 @@ struct TeDriveAction {
 	QString text;
 	QString path;
 	QString toolTip;
+	QString identity;
 };
 
 //Initialize and uninitialize platform system
@@ -102,8 +104,23 @@ extern QList<TeDriveAction> getDriveActions();
 
 #ifdef Q_OS_LINUX
 namespace platform_util_test {
+struct DriveActionChange {
+	bool changed = false;
+	bool state = false;
+};
+
+class DriveActionLabelAllocator
+{
+public:
+	void assign(QList<TeDriveAction>* actions);
+
+private:
+	QHash<QString, int> m_labelIndices;
+};
+
 QString driveActionLabel(int index);
 bool isExternalBlockDevice(const QString& blockDevice, const QString& sysfsRoot);
+DriveActionChange compareDriveActionSnapshots(const QList<TeDriveAction>& previous, const QList<TeDriveAction>& current);
 }
 #endif
 

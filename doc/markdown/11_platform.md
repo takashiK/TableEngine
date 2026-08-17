@@ -106,8 +106,8 @@ OS レベルのイベント（ドライブの接続 / 切断等）を `Qt` の�
 
 ### Linux 実装
 
-ドライブのマウント状態変化を検知するネイティブイベントフィルタは未実装です。
-`getNativeEvent()` は共有の `TeNativeEvent` インスタンスを返しますが、`mountStateChanged` シグナルは発行されません。
+`TeLinuxMountMonitor` は `/proc/self/mountinfo` の変更通知を監視し、300ms のデバウンス後に外部 USB / Thunderbolt ドライブの表示用一覧を再評価します。
+表示状態に変化がある場合だけ、共有の `TeNativeEvent` から `mountStateChanged` シグナルを発行します。`/proc/self/mountinfo` を開けない環境では 5 秒間隔のフォールバック監視を使用します。
 
 ---
 

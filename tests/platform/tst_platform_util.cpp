@@ -56,6 +56,16 @@ namespace {
 		}
 		return sysfs;
 	}
+
+	TeDriveAction driveAction(const QString& name, const QString& path, const QString& identity)
+	{
+		return { name, path, name, identity };
+	}
+
+	QString driveIdentity(const QString& device, const QString& mountPoint)
+	{
+		return device + QChar::Null + mountPoint;
+	}
 }
 
 TEST(tst_platform_util, driveActionLabel_continuesAfterZ)
@@ -63,6 +73,104 @@ TEST(tst_platform_util, driveActionLabel_continuesAfterZ)
 	EXPECT_EQ(platform_util_test::driveActionLabel(0), "C");
 	EXPECT_EQ(platform_util_test::driveActionLabel(23), "Z");
 	EXPECT_EQ(platform_util_test::driveActionLabel(24), "AA");
+}
+
+TEST(tst_platform_util, driveActionLabelAllocator_preservesLabelsUntilDriveRemoval)
+{
+	platform_util_test::DriveActionLabelAllocator allocator;
+	QList<TeDriveAction> initial {
+		driveAction("One", "/media/one", driveIdentity("/dev/sdb", "/media/one")),
+		driveAction("Two", "/media/two", driveIdentity("/dev/sdc", "/media/two"))
+	};
+	allocator.assign(&initial);
+	EXPECT_EQ(initial[0].text, "C:One");
+	EXPECT_EQ(initial[1].text, "D:Two");
+
+	QList<TeDriveAction> afterRemoval { driveAction("Two", "/media/two", driveIdentity("/dev/sdc", "/media/two")) };
+	allocator.assign(&afterRemoval);
+	EXPECT_EQ(afterRemoval[0].text, "D:Two");
+	const auto removal = platform_util_test::compareDriveActionSnapshots(initial, afterRemoval);
+	EXPECT_TRUE(removal.changed);
+	EXPECT_FALSE(removal.state);
+
+	QList<TeDriveAction> afterAddition {
+		driveAction("Three", "/media/three", driveIdentity("/dev/sdd", "/media/three")),
+		driveAction("Two", "/media/two", driveIdentity("/dev/sdc", "/media/two"))
+	};
+	allocator.assign(&afterAddition);
+	EXPECT_EQ(afterAddition[0].text, "C:Three");
+	EXPECT_EQ(afterAddition[1].text, "D:Two");
+
+	QList<TeDriveAction> reordered {
+		driveAction("Two", "/media/two", driveIdentity("/dev/sdc", "/media/two")),
+		driveAction("Three", "/media/three", driveIdentity("/dev/sdd", "/media/three"))
+	};
+	allocator.assign(&reordered);
+	EXPECT_EQ(reordered[0].text, "D:Two");
+	EXPECT_EQ(reordered[1].text, "C:Three");
+}
+
+TEST(tst_platform_util, driveActionLabelAllocator_replacesSameMountPointByDeviceIdentity)
+{
+	platform_util_test::DriveActionLabelAllocator allocator;
+	QList<TeDriveAction> previous { driveAction("USB", "/media/usb", driveIdentity("/dev/sdb", "/media/usb")) };
+	allocator.assign(&previous);
+	EXPECT_EQ(previous[0].text, "C:USB");
+
+	QList<TeDriveAction> replacement { driveAction("USB", "/media/usb", driveIdentity("/dev/sdc", "/media/usb")) };
+	allocator.assign(&replacement);
+	EXPECT_EQ(replacement[0].text, "C:USB");
+	const auto change = platform_util_test::compareDriveActionSnapshots(previous, replacement);
+	EXPECT_TRUE(change.changed);
+	EXPECT_TRUE(change.state);
+}
+
+TEST(tst_platform_util, compareDriveActionSnapshots_unchangedAndEmpty)
+{
+	EXPECT_FALSE(platform_util_test::compareDriveActionSnapshots({}, {}).changed);
+	const QList<TeDriveAction> actions { { "C:USB", "/media/usb", "USB" } };
+	EXPECT_FALSE(platform_util_test::compareDriveActionSnapshots(actions, actions).changed);
+}
+
+TEST(tst_platform_util, compareDriveActionSnapshots_additionReportsArrival)
+{
+	const QList<TeDriveAction> current { { "C:USB", "/media/usb", "USB" } };
+	const auto change = platform_util_test::compareDriveActionSnapshots({}, current);
+	EXPECT_TRUE(change.changed);
+	EXPECT_TRUE(change.state);
+}
+
+TEST(tst_platform_util, compareDriveActionSnapshots_removalReportsRemoval)
+{
+	const QList<TeDriveAction> previous { { "C:USB", "/media/usb", "USB" } };
+	const auto change = platform_util_test::compareDriveActionSnapshots(previous, {});
+	EXPECT_TRUE(change.changed);
+	EXPECT_FALSE(change.state);
+}
+
+TEST(tst_platform_util, compareDriveActionSnapshots_reorderingIsUnchanged)
+{
+	const QList<TeDriveAction> previous { { "C:One", "/media/one", "One" }, { "D:Two", "/media/two", "Two" } };
+	const QList<TeDriveAction> current { previous[1], previous[0] };
+	EXPECT_FALSE(platform_util_test::compareDriveActionSnapshots(previous, current).changed);
+}
+
+TEST(tst_platform_util, compareDriveActionSnapshots_metadataReplacementReportsArrival)
+{
+	const QList<TeDriveAction> previous { { "C:USB", "/media/usb", "Old USB" } };
+	const QList<TeDriveAction> current { { "C:USB", "/media/usb", "New USB" } };
+	const auto change = platform_util_test::compareDriveActionSnapshots(previous, current);
+	EXPECT_TRUE(change.changed);
+	EXPECT_TRUE(change.state);
+}
+
+TEST(tst_platform_util, compareDriveActionSnapshots_mixedChangesPreferArrival)
+{
+	const QList<TeDriveAction> previous { { "C:Old", "/media/old", "Old" } };
+	const QList<TeDriveAction> current { { "D:New", "/media/new", "New" } };
+	const auto change = platform_util_test::compareDriveActionSnapshots(previous, current);
+	EXPECT_TRUE(change.changed);
+	EXPECT_TRUE(change.state);
 }
 
 TEST(tst_platform_util, isExternalBlockDevice_acceptsUsbAndThunderboltAncestors)

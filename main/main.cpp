@@ -95,5 +95,9 @@ int main(int argc, char *argv[])
 	dispatcher.setViewStore(&store);
 
 	//start event loop.
-	return a.exec();
+	int result = a.exec();
+
+	//uninitialize com thread.
+	threadUninitialize();
+	return result;
 }
