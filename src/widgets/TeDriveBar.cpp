@@ -222,14 +222,10 @@ void TeDriveBar::updateDrive(bool state)
 	}
 	m_driveActions.clear();
 
-	for (const auto& drive : QStorageInfo::mountedVolumes()) {
-		QString name = drive.displayName();
-		if (name.isEmpty()) {
-			name = drive.rootPath();
-		}
-		QAction* act = new QAction(provider.icon(QFileInfo(drive.rootPath())), drive.rootPath().left(1));
-		act->setData(drive.rootPath());
-		act->setToolTip(name);
+	for (const TeDriveAction& drive : getDriveActions()) {
+		QAction* act = new QAction(provider.icon(QFileInfo(drive.path)), drive.text);
+		act->setData(drive.path);
+		act->setToolTip(drive.toolTip);
 		insertAction(mp_driveStart, act);
 		connect(act, &QAction::triggered, [this, act](bool) { selectDrive(act->data().toString()); });
 		m_driveActions.append(act);

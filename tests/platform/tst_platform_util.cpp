@@ -35,6 +35,73 @@
 
 using namespace ::testing;
 
+namespace {
+	bool makeDirectoryLink(const QString& target, const QString& linkPath)
+	{
+		return QFile::link(target, linkPath);
+	}
+
+	QString makeBlockDevice(QTemporaryDir* root, const QString& blockDevice, const QString& subsystem)
+	{
+		const QString sysfs = root->filePath("sys");
+		const QString device = sysfs + "/devices/" + blockDevice + "/block/" + blockDevice;
+		if (!QDir().mkpath(device) || !QDir().mkpath(sysfs + "/class/block") || !QDir().mkpath(sysfs + "/bus/" + subsystem)) {
+			return QString();
+		}
+		if (!makeDirectoryLink(sysfs + "/bus/" + subsystem, sysfs + "/devices/" + blockDevice + "/subsystem")) {
+			return QString();
+		}
+		if (!makeDirectoryLink(device, sysfs + "/class/block/" + blockDevice)) {
+			return QString();
+		}
+		return sysfs;
+	}
+}
+
+TEST(tst_platform_util, driveActionLabel_continuesAfterZ)
+{
+	EXPECT_EQ(platform_util_test::driveActionLabel(0), "C");
+	EXPECT_EQ(platform_util_test::driveActionLabel(23), "Z");
+	EXPECT_EQ(platform_util_test::driveActionLabel(24), "AA");
+}
+
+TEST(tst_platform_util, isExternalBlockDevice_acceptsUsbAndThunderboltAncestors)
+{
+	QTemporaryDir root;
+	ASSERT_TRUE(root.isValid());
+	const QString sysfs = makeBlockDevice(&root, "sdb", "usb");
+	ASSERT_FALSE(sysfs.isEmpty());
+	EXPECT_TRUE(platform_util_test::isExternalBlockDevice("sdb", sysfs));
+
+	QTemporaryDir thunderboltRoot;
+	ASSERT_TRUE(thunderboltRoot.isValid());
+	const QString thunderboltSysfs = makeBlockDevice(&thunderboltRoot, "nvme0n1", "thunderbolt");
+	ASSERT_FALSE(thunderboltSysfs.isEmpty());
+	EXPECT_TRUE(platform_util_test::isExternalBlockDevice("nvme0n1", thunderboltSysfs));
+}
+
+TEST(tst_platform_util, isExternalBlockDevice_resolvesMappedDeviceSlaves)
+{
+	QTemporaryDir root;
+	ASSERT_TRUE(root.isValid());
+	const QString sysfs = makeBlockDevice(&root, "sdb", "usb");
+	ASSERT_FALSE(sysfs.isEmpty());
+	const QString mapped = sysfs + "/devices/virtual/block/dm-0";
+	ASSERT_TRUE(QDir().mkpath(mapped + "/slaves"));
+	ASSERT_TRUE(makeDirectoryLink(mapped, sysfs + "/class/block/dm-0"));
+	ASSERT_TRUE(makeDirectoryLink(sysfs + "/class/block/sdb", mapped + "/slaves/sdb"));
+	EXPECT_TRUE(platform_util_test::isExternalBlockDevice("dm-0", sysfs));
+}
+
+TEST(tst_platform_util, isExternalBlockDevice_rejectsNonExternalDevices)
+{
+	QTemporaryDir root;
+	ASSERT_TRUE(root.isValid());
+	const QString sysfs = makeBlockDevice(&root, "nvme0n1", "pci");
+	ASSERT_FALSE(sysfs.isEmpty());
+	EXPECT_FALSE(platform_util_test::isExternalBlockDevice("nvme0n1", sysfs));
+}
+
 TEST(tst_platform_util, copyFiles_duplicateSources_rejectedWithoutPartialCopy)
 {
 	QTemporaryDir srcDir;

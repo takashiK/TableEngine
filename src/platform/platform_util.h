@@ -20,6 +20,7 @@
 
 #pragma once
 #include <QString>
+#include <QList>
 #include <QPixmap>
 #include <QSize>
 #include <QApplication>
@@ -40,6 +41,12 @@ class TeFileOpProgress;
 enum class TeStyleColorScheme {
 	Light,
 	Dark
+};
+
+struct TeDriveAction {
+	QString text;
+	QString path;
+	QString toolTip;
 };
 
 //Initialize and uninitialize platform system
@@ -90,6 +97,15 @@ extern TeNativeEvent* getNativeEvent();
 //shell
 // OS-specific fallback shell command, used when the SHELL environment variable is not set.
 extern QString getDefaultShellCommand();
+
+extern QList<TeDriveAction> getDriveActions();
+
+#ifdef Q_OS_LINUX
+namespace platform_util_test {
+QString driveActionLabel(int index);
+bool isExternalBlockDevice(const QString& blockDevice, const QString& sysfsRoot);
+}
+#endif
 
 // Current system/application colour scheme. Returns TeStyleColorScheme::Light
 // when detection is unavailable (e.g. Qt < 6.5 or no platform support).

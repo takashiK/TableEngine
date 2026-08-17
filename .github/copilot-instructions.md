@@ -159,9 +159,9 @@ Thoroughness: {quick|medium|thorough}
 
 | タスク種別 | 複雑度 | 推奨モデル |
 |-----------|--------|-----------|
-| コード読解・検索 | 低 | GPT-5.6 Luna / MAI 最新 |
-| サブエージェント探索 | 低 | GPT-5.6 Luna / MAI 最新 |
-| 一括置換・機械的修正 | 低 | GPT-5.6 Luna / MAI 最新 |
+| コード読解・検索 | 低 | GPT-5.6 Luna |
+| サブエージェント探索 | 低 | GPT-5.6 Luna  |
+| 一括置換・機械的修正 | 低 | GPT-5.6 Luna  |
 | ドキュメント更新 | 中 | Claude Sonnet 5 |
 | 実装 | 中 | Claude Sonnet 5 |
 | 分析・設計レポート生成 | 高 | Claude Opus 5 |

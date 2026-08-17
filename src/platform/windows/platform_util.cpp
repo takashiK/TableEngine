@@ -26,6 +26,7 @@
 #include <QMap>
 #include <QDir>
 #include <QFileInfo>
+#include <QStorageInfo>
 #include <Shobjidl.h>
 #include <QMimeData>
 #include <QImage>
@@ -192,6 +193,19 @@ void comInitializeThread()
 void comUninitializeThread()
 {
 	CoUninitialize();
+}
+
+QList<TeDriveAction> getDriveActions()
+{
+	QList<TeDriveAction> actions;
+	for (const QStorageInfo& drive : QStorageInfo::mountedVolumes()) {
+		QString name = drive.displayName();
+		if (name.isEmpty()) {
+			name = drive.rootPath();
+		}
+		actions.append({ drive.rootPath().left(1), drive.rootPath(), name });
+	}
+	return actions;
 }
 
 

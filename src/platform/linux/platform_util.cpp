@@ -35,6 +35,7 @@
 #include <QDateTime>
 #include <QVector>
 #include <QSet>
+#include <QStorageInfo>
 
 #include <QMimeDatabase>
 #include <QMimeType>
@@ -400,6 +401,41 @@ namespace {
 		*destinations = candidates;
 		return true;
 	}
+
+	bool isExternalBlockDeviceImpl(const QString& blockDevice, const QString& sysfsRoot, QSet<QString>* visited)
+	{
+		if (blockDevice.isEmpty() || visited->contains(blockDevice)) {
+			return false;
+		}
+		visited->insert(blockDevice);
+
+		const QString root = QDir::cleanPath(sysfsRoot);
+		const QString entry = QFileInfo(QDir(root).filePath(QStringLiteral("class/block/") + blockDevice)).canonicalFilePath();
+		if (entry.isEmpty() || (entry != root && !entry.startsWith(root + QLatin1Char('/')))) {
+			return false;
+		}
+
+		QString current = entry;
+		while (current == root || current.startsWith(root + QLatin1Char('/'))) {
+			const QString subsystem = QFileInfo(QDir(current).filePath(QStringLiteral("subsystem"))).canonicalFilePath();
+			const QString subsystemName = QFileInfo(subsystem).fileName();
+			if (subsystemName == QStringLiteral("usb") || subsystemName == QStringLiteral("thunderbolt")) {
+				return true;
+			}
+			if (current == root) {
+				break;
+			}
+			current = QFileInfo(current).dir().absolutePath();
+		}
+
+		const QDir slaves(QDir(entry).filePath(QStringLiteral("slaves")));
+		for (const QFileInfo& slave : slaves.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+			if (isExternalBlockDeviceImpl(slave.fileName(), root, visited)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
 //////////////////////////////////////////////////////////////
@@ -421,6 +457,30 @@ void comInitializeThread()
 
 void comUninitializeThread()
 {
+}
+
+QList<TeDriveAction> getDriveActions()
+{
+	QList<TeDriveAction> actions;
+	for (const QStorageInfo& drive : QStorageInfo::mountedVolumes()) {
+		const QString devicePath = QFileInfo(drive.device()).canonicalFilePath();
+		const QString blockDevice = QFileInfo(devicePath.isEmpty() ? drive.device() : devicePath).fileName();
+		if (!platform_util_test::isExternalBlockDevice(blockDevice, QStringLiteral("/sys"))) {
+			continue;
+		}
+
+		const QString mountPoint = drive.rootPath();
+		QString mountName = QFileInfo(QDir::cleanPath(mountPoint)).fileName();
+		if (mountName.isEmpty()) {
+			mountName = mountPoint;
+		}
+		QString toolTip = drive.displayName();
+		if (toolTip.isEmpty()) {
+			toolTip = mountPoint;
+		}
+		actions.append({ platform_util_test::driveActionLabel(actions.size()) + QLatin1Char(':') + mountName, mountPoint, toolTip });
+	}
+	return actions;
 }
 
 //////////////////////////////////////////////////////////////
@@ -797,6 +857,25 @@ TeNativeEvent* getNativeEvent()
 QString getDefaultShellCommand()
 {
 	return QStringLiteral("/bin/sh");
+}
+
+namespace platform_util_test {
+QString driveActionLabel(int index)
+{
+	QString label;
+	int value = index + 2;
+	do {
+		label.prepend(QChar(u'A' + (value % 26)));
+		value = (value / 26) - 1;
+	} while (value >= 0);
+	return label;
+}
+
+bool isExternalBlockDevice(const QString& blockDevice, const QString& sysfsRoot)
+{
+	QSet<QString> visited;
+	return isExternalBlockDeviceImpl(blockDevice, sysfsRoot, &visited);
+}
 }
 
 //////////////////////////////////////////////////////////////
