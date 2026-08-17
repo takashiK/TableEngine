@@ -17,7 +17,7 @@ I'm user of FD at MS-DOS and 卓駆☆ at Windows. but both are not compatible o
 * libarchive and gtest / gmock (unit test only) — managed by vcpkg
 * ICU libraries bundled with Qt
 
-### Ubuntu 24.04
+### Ubuntu 26.04
 
 Linux builds use Ubuntu's system packages and never use vcpkg. Install the
 following packages before configuring the project:
@@ -30,7 +30,7 @@ sudo apt install -y \
   libarchive-dev libicu-dev libgtest-dev libgmock-dev
 ```
 
-Ubuntu 24.04's Qt 6.4 packages are supported. `valijson`, `QHexView`,
+Ubuntu 26.04's Qt 6.10 packages are supported. `valijson`, `QHexView`,
 `QLightTerminal`, and `ptyqt` are Git submodules on every platform.
 
 ## Folder tree
@@ -84,7 +84,7 @@ vcpkg will automatically download and build `libarchive` and `gtest` on the firs
 
 **VS Code**: Open the folder and select the `Qt MSVC2022 64bit - Ninja Multi-Config` configure preset in CMake Tools.
 
-### Ubuntu 24.04
+### Ubuntu 26.04
 
 After installing the packages above, configure, build, test, and package with
 the apt-only presets:
