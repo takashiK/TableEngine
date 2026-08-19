@@ -115,4 +115,16 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/tableengine"
         RENAME "copyright"
     )
+
+    # Desktop entry + hicolor theme icons so GNOME/Wayland show the app icon
+    # instead of the generic fallback in the dock/sidebar.
+    install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/Resources/app_icon/tableengine.desktop"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/applications"
+    )
+
+    install(DIRECTORY
+        "${CMAKE_CURRENT_SOURCE_DIR}/Resources/app_icon/hicolor/"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor"
+    )
 endif()

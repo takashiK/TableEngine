@@ -33,8 +33,10 @@
 #include "version.h"
 
 #include <QtWidgets/QApplication>
+#include <QGuiApplication>
 #include <QLocale>
 #include <QTranslator>
+#include <QIcon>
 
 #include <QPixmapCache>
 
@@ -45,7 +47,10 @@ int main(int argc, char *argv[])
 	QApplication::setOrganizationName("TableWare");
 	QApplication::setApplicationName("TableEngine");
 	QApplication::setApplicationVersion(APP_VERSION_STR);
+	// Match the Linux .desktop file so GNOME/Wayland resolve the dock icon instead of a fallback.
+	QGuiApplication::setDesktopFileName("tableengine");
 	QApplication a(argc, argv);
+	a.setWindowIcon(QIcon(":/TableEngine/appIcon.png"));
 
 	//Load translation file.
 	QTranslator myappTranslator;
