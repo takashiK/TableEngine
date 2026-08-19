@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=TableEngine
+Comment=Keyboard-driven file explorer
+Exec=TableEngine %U
+Icon=tableengine
+Terminal=false
+Categories=Utility;FileManager;
+StartupWMClass=TableEngine

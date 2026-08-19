@@ -22,8 +22,8 @@
 
 #include <QPainter>
 #include <QImage>
-#include <QGuiApplication>
-#include <QStyleHints>
+
+#include "platform/platform_util.h"
 
 TeAdaptiveIconEngine::TeAdaptiveIconEngine(const QString& resourcePath)
     : m_path(resourcePath)
@@ -47,7 +47,7 @@ QPixmap TeAdaptiveIconEngine::pixmap(const QSize& size, QIcon::Mode mode, QIcon:
         px = px.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     if (!px.isNull()
-        && QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark)
+        && getStyleColorScheme() == TeStyleColorScheme::Dark)
     {
         return inverted(px);
     }

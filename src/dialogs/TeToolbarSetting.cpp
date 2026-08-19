@@ -133,13 +133,13 @@ void TeToolbarSetting::storeDefaultSettings(bool force)
 		const TeCommandInfoBase* p_info = factory->commandInfo(cmdId);
 		if (p_info) {
 			settings.setValue(
-				QString("item%1").arg(index++, 3, 10, u'0'),
+				QString("item%1").arg(index++, 3, 10, QChar{u'0'}),
 				QString("0,%1,%2").arg(p_info->name()).arg(static_cast<int>(p_info->cmdId())));
 		}
 	};
 	auto separatorEntry = [&]() {
 		settings.setValue(
-			QString("item%1").arg(index++, 3, 10, u'0'),
+			QString("item%1").arg(index++, 3, 10, QChar{u'0'}),
 			QString("0,---,%1").arg(static_cast<int>(TeTypes::CMDID_SPECIAL_SEPARATOR)));
 	};
 
@@ -187,7 +187,7 @@ void TeToolbarSetting::updateSettings()
 	for (int i = 0; i < mp_toolbar->topLevelItemCount(); i++) {
 		QTreeWidgetItem* item = mp_toolbar->topLevelItem(i);
 		settings.setValue(
-			QString("item%1").arg(i, 3, 10, u'0'),
+			QString("item%1").arg(i, 3, 10, QChar{u'0'}),
 			QString("0,%1,%2")
 				.arg(item->data(COL_REGISTER, Qt::DisplayRole).toString())
 				.arg(item->data(COL_CMD_ID, Qt::DisplayRole).toInt()));

@@ -49,6 +49,7 @@
 #include "dialogs/TeFilePathDialog.h"
 #include "platform/TeFileOperationManager.h"
 #include "platform/platform_util.h"
+#include "utils/TeAppPaths.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -70,7 +71,6 @@
 #include <QCoreApplication>
 #include <QGuiApplication>
 #include <QScreen>
-#include <QStyleHints>
 #include <QtWidgets/QApplication>
 #include "utils/TeFolderAppearance.h"
 
@@ -334,7 +334,7 @@ void TeViewStore::initialize()
 	mp_paletteEmitter->addEmitter(mp_mainWindow);
 	connect(mp_paletteEmitter, &TeEventEmitter::emitEvent,
 		this, [this](QWidget*, QEvent*) {
-			Qt::ColorScheme current = QGuiApplication::styleHints()->colorScheme();
+			TeStyleColorScheme current = getStyleColorScheme();
 			if (current != m_lastColorScheme) {
 				m_lastColorScheme = current;
 				applyStyleSheet(current);
@@ -545,7 +545,7 @@ void TeViewStore::loadKeySetting()
 	if (mp_dispatcher) mp_dispatcher->loadKeySetting();
 }
 
-void TeViewStore::applyStyleSheet(Qt::ColorScheme scheme)
+void TeViewStore::applyStyleSheet(TeStyleColorScheme scheme)
 {
 	m_lastColorScheme = scheme;
 
@@ -556,15 +556,15 @@ void TeViewStore::applyStyleSheet(Qt::ColorScheme scheme)
 		return {};
 	};
 
-	const bool dark = (scheme == Qt::ColorScheme::Dark);
+	const bool dark = (scheme == TeStyleColorScheme::Dark);
 
 	// ① System default (embedded QRC resource)
 	QString merged = loadFile(dark
 		? QStringLiteral(":/Style/stylesheet_dark.css")
 		: QStringLiteral(":/Style/stylesheet_light.css"));
 
-	// ② User override file (next to the executable) — applied after base so rules win
-	const QString userSheet = loadFile(QApplication::applicationDirPath()
+	// ② User override file (writable per-user asset dir) — applied after base so rules win
+	const QString userSheet = loadFile(teUserAssetDir()
 		+ (dark ? QStringLiteral("/stylesheet_user_dark.css")
 		        : QStringLiteral("/stylesheet_user_light.css")));
 	if (!userSheet.isEmpty())
@@ -588,7 +588,7 @@ void TeViewStore::applyStyleSheet(Qt::ColorScheme scheme)
 
 void TeViewStore::applyStyleSheet()
 {
-	applyStyleSheet(QGuiApplication::styleHints()->colorScheme());
+	applyStyleSheet(getStyleColorScheme());
 }
 
 /*!

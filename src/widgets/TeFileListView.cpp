@@ -66,6 +66,7 @@ void TeFileListView::setSelectionMode(TeTypes::SelectionMode mode)
 {
 	m_selectionMode = mode;
 	m_pressedIndex = QModelIndex();
+	m_anchorIndex = QModelIndex();
 	switch (mode) {
 	case TeTypes::SELECTION_NONE:
 	case TeTypes::SELECTION_TABLE_ENGINE:
@@ -80,6 +81,43 @@ void TeFileListView::setSelectionMode(TeTypes::SelectionMode mode)
 TeTypes::SelectionMode TeFileListView::selectionMode() const
 {
 	return m_selectionMode;
+}
+
+void TeFileListView::setModel(QAbstractItemModel* model)
+{
+	QListView::setModel(model);
+	m_anchorIndex = QModelIndex();
+}
+
+void TeFileListView::setRootIndex(const QModelIndex& index)
+{
+	QListView::setRootIndex(index);
+	m_anchorIndex = QModelIndex();
+}
+
+/*!
+	Sole current-navigation anchor-update path: keyboard moves, mouse clicks/
+	drags (via QListView::mousePressEvent()/mouseMoveEvent()), and programmatic
+	setCurrentIndex() calls all funnel through here. Synchronization is skipped
+	while a CurrentChangedBlockGuard is active, so mousePressEvent()'s explicit
+	applyPressSelection() logic keeps sole ownership of m_anchorIndex for
+	Ctrl/Shift/right-click semantics.
+ */
+void TeFileListView::currentChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+	QListView::currentChanged(current, previous);
+
+	if ((QListView::selectionMode() == QListView::NoSelection) && (selectionMode() == TeTypes::SELECTION_TABLE_ENGINE) && !m_currentChangedBlocked) {
+		m_anchorIndex = isSelectableIndex(current) ? QPersistentModelIndex(current) : QPersistentModelIndex();
+	}
+}
+
+bool TeFileListView::isSelectableIndex(const QModelIndex& index) const
+{
+	if (!index.isValid()) {
+		return false;
+	}
+	return model()->data(index, Qt::DisplayRole).toString() != QStringLiteral("..");
 }
 
 /*!
@@ -144,8 +182,11 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 
 		QListView::keyPressEvent(event);
 
-		QPersistentModelIndex newCurrent, current;
+		// currentChanged() is the sole current-navigation anchor-update path: any
+		// resulting setCurrentIndex() (from QListView::keyPressEvent() above or
+		// from the Space-key handling below) synchronizes m_anchorIndex itself.
 		if (event) {
+			QPersistentModelIndex newCurrent, current;
 			switch (event->key()) {
 			case Qt::Key_Space:
 				//select by space key.
@@ -160,12 +201,6 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 					selectionModel()->setCurrentIndex(newCurrent, QItemSelectionModel::NoUpdate);
 				}
 				break;
-			case Qt::Key_Up:
-			case Qt::Key_Down:
-			case Qt::Key_Left:
-			case Qt::Key_Right:
-				// change current index by arrow keys.
-				break;
 			default:
 				break;
 			}
@@ -178,36 +213,124 @@ void TeFileListView::keyPressEvent(QKeyEvent *event)
 
 void TeFileListView::mousePressEvent(QMouseEvent* event)
 {
-	Qt::KeyboardModifiers modifiers = event && event->isInputEvent()
-		? static_cast<const QInputEvent*>(event)->modifiers()
-		: QGuiApplication::keyboardModifiers();
-
 	if ((QListView::selectionMode() == QListView::NoSelection) && (selectionMode() == TeTypes::SELECTION_TABLE_ENGINE)) {
+		Qt::KeyboardModifiers modifiers = event->modifiers();
 		QPoint pos = event->position().toPoint();
 		QModelIndex index = indexAt(pos);
-		if (selectionModel()->isSelected(index)) {
-			m_pressedIndex = QModelIndex();
-		}else{
-			m_pressedIndex = index;
-			if (isSelectionRectVisible()) {
-				m_pressedPos = pos + QPoint(horizontalOffset(), verticalOffset());
-				mp_rubberBand->setGeometry(QRect::span(pos, m_pressedPos).normalized());
-				mp_rubberBand->show();
+		bool wasSelected = index.isValid() && selectionModel()->isSelected(index);
+
+		// Left and right press both establish/clear the "temporary single
+		// selection" tracked by m_pressedIndex, so a following arrow-key move
+		// clears it regardless of which button created it; only left press
+		// starts the drag rubber-band.
+		if (event->button() == Qt::LeftButton || event->button() == Qt::RightButton) {
+			if (wasSelected) {
+				m_pressedIndex = QModelIndex();
+			}
+			else {
+				m_pressedIndex = index;
+				if (event->button() == Qt::LeftButton && isSelectionRectVisible()) {
+					m_pressedPos = pos + QPoint(horizontalOffset(), verticalOffset());
+					mp_rubberBand->setGeometry(QRect::span(pos, m_pressedPos).normalized());
+					mp_rubberBand->show();
+				}
 			}
 		}
 
-		if (!index.isValid() && !(modifiers & (Qt::ShiftModifier | Qt::ControlModifier))) {
-			clearSelection();
+		// selectionCommand() returns NoUpdate for MouseButtonPress in this mode,
+		// so the base call only retains Qt's current/pressed/edit/drag machinery;
+		// selection itself is applied explicitly below, independent of Qt's
+		// platform-dependent internal anchor handling. currentChanged()'s anchor
+		// sync is suspended for the duration of the base call so applyPressSelection()
+		// below sees the pre-click anchor, not one clobbered by the base class's
+		// own setCurrentIndex().
+		{
+			CurrentChangedBlockGuard guard(m_currentChangedBlocked);
+			QListView::mousePressEvent(event);
 		}
-	}
-	QListView::mousePressEvent(event);
 
-	if ((QListView::selectionMode() == QListView::NoSelection) && (selectionMode() == TeTypes::SELECTION_TABLE_ENGINE)) {
+		applyPressSelection(index, wasSelected, event->button(), modifiers);
+
 		//deselect ".." entry.
 		QModelIndex topIndex = model()->index(0, 0, rootIndex());
 		if (".." == model()->data(topIndex, Qt::DisplayRole).toString()) {
 			selectionModel()->select(topIndex, QItemSelectionModel::Deselect);
 		}
+		return;
+	}
+	QListView::mousePressEvent(event);
+}
+
+/*!
+	Applies the TABLE_ENGINE click selection rule explicitly (see
+	doc/markdown/widgets/TeFileListView.md), independent of Qt's
+	platform-dependent internal anchor handling.
+ */
+void TeFileListView::applyPressSelection(const QModelIndex& index, bool wasSelected, Qt::MouseButton button, Qt::KeyboardModifiers modifiers)
+{
+	bool validTarget = isSelectableIndex(index);
+
+	if (button == Qt::LeftButton) {
+		if (modifiers & Qt::ShiftModifier) {
+			if (!validTarget) {
+				// blank / ".." target: keep the current selection unchanged.
+				return;
+			}
+			// With no existing selection there is nothing to extend from, so
+			// the click establishes a fresh anchor at the target itself
+			// (matches a plain click) rather than reusing a stale anchor.
+			// The parent check guards against a stale anchor left over from a
+			// different folder/root that setRootIndex()/setModel() failed to
+			// invalidate (defensive; those overrides already reset it).
+			QModelIndex anchor;
+			if (m_anchorIndex.isValid() && QModelIndex(m_anchorIndex).parent() == rootIndex() && selectionModel()->hasSelection()) {
+				anchor = QModelIndex(m_anchorIndex);
+			}
+			else {
+				anchor = index;
+				m_anchorIndex = index;
+			}
+			int r1 = qMin(anchor.row(), index.row());
+			int r2 = qMax(anchor.row(), index.row());
+			QModelIndex parent = rootIndex();
+			QItemSelection range(model()->index(r1, index.column(), parent), model()->index(r2, index.column(), parent));
+			selectionModel()->select(range, (modifiers & Qt::ControlModifier) ? QItemSelectionModel::Select : QItemSelectionModel::ClearAndSelect);
+			// anchor is preserved for Shift (and Ctrl+Shift) so repeated
+			// Shift-clicks keep extending the range from the same origin.
+			return;
+		}
+
+		if (modifiers & Qt::ControlModifier) {
+			if (validTarget) {
+				selectionModel()->select(index, QItemSelectionModel::Toggle);
+			}
+			// anchor is preserved for Ctrl.
+			return;
+		}
+
+		// Unmodified click.
+		if (!validTarget) {
+			clearSelection();
+			m_anchorIndex = QModelIndex();
+			return;
+		}
+		if (!wasSelected) {
+			selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+		}
+		// else: clicking an already-selected item keeps the selection as-is.
+		m_anchorIndex = index;
+		return;
+	}
+
+	if (button == Qt::RightButton) {
+		if (!validTarget) {
+			return;
+		}
+		if (!wasSelected) {
+			selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+		}
+		// else: right-clicking an already-selected item preserves the selection.
+		// The anchor is intentionally left untouched by right-click.
 	}
 }
 
@@ -219,6 +342,9 @@ void TeFileListView::mouseMoveEvent(QMouseEvent* event)
 		QPoint startPos = m_pressedPos - QPoint(horizontalOffset(), verticalOffset());
 		mp_rubberBand->setGeometry(QRect::span(startPos,pos).normalized());
 	}
+	// Suspend anchor sync: base-class hover-driven current changes during a
+	// rubber-band drag must not move the anchor established at press time.
+	CurrentChangedBlockGuard guard(m_currentChangedBlocked);
 	QListView::mouseMoveEvent(event);
 }
 
@@ -242,93 +368,20 @@ void TeFileListView::mouseReleaseEvent(QMouseEvent* event)
  */
 QItemSelectionModel::SelectionFlags TeFileListView::selectionCommand(const QModelIndex& index, const QEvent* event) const
 {
-	//qDebug() << "event type:" << (event ? event->type() : QEvent::None) << "index:" << index << "selected:" << selectionModel()->isSelected(index);
 	if ((QListView::selectionMode() == QListView::NoSelection) && (selectionMode() == TeTypes::SELECTION_TABLE_ENGINE)) {
-		Qt::KeyboardModifiers modifiers = event && event->isInputEvent()
-            ? static_cast<const QInputEvent*>(event)->modifiers()
-            : QGuiApplication::keyboardModifiers();
-
-		QString str = model()->data(index, Qt::DisplayRole).toString();
-		bool indexInvalid = !index.isValid() || (str == "..");
-		bool indexSelected = selectionModel()->isSelected(index);
-        if (event) {
-            switch (event->type()) {
-            case QEvent::MouseMove: {
-				if (modifiers & Qt::ShiftModifier) {
-					//qDebug() << "MouseMove ShiftModifier SelectCurrent";
-					return QItemSelectionModel::SelectCurrent;
-				}
-				else {
-					//qDebug() << "MouseMove No Modifier ToggleCurrent";
-					return QItemSelectionModel::ToggleCurrent;
-				}
-
-                break;
-            }
-            case QEvent::MouseButtonPress: {
-				if (modifiers & Qt::ShiftModifier) {
-					if (index.isValid()) {
-						//qDebug() << "MouseButtonPress ShiftModifier indexValid SelectCurrent";
-						return QItemSelectionModel::SelectCurrent;
-					}
-					else {
-						//qDebug() << "MouseButtonPress ShiftModifier indexInvalid Select";
-						return QItemSelectionModel::Select;
-					}
-
-				}
-				else if (modifiers & Qt::ControlModifier) {
-					//qDebug() << "MouseButtonPress ControlModifier Toggle";
-					return QItemSelectionModel::Toggle;
-				}
-				else {
-					if (indexInvalid) {
-						//qDebug() << "MouseButtonPress No Modifier indexInvalid Clear";
-						return QItemSelectionModel::Clear;
-					}
-					else if (indexSelected) {
-						//qDebug() << "MouseButtonPress No Modifier indexSelected NoUpdate";
-						return QItemSelectionModel::NoUpdate;
-					}
-					else {
-						//qDebug() << "MouseButtonPress No Modifier ClearAndSelect";
-						return QItemSelectionModel::ClearAndSelect;
-					}
-				}
-                break;
-            }
-            case QEvent::MouseButtonRelease: {
-				break;
-			}
-            case QEvent::KeyPress:
-            default:
-                break;
-            }
-
-			return QItemSelectionModel::NoUpdate;
-        }
-
-		// event == nullptr means the selection flags are requested for a
-		// programmatic current-index change made through
-		// QAbstractItemView::setCurrentIndex(). This happens in two distinct
-		// situations that must behave differently:
-		//
-		//  1. Mouse Shift+click range selection. While the left button is held
-		//     the view extends the selection from the anchor to the clicked
-		//     item, so SelectCurrent must be returned (legacy behavior).
-		//  2. Incremental inline search (QAbstractItemView::keyboardSearch),
-		//     triggered by typing characters. The Shift key is often physically
-		//     held while typing, but the cursor jump must NOT alter the
-		//     selection.
-		//
-		// No mouse button is pressed during keyboard search, so the live mouse
-		// button state distinguishes the two cases reliably.
-		if ((modifiers & Qt::ShiftModifier) && (QGuiApplication::mouseButtons() != Qt::NoButton)) {
-			//qDebug() << "Programmatic mouse Shift change SelectCurrent";
-			return QItemSelectionModel::SelectCurrent;
+		// MouseMove (rubber-band drag hover) is the only case where the base
+		// class still drives selection in this mode; every other case
+		// (MouseButtonPress/Release/DblClick, KeyPress, and event == nullptr for
+		// programmatic current-index changes) is applied explicitly by
+		// mousePressEvent()/keyPressEvent(), so the base class must not touch
+		// selection here. Modifiers are read only from the event itself; no
+		// QGuiApplication fallback is used, keeping the behavior deterministic
+		// and platform independent.
+		if (event && event->type() == QEvent::MouseMove) {
+			Qt::KeyboardModifiers modifiers = static_cast<const QInputEvent*>(event)->modifiers();
+			return (modifiers & Qt::ShiftModifier) ? QItemSelectionModel::SelectCurrent : QItemSelectionModel::ToggleCurrent;
 		}
 
-		//qDebug() << "Programmatic current change NoUpdate";
 		return QItemSelectionModel::NoUpdate;
 	}
 

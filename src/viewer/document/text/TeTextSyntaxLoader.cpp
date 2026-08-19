@@ -1,6 +1,7 @@
 ﻿#include "TeTextSyntaxLoader.h"
 
 #include "viewer/document/TeDocumentSettings.h"
+#include "utils/TeAppPaths.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -72,17 +73,17 @@ namespace {
 
         if (format.foreground().style() != Qt::NoBrush) {
             QString rgb = QString("#%1%2%3")
-                .arg(format.foreground().color().red(), 2, 16, u'0')
-                .arg(format.foreground().color().green(), 2, 16, u'0')
-                .arg(format.foreground().color().blue(), 2, 16, u'0');
+                .arg(format.foreground().color().red(), 2, 16, QChar{u'0'})
+                .arg(format.foreground().color().green(), 2, 16, QChar{u'0'})
+                .arg(format.foreground().color().blue(), 2, 16, QChar{u'0'});
             style["color"] = rgb;
         }
 
         if (format.background().style() != Qt::NoBrush) {
             QString rgb = QString("#%1%2%3")
-                .arg(format.background().color().red(), 2, 16, u'0')
-                .arg(format.background().color().green(), 2, 16, u'0')
-                .arg(format.background().color().blue(), 2, 16, u'0');
+                .arg(format.background().color().red(), 2, 16, QChar{u'0'})
+                .arg(format.background().color().green(), 2, 16, QChar{u'0'})
+                .arg(format.background().color().blue(), 2, 16, QChar{u'0'});
             style["bgcolor"] = rgb;
         }
         return style;
@@ -110,7 +111,7 @@ bool TeTextSyntaxLoader::loadAll()
     
     //Load syntaxes
     QSettings setting;
-    QString path = setting.value(SETTING_TEXT_HIGHLIGHT_FOLDER, QApplication::applicationDirPath() + "/highlight").toString();
+    QString path = setting.value(SETTING_TEXT_HIGHLIGHT_FOLDER, teUserAssetDir() + "/highlight").toString();
     QDir dir(path);
     if (!dir.exists()) {
         return false;
@@ -143,7 +144,7 @@ bool TeTextSyntaxLoader::loadAll()
 bool TeTextSyntaxLoader::saveAll()
 {
     QSettings setting;
-    QString path = setting.value(SETTING_TEXT_HIGHLIGHT_FOLDER, QApplication::applicationDirPath() + "/highlight").toString();
+    QString path = setting.value(SETTING_TEXT_HIGHLIGHT_FOLDER, teUserAssetDir() + "/highlight").toString();
     QDir dir;
     dir.mkpath(path);
     dir.setPath(path);

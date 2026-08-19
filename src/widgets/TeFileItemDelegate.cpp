@@ -6,7 +6,6 @@
 #include <QFileInfo>
 #include <QFileSystemModel>
 #include <QPainter>
-#include <qpainterstateguard.h>
 #include <QTextLayout>
 #include <QTextOption>
 #include <QtMath>
@@ -85,7 +84,7 @@ void TeFileItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
         paintIconMode(painter, opt, style, widget);
     } else {
         // ListMode: check for QFileSystemModel extended info
-        QVariant fileInfoVar = index.data(QFileSystemModel::FileInfoRole);
+        QVariant fileInfoVar = index.data(QFileSystemModel::FilePathRole);
         bool hasInfo = fileInfoVar.isValid() || index.data(TeFileInfo::ROLE_TYPE).isValid();
         if ((hasInfo && m_infoFlags != TeTypes::FILEINFO_NONE) || m_maxFileNameChars > 0) {
             paintListMode(painter, opt, index, style, widget);
@@ -126,15 +125,15 @@ void TeFileItemDelegate::paintIconMode(QPainter* painter, QStyleOptionViewItem& 
 
 void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& opt, const QModelIndex& index, QStyle* style, const QWidget* widget) const
 {
-    // Support both QFileSystemModel items (QFileInfo via FileInfoRole) and
+    // Support both QFileSystemModel items (path via FilePathRole) and
     // archive items (TeFileInfo custom roles, which have no QFileInfo).
-    QVariant fileInfoVar = index.data(QFileSystemModel::FileInfoRole);
+    QVariant fileInfoVar = index.data(QFileSystemModel::FilePathRole);
     const bool hasInfo = fileInfoVar.isValid() || index.data(TeFileInfo::ROLE_TYPE).isValid();
     bool entryIsDir = false;
     qint64 entrySize = 0;
     QDateTime entryModified;
     if (fileInfoVar.isValid()) {
-        QFileInfo fileInfo = qvariant_cast<QFileInfo>(fileInfoVar);
+        QFileInfo fileInfo(fileInfoVar.toString());
         entryIsDir = fileInfo.isDir();
         entrySize = fileInfo.size();
         entryModified = fileInfo.lastModified();
@@ -211,8 +210,8 @@ void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& 
     if (opt.state & QStyle::State_Selected) {
         const QRect &rect = opt.rect;
         const bool isRtl = opt.direction == Qt::RightToLeft;
-        const QColor col = opt.palette.accent().color();
-        QPainterStateGuard psg(painter);
+        const QColor col = opt.palette.color(QPalette::Active, QPalette::Highlight);
+        painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setBrush(col);
         painter->setPen(col);
@@ -221,6 +220,7 @@ void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& 
         QRectF r(QPointF(xPos, rect.y() + yOfs),
                  QPointF(xPos + 1, rect.y() + rect.height() - yOfs));
         painter->drawRoundedRect(r, 1, 1);
+        painter->restore();
     }
 }
 
@@ -318,7 +318,7 @@ QSize TeFileItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QMo
         baseSize.setWidth(nonFileNameWidth + constrainedFileNameWidth);
     }
 
-    QVariant fileInfoVar = index.data(QFileSystemModel::FileInfoRole);
+    QVariant fileInfoVar = index.data(QFileSystemModel::FilePathRole);
     if ((fileInfoVar.isValid() || index.data(TeFileInfo::ROLE_TYPE).isValid()) && m_infoFlags != TeTypes::FILEINFO_NONE) {
         int margin = fm.horizontalAdvance(QLatin1Char(' '));
 

@@ -85,8 +85,9 @@ public slots:
 	void accept() override;
 
 private:
-	QWidget* createUserEntry(const UserCommandSetting& initial = UserCommandSetting());
-	void addUserEntry(const UserCommandSetting& initial = UserCommandSetting());
+	QWidget* createUserEntry(const UserCommandSetting& initial);
+	void addUserEntry();
+	void addUserEntry(const UserCommandSetting& initial);
 	void removeUserEntry(QWidget* frame);
 
 	void loadSettings();

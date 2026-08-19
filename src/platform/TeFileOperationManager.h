@@ -24,6 +24,7 @@
 #include <QString>
 #include <QStringList>
 #include <QHash>
+#include <QPointer>
 
 /**
  * @file TeFileOperationManager.h
@@ -40,6 +41,8 @@
 
 class QWidget;
 class QThread;
+class TeFileOpProgress;
+class TeFileOpProgressDialog;
 
 /**
  * @class TeFileOpWorker
@@ -58,10 +61,13 @@ public:
 	explicit TeFileOpWorker(QObject* parent = nullptr);
 
 public slots:
-	void doCopyFiles(quint64 id, const QStringList& files, const QString& path, quint64 owner);
-	void doCopyFile(quint64 id, const QString& fromFile, const QString& toFile, quint64 owner);
-	void doMoveFiles(quint64 id, const QStringList& files, const QString& path, quint64 owner);
-	void doDeleteFiles(quint64 id, const QStringList& files, quint64 owner);
+	// The final quint64 is a TeFileOpProgress* reinterpret_cast to an integer
+	// (0 when no progress reporting is needed) so the argument stays a
+	// registrable, cross-thread-safe queued-connection type, matching owner.
+	void doCopyFiles(quint64 id, const QStringList& files, const QString& path, quint64 owner, quint64 progress);
+	void doCopyFile(quint64 id, const QString& fromFile, const QString& toFile, quint64 owner, quint64 progress);
+	void doMoveFiles(quint64 id, const QStringList& files, const QString& path, quint64 owner, quint64 progress);
+	void doDeleteFiles(quint64 id, const QStringList& files, quint64 owner, quint64 progress);
 
 signals:
 	/** @brief Emitted on the worker thread when an operation completes. */
@@ -109,10 +115,20 @@ private slots:
 
 private:
 	quint64 ownerHandle() const;
+	/**
+	 * @brief Creates the progress reporter (and, on Linux, a GUI-thread
+	 *        progress dialog) for operation @p id. Returns nullptr on
+	 *        platforms whose native shell already shows progress (Windows).
+	 */
+	TeFileOpProgress* beginProgress(quint64 id, const QString& title);
+	/** @brief Closes/destroys the progress reporter and dialog for @p id, if any. */
+	void endProgress(quint64 id);
 
 	QThread*        mp_thread = nullptr;
 	TeFileOpWorker* mp_worker = nullptr;
 	QWidget*        mp_owner  = nullptr;
 	quint64         m_nextId  = 1;
 	QHash<quint64, QString> m_errorText;
+	QHash<quint64, TeFileOpProgress*>              m_progress;
+	QHash<quint64, QPointer<TeFileOpProgressDialog>> m_dialogs;
 };

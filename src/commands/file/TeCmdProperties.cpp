@@ -25,7 +25,7 @@
 #include "widgets/TeArchiveFolderView.h"
 #include "dialogs/TePropertiesDialog.h"
 
-#include <QURL>
+#include <QUrl>
 #include <QList>
 
 #include <QMimeData>

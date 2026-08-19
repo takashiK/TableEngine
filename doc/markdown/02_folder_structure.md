@@ -53,7 +53,8 @@ src/
 ├── platform/                # OS 依存処理の抽象化レイヤー
 │   ├── platform_util.h      # プラットフォーム中立 API 宣言
 │   ├── TeNativeEvent.h/cpp  # ネイティブイベントフィルタ
-│   └── windows/             # Windows 固有実装
+│   ├── windows/             # Windows 固有実装
+│   └── linux/               # Linux (Ubuntu) 固有実装
 ├── utils/                   # ファイル操作・検索・履歴等のユーティリティ
 ├── viewer/                  # ファイルビューワ
 │   ├── binary/              # バイナリビューワ

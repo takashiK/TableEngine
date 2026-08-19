@@ -26,6 +26,7 @@
 #include <QMap>
 #include <QDir>
 #include <QFileInfo>
+#include <QStorageInfo>
 #include <Shobjidl.h>
 #include <QMimeData>
 #include <QImage>
@@ -39,6 +40,9 @@
 #include <shellapi.h>
 #include <thumbcache.h>
 #include <GdiPlus.h>
+
+#include <QGuiApplication>
+#include <QStyleHints>
 
 #include <vector>
 
@@ -191,6 +195,19 @@ void comUninitializeThread()
 	CoUninitialize();
 }
 
+QList<TeDriveAction> getDriveActions()
+{
+	QList<TeDriveAction> actions;
+	for (const QStorageInfo& drive : QStorageInfo::mountedVolumes()) {
+		QString name = drive.displayName();
+		if (name.isEmpty()) {
+			name = drive.rootPath();
+		}
+		actions.append({ drive.rootPath().left(1), drive.rootPath(), name });
+	}
+	return actions;
+}
+
 
 bool showFilesContext(int px, int py, const QStringList& paths)
 {
@@ -309,8 +326,10 @@ void openFile(const QString& path)
 	}
 }
 
-bool copyFiles(const QStringList & files, const QString & path, WId owner)
+bool copyFiles(const QStringList & files, const QString & path, WId owner, TeFileOpProgress* /*progress*/)
 {
+	// Windows shows its own native progress UI via IFileOperation, so the
+	// cross-thread TeFileOpProgress reporter (used by the Linux implementation) is unused here.
 	HRESULT hr = S_OK;
 	IFileOperation *pfo;
 
@@ -364,7 +383,7 @@ bool copyFiles(const QStringList & files, const QString & path, WId owner)
 	return SUCCEEDED(hr);
 }
 
-bool copyFile(const QString & fromFile, const QString & toFile, WId owner)
+bool copyFile(const QString & fromFile, const QString & toFile, WId owner, TeFileOpProgress* /*progress*/)
 {
 	HRESULT hr = S_OK;
 	IFileOperation *pfo;
@@ -422,7 +441,7 @@ bool copyFile(const QString & fromFile, const QString & toFile, WId owner)
 	return SUCCEEDED(hr);
 }
 
-bool moveFiles(const QStringList & files, const QString & path, WId owner)
+bool moveFiles(const QStringList & files, const QString & path, WId owner, TeFileOpProgress* /*progress*/)
 {
 	HRESULT hr = S_OK;
 	IFileOperation *pfo;
@@ -476,7 +495,7 @@ bool moveFiles(const QStringList & files, const QString & path, WId owner)
 	return SUCCEEDED(hr);
 }
 
-bool deleteFiles(const QStringList & files, WId owner)
+bool deleteFiles(const QStringList & files, WId owner, TeFileOpProgress* /*progress*/)
 {
 	HRESULT hr = S_OK;
 	IFileOperation *pfo;
@@ -684,12 +703,12 @@ bool isMoveAction(const QMimeData* mime)
 {
 	if (mime->hasFormat("application/x-qt-windows-mime;value=\"Preferred DropEffect\"")) {
 		const QByteArray array = mime->data("application/x-qt-windows-mime;value=\"Preferred DropEffect\"");
-		return (array.at(0) == 2);
+		return !array.isEmpty() && (array.at(0) == 2);
 	}
 
 	if (mime->hasFormat("Preferred DropEffect")) {
 		const QByteArray array = mime->data("Preferred DropEffect");
-		return (array.at(0) == 2);
+		return !array.isEmpty() && (array.at(0) == 2);
 	}
 
 	return false;
@@ -712,6 +731,21 @@ void setCopyAction(QMimeData* mime)
 TeNativeEvent* getNativeEvent()
 {
 	return &g_event;
+}
+
+//////////////////////////////////////////////////////////
+//
+// Colour scheme
+//
+
+TeStyleColorScheme getStyleColorScheme()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+	return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark
+		? TeStyleColorScheme::Dark : TeStyleColorScheme::Light;
+#else
+	return TeStyleColorScheme::Light;
+#endif
 }
 
 

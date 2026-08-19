@@ -6,9 +6,10 @@
 上位レイヤー（コマンド / ウィジェット）は `platform_util.h` で宣言された関数のみを呼び出し、  
 OS の違いを意識せずにファイル操作・サムネイル取得・ネイティブイベント等を利用できます。
 
-現在は **Windows** 向けの実装のみが提供されています。  
-Linux / macOS 対応を追加する際は `platform/` 配下に OS 別の実装ファイルを追加し、  
-`CMakeLists.txt` の条件コンパイル（`if(WIN32)` 等）で切り替えます。
+現在は **Windows** と **Linux (Ubuntu)** 向けの実装が提供されています。
+Linux 実装ではデスクトップ環境固有のシェル連携（右クリックコンテキストメニュー / サムネイル / プロパティダイアログ / `IFileOperation` 相当のコピー・移動）は未実装で、安全に no-op（何もしない）またはデフォルト値を返します。
+macOS 対応を追加する際は `platform/` 配下に OS 別の実装ファイルを追加し、
+`CMakeLists.txt` の条件コンパイル（`if(WIN32)` / `elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")` 等）で切り替えます。
 
 ---
 
@@ -19,9 +20,11 @@ platform/
 ├── platform_util.h            # プラットフォーム中立な関数宣言（上位レイヤーが参照する唯一のヘッダ）
 ├── TeNativeEvent.h/cpp        # ネイティブイベント通知の抽象クラス
 ├── TeFileOperationManager.h/cpp  # 非同期シェルファイル操作マネージャ（ワーカースレッド）
-└── windows/
-    ├── platform_util.cpp      # Windows 向け platform_util.h の実装
-    └── TeWindowsEventFilter.h/cpp  # Windows ネイティブイベントフィルタ
+├── windows/
+│   ├── platform_util.cpp      # Windows 向け platform_util.h の実装
+│   └── TeWindowsEventFilter.h/cpp  # Windows ネイティブイベントフィルタ
+└── linux/
+    └── platform_util.cpp      # Linux (Ubuntu) 向け platform_util.h の実装
 ```
 
 ---
@@ -29,7 +32,7 @@ platform/
 ## API Reference
 
 `platform_util.h` で宣言されているすべての関数を以下に示します。  
-実装は `platform/windows/platform_util.cpp` にあります。
+実装は `platform/windows/platform_util.cpp`（Windows）と `platform/linux/platform_util.cpp`（Linux）にあります。
 
 ### Initialization
 
@@ -101,6 +104,38 @@ OS レベルのイベント（ドライブの接続 / 切断等）を `Qt` の�
 `TeNativeEvent::changeMountState()` を呼び出します。  
 `threadInitialize()` で `QApplication` にインストールされます。
 
+### Linux 実装
+
+`TeLinuxMountMonitor` は `/proc/self/mountinfo` の変更通知を監視し、300ms のデバウンス後に外部 USB / Thunderbolt ドライブの表示用一覧を再評価します。
+表示状態に変化がある場合だけ、共有の `TeNativeEvent` から `mountStateChanged` シグナルを発行します。`/proc/self/mountinfo` を開けない環境では 5 秒間隔のフォールバック監視を使用します。
+
+---
+
+## Colour Scheme Abstraction
+
+ライト / ダークテーマの判定は Qt のバージョン差異を吸収する `TeStyleColorScheme` で抽象化されています。
+
+```cpp
+enum class TeStyleColorScheme {
+	Light,
+	Dark
+};
+
+extern TeStyleColorScheme getStyleColorScheme();
+```
+
+| プラットフォーム | 実装 |
+|---|---|
+| Windows | `QGuiApplication::styleHints()->colorScheme()`（Qt 6.5+ が前提）を判定 |
+| Linux | `QT_VERSION >= 6.5.0` の場合のみ `QStyleHints::colorScheme()` を判定し、それ以外や検出失敗時は `TeStyleColorScheme::Light` を返す |
+
+Qt 6.5 未満（Ubuntu 24.04 の apt パッケージは Qt 6.4）でもヘッダがコンパイルできるよう、`Qt::ColorScheme` に直接依存せず独自の enum を経由しています。
+
+利用側:
+
+- `TeViewStore::applyStyleSheet(TeStyleColorScheme scheme)` — スキーム変化時にスタイルシートを再適用する（詳細: [05_viewstore.md](05_viewstore.md)）
+- `TeAdaptiveIconEngine` — ダークモード時にアイコンを重彩色する（詳細: [10_utils.md](10_utils.md)）
+
 ---
 
 ## TeFileOperationManager
@@ -118,15 +153,15 @@ OS レベルのイベント（ドライブの接続 / 切断等）を `Qt` の�
 
 ## Adding a New Platform
 
-新しいプラットフォームを追加する手順：
+新しいプラットフォーム（例: macOS）を追加する手順：
 
 1. `platform/<os>/platform_util.cpp` を作成し、`platform_util.h` の全関数を実装する
-2. `platform/<os>/Te<OS>EventFilter.h/cpp` を作成し、`QAbstractNativeEventFilter` を継承してネイティブイベントを処理する
-3. `src/CMakeLists.txt` に条件コンパイルブロックを追加する
+2. 必要であれば `platform/<os>/Te<OS>EventFilter.h/cpp` を作成し、`QAbstractNativeEventFilter` を継承してネイティブイベントを処理する
+3. `src/CMakeLists.txt` に条件コンパイルブロックを追加する（Windows / Linux 向けの既存ブロックを参照）
 
 ```cmake
-elseif(UNIX)
-    file(GLOB_RECURSE SOURCES_UNIX RELATIVE ... "platform/unix/*.cpp")
-    list(APPEND SOURCES_PLATFORM ${SOURCES_UNIX})
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    file(GLOB_RECURSE SOURCES_MACOS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/macos/*.cpp")
+    list(APPEND SOURCES_PLATFORM ${SOURCES_MACOS})
 endif()
 ```

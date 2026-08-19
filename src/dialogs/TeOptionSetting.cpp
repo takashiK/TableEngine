@@ -791,8 +791,15 @@ TeFolderAppearance TeOptionSetting::loadFolderAppearance(bool useSettings) const
 	}
 
 	// Accent — use the platform accent color exposed by QPalette::accent()
-	result.accentColor = sa.accentColor.isValid()
-		? sa.accentColor : pal.accent().color();
+	if (sa.accentColor.isValid()) {
+		result.accentColor = sa.accentColor;
+	} else {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+		result.accentColor = pal.accent().color();
+#else
+		result.accentColor = pal.color(QPalette::Active, QPalette::Highlight);
+#endif
+	}
 
 	// focusPriority is carried over directly from fromSettings() (enum value)
 	result.focusPriority = sa.focusPriority;

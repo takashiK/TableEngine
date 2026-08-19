@@ -24,6 +24,7 @@
 #include <QMainWindow>
 #include "TeDispatcher.h"
 #include "TeSettings.h"
+#include "platform/platform_util.h"
 
 /**
  * @file TeViewStore.h
@@ -134,7 +135,7 @@ public:
 	 * @brief Applies the merged stylesheet (base + user file + QSettings) to the application.
 	 * @param scheme The colour scheme to use when selecting the base stylesheet file.
 	 */
-	void applyStyleSheet(Qt::ColorScheme scheme);
+	void applyStyleSheet(TeStyleColorScheme scheme);
 
 	/** @brief Applies the stylesheet using the current system colour scheme. */
 	void applyStyleSheet();
@@ -366,7 +367,7 @@ private:
 	TeEventEmitter* mp_closeEventEmitter = nullptr;
 	TeEventEmitter* mp_focusEventEmitter = nullptr;
 	TeEventEmitter* mp_paletteEmitter = nullptr;
-	Qt::ColorScheme m_lastColorScheme = Qt::ColorScheme::Light;
+	TeStyleColorScheme m_lastColorScheme = TeStyleColorScheme::Light;
 	QList<QWidget*> m_floatingWidgets;
 	TeFindFolderView* mp_findView = nullptr;
 	TeFileOperationManager* mp_fileOpManager = nullptr;

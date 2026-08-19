@@ -102,10 +102,9 @@ bool TeCmdFolderCreate::execute(TeViewStore * p_store)
 		if (p_folder->tree()->hasFocus()) {
 			QAbstractItemView* p_itemView = p_folder->tree();
 			if (p_itemView->currentIndex().isValid()) {
-				QVariant var = p_itemView->currentIndex().data(QFileSystemModel::FileInfoRole);
-				if (var.isValid() && var.canConvert<QFileInfo>()) {
-					QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
-					path = fileInfo.filePath();
+				auto* model = qobject_cast<QFileSystemModel*>(p_itemView->model());
+				if (model != nullptr) {
+					path = model->fileInfo(p_itemView->currentIndex()).filePath();
 				}
 			}
 		}

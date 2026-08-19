@@ -106,10 +106,10 @@ bool TeCmdPaste::execute(TeViewStore* p_store)
 	}
 
 	if (isMoveAction(mime)) {
-		p_store->fileOperationManager()->moveFiles(paths, dstPath);
+		p_store->fileOperationManager()->moveFiles(paths, dstPath, QObject::tr("Failed to paste (move) files."));
 	}
 	else {
-		p_store->fileOperationManager()->copyFiles(paths, dstPath);
+		p_store->fileOperationManager()->copyFiles(paths, dstPath, QObject::tr("Failed to paste (copy) files."));
 	}
 	return true;
 }

@@ -248,6 +248,18 @@ exいv2 などの外部ライブラリを利用する場合は `TeExifReader` �
 QIcon icon(new TeAdaptiveIconEngine(":/icons/my_icon.svg"));
 ```
 
+### TeAppPaths
+
+ユーザー書き込み可能なアプリ資産（シンタックスハイライト定義、ユーザースタイルシート上書き）の格納先を解決するフリー関数 `teUserAssetDir()` です。
+
+- Windows: `QApplication::applicationDirPath()` をそのまま返す（ポータブルインストールの既存レイアウトを維持）
+- Linux: `applicationDirPath()`（通常 `/usr/bin`）は書き込み不可のため、`QStandardPaths::AppDataLocation`（通常は `~/.local/share/TableWare/TableEngine`）を使用する
+  - ディレクトリ本体の作成はプロセスごとに一度だけ行いキャッシュする
+  - 既定のハイライトファイルはシステム側の読み取り専用の場所から呼び出しのたびに不足分のみコピーする（既存のユーザー編集済みファイルは上書きしない）ため、後続バージョンで追加されたファイルも既存ユーザーに反映される
+  - システム側の読み取り専用ハイライトの探索順は「実行ファイル隣接（ビルド直後）」→「`bindir/../share`（カスタム prefix / Debian パッケージ共通）」→「`/usr/share/tableengine/highlight`（固定フォールバック）」
+
+実装ファイル: `src/utils/TeAppPaths.h` / `.cpp`
+
 ### TeToolCommand
 
 外部ツール実行コマンド文字列内のマクロ展開・書式検証・作業ディレクトリ解決を行う共通ヘルパー群（namespace）です。  
