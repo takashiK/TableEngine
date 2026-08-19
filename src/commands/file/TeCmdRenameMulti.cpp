@@ -86,7 +86,7 @@ bool TeCmdRenameMulti::execute(TeViewStore* p_store)
 				files.sort();
 				for (int i = 0; i < files.size(); i++) {
 					QString newName = baseName;
-					newName += QString("%1").arg(startNum + i, digits, 10, u'0');
+					newName += QString("%1").arg(startNum + i, digits, 10, QChar{u'0'});
 					newName += extention;
 					p_arc->renameEntry(files[i], newName);
 				}
@@ -123,7 +123,7 @@ bool TeCmdRenameMulti::execute(TeViewStore* p_store)
 			//rename
 			for (int i = 0; i < files.size(); i++) {
 				QString newName = baseName;
-				newName += QString("%1").arg(startNum + i, digits, 10, u'0');
+				newName += QString("%1").arg(startNum + i, digits, 10, QChar{u'0'});
 				newName += extention;
 				QFile::rename(fileInfoList[i].filePath(), fileInfoList[i].absolutePath() + "/" +  newName);
 			}

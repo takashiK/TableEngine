@@ -22,6 +22,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFileSystemModel>
+#include <QDir>
 #include <QItemSelectionModel>
 #include <QTemporaryDir>
 #include <QTest>
@@ -74,7 +75,16 @@ QStringList selectedPaths(TeFileFolderView& view)
 	return paths;
 }
 
+// Exposes the protected collectFileContextMenuTarget() helper for direct,
+// deterministic testing without invoking any native menu / QMenu::exec().
+class TestableFileFolderView : public TeFileFolderView
+{
+public:
+	using TeFileFolderView::collectFileContextMenuTarget;
+};
+
 }
+
 
 TEST(tst_TeFileFolderView, refresh_reloads_size_and_restores_selection)
 {
@@ -115,4 +125,55 @@ TEST(tst_TeFileFolderView, refresh_reloads_size_and_restores_selection)
 	expectedPaths.sort();
 	QTRY_COMPARE_WITH_TIMEOUT(selectedPaths(view), expectedPaths, 5000);
 	QTRY_COMPARE_WITH_TIMEOUT(refreshedModel->filePath(proxy->mapToSource(proxy->index(0, 0))), secondPath, 5000);
+}
+
+TEST(tst_TeFileFolderView, right_click_background_with_stale_selection_is_not_a_file_target)
+{
+	// Regression test: right-clicking the background while other files remain selected
+	// from a prior selection must never surface that stale selection as a
+	// native file context-menu target.
+	QTemporaryDir directory;
+	ASSERT_TRUE(directory.isValid());
+	const QString firstPath = directory.filePath("first.bin");
+	writeFile(firstPath, 10);
+
+	TestableFileFolderView view;
+	view.setRootPath(directory.path());
+	QTRY_VERIFY_WITH_TIMEOUT(proxyIndex(view, firstPath).isValid(), 5000);
+
+	const QModelIndex firstIndex = proxyIndex(view, firstPath);
+	view.list()->selectionModel()->select(firstIndex, QItemSelectionModel::ClearAndSelect);
+
+	QStringList files;
+	const bool isItemTarget = view.collectFileContextMenuTarget(
+		view.list(), QPoint(-1, -1), files);
+
+	EXPECT_FALSE(isItemTarget);
+	EXPECT_TRUE(files.isEmpty());
+}
+
+TEST(tst_TeFileFolderView, right_click_selected_item_is_a_file_target)
+{
+	// Baseline: right-clicking the current, selected item must still resolve
+	// to a native file context-menu target.
+	QTemporaryDir directory;
+	ASSERT_TRUE(directory.isValid());
+	const QString firstPath = directory.filePath("first.bin");
+	writeFile(firstPath, 10);
+
+	TestableFileFolderView view;
+	view.setRootPath(directory.path());
+	QTRY_VERIFY_WITH_TIMEOUT(proxyIndex(view, firstPath).isValid(), 5000);
+
+	const QModelIndex firstIndex = proxyIndex(view, firstPath);
+	view.list()->selectionModel()->select(firstIndex, QItemSelectionModel::ClearAndSelect);
+	view.list()->setCurrentIndex(firstIndex);
+
+	QStringList files;
+	const bool isItemTarget = view.collectFileContextMenuTarget(
+		view.list(), view.list()->visualRect(firstIndex).center(), files);
+
+	EXPECT_TRUE(isItemTarget);
+	ASSERT_EQ(1, files.size());
+	EXPECT_EQ(QDir::cleanPath(firstPath), QDir::cleanPath(files.constFirst()));
 }

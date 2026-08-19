@@ -324,11 +324,7 @@ TeFileInfo TeFileFolderView::currentFileInfo() const
 	if (!current.isValid())
 		return TeFileInfo();
 
-	QVariant var = current.data(QFileSystemModel::FileInfoRole);
-	if (!var.isValid() || !var.canConvert<QFileInfo>())
-		return TeFileInfo();
-
-	QFileInfo fi = qvariant_cast<QFileInfo>(var);
+	QFileInfo fi = mp_listModel->fileInfo(mp_listSortModel->mapToSource(current));
 	TeFileInfo info;
 	info.type = fi.isDir() ? TeFileInfo::EN_DIR : TeFileInfo::EN_FILE;
 	info.path = QDir::fromNativeSeparators(fi.absoluteFilePath());
@@ -340,42 +336,81 @@ TeFileInfo TeFileFolderView::currentFileInfo() const
 
 void TeFileFolderView::showContextMenu(const QAbstractItemView * pView, const QPoint & pos)
 {
-	if (pView != nullptr) {
-		QPoint gpos = pView->mapToGlobal(pos);
-		QPersistentModelIndex index = pView->indexAt(pos);
-		if (index.isValid() && index == pView->currentIndex()) {
-			//ContextMenu for the item
-			QStringList files;
-			if (pView->selectionModel()->hasSelection()) {
-				QModelIndexList list = pView->selectionModel()->selectedIndexes();
-				for (const auto& sindex : list) {
-					QVariant var = sindex.data(QFileSystemModel::FileInfoRole);
-					if (var.isValid() && var.canConvert<QFileInfo>()) {
-						QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
-						files.append(fileInfo.filePath());
-					}
-				}
-			}
-			else {
-				QVariant var = index.data(QFileSystemModel::FileInfoRole);
-				if (var.isValid() && var.canConvert<QFileInfo>()) {
-					QFileInfo fileInfo = qvariant_cast<QFileInfo>(var);
-					files.append(fileInfo.filePath());
-				}
-			}
-			::showFilesContext(gpos.x(), gpos.y(), files);
-		}
-		else if(pView == mp_treeView){
-			//ContextMenu at no selected for treeView
-			showUserContextMenu(SETTING_TREEPOPUP_GROUP, gpos);
+	if (pView == nullptr) {
+		return;
+	}
 
+	QPoint gpos = pView->mapToGlobal(pos);
+	QStringList files;
+	if (collectFileContextMenuTarget(pView, pos, files)) {
+		//ContextMenu for the item.
+#ifdef Q_OS_LINUX
+		//No native shell context menu on Linux; fall back to the
+		//user-configurable popup menu. Windows always shows its native menu
+		//here, so this fallback is kept Linux-only to avoid changing its
+		//existing mixed-selection behaviour.
+		if (!::showFilesContext(gpos.x(), gpos.y(), files)) {
+			showUserContextMenu(pView == mp_treeView ? SETTING_TREEPOPUP_GROUP : SETTING_LISTPOPUP_GROUP, gpos);
 		}
-		else if (pView == mp_listView) {
-			//ContextMenu at no selected for listView
-			showUserContextMenu(SETTING_LISTPOPUP_GROUP, gpos);
+#else
+		::showFilesContext(gpos.x(), gpos.y(), files);
+#endif
+	}
+	else if (pView == mp_treeView) {
+		//ContextMenu at no selected / ".." for treeView
+		showUserContextMenu(SETTING_TREEPOPUP_GROUP, gpos);
+	}
+	else if (pView == mp_listView) {
+		//ContextMenu at no selected / ".." for listView
+		showUserContextMenu(SETTING_LISTPOPUP_GROUP, gpos);
+	}
+}
 
+bool TeFileFolderView::collectFileContextMenuTarget(const QAbstractItemView* pView, const QPoint& pos, QStringList& files) const
+{
+	auto filePathForIndex = [this, pView](const QModelIndex& modelIndex) {
+		if (pView == mp_treeView) {
+			return mp_treeModel->fileInfo(mp_treeSortModel->mapToSource(modelIndex)).filePath();
+		}
+		if (pView == mp_listView) {
+			return mp_listModel->fileInfo(mp_listSortModel->mapToSource(modelIndex)).filePath();
+		}
+		return QString();
+	};
+	auto isDotDot = [pView](const QModelIndex& modelIndex) {
+		return pView->model()->data(modelIndex, Qt::DisplayRole).toString() == QStringLiteral("..");
+	};
+
+	QPersistentModelIndex index = pView->indexAt(pos);
+	// ".." must never be a context-menu target; treat it like blank space so
+	// the background/user context menu opens instead of a stale-selection
+	// native file menu.
+	if (!index.isValid() || isDotDot(index) || index != pView->currentIndex()) {
+		return false;
+	}
+
+	if (pView->selectionModel()->hasSelection()) {
+		QModelIndexList list = pView->selectionModel()->selectedIndexes();
+		for (const auto& sindex : list) {
+			if (sindex.column() != 0) {
+				continue; // selectedIndexes() returns one entry per column; only row 0 is needed.
+			}
+			if (isDotDot(sindex)) {
+				continue; // defensive: ".." must never surface even via a stale multi-selection.
+			}
+			const QString filePath = filePathForIndex(sindex);
+			if (!filePath.isEmpty()) {
+				files.append(filePath);
+			}
 		}
 	}
+	else {
+		const QString filePath = filePathForIndex(index);
+		if (!filePath.isEmpty()) {
+			files.append(filePath);
+		}
+	}
+	return true;
 }
 
 void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint& pos)

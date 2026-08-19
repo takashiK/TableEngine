@@ -21,14 +21,19 @@ classDiagram
         +setSelectionMode(mode)
         +setFileViewMode(infoFlags, viewMode)
         +indexAt(point) QModelIndex
+        +setModel(model)
+        +setRootIndex(index)
         #keyPressEvent(event)
         #mousePressEvent(event)
         #mouseMoveEvent(event)
         #mouseReleaseEvent(event)
         #selectionCommand(index, event) SelectionFlags
+        -isSelectableIndex(index) bool
+        -applyPressSelection(index, wasSelected, button, modifiers)
         -mp_folderView: TeFolderView*
         -m_pressedIndex: QModelIndex
         -m_pressedPos: QPoint
+        -m_anchorIndex: QPersistentModelIndex
         -mp_rubberBand: QRubberBand*
         -m_selectionMode: TeTypes::SelectionMode
     }
@@ -86,6 +91,7 @@ Explorer 互換モードとの最大の違いは **カーソル位置と選択�
 |---|---|---|
 | `m_pressedIndex` | `QModelIndex` | マウスで最後にクリックした（未選択）アイテムのインデックス。選択状態の二重適用防止と、矢印キーの単一選択解除判定に使用。 |
 | `m_pressedPos` | `QPoint` | ラバーバンド開始座標（スクロールオフセット込みの絶対座標）。 |
+| `m_anchorIndex` | `QPersistentModelIndex` | 範囲選択（Shift 系操作）の起点。Qt 内部のアンカー機構には依存せず、明示的に管理される「sticky anchor」。 |
 | `mp_rubberBand` | `QRubberBand*` | ドラッグ選択の矩形表示。 |
 
 `m_pressedIndex` は以下のタイミングでリセット（`QModelIndex()`）されます：
@@ -93,55 +99,60 @@ Explorer 互換モードとの最大の違いは **カーソル位置と選択�
 - 選択済みアイテムをクリックしたとき（ラバーバンド開始しない）
 - 矢印 / Space / その他ほぼすべてのキー押下時（Shift / Ctrl / Alt を除く）
 
+`m_anchorIndex` は以下のタイミングで更新・無効化されます：
+
+- 無修飾クリックで有効アイテムをクリックしたとき → クリックしたアイテムに設定（新しい起点）
+- 無修飾クリックで空白部分 / `..` をクリックしたとき → 無効化
+- Shift / Ctrl+Shift クリック時 → **変更しない**（同じ起点から連続して範囲選択できる、いわゆる sticky anchor）
+- Ctrl クリック時 → **変更しない**
+- 矢印 / Space / インライン検索など、修飾なしのカーソル移動を伴うキー操作 → 移動後の `currentIndex()` に設定（無効アイテムなら無効化）
+- Shift / Ctrl / Alt 単独のキー押下 → 変更しない
+- `setModel()` / `setRootIndex()` 呼び出し時 → 無効化（モデルやルートが変わった時点で古いアンカーは意味を失うため）
+
 ---
 
 ### マウスアクション仕様
 
-#### mousePressEvent（`selectionCommand` 経由の動作を含む）
+#### mousePressEvent と `applyPressSelection()`
 
-`selectionCommand()` は `QAbstractItemView` の選択フラグを決定する仮想関数であり、  
-実際の選択変更はここが返す `QItemSelectionModel::SelectionFlags` によって実行されます。
+`selectionCommand()` は TABLE_ENGINE モードでは常に `NoUpdate` を返し（`MouseMove` を除く）、  
+Qt の内部アンカー機構には一切依存しません。実際の選択変更は `QListView::mousePressEvent()` 呼び出し後に  
+`applyPressSelection()` が `m_anchorIndex` と押下対象を元に明示的に適用します。
 
-| 操作 | クリック対象 | 選択変化 | `m_pressedIndex` |
+| 操作 | クリック対象 | 選択変化 | `m_anchorIndex` |
 |---|---|---|---|
 | 無修飾クリック | 未選択アイテム | そのアイテムのみ選択（既存選択は全解除） | そのアイテムに設定 |
-| 無修飾クリック | 選択済みアイテム | 変化なし（維持） | `QModelIndex()`（ラバーバンドなし） |
-| 無修飾クリック | 空白部分 / `..` | 全選択解除 | そのまま |
-| Ctrl+クリック | 任意アイテム | そのアイテムの選択をトグル | そのアイテムに設定 |
-| Shift+クリック | 有効アイテム | そのアイテムを選択に追加（SelectCurrent） | そのアイテムに設定 |
-| Shift+クリック | 空白部分 | 変化なし（Select フラグのみ） | そのまま |
+| 無修飾クリック | 選択済みアイテム | 変化なし（維持） | そのアイテムに設定 |
+| 無修飾クリック | 空白部分 / `..` | 全選択解除 | 無効化 |
+| Ctrl+クリック | 有効アイテム | そのアイテムの選択をトグル | 変更しない |
+| Ctrl+クリック | 空白部分 / `..` | 変化なし | 変更しない |
+| Shift+クリック | 有効アイテム | `m_anchorIndex`〜対象の範囲を選択（`ClearAndSelect`） | 変更しない（起点として保持） |
+| Ctrl+Shift+クリック | 有効アイテム | `m_anchorIndex`〜対象の範囲を既存選択に追加（`Select`） | 変更しない |
+| Shift(+Ctrl)+クリック | 空白部分 / `..` | 変化なし | 変更しない |
+| 右クリック | 未選択アイテム | そのアイテムのみ選択 | 変更しない |
+| 右クリック | 選択済みアイテム / 空白 / `..` | 変化なし | 変更しない |
+
+> **範囲選択の起点**：Shift+クリックの範囲は、有効な `m_anchorIndex` が存在し、かつ現在選択が  
+> 空でない場合に限り `m_anchorIndex` を起点とします。それ以外（初回や選択解除後）はクリック対象自身を  
+> 新しい起点として範囲選択を開始します。連続する Shift+クリックは同じ起点から範囲を再計算するため、  
+> 前回の Shift+クリック先には影響されません（sticky anchor）。
 
 > **`..` エントリ保護**：`..`（親ディレクトリ参照）は決して選択状態にならないよう、  
-> `mousePressEvent` および `mouseReleaseEvent` の末尾で強制的に `Deselect` されます。
-
-> **`selectionCommand()` のイベント別フラグ**  
-> `selectionCommand(index, event)` は `event` の種類で返すフラグを切り替えます。
->
-> | `event` | 修飾 | 返すフラグ |
-> |---|---|---|
-> | `MouseButtonPress` | Shift（有効アイテム） | `SelectCurrent` |
-> | `MouseButtonPress` | Ctrl | `Toggle` |
-> | `MouseButtonPress` | 無修飾（未選択） | `ClearAndSelect` |
-> | `MouseMove`（ドラッグ） | Shift / 無修飾 | `SelectCurrent` / `ToggleCurrent` |
-> | `nullptr`（プログラム的な current 変更） | Shift かつ **マウスボタン押下中** | `SelectCurrent` |
-> | `nullptr`（プログラム的な current 変更） | 上記以外 | `NoUpdate` |
->
-> `event == nullptr` は `setCurrentIndex()` 経由の current 変更で発生し、Shift+クリックの範囲選択と  
-> インライン検索（`keyboardSearch`）の双方が通ります。両者はマウスボタンの押下状態で識別します  
-> （詳細は「インクリメンタル検索」を参照）。
-
+> `applyPressSelection()` が無効ターゲットとして扱うことに加え、`mousePressEvent` /  
+> `mouseReleaseEvent` の末尾で先頭行が `..` の場合に強制的に `Deselect` します。
 
 #### mouseMoveEvent（ラバーバンドドラッグ）
 
 `m_pressedIndex` に有効なインデックスが設定されているとき（未選択アイテムを押した場合）、  
 `isSelectionRectVisible()` が真であればラバーバンドを表示します。
 
-ドラッグ中、ラバーバンド矩形内に入ったアイテムに対して `selectionCommand` が呼ばれます：
+ドラッグ中、ラバーバンド矩形内に入ったアイテムに対しては `selectionCommand()` が唯一 `NoUpdate` 以外を  
+返す経路（`MouseMove`）を通り、Qt 標準の範囲選択機構に委譲します：
 
-| 修飾キー | 選択変化 |
-|---|---|
-| なし | ラバーバンド内アイテムをトグル（`ToggleCurrent`） |
-| Shift | ラバーバンド内アイテムを選択に追加（`SelectCurrent`） |
+| 修飾キー | 返すフラグ | 選択変化 |
+|---|---|---|
+| なし | `ToggleCurrent` | ラバーバンド内アイテムをトグル |
+| Shift | `SelectCurrent` | ラバーバンド内アイテムを選択に追加 |
 
 #### mouseReleaseEvent
 
@@ -311,9 +322,13 @@ Space: C をトグル → C 解除, カーソル → D
 > Shift を押しながら文字を打つと一致アイテムが選択されてしまっていました  
 > （Shift+矢印の選択動作とオーバーラップ）。  
 >
-> 修正後は、`event == nullptr` 経路で **マウスボタンが押されている場合のみ** `SelectCurrent` を返します。  
-> インライン検索中はマウスボタンが押されていないため `NoUpdate` となり、選択は変化しません。  
-> Shift+クリックの範囲選択は同経路をマウスボタン押下中に通るため、従来どおり機能します。
+> 現在の実装では、TABLE_ENGINE モードの `selectionCommand()` は `MouseMove` を除く  
+> すべてのイベント種別（`MouseButtonPress` / `MouseButtonRelease` / `MouseButtonDblClick` /  
+> `KeyPress`、および `event == nullptr` のプログラム的な current 変更）で無条件に `NoUpdate`  
+> を返します。選択はこの経路には一切依存せず、`mousePressEvent()` から呼ばれる  
+> `applyPressSelection()`（`m_anchorIndex` ベース）と `keyPressEvent()` の明示的な  
+> `Toggle` 呼び出しのみが選択を変更します。そのためインライン検索・Shift+クリックの  
+> いずれの経路でも `selectionCommand()` 自体が選択に影響することはありません。
 
 ---
 

@@ -27,7 +27,7 @@
 #include "widgets/TeFileListView.h"
 
 #include <QItemSelectionModel>
-#include <QRegularexpression>
+#include <QRegularExpression>
 
 /**
  * @file TeCmdSelectFilter.cpp

@@ -11,8 +11,48 @@
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
                 "CMAKE_C_COMPILER": "cl.exe",
                 "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/support/vcpkg/scripts/buildsystems/vcpkg.cmake",
                 "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "Ubuntu-GCC-Ninja-debug",
+            "displayName": "Ubuntu GCC 64bit - Ninja (Debug)",
+            "description": "Ninja single-config generator using system GCC and apt-installed Qt6/libarchive/ICU (no vcpkg)",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "Ubuntu-GCC-Ninja-release",
+            "displayName": "Ubuntu GCC 64bit - Ninja (Release)",
+            "description": "Ninja single-config generator using system GCC and apt-installed Qt6/libarchive/ICU (no vcpkg)",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
             }
         }
     ],
@@ -28,6 +68,34 @@
             "displayName": "Qt MSVC2022 Ninja - Release",
             "configurePreset": "Qt-MSVC2022-amd64-Ninja",
             "configuration": "Release"
+        },
+        {
+            "name": "Ubuntu-GCC-Ninja-debug",
+            "displayName": "Ubuntu GCC Ninja - Debug",
+            "configurePreset": "Ubuntu-GCC-Ninja-debug"
+        },
+        {
+            "name": "Ubuntu-GCC-Ninja-release",
+            "displayName": "Ubuntu GCC Ninja - Release",
+            "configurePreset": "Ubuntu-GCC-Ninja-release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "Ubuntu-GCC-Ninja-debug",
+            "displayName": "Ubuntu GCC Ninja - Debug Tests",
+            "configurePreset": "Ubuntu-GCC-Ninja-debug",
+            "environment": { "QT_QPA_PLATFORM": "offscreen" },
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error" }
+        },
+        {
+            "name": "Ubuntu-GCC-Ninja-release",
+            "displayName": "Ubuntu GCC Ninja - Release Tests",
+            "configurePreset": "Ubuntu-GCC-Ninja-release",
+            "environment": { "QT_QPA_PLATFORM": "offscreen" },
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error" }
         }
     ],
     "packagePresets": [
@@ -37,6 +105,12 @@
             "configurePreset": "Qt-MSVC2022-amd64-Ninja",
             "generators": ["ZIP"],
             "configurations": ["Release"]
+        },
+        {
+            "name": "ubuntu-deb",
+            "displayName": "Ubuntu 64-bit DEB",
+            "configurePreset": "Ubuntu-GCC-Ninja-release",
+            "generators": ["DEB"]
         }
     ]
 }

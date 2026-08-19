@@ -147,6 +147,21 @@ protected:
 	 */
 	void showUserContextMenu(const QString& menuName, const QPoint& pos);
 
+	/**
+	 * @brief Determines whether @p pos in @p pView targets a selectable file
+	 * item for the native file context menu, as opposed to the background/
+	 * user context menu.
+	 * @param pView  The tree or list view that received the context-menu event.
+	 * @param pos    Local (widget) position of the context-menu event.
+	 * @param files  [out] File paths to pass to the native file context menu;
+	 *               only populated when this returns true.
+	 * @return true if @p pos targets a selectable file item (the currently
+	 * selected item, or the current multi-selection when it lies under the
+	 * cursor); false for blank space or "..", so a stale multi-selection of
+	 * unrelated files never surfaces as a native file context-menu target.
+	 */
+	bool collectFileContextMenuTarget(const QAbstractItemView* pView, const QPoint& pos, QStringList& files) const;
+
 private:
 	/** @brief Connects mp_listModel::directoryLoaded() to the "select first row when current is invalid" behavior. */
 	void connectListModelSignals();

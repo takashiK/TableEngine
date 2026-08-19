@@ -1466,6 +1466,262 @@ TEST_F(tst_TeFileListView, mouse_ctrl_drag)
 
 }
 
+TEST_F(tst_TeFileListView, mouse_shift_click_keeps_sticky_anchor)
+{
+    // Regression test: consecutive Shift-clicks (with no intervening
+    // unmodified click/key) must always extend the range from the SAME
+    // anchor (the item last clicked without Shift/Ctrl), never from the
+    // previously Shift-clicked target.
+    TeFileListView view;
+    setupView(view);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+
+    // Plain click establishes the anchor at row 12.
+    QModelIndex anchor = view.model()->index(12, 0);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::NoModifier, view.visualRect(anchor).center());
+
+    // First Shift-click extends the range to row 18 (12..18 = 7 rows).
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ShiftModifier, view.visualRect(view.model()->index(18, 0)).center());
+    EXPECT_EQ(7, view.selectionModel()->selectedRows().count());
+
+    // Second Shift-click must still extend from row 12 (the original
+    // anchor), not from row 18 (the previous Shift target).
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ShiftModifier, view.visualRect(view.model()->index(4, 0)).center());
+    for (int row = 4; row <= 12; row++) {
+        EXPECT_TRUE(view.selectionModel()->isSelected(view.model()->index(row, 0))) << "row " << row;
+    }
+    EXPECT_EQ(9, view.selectionModel()->selectedRows().count());
+    EXPECT_FALSE(view.selectionModel()->isSelected(view.model()->index(13, 0)));
+    EXPECT_FALSE(view.selectionModel()->isSelected(view.model()->index(18, 0)));
+
+    // Third Shift-click still measures from the same anchor (row 12).
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ShiftModifier, view.visualRect(view.model()->index(20, 0)).center());
+    for (int row = 12; row <= 20; row++) {
+        EXPECT_TRUE(view.selectionModel()->isSelected(view.model()->index(row, 0))) << "row " << row;
+    }
+    EXPECT_EQ(9, view.selectionModel()->selectedRows().count());
+}
+
+TEST_F(tst_TeFileListView, mouse_ctrl_shift_click_adds_range_without_clearing)
+{
+    // Ctrl+Shift-click must ADD the anchor..target range to the current
+    // selection (Select, not ClearAndSelect), preserving an unrelated
+    // pre-existing selection.
+    TeFileListView view;
+    setupView(view);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+
+    // Plain click establishes the anchor at row 10 and selects it.
+    QModelIndex anchor = view.model()->index(10, 0);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::NoModifier, view.visualRect(anchor).center());
+
+    // Ctrl-click adds an unrelated, far-away item without moving the anchor.
+    QModelIndex farItem = view.model()->index(0, 0);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ControlModifier, view.visualRect(farItem).center());
+    EXPECT_TRUE(view.selectionModel()->isSelected(anchor));
+    EXPECT_TRUE(view.selectionModel()->isSelected(farItem));
+    EXPECT_EQ(2, view.selectionModel()->selectedRows().count());
+
+    // Ctrl+Shift-click adds the anchor(10)..target(13) range while keeping
+    // the unrelated row 0 selection intact.
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ControlModifier | Qt::ShiftModifier, view.visualRect(view.model()->index(13, 0)).center());
+    EXPECT_TRUE(view.selectionModel()->isSelected(farItem));
+    for (int row = 10; row <= 13; row++) {
+        EXPECT_TRUE(view.selectionModel()->isSelected(view.model()->index(row, 0))) << "row " << row;
+    }
+    EXPECT_EQ(5, view.selectionModel()->selectedRows().count());
+}
+
+TEST_F(tst_TeFileListView, dotdot_entry_is_never_selectable)
+{
+    // ".." must never become selected, regardless of click modifier, and an
+    // unmodified click on it clears the existing selection.
+    QStandardItemModel dotModel;
+    dotModel.appendRow(new QStandardItem(QStringLiteral("..")));
+    for (int i = 0; i < 5; i++) {
+        dotModel.appendRow(new QStandardItem(QString::asprintf("item%02d", i)));
+    }
+
+    TeFileListView view;
+    view.setModel(&dotModel);
+    view.setViewMode(QListView::ListMode);
+    view.setWrapping(false);
+    view.setResizeMode(QListView::Adjust);
+    view.setSelectionMode(TeTypes::SELECTION_TABLE_ENGINE);
+    view.setSpacing(2);
+    view.setSelectionRectVisible(true);
+    view.setFont(QFont(QStringLiteral("Courier New"), 9));
+    view.setFileViewMode(TeTypes::FILEINFO_NONE, TeTypes::FILEVIEW_SMALL_ICON);
+    view.resize(200, 300);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+
+    QModelIndex dotIndex = dotModel.index(0, 0);
+    QModelIndex item0 = dotModel.index(1, 0);
+    QModelIndex item1 = dotModel.index(2, 0);
+
+    // Plain click on ".." never selects it and clears the existing selection.
+    view.selectionModel()->select(item0, QItemSelectionModel::Select);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::NoModifier, view.visualRect(dotIndex).center());
+    EXPECT_FALSE(view.selectionModel()->isSelected(dotIndex));
+    EXPECT_EQ(0, view.selectionModel()->selectedRows().count());
+
+    // Ctrl-click on ".." has no effect.
+    view.selectionModel()->select(item0, QItemSelectionModel::Select);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ControlModifier, view.visualRect(dotIndex).center());
+    EXPECT_FALSE(view.selectionModel()->isSelected(dotIndex));
+    EXPECT_TRUE(view.selectionModel()->isSelected(item0));
+    EXPECT_EQ(1, view.selectionModel()->selectedRows().count());
+
+    // Shift-click on ".." leaves the current selection unchanged.
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ShiftModifier, view.visualRect(dotIndex).center());
+    EXPECT_FALSE(view.selectionModel()->isSelected(dotIndex));
+    EXPECT_TRUE(view.selectionModel()->isSelected(item0));
+    EXPECT_EQ(1, view.selectionModel()->selectedRows().count());
+
+    // A Shift-click range that spans past ".." never selects it: the
+    // click on ".." is a no-op, so the selection stays exactly what a
+    // preceding plain click on item1 left it as.
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::NoModifier, view.visualRect(item1).center());
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ShiftModifier, view.visualRect(dotIndex).center());
+    EXPECT_TRUE(view.selectionModel()->isSelected(item1));
+    EXPECT_FALSE(view.selectionModel()->isSelected(dotIndex));
+    EXPECT_EQ(1, view.selectionModel()->selectedRows().count());
+}
+
+TEST_F(tst_TeFileListView, setRootIndex_invalidates_anchor)
+{
+    // setRootIndex() must invalidate the range-selection anchor so a
+    // subsequent Shift-click under the new root starts a fresh range instead
+    // of reusing an anchor row that belonged to the previous root.
+    TeFileListView view;
+    setupView(view);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+
+    // Establish an anchor at the top level via a plain click.
+    QModelIndex anchor = view.model()->index(5, 0);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::NoModifier, view.visualRect(anchor).center());
+    ASSERT_TRUE(view.selectionModel()->isSelected(anchor));
+
+    // Descend into a child container.
+    QStandardItem* folder = new QStandardItem(QStringLiteral("subfolder"));
+    model.invisibleRootItem()->appendRow(folder);
+    for (int i = 0; i < 5; i++) {
+        folder->appendRow(new QStandardItem(QString::asprintf("sub%02d", i)));
+    }
+    QModelIndex folderIndex = folder->index();
+
+    view.setRootIndex(folderIndex);
+    view.doItemsLayout();
+
+    // A Shift-click under the new root establishes a fresh anchor at the
+    // click target instead of reusing the invalidated top-level anchor.
+    QModelIndex target = view.model()->index(2, 0, folderIndex);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ShiftModifier, view.visualRect(target).center());
+    EXPECT_TRUE(view.selectionModel()->isSelected(target));
+    EXPECT_EQ(1, view.selectionModel()->selectedIndexes().count());
+}
+
+TEST_F(tst_TeFileListView, setModel_invalidates_anchor)
+{
+    // setModel() must invalidate the (now dangling) persistent anchor index
+    // so a subsequent Shift-click on the new model starts a fresh range.
+    TeFileListView view;
+    setupView(view);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+
+    // Establish an anchor via a plain click.
+    QModelIndex anchor = view.model()->index(10, 0);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::NoModifier, view.visualRect(anchor).center());
+    ASSERT_TRUE(view.selectionModel()->isSelected(anchor));
+
+    // Swap in a completely different model.
+    QStandardItemModel model2;
+    for (int i = 0; i < 5; i++) {
+        model2.appendRow(new QStandardItem(QString::asprintf("m2-%02d", i)));
+    }
+    view.setModel(&model2);
+    view.doItemsLayout();
+
+    QModelIndex target = model2.index(1, 0);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ShiftModifier, view.visualRect(target).center());
+    EXPECT_TRUE(view.selectionModel()->isSelected(target));
+    EXPECT_EQ(1, view.selectionModel()->selectedRows().count());
+}
+
+TEST_F(tst_TeFileListView, setCurrentIndex_updates_anchor_for_shift_click)
+{
+    // Regression test: currentChanged() must be the sole current-navigation
+    // anchor-update path, so a purely programmatic setCurrentIndex() call
+    // (with no intervening click) establishes the range-selection anchor
+    // just like a plain click does.
+    TeFileListView view;
+    setupView(view);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+
+    QModelIndex anchor = model.index(5, 0);
+    view.setCurrentIndex(anchor);
+    // An unrelated selection makes selectionModel()->hasSelection() true, so
+    // the Shift-click below is forced to consult m_anchorIndex rather than
+    // falling back to "no prior selection" logic.
+    view.selectionModel()->select(anchor, QItemSelectionModel::Select);
+
+    QModelIndex target = model.index(10, 0);
+    QTest::mouseClick(view.viewport(), Qt::LeftButton, Qt::ShiftModifier, view.visualRect(target).center());
+
+    for (int row = 5; row <= 10; row++) {
+        EXPECT_TRUE(view.selectionModel()->isSelected(model.index(row, 0))) << "row " << row;
+    }
+    EXPECT_EQ(6, view.selectionModel()->selectedRows().count());
+}
+
+TEST_F(tst_TeFileListView, mouse_right_click_unselected_item_is_temporary_selection)
+{
+    // Right-clicking a previously unselected selectable item must select it
+    // AND set m_pressedIndex, so a following arrow-key move clears that
+    // temporary single selection exactly like a left click does.
+    TeFileListView view;
+    setupView(view);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+
+    QModelIndex index = view.model()->index(8, 0);
+    QTest::mouseClick(view.viewport(), Qt::RightButton, Qt::NoModifier, view.visualRect(index).center());
+    EXPECT_EQ(index, view.currentIndex());
+    EXPECT_TRUE(view.selectionModel()->isSelected(index));
+    EXPECT_EQ(1, view.selectionModel()->selectedRows().count());
+
+    QTest::keyClick(&view, Qt::Key_Down);
+    EXPECT_FALSE(view.selectionModel()->isSelected(index));
+    EXPECT_EQ(0, view.selectionModel()->selectedRows().count());
+}
+
+TEST_F(tst_TeFileListView, mouse_right_click_on_already_selected_item_is_not_temporary)
+{
+    // Right-clicking an already-selected item must preserve the selection
+    // as-is; it is not a fresh "temporary" click, so a following arrow-key
+    // move must not clear it.
+    TeFileListView view;
+    setupView(view);
+    view.show();
+    EXPECT_TRUE(QTest::qWaitForWindowExposed(&view));
+
+    QModelIndex index = view.model()->index(8, 0);
+    view.selectionModel()->select(index, QItemSelectionModel::Select);
+    view.setCurrentIndex(index);
+
+    QTest::mouseClick(view.viewport(), Qt::RightButton, Qt::NoModifier, view.visualRect(index).center());
+    EXPECT_TRUE(view.selectionModel()->isSelected(index));
+
+    QTest::keyClick(&view, Qt::Key_Down);
+    EXPECT_TRUE(view.selectionModel()->isSelected(index));
+}
+
 TEST_F(tst_TeFileListView, filename_width_limits_use_active_font_M_unit)
 {
     QStandardItemModel model;

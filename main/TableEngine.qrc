@@ -72,6 +72,7 @@
         <file alias="sortName.png">Resources/icon/iconmonstr-id-card-5-64.png</file>
         <file alias="folder_up.png">Resources/icon/iconmonstr-arrow_R-60-240.png</file>
         <file alias="application.ico">Resources/app_icon/table_engine.ico</file>
+        <file alias="appIcon.png">Resources/app_icon/table_engine.png</file>
         <file alias="view.png">Resources/icon/iconmonstr-file-24-64.png</file>
         <file alias="binary_edit.png">Resources/icon/iconmonstr-pen-3-64.png</file>
         <file alias="file_edit.png">Resources/icon/iconmonstr-pen-4-64.png</file>

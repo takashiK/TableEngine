@@ -76,11 +76,11 @@ QSize TeFileSortProxyModel::pixmapSize() const
 QVariant TeFileSortProxyModel::data(const QModelIndex& index, int role) const
 {
     if (role == FilePixmap) {
-        QVariant fileInfoVar = QSortFilterProxyModel::data(index, QFileSystemModel::FileInfoRole);
+        QVariant fileInfoVar = QSortFilterProxyModel::data(index, QFileSystemModel::FilePathRole);
         if (!fileInfoVar.isValid())
             return QVariant();
 
-        QFileInfo info = qvariant_cast<QFileInfo>(fileInfoVar);
+        QFileInfo info(fileInfoVar.toString());
         if (!info.isFile())
             return QVariant();
 
@@ -192,11 +192,11 @@ bool TeFileSortProxyModel::filterAcceptsRow(int source_row, const QModelIndex &s
         if (!index.isValid())
             return false;
 
-        QVariant var = sourceModel()->data(index, QFileSystemModel::FileInfoRole);
+        QVariant var = sourceModel()->data(index, QFileSystemModel::FilePathRole);
         if (!var.isValid())
             return true;
 
-        QFileInfo fileInfo = var.value<QFileInfo>();
+        QFileInfo fileInfo(var.toString());
         const QString fileName = fileInfo.fileName();
 
         // Filter Unix-style hidden files (dot-prefix) cross-platform.
@@ -277,10 +277,10 @@ bool TeFileSortProxyModel::lessThan(const QModelIndex &source_left, const QModel
 TeFileSortProxyModel::EntryAttr TeFileSortProxyModel::entryAttr(const QModelIndex& srcIndex) const
 {
     EntryAttr attr;
-    QVariant fileInfoVar = srcIndex.data(QFileSystemModel::FileInfoRole);
+    QVariant fileInfoVar = srcIndex.data(QFileSystemModel::FilePathRole);
     if (fileInfoVar.isValid()) {
         // Filesystem source: preserve exact QFileInfo-based behavior.
-        QFileInfo info = qvariant_cast<QFileInfo>(fileInfoVar);
+        QFileInfo info(fileInfoVar.toString());
         attr.isDir = info.isDir();
         attr.size = info.size();
         attr.name = info.fileName();

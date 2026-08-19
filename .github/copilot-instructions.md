@@ -155,12 +155,13 @@ Thoroughness: {quick|medium|thorough}
 ## Model Selection (Agent Auto)
 
 モデルは常に各系列の**最新版**を使用する（版名は固定しない）。
+これらのタスクは、SubAgentに委託して実施する。モデル選択はタスク種別と複雑度に応じて行う。
 
 | タスク種別 | 複雑度 | 推奨モデル |
 |-----------|--------|-----------|
-| コード読解・検索 | 低 | GPT-5.6 Luna / MAI 最新 |
-| サブエージェント探索 | 低 | GPT-5.6 Luna / MAI 最新 |
-| 一括置換・機械的修正 | 低 | GPT-5.6 Luna / MAI 最新 |
+| コード読解・検索 | 低 | GPT-5.6 Luna |
+| サブエージェント探索 | 低 | GPT-5.6 Luna  |
+| 一括置換・機械的修正 | 低 | GPT-5.6 Luna  |
 | ドキュメント更新 | 中 | Claude Sonnet 5 |
 | 実装 | 中 | Claude Sonnet 5 |
 | 分析・設計レポート生成 | 高 | Claude Opus 5 |
@@ -232,8 +233,10 @@ Implementation PhaseおよびTesting Phaseで、同一の検討スコープが3�
 
 ## Repository Context
 
-- C++17, Qt 6.11+ (Core / Gui / Widgets / Core5Compat), MSVC 2022, CMake 3.19+
-- アプリ名: TableEngine（キーボード中心のファイルエクスプローラ, GPLv2, Windows）
+- C++17, Qt 6 (Core / Gui / Widgets / Core5Compat), CMake 3.19+
+- Windows: Qt 6.11+, MSVC 2022, vcpkg, Ninja Multi-Config, ZIP パッケージ
+- Ubuntu 26.04: apt 提供の Qt 6.10+, GCC, Ninja, system packages, DEB パッケージ（vcpkg 不使用）
+- アプリ名: TableEngine（キーボード中心のファイルエクスプローラ, GPLv2, Windows / Ubuntu）
 - 概要: `doc/markdown/01_overview.md` / アーキテクチャ: `doc/markdown/04_architecture.md`
 
 ### ワークスペース構成の注意
@@ -265,7 +268,7 @@ TableEngine/
 ├── src/           # コアライブラリ (tablelibs として静的リンク)
 │   ├── commands/  # コマンドパターン実装
 │   ├── dialogs/   # ダイアログ群
-│   ├── platform/  # OS 抽象化 (Windows 実装)
+│   ├── platform/  # OS 抽象化 (Windows / Linux 実装)
 │   ├── utils/     # ユーティリティクラス群
 │   ├── viewer/    # テキスト・画像・バイナリビューア
 │   └── widgets/   # UI ウィジェット群
@@ -278,5 +281,5 @@ TableEngine/
 
 - 言語: C++17（言語ID: `cpp`）
 - フォーマッタ: VS Code C/C++ 拡張（保存時自動フォーマット、CLI は使用しない）
-- ビルド検証: CMake プリセット使用
+- ビルド検証: CMake プリセット使用（Windows: `Qt-MSVC2022-amd64-Ninja`、Ubuntu: `Ubuntu-GCC-Ninja-release`）
 - 詳細コマンドは各 SKILL の `lang/cpp.md` を参照

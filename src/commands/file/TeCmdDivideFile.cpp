@@ -119,7 +119,7 @@ bool TeCmdDivideFile::execute(TeViewStore* p_store)
 			int count = 0;
 			const qsizetype copySize = 1024 * 1024 * 16; // 16MB
 			while (srcFile.bytesAvailable()) {
-				QFile dstFile(outPath + "/" + srcInfo.fileName() + QString(".%1").arg(count, 3, 10, u'0'));
+				QFile dstFile(outPath + "/" + srcInfo.fileName() + QString(".%1").arg(count, 3, 10, QChar{u'0'}));
 				if( !dstFile.open(QIODevice::WriteOnly) ){
 					QMessageBox::warning(
 						p_store->mainWindow(),

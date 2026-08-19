@@ -21,6 +21,7 @@
 #pragma once
 
 #include "TeFolderView.h"
+#include "utils/TeArchive.h"
 #include "utils/TeHistory.h"
 #include "utils/TeFileInfo.h"
 
@@ -46,12 +47,6 @@ class QStandardItemModel;
 class QFileIconProvider;
 class QPoint;
 class QTemporaryDir;
-
-namespace TeArchive {
-	enum ArchiveType;
-	class Reader;
-	class Writer;
-}
 
 /**
  * @class TeArchiveFolderView

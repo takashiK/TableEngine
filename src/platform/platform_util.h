@@ -20,6 +20,8 @@
 
 #pragma once
 #include <QString>
+#include <QList>
+#include <QHash>
 #include <QPixmap>
 #include <QSize>
 #include <QApplication>
@@ -33,6 +35,21 @@
 
 class QMimeData;
 class TeNativeEvent;
+class TeFileOpProgress;
+
+// Platform-neutral colour scheme, kept independent of Qt::ColorScheme so this
+// header compiles unchanged against Qt versions that lack that API (< 6.5).
+enum class TeStyleColorScheme {
+	Light,
+	Dark
+};
+
+struct TeDriveAction {
+	QString text;
+	QString path;
+	QString toolTip;
+	QString identity;
+};
 
 //Initialize and uninitialize platform system
 extern bool threadInitialize(QApplication* a);
@@ -53,12 +70,16 @@ extern void showFileProperties(const QString& path);
 
 extern void openFile(const QString& path);
 
-extern bool copyFiles(const QStringList& files, const QString& path, WId owner = 0);
-extern bool copyFile(const QString& fromFile, const QString& toFile, WId owner = 0);
+// The optional TeFileOpProgress* lets a background worker thread report
+// processed/total bytes and the current path to a GUI-thread progress
+// dialog without blocking cross-thread calls (see TeFileOpProgress.h).
+// Callers that don't need progress reporting can omit it.
+extern bool copyFiles(const QStringList& files, const QString& path, WId owner = 0, TeFileOpProgress* progress = nullptr);
+extern bool copyFile(const QString& fromFile, const QString& toFile, WId owner = 0, TeFileOpProgress* progress = nullptr);
 
-extern bool moveFiles(const QStringList& files, const QString& path, WId owner = 0);
+extern bool moveFiles(const QStringList& files, const QString& path, WId owner = 0, TeFileOpProgress* progress = nullptr);
 
-extern bool deleteFiles(const QStringList& files, WId owner = 0);
+extern bool deleteFiles(const QStringList& files, WId owner = 0, TeFileOpProgress* progress = nullptr);
 
 extern QPixmap getThumbnail(const QString& path, const QSize& size);
 extern QPixmap getFileIcon(const QString& path, const QSize& size);
@@ -67,6 +88,8 @@ extern QString getAssociatedAppPath(const QString& suffix);
 
 //clipboard action
 extern bool isMoveAction(const QMimeData* mime);
+// NOTE: mime->setUrls() must be called before setMoveAction()/setCopyAction();
+// the Linux implementation reads the URL list to build GNOME/KDE clipboard formats.
 extern void setMoveAction(QMimeData* mime);
 extern void setCopyAction(QMimeData* mime);
 
@@ -76,3 +99,31 @@ extern TeNativeEvent* getNativeEvent();
 //shell
 // OS-specific fallback shell command, used when the SHELL environment variable is not set.
 extern QString getDefaultShellCommand();
+
+extern QList<TeDriveAction> getDriveActions();
+
+#ifdef Q_OS_LINUX
+namespace platform_util_test {
+struct DriveActionChange {
+	bool changed = false;
+	bool state = false;
+};
+
+class DriveActionLabelAllocator
+{
+public:
+	void assign(QList<TeDriveAction>* actions);
+
+private:
+	QHash<QString, int> m_labelIndices;
+};
+
+QString driveActionLabel(int index);
+bool isExternalBlockDevice(const QString& blockDevice, const QString& sysfsRoot);
+DriveActionChange compareDriveActionSnapshots(const QList<TeDriveAction>& previous, const QList<TeDriveAction>& current);
+}
+#endif
+
+// Current system/application colour scheme. Returns TeStyleColorScheme::Light
+// when detection is unavailable (e.g. Qt < 6.5 or no platform support).
+extern TeStyleColorScheme getStyleColorScheme();

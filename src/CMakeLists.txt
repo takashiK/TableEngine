@@ -2,7 +2,7 @@
 find_package(LibArchive REQUIRED)
 
 file(GLOB SOURCES_BASE             RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
-file(GLOB SOURCES_PLATFORM         RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/*.cpp")
+file(GLOB SOURCES_PLATFORM         CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/*.cpp")
 file(GLOB_RECURSE SOURCES_COMMANDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "commands/*.cpp")
 file(GLOB_RECURSE SOURCES_VIEW_DOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "viewer/document/*.cpp")
 file(GLOB_RECURSE SOURCES_VIEW_PIC CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "viewer/picture/*.cpp")
@@ -12,7 +12,7 @@ file(GLOB_RECURSE SOURCES_WIDGETS  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "widgets
 file(GLOB_RECURSE SOURCES_UTILS CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "utils/*.cpp")
 
 file(GLOB HEADERS_BASE             RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.h")
-file(GLOB HEADERS_PLATFORM         RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/*.h")
+file(GLOB HEADERS_PLATFORM         CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/*.h")
 file(GLOB_RECURSE HEADERS_COMMANDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "commands/*.h")
 file(GLOB_RECURSE HEADERS_VIEW_DOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "viewer/document/*.h")
 file(GLOB_RECURSE HEADERS_VIEW_PIC CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "viewer/picture/*.h")
@@ -23,8 +23,12 @@ file(GLOB_RECURSE HEADERS_UTILS CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURC
 
 
 # Windows platform specific files
-file(GLOB_RECURSE SOURCES_WIN RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/windows/*.cpp")
-file(GLOB_RECURSE HEADERS_WIN RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/windows/*.h")
+file(GLOB_RECURSE SOURCES_WIN CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/windows/*.cpp")
+file(GLOB_RECURSE HEADERS_WIN CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/windows/*.h")
+
+# Linux platform specific files
+file(GLOB_RECURSE SOURCES_LINUX CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/linux/*.cpp")
+file(GLOB_RECURSE HEADERS_LINUX CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "platform/linux/*.h")
 
 # Support package include directory
 set(SUPPORT_INCLUDE_DIR )
@@ -34,7 +38,10 @@ set(SUPPORT_LIBS )
 if(WIN32)
     list(APPEND SOURCES_PLATFORM ${SOURCES_WIN})    
     list(APPEND HEADERS_PLATFORM ${HEADERS_WIN})    
-endif(WIN32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list(APPEND SOURCES_PLATFORM ${SOURCES_LINUX})
+    list(APPEND HEADERS_PLATFORM ${HEADERS_LINUX})
+endif()
 
 list(APPEND SUPPORT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../support/valijson/include)
 
@@ -63,12 +70,17 @@ qt_add_library(tablelibs STATIC
 target_link_libraries(tablelibs QLightTerminal QHexView Qt6::Widgets Qt6::Gui)
 target_include_directories(tablelibs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${SUPPORT_INCLUDE_DIR})
 
+target_link_libraries(tablelibs LibArchive::LibArchive)
+
 if(WIN32)
 target_compile_options(tablelibs PRIVATE /MP )
 
 target_link_libraries(tablelibs
     Shlwapi
-    LibArchive::LibArchive
     icu.lib
 )
-endif(WIN32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # Ubuntu: apt-installed ICU, discovered via CMake's bundled FindICU module (no vcpkg)
+    find_package(ICU REQUIRED COMPONENTS uc i18n)
+    target_link_libraries(tablelibs ICU::uc ICU::i18n)
+endif()

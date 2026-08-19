@@ -188,6 +188,11 @@ QWidget* TeEditUserCommands::createUserEntry(const UserCommandSetting& initial)
 	return frame;
 }
 
+void TeEditUserCommands::addUserEntry()
+{
+	addUserEntry(UserCommandSetting{});
+}
+
 void TeEditUserCommands::addUserEntry(const UserCommandSetting& initial)
 {
 	if (m_userRows.size() >= TeSettings::MAX_USER_COMMANDS) {

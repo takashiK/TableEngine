@@ -78,11 +78,11 @@ QVariant TePictureThumbnailProxyModel::data(const QModelIndex& index, int role) 
 	if (role != ThumbnailPixmap)
 		return QSortFilterProxyModel::data(index, role);
 
-	const QVariant infoValue = QSortFilterProxyModel::data(index, QFileSystemModel::FileInfoRole);
-	if (!infoValue.isValid())
+	const auto* fileSystemModel = qobject_cast<const QFileSystemModel*>(sourceModel());
+	if (fileSystemModel == nullptr)
 		return QVariant();
 
-	const QFileInfo info = qvariant_cast<QFileInfo>(infoValue);
+	const QFileInfo info = fileSystemModel->fileInfo(mapToSource(index));
 	if (!isSupportedImageFile(info))
 		return QVariant();
 
