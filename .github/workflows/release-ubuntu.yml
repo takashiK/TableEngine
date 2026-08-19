@@ -1,0 +1,55 @@
+name: Release (Ubuntu / GCC)
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag to publish"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref }}
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            build-essential cmake ninja-build git pkg-config dpkg-dev \
+            qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-l10n-tools qt6-qpa-plugins \
+            libarchive-dev libicu-dev libgtest-dev libgmock-dev
+
+      - name: Configure (CMake)
+        run: cmake --preset Ubuntu-GCC-Ninja-release
+
+      - name: Build
+        run: cmake --build --preset Ubuntu-GCC-Ninja-release --parallel
+
+      - name: Package release DEB
+        run: cpack --preset ubuntu-deb
+
+      - name: Upload GitHub Release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref_name }}
+          files: out/build/Ubuntu-GCC-Ninja-release/tableengine-*.deb
+          fail_on_unmatched_files: true

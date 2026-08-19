@@ -26,7 +26,7 @@
 
 vcpkg のトリプレットは `x64-windows-static-md`（`/MD` スタティックリンク）を使用します。
 
-## Ubuntu 24.04 Prerequisites
+## Ubuntu 26.04 Prerequisites
 
 Linux ビルドでは vcpkg を使用せず、Ubuntu の `apt` パッケージだけで依存関係を解決します。
 
@@ -47,7 +47,9 @@ sudo apt install -y \
 | `libgtest-dev` / `libgmock-dev` | ユニットテスト |
 | `dpkg-dev` | DEB の共有ライブラリ依存関係解析 |
 
-Ubuntu 24.04 の Qt 6.4 パッケージをサポートします。qmake（`*.pro`）によるビルドはサポートしません。
+Ubuntu 26.04 の Qt 6.10 パッケージをサポートします。qmake（`*.pro`）によるビルドはサポートしません。
+
+Ubuntu 26.04 / Qt 6.10 で動作確認済みです。Ubuntu 24.04 / Qt 6.4 はビルド可能な互換コードを含みますが、未テストです。
 
 ---
 

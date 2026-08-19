@@ -235,7 +235,7 @@ Implementation PhaseおよびTesting Phaseで、同一の検討スコープが3�
 
 - C++17, Qt 6 (Core / Gui / Widgets / Core5Compat), CMake 3.19+
 - Windows: Qt 6.11+, MSVC 2022, vcpkg, Ninja Multi-Config, ZIP パッケージ
-- Ubuntu 24.04: apt 提供の Qt 6.4+, GCC, Ninja, system packages, DEB パッケージ（vcpkg 不使用）
+- Ubuntu 26.04: apt 提供の Qt 6.10+, GCC, Ninja, system packages, DEB パッケージ（vcpkg 不使用）
 - アプリ名: TableEngine（キーボード中心のファイルエクスプローラ, GPLv2, Windows / Ubuntu）
 - 概要: `doc/markdown/01_overview.md` / アーキテクチャ: `doc/markdown/04_architecture.md`
 
