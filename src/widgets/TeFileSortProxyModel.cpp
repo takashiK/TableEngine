@@ -20,7 +20,9 @@
 
 #include "TeFileSortProxyModel.h"
 #include "utils/TeImageLoader.h"
+#include "utils/TeFileIconProvider.h"
 #include "utils/TeFileInfo.h"
+#include "utils/TeRemoteAccess.h"
 
 #include <QFileSystemModel>
 #include <QImageReader>
@@ -73,6 +75,11 @@ QSize TeFileSortProxyModel::pixmapSize() const
     return m_pixmapSize;
 }
 
+void TeFileSortProxyModel::setDynamicFolderIcons(bool enable)
+{
+    m_dynamicFolderIcons = enable;
+}
+
 QVariant TeFileSortProxyModel::data(const QModelIndex& index, int role) const
 {
     if (role == FilePixmap) {
@@ -80,15 +87,26 @@ QVariant TeFileSortProxyModel::data(const QModelIndex& index, int role) const
         if (!fileInfoVar.isValid())
             return QVariant();
 
-        QFileInfo info(fileInfoVar.toString());
-        if (!info.isFile())
+        const QString filePath = fileInfoVar.toString();
+        if (TeRemoteAccess::suppressAutoContent(filePath))
             return QVariant();
 
         static const QList<QByteArray> supportedFormats = QImageReader::supportedImageFormats();
-        if (!supportedFormats.contains(info.suffix().toLower().toUtf8()))
+        if (!supportedFormats.contains(QFileInfo(filePath).suffix().toLower().toUtf8()))
             return QVariant();
 
-        QDateTime lastModified = info.lastModified();
+        QFileInfo info(filePath);
+        QDateTime lastModified;
+        if (TeRemoteAccess::suppressIconAccess(filePath)) {
+            const EntryAttr attr = entryAttr(mapToSource(index));
+            if (attr.isDir)
+                return QVariant();
+            lastModified = attr.modified;
+        } else {
+            if (!info.isFile())
+                return QVariant();
+            lastModified = info.lastModified();
+        }
         QString key = TeImageLoader::cacheKey(info.absoluteFilePath(), m_pixmapSize, lastModified);
         QPixmap pixmap;
         if (QPixmapCache::find(key, &pixmap)) {
@@ -98,6 +116,11 @@ QVariant TeFileSortProxyModel::data(const QModelIndex& index, int role) const
         mp_imageLoader->requestLoad(info.absoluteFilePath(), m_pixmapSize);
         return QVariant();
     } else if (role == Qt::DecorationRole){
+        if (m_dynamicFolderIcons && index.column() == 0) {
+            const QString path = QSortFilterProxyModel::data(index, QFileSystemModel::FilePathRole).toString();
+            if (!path.isEmpty())
+                return TeFileIconProvider::instance()->folderIcon(path);
+        }
         if(QSortFilterProxyModel::data(index, Qt::DisplayRole).toString() == "..") {
             //folder up icon
             static const QIcon icon(":/TableEngine/folder_up.png");
@@ -217,7 +240,7 @@ bool TeFileSortProxyModel::filterAcceptsRow(int source_row, const QModelIndex &s
             return true;
         }
 
-        if (fileInfo.isDir()) {
+        if (entryAttr(index).isDir) {
             return true; // Always include directories
         }else{
             return m_fileRegex.match(fileName).hasMatch();
@@ -279,7 +302,17 @@ TeFileSortProxyModel::EntryAttr TeFileSortProxyModel::entryAttr(const QModelInde
     EntryAttr attr;
     QVariant fileInfoVar = srcIndex.data(QFileSystemModel::FilePathRole);
     if (fileInfoVar.isValid()) {
-        // Filesystem source: preserve exact QFileInfo-based behavior.
+        const auto* fsModel = qobject_cast<const QFileSystemModel*>(srcIndex.model());
+        if (fsModel && TeRemoteAccess::suppressIconAccess(fileInfoVar.toString())) {
+            // Remote path: use the model's cached metadata instead of a per-item stat.
+            attr.isDir = fsModel->isDir(srcIndex);
+            attr.size = fsModel->size(srcIndex);
+            attr.name = fsModel->fileName(srcIndex);
+            attr.suffix = QFileInfo(attr.name).suffix();
+            attr.modified = fsModel->lastModified(srcIndex);
+            return attr;
+        }
+        // Local path (or legacy mode): preserve exact QFileInfo-based behavior.
         QFileInfo info(fileInfoVar.toString());
         attr.isDir = info.isDir();
         attr.size = info.size();
@@ -296,6 +329,11 @@ TeFileSortProxyModel::EntryAttr TeFileSortProxyModel::entryAttr(const QModelInde
         attr.suffix = QFileInfo(attr.name).suffix();
     }
     return attr;
+}
+
+TeFileSortProxyModel::EntryAttr TeFileSortProxyModel::entryAttrForProxyIndex(const QModelIndex& proxyIndex) const
+{
+    return entryAttr(mapToSource(proxyIndex));
 }
 
 bool TeFileSortProxyModel::stringLessThan(const QString &left, const QString &right, Qt::CaseSensitivity cs, bool isLocaleAware)

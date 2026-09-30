@@ -1,7 +1,8 @@
 #include "TeFileInfo.h"
+#include "TeFileIconProvider.h"
+#include "TeRemoteAccess.h"
 #include <QFileInfo>
 #include <QStandardItem>
-#include <QFileIconProvider>
 
 /**
  * @file TeFileInfo.cpp
@@ -31,17 +32,18 @@ QList<QStandardItem*> TeFileInfo::exportItem(bool filesystem, bool bColum) const
 
 	//COL_NAME
 	QStandardItem* item = nullptr;
-	QFileIconProvider iconProvider;
-	if (filesystem && finfo.exists()) {
-		item = new QStandardItem(iconProvider.icon(finfo), finfo.fileName());
+	TeFileIconProvider* iconProvider = TeFileIconProvider::instance();
+	// Remote paths skip the per-result exists() stat and per-file shell icon lookup.
+	if (filesystem && !TeRemoteAccess::suppressIconAccess(path) && finfo.exists()) {
+		item = new QStandardItem(iconProvider->icon(finfo), finfo.fileName());
 	}
 	else {
 		switch(type){
 		case EN_DIR:
-			item = new QStandardItem(iconProvider.icon(QFileIconProvider::Folder), finfo.fileName());
+			item = new QStandardItem(iconProvider->icon(QAbstractFileIconProvider::Folder), finfo.fileName());
 			break;
 		case EN_FILE:
-			item = new QStandardItem(iconProvider.icon(QFileIconProvider::File), finfo.fileName());
+			item = new QStandardItem(iconProvider->icon(QAbstractFileIconProvider::File), finfo.fileName());
 			break;
 		default:
 			item = new QStandardItem(finfo.fileName());

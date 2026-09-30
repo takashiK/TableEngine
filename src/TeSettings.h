@@ -64,6 +64,15 @@ namespace TeSettings {
 		WINDOW_SIZE_MODE_FIXED    = 1, ///< Always use the configured fixed size.
 	};
 
+	/**
+	 * @brief Automatic-access policy for WSL / network share / OneDrive locations.
+	 */
+	enum RemoteAccessMode {
+		REMOTE_ACCESS_SUPPRESS_ICON = 0, ///< A: no per-file shell icon lookups; thumbnails/previews kept.
+		REMOTE_ACCESS_SUPPRESS_AUTO = 1, ///< B: A plus no automatic thumbnail/preview content reads.
+		REMOTE_ACCESS_NORMAL        = 2, ///< C: legacy behaviour.
+	};
+
 	/** @brief Returns shared minimum width used by dialogs. */
 	int dialogMinimumWidth();
 };
@@ -143,6 +152,10 @@ SETTING_STR(SETTING_FOLDER_FOCUS_BG,         "folder/appearance/focus/bg_color")
 SETTING_STR(SETTING_FOLDER_FOCUS_PRIORITY,   "folder/appearance/focus_priority");
 
 SETTING_STR(SETTING_FOLDER_ACCENT_COLOR,     "folder/appearance/accent_color");
+
+SETTING_STR(SETTING_FOLDER_REMOTE_WSL,       "folder/remote_access/wsl");
+SETTING_STR(SETTING_FOLDER_REMOTE_NETWORK,   "folder/remote_access/network");
+SETTING_STR(SETTING_FOLDER_REMOTE_ONEDRIVE,  "folder/remote_access/onedrive");
 
 // Dynamic settings
 SETTING_STR(SETTING_EDIT_SELECTION_STYLE, "edit/selection_style");

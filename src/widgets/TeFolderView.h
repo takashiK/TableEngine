@@ -102,10 +102,28 @@ public:
 	virtual void refresh();
 
 	/**
+	 * @brief Re-resolves cached icons (e.g. after remote access modes change).
+	 *
+	 * Default implementation does nothing.
+	 */
+	virtual void refreshIcons();
+
+	/**
 	 * @brief Sets the root path displayed at the top of the tree.
 	 * @param path The new root path.
 	 */
 	virtual void setRootPath(const QString& path) = 0;
+
+	/** @brief Like setRootPath() but returns false if the path was rejected; default always succeeds. */
+	virtual bool trySetRootPath(const QString& path) { setRootPath(path); return true; }
+
+	/** @brief Like setCurrentPath() but returns false if the path was rejected; default always succeeds. */
+	virtual bool trySetCurrentPath(const QString& path) { setCurrentPath(path); return true; }
+
+	/** @brief Sets root and current together; returns false if rejected. Default applies both sequentially. */
+	virtual bool trySetPaths(const QString& root, const QString& current) {
+		return trySetRootPath(root) && (current.isEmpty() || trySetCurrentPath(current));
+	}
 
 	/** @brief Returns the current root path. */
 	virtual QString rootPath() =0;

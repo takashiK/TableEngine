@@ -21,6 +21,7 @@
 #include "TeDetailThumbnailSection.h"
 #include "utils/TeThumbnailProvider.h"
 #include "utils/TeImageLoader.h"
+#include "utils/TeRemoteAccess.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -58,6 +59,7 @@ TeDetailThumbnailSection::TeDetailThumbnailSection(QWidget* parent)
 
 bool TeDetailThumbnailSection::canHandle(const QFileInfo& info) const
 {
+    if (TeRemoteAccess::suppressAutoContent(info.absoluteFilePath())) return false;
     if (!info.isFile()) return false;
     const QByteArray fmt = QImageReader::imageFormat(info.absoluteFilePath());
     return !fmt.isEmpty();

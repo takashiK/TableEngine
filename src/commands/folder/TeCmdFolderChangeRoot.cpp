@@ -121,7 +121,9 @@ bool TeCmdFolderChangeRoot::execute(TeViewStore* p_store)
 	QDir dir;
 	if (dir.exists(rootPath)) {
 		//qDebug() << "TeCmdFolderChangeRoot: new:" << newTab << " tabPos:" << tabPos << " Change root path to " << rootPath;
-		p_store->changeRootPath(rootPath, newTab, tabPos);
+		if (!p_store->changeRootPath(rootPath, newTab, tabPos)) {
+			QMessageBox::warning(p_store->mainWindow(), QObject::tr("Error"), QObject::tr("The specified folder could not be opened."));
+		}
 	}
 
 	return true;

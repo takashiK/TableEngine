@@ -127,6 +127,15 @@ void TeDetailView::applyFileInfo()
     }
 }
 
+void TeDetailView::reload()
+{
+    if (m_pendingInfo.filePath().isEmpty())
+        return;
+    m_pendingDirty = true;
+    if (isVisible())
+        applyFileInfo();
+}
+
 void TeDetailView::clear()
 {
     m_pendingInfo  = QFileInfo();

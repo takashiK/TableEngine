@@ -77,6 +77,7 @@ target_compile_options(tablelibs PRIVATE /MP )
 
 target_link_libraries(tablelibs
     Shlwapi
+    Mpr
     icu.lib
 )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")

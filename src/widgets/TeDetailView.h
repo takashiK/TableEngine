@@ -89,6 +89,9 @@ public slots:
     /** @brief Clears all sections. */
     void clear();
 
+    /** @brief Re-evaluates the current item, e.g. after remote access modes change. */
+    void reload();
+
 protected:
     void showEvent(QShowEvent* event) override;
 

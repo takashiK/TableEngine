@@ -133,10 +133,18 @@ void TeFileItemDelegate::paintListMode(QPainter* painter, QStyleOptionViewItem& 
     qint64 entrySize = 0;
     QDateTime entryModified;
     if (fileInfoVar.isValid()) {
-        QFileInfo fileInfo(fileInfoVar.toString());
-        entryIsDir = fileInfo.isDir();
-        entrySize = fileInfo.size();
-        entryModified = fileInfo.lastModified();
+        const auto* proxy = qobject_cast<const TeFileSortProxyModel*>(index.model());
+        if (proxy) {
+            const TeFileSortProxyModel::EntryAttr attr = proxy->entryAttrForProxyIndex(index);
+            entryIsDir = attr.isDir;
+            entrySize = attr.size;
+            entryModified = attr.modified;
+        } else {
+            QFileInfo fileInfo(fileInfoVar.toString());
+            entryIsDir = fileInfo.isDir();
+            entrySize = fileInfo.size();
+            entryModified = fileInfo.lastModified();
+        }
     } else {
         const int type = index.data(TeFileInfo::ROLE_TYPE).toInt();
         entryIsDir = (type == TeFileInfo::EN_DIR || type == TeFileInfo::EN_PARENT);

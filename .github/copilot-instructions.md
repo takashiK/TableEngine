@@ -159,14 +159,14 @@ Thoroughness: {quick|medium|thorough}
 
 | タスク種別 | 複雑度 | 推奨モデル |
 |-----------|--------|-----------|
-| コード読解・検索 | 低 | GPT-5.6 Luna |
-| サブエージェント探索 | 低 | GPT-5.6 Luna  |
-| 一括置換・機械的修正 | 低 | GPT-5.6 Luna  |
-| ドキュメント更新 | 中 | Claude Sonnet 5 |
-| 実装 | 中 | Claude Sonnet 5 |
-| 分析・設計レポート生成 | 高 | Claude Opus 5 |
-| アーキテクチャ設計 | 高 | Claude Opus 5 |
-| 設計・実装のレビュー | 高 | Claude Opus 5 |
+| コード読解・検索 | 低 | GPT-6 Sol |
+| サブエージェント探索 | 低 | GPT-6 Luna  |
+| 一括置換・機械的修正 | 低 | GPT-6 Luna  |
+| ドキュメント更新 | 中 | Claude Sonnet 5.5 |
+| 実装 | 中 | Claude Sonnet 5.5 |
+| 分析・設計レポート生成 | 中 | Claude Sonnet 5.5 |
+| アーキテクチャ設計 | 高 | Claude Opus 5.5 |
+| 設計・実装のレビュー | 高 | Claude Opus 5.5 |
 
 - 優先順位: 品質 > トークンコスト
 - モデルは着手前に確定し、セッション途中で切り替えない（プロンプトキャッシュ失効を防ぐ。→ Token Efficiency 参照）
