@@ -146,7 +146,7 @@ public:
 	/**
 	 * @brief Mounts a pre-opened archive reader.
 	 *
-	 * Ownership of @p p_archive is transferred to this view.
+	 * Ownership of @p p_archive is transferred to this view on success only.
 	 * @param p_archive A fully opened TeArchive::Reader instance.
 	 * @return true on success.
 	 */
@@ -272,6 +272,10 @@ protected slots:
 	void itemActivated(const QModelIndex &index);
 
 private:
+	void resetArchive();
+	bool m_loading = false;
+	bool m_loadCanceled = false;
+
 	QString m_rootPath;              ///< URI of the currently mounted archive.
 	Mode m_mode = MODE_WRITABLE;     ///< Current mount mode.
 

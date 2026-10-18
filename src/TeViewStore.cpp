@@ -73,6 +73,7 @@
 #include <QCoreApplication>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QPointer>
 #include <QtWidgets/QApplication>
 #include "utils/TeFolderAppearance.h"
 
@@ -972,9 +973,11 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 	folderView->list()->setFileNameWidthLimits(m_minFileNameWidthChars, m_maxFileNameWidthChars);
 	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
+	QPointer<TeViewStore> storeGuard(this);
+	QPointer<TeArchiveFolderView> viewGuard(folderView);
 	bool ok = folderView->setArchive(path);
-	if (!ok) {
-		delete folderView;
+	if (!ok || !storeGuard || !viewGuard) {
+		delete viewGuard.data();
 		return nullptr;
 	}
 	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
