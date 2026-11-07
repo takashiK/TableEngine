@@ -64,7 +64,7 @@ bool TeCmdChangeAttribute::execute(TeViewStore* p_store)
 {
 	QStringList paths;
 	if (getSelectedItemList(p_store, &paths)) {
-
+		// TODO: Change Attribute
 	}
 	return true;
 }

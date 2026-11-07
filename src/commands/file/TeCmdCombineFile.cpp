@@ -90,7 +90,13 @@ bool TeCmdCombineFile::execute(TeViewStore* p_store)
 			}
 			//combine files
 			if (!outFile.open(QIODevice::WriteOnly | QIODeviceBase::Truncate)) {
-				return false;
+				QMessageBox msg(p_store->mainWindow());
+				msg.setIconPixmap(QIcon(":TableEngine/error.png").pixmap(32, 32));
+				msg.setWindowTitle(QObject::tr("Error"));
+				msg.setText(QObject::tr("Could not open output file for writing."));
+				msg.exec();
+
+				return true;
 			}
 			for (const auto& path : inputFiles) {
 				QFile inputFile( path );
@@ -99,18 +105,23 @@ bool TeCmdCombineFile::execute(TeViewStore* p_store)
 						const QByteArray chunk = inputFile.read(16*1024*1024);
 						if (outFile.write(chunk) == -1) {
 							outFile.close();
-							return false;
+							QMessageBox msg(p_store->mainWindow());
+							msg.setIconPixmap(QIcon(":TableEngine/error.png").pixmap(32, 32));
+							msg.setWindowTitle(QObject::tr("Error"));
+							msg.setText(QObject::tr("Error writing to output file."));
+							msg.exec();
+							return true;
 						}
 					}
 					inputFile.close();
 				} else {
 					outFile.close();
-					QMessageBox::critical(
-						nullptr,
-						QObject::tr("Error"),
-						QObject::tr("Could not open input file:\n%1").arg(path)
-					);
-					return false;
+					QMessageBox msg(p_store->mainWindow());
+					msg.setIconPixmap(QIcon(":TableEngine/error.png").pixmap(32, 32));
+					msg.setWindowTitle(QObject::tr("Error"));
+					msg.setText(QObject::tr("Could not open input file:\n%1").arg(path));
+					msg.exec();
+					return true;
 				}
 			}
 			outFile.close();
