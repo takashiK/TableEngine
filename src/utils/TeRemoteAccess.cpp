@@ -49,6 +49,15 @@ std::function<Kind(const QString&)>& hook()
 
 std::atomic<bool> g_hookActive{false};
 
+// Windows-style paths are parsed lexically on every OS, so '\\' must be
+// normalized even where QDir::fromNativeSeparators() is a no-op.
+QString toSlashes(const QString& path)
+{
+	QString p = path;
+	p.replace(QLatin1Char('\\'), QLatin1Char('/'));
+	return p;
+}
+
 bool isWslHost(const QString& host)
 {
 	return host.compare(QLatin1String("wsl$"), Qt::CaseInsensitive) == 0
@@ -57,7 +66,7 @@ bool isWslHost(const QString& host)
 
 QString uncHost(const QString& remoteName)
 {
-	QString p = QDir::fromNativeSeparators(remoteName);
+	QString p = toSlashes(remoteName);
 	while (p.startsWith(QLatin1Char('/')))
 		p.remove(0, 1);
 	const int slash = p.indexOf(QLatin1Char('/'));
@@ -189,7 +198,7 @@ DriveResolution resolveDriveProbe(unsigned driveType, unsigned connectionResult,
 
 bool isLexicalRoot(const QString& path)
 {
-	const QString p = QDir::fromNativeSeparators(path);
+	const QString p = toSlashes(path);
 	if (p == QLatin1String("/"))
 		return true;
 	if (p.size() >= 2 && p.size() <= 3 && p.at(0).isLetter() && p.at(1) == QLatin1Char(':'))
@@ -203,7 +212,7 @@ bool isLexicalRoot(const QString& path)
 
 Kind classifyPath(const QString& path, const DriveKindResolver& resolveDrive, const QStringList& oneDriveRoots)
 {
-	QString p = QDir::fromNativeSeparators(path);
+	QString p = toSlashes(path);
 
 	if (p.startsWith(QLatin1String("//?/UNC/"), Qt::CaseInsensitive)) {
 		p = QLatin1String("//") + p.mid(8);
@@ -223,7 +232,7 @@ Kind classifyPath(const QString& path, const DriveKindResolver& resolveDrive, co
 	}
 
 	for (const QString& root : oneDriveRoots) {
-		QString r = QDir::fromNativeSeparators(root);
+		QString r = toSlashes(root);
 		while (r.size() > 1 && r.endsWith(QLatin1Char('/')))
 			r.chop(1);
 		if (r.isEmpty())
