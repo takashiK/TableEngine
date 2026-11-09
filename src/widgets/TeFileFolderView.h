@@ -79,6 +79,16 @@ public:
 	 * @param path Absolute directory path.
 	 */
 	virtual void setRootPath(const QString& path);
+	/**
+	 * @brief Sets the root path only if the models accept it.
+	 * @return false (previous root, list and history untouched) when @p path yields an invalid model index.
+	 */
+	bool trySetRootPath(const QString& path) override;
+	/**
+	 * @brief Atomically sets root and current path; on failure the view, models and history are unchanged.
+	 * @param current Target inside @p root; empty keeps the root as current.
+	 */
+	bool trySetPaths(const QString& root, const QString& current) override;
 	/** @brief Returns the current tree root path. */
 	virtual QString rootPath();
 
@@ -87,6 +97,8 @@ public:
 	 * @param path Absolute directory path inside the current root.
 	 */
 	virtual void setCurrentPath(const QString& path);
+	/** @brief Like setCurrentPath() but returns false and keeps the previous state when @p path is rejected. */
+	bool trySetCurrentPath(const QString& path) override;
 	/** @brief Returns the path currently displayed in the list view. */
 	virtual QString currentPath();
 
@@ -116,6 +128,9 @@ public:
 	 */
 	virtual void refresh() override;
 
+	/** @brief Repaints visible tree rows so their icons follow the current remote access modes. */
+	void refreshIcons() override;
+
 public slots:
 	/**
 	 * @brief Updates file-type visibility flags and sort order.
@@ -130,8 +145,9 @@ protected:
 	 * @brief Updates both panes to reflect a new root/current combination.
 	 * @param root    New tree root path.
 	 * @param current New list-view current path (defaults to root).
+	 * @return false when a target yields an invalid model index; views and models keep their previous state.
 	 */
-	void updatePath(const QString& root, const QString& current=QString());
+	bool updatePath(const QString& root, const QString& current=QString());
 
 	/**
 	 * @brief Shows a system context menu at @p pos for the item view @p pView.
@@ -163,6 +179,9 @@ protected:
 	bool collectFileContextMenuTarget(const QAbstractItemView* pView, const QPoint& pos, QStringList& files) const;
 
 private:
+	/** @brief Sets the list model root; restores the previous root and returns false if the model rejects @p path. */
+	bool setListModelRoot(const QString& path, QModelIndex& rootIndex);
+
 	/** @brief Connects mp_listModel::directoryLoaded() to the "select first row when current is invalid" behavior. */
 	void connectListModelSignals();
 
@@ -178,4 +197,5 @@ private:
 	TeEventFilter* mp_listEvent;         ///< Event filter for the list pane.
 
 	TeHistory m_history;                 ///< Navigation history.
+	bool m_updatingPath = false;         ///< True while updatePath() runs; tree selection changes are then not re-entered.
 };

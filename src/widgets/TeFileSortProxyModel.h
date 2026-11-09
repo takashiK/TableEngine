@@ -89,6 +89,12 @@ public:
     QSize pixmapSize() const;
 
     /**
+     * @brief Resolves Qt::DecorationRole per visible item via TeFileIconProvider::folderIcon().
+     * @param enable true for directory-only (tree) proxies, so remote-mode changes need no source icon rebuild.
+     */
+    void setDynamicFolderIcons(bool enable);
+
+    /**
      * @brief Returns model data, loading a thumbnail when @p role is FilePixmap.
      * @param index The model index.
      * @param role  The data role requested.
@@ -164,6 +170,31 @@ public:
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
 
     Qt::DropActions	supportedDropActions() const override;
+
+    /**
+     * @brief Source-model-agnostic attributes of a single entry.
+     *
+     * Used by lessThan() and the item delegate so that ordering and painting work
+     * regardless of whether the source model is a QFileSystemModel or a
+     * QStandardItemModel.
+     */
+    struct EntryAttr {
+        bool isDir = false;   ///< True if the entry is a directory or "..".
+        qint64 size = 0;      ///< File size in bytes.
+        QString name;         ///< Display name.
+        QString suffix;       ///< File name suffix/extension.
+        QDateTime modified;   ///< Last-modified timestamp.
+    };
+
+    /**
+     * @brief Returns entry attributes for a proxy index.
+     *
+     * @details On WSL / network / OneDrive paths (unless legacy mode is selected)
+     * the attributes come from QFileSystemModel's cached metadata, so painting
+     * and sorting perform no per-item stat on the GUI thread.
+     */
+    EntryAttr entryAttrForProxyIndex(const QModelIndex& proxyIndex) const;
+
 protected:
     /**
      * @brief Filters rows based on file type flags and the filename regex.
@@ -203,20 +234,6 @@ private slots:
 
 private:
     /**
-     * @brief Source-model-agnostic attributes of a single entry.
-     *
-     * Used by lessThan() so that ordering works regardless of whether the
-     * source model is a QFileSystemModel or a QStandardItemModel.
-     */
-    struct EntryAttr {
-        bool isDir = false;   ///< True if the entry is a directory or "..".
-        qint64 size = 0;      ///< File size in bytes.
-        QString name;         ///< Display name.
-        QString suffix;       ///< File name suffix/extension.
-        QDateTime modified;   ///< Last-modified timestamp.
-    };
-
-    /**
      * @brief Extracts entry attributes from a source-model index.
      * @param srcIndex Index in the source model.
      * @return Populated EntryAttr describing the entry.
@@ -229,6 +246,7 @@ private:
 
     TeTypes::OrderType m_sortType = TeTypes::ORDER_NAME;        ///< Active sort criterion.
     QSize m_pixmapSize = QSize(128, 128);                   ///< Target thumbnail size.
+    bool m_dynamicFolderIcons = false;    ///< Decoration is resolved per item by folderIcon().
     TeImageLoader* mp_imageLoader = nullptr;        ///< Async thumbnail loader.
     QRegularExpression m_fileRegex;       ///< Optional filename filter.
     bool m_showHiddenFiles = true;        ///< Whether dot-files are visible.

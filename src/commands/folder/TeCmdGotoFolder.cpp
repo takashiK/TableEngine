@@ -20,6 +20,7 @@
 
 #include "TeCmdGotoFolder.h"
 #include "utils/TeUtils.h"
+#include "utils/TeRemoteAccess.h"
 #include "TeViewStore.h"
 #include "widgets/TeFolderView.h"
 #include "dialogs/TeFilePathDialog.h"
@@ -34,6 +35,13 @@
  */
 
 const char* TeCmdGotoFolder::PARAM_PATH = "path";
+
+namespace {
+void showOpenFailed(TeViewStore* p_store)
+{
+	QMessageBox::warning(p_store->mainWindow(), QObject::tr("Error"), QObject::tr("The specified folder could not be opened."));
+}
+}
 
 TeCmdGotoFolder::TeCmdGotoFolder()
 {
@@ -93,17 +101,20 @@ bool TeCmdGotoFolder::execute(TeViewStore* p_store)
 		TeFolderView* p_view = p_store->currentFolderView();
 		QString rootPath = dir.absoluteFilePath(p_view->rootPath());
 
-		if(path.startsWith(rootPath))
+		if(p_view->getType() == TeTypes::WT_FOLDERVIEW && path.startsWith(rootPath))
 		{
-			p_view->setCurrentPath(path);
+			if (!p_view->trySetCurrentPath(path))
+				showOpenFailed(p_store);
 		}
 		else {
 			QDir rootDir(path);
-			while (!rootDir.isRoot()) {
-				rootDir.cdUp();
+			while (!TeRemoteAccess::isLexicalRoot(rootDir.absolutePath())) {
+				if (!rootDir.cdUp())
+					break;
 			}
-			p_view->setRootPath(rootDir.absolutePath());
-			p_view->setCurrentPath(path);
+			// Root and current are committed together; a rejection leaves view, tab and history unchanged.
+			if (!p_store->changeRootPath(rootDir.absolutePath(), false, -1, path))
+				showOpenFailed(p_store);
 		}
 
 	}

@@ -90,6 +90,9 @@ public:
 	/** @brief Removes all drive and quick-access buttons from the toolbar. */
 	void clear();
 
+	/** @brief Re-resolves the icon of every drive and quick-access button in place. */
+	void refreshIcons();
+
 signals:
 	/**
 	 * @brief Emitted when the user clicks a drive or quick-access button.

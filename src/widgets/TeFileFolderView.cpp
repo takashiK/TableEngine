@@ -30,6 +30,7 @@
 #include "commands/file/TeCmdMoveTo.h"
 #include "utils/TeFileFinder.h"
 #include "utils/TeFileInfo.h"
+#include "utils/TeFileIconProvider.h"
 #include "TeFileSortProxyModel.h"
 
 #include <QLayout>
@@ -42,7 +43,9 @@
 #include <QStack>
 #include <QMimeData>
 #include <QScrollBar>
+#include <QScopedValueRollback>
 #include <QItemSelection>
+#include <QTimer>
 /**
  * @file TeFileFolderView.cpp
  * @brief Implementation of TeFileFolderView.
@@ -68,11 +71,14 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 
 	mp_treeModel = new QFileSystemModel;
 	mp_listModel = new QFileSystemModel;
+	mp_treeModel->setIconProvider(TeFileIconProvider::folderInstance());
+	mp_listModel->setIconProvider(TeFileIconProvider::instance());
 
 	mp_treeModel->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 	mp_treeModel->setRootPath("");
 	mp_treeSortModel = new TeFileSortProxyModel(this);
 	mp_treeSortModel->setSourceModel(mp_treeModel);
+	mp_treeSortModel->setDynamicFolderIcons(true);
 	mp_treeSortModel->setShowHiddenFiles(false);
 	mp_treeView->setModel(mp_treeSortModel);
 
@@ -104,6 +110,8 @@ TeFileFolderView::TeFileFolderView(QWidget *parent)
 	connect(mp_treeView->selectionModel(), &QItemSelectionModel::currentChanged, 
 		[this](const QModelIndex &proxyIndex, const QModelIndex &/*previous*/)
 		{ 
+			if (m_updatingPath)
+				return;
 			QModelIndex sourceIndex = mp_treeSortModel->mapToSource(proxyIndex);
 			setCurrentPath(mp_treeModel->filePath(sourceIndex));
 		 });
@@ -240,6 +248,12 @@ void TeFileFolderView::connectListModelSignals()
 		}});
 }
 
+void TeFileFolderView::refreshIcons()
+{
+	// The tree proxy resolves icons per painted row, so repainting is enough.
+	mp_treeView->viewport()->update();
+}
+
 void TeFileFolderView::refresh()
 {
 	const QString path = mp_listModel->rootPath();
@@ -271,11 +285,19 @@ void TeFileFolderView::refresh()
 
 	QFileSystemModel* oldModel = mp_listModel;
 	QFileSystemModel* newModel = new QFileSystemModel;
+	newModel->setIconProvider(TeFileIconProvider::instance());
 	newModel->setOptions(options);
 	newModel->setReadOnly(readOnly);
 	newModel->setFilter(filters);
 	newModel->setNameFilters(nameFilters);
 	newModel->setNameFilterDisables(nameFilterDisables);
+
+	// A rejected root (e.g. vanished share) keeps the old model and view state untouched.
+	QModelIndex rootIndex = newModel->setRootPath(path);
+	if (!rootIndex.isValid()) {
+		delete newModel;
+		return;
+	}
 	mp_listModel = newModel;
 
 	//TeFileSortProxyModel::setSourceModel() disconnects oldModel and connects newModel internally.
@@ -311,7 +333,6 @@ void TeFileFolderView::refresh()
 		mp_listView->verticalScrollBar()->setValue(scrollValue);
 	}, Qt::SingleShotConnection);
 
-	QModelIndex rootIndex = newModel->setRootPath(path);
 	auto listSortRoot = mp_listSortModel->mapFromSource(rootIndex);
 	mp_listView->setRootIndex(listSortRoot);
 
@@ -469,8 +490,15 @@ void TeFileFolderView::showUserContextMenu(const QString& menuName, const QPoint
 
 void TeFileFolderView::setRootPath(const QString & path)
 {
-	updatePath(path, QString());
+	trySetRootPath(path);
+}
+
+bool TeFileFolderView::trySetRootPath(const QString& path)
+{
+	if (!updatePath(path, QString()))
+		return false;
 	m_history.push({ rootPath(), currentPath()});
+	return true;
 }
 
 QString TeFileFolderView::rootPath()
@@ -480,8 +508,23 @@ QString TeFileFolderView::rootPath()
 
 void TeFileFolderView::setCurrentPath(const QString & path)
 {
-	updatePath(rootPath(), path);
+	trySetCurrentPath(path);
+}
+
+bool TeFileFolderView::trySetCurrentPath(const QString& path)
+{
+	if (!updatePath(rootPath(), path))
+		return false;
 	m_history.push({ rootPath(), currentPath() });
+	return true;
+}
+
+bool TeFileFolderView::trySetPaths(const QString& root, const QString& current)
+{
+	if (!updatePath(root, current))
+		return false;
+	m_history.push({ rootPath(), currentPath() });
+	return true;
 }
 
 QString TeFileFolderView::currentPath()
@@ -492,15 +535,20 @@ QString TeFileFolderView::currentPath()
 void TeFileFolderView::moveNextPath()
 {
 	TeHistory::PathPair pair = m_history.next();
-	if(pair != TeHistory::PathPair())
-		updatePath(pair.first, pair.second);
+	// A rejected entry must not leave the history cursor advanced.
+	if (pair != TeHistory::PathPair()
+		&& ((!pair.second.isEmpty() && !mp_treeModel->index(pair.second).isValid())
+			|| !updatePath(pair.first, pair.second)))
+		m_history.previous();
 }
 
 void TeFileFolderView::movePrevPath()
 {
 	TeHistory::PathPair pair = m_history.previous();
-	if (pair != TeHistory::PathPair())
-		updatePath(pair.first, pair.second);
+	if (pair != TeHistory::PathPair()
+		&& ((!pair.second.isEmpty() && !mp_treeModel->index(pair.second).isValid())
+			|| !updatePath(pair.first, pair.second)))
+		m_history.next();
 }
 
 void TeFileFolderView::moveParentPath() {
@@ -534,22 +582,75 @@ TeFinder* TeFileFolderView::makeFinder()
 	return nullptr;
 }
 
-void TeFileFolderView::updatePath(const QString& root, const QString& current)
+bool TeFileFolderView::setListModelRoot(const QString& path, QModelIndex& rootIndex)
 {
+	const QString prevRoot = mp_listModel->rootPath();
+	rootIndex = mp_listModel->setRootPath(path);
+
+	// QFileSystemModel returns the previous root's index (or an invalid one) when it rejects @p path.
+	const bool moved = QDir::cleanPath(mp_listModel->rootPath()) != QDir::cleanPath(prevRoot)
+		|| QDir::cleanPath(path) == QDir::cleanPath(prevRoot);
+	if (rootIndex.isValid() && moved
+		&& QDir::cleanPath(mp_listModel->filePath(rootIndex)) == QDir::cleanPath(path))
+		return true;
+
+	mp_listModel->setRootPath(prevRoot);
+	rootIndex = QModelIndex();
+	return false;
+}
+
+bool TeFileFolderView::updatePath(const QString& root, const QString& current)
+{
+	QScopedValueRollback<bool> updatingGuard(m_updatingPath, true);
 
 	QDir dir;
 	QString absRoot = dir.absoluteFilePath(root);
-	if (rootPath() != absRoot) {
+
+	// Validate every target before touching the views so a rejected path keeps the previous state.
+	const bool rootChanged = (rootPath() != absRoot);
+	QModelIndex treeRootSource;
+	if (rootChanged) {
+		treeRootSource = mp_treeModel->index(absRoot);
+		if (!treeRootSource.isValid())
+			return false;
+	}
+
+	const QString prevListRoot = mp_listModel->rootPath();
+	const QString prevVirtualRoot = mp_listSortModel->virtualRootPath();
+	const QPersistentModelIndex prevTreeRoot = tree()->visualRootIndex();
+	const QPersistentModelIndex prevTreeCurrent = tree()->currentIndex();
+	const QPersistentModelIndex prevListRootIndex = list()->rootIndex();
+	const QPersistentModelIndex prevListCurrent = list()->currentIndex();
+
+	// Restores the pre-call state when a later step rejects the target after the root was committed.
+	auto rollback = [&]() {
+		if (!rootChanged)
+			return;
+		QModelIndex ignored;
+		mp_listSortModel->setVirtualRootPath(prevVirtualRoot);
+		setListModelRoot(prevListRoot, ignored);
+		tree()->setVisualRootIndex(QModelIndex(prevTreeRoot));
+		tree()->setCurrentIndex(QModelIndex(prevTreeCurrent));
+		list()->setRootIndex(QModelIndex(prevListRootIndex));
+		list()->setCurrentIndex(QModelIndex(prevListCurrent));
+	};
+
+	if (rootChanged) {
+		//Set target path of listview to same as treeview.
+		mp_listSortModel->setVirtualRootPath(absRoot);
+		QModelIndex rootIndex;
+		if (!setListModelRoot(absRoot, rootIndex)) {
+			mp_listSortModel->setVirtualRootPath(prevVirtualRoot);
+			return false;
+		}
+
 		//Set root path to treeview.
-		QModelIndex index = mp_treeSortModel->mapFromSource(mp_treeModel->index(absRoot));
+		QModelIndex index = mp_treeSortModel->mapFromSource(treeRootSource);
 		tree()->setVisualRootIndex(index);
 		tree()->setCurrentIndex(index);
 
-		//Set target path of listview to same as treeview.
 		list()->clearSelection();
 		list()->setCurrentIndex(QModelIndex());
-		mp_listSortModel->setVirtualRootPath(absRoot);
-		QModelIndex rootIndex = mp_listModel->setRootPath(absRoot);
 
 		auto listSortRoot = mp_listSortModel->mapFromSource(rootIndex);
 		list()->setRootIndex(listSortRoot);
@@ -563,20 +664,26 @@ void TeFileFolderView::updatePath(const QString& root, const QString& current)
 
 	if (!current.isEmpty()) {
 		//Set current path to listview. and current index to treeview.
-		QModelIndex index = mp_treeSortModel->mapFromSource(mp_treeModel->index(current));
+		QModelIndex prevIndex = mp_listSortModel->mapToSource(list()->rootIndex());
+		QString prevPath = mp_listModel->filePath(prevIndex);
+		QModelIndex index = mp_listModel->index(current);
+		QModelIndex listRootIndex;
+		const bool listChanged = (list()->rootIndex() != mp_listSortModel->mapFromSource(index));
+		if (listChanged && !setListModelRoot(current, listRootIndex)) {
+			rollback();
+			return false;
+		}
+
+		index = mp_treeSortModel->mapFromSource(mp_treeModel->index(current));
 		if (tree()->currentIndex() != index) {
 			tree()->clearSelection();
 			tree()->setCurrentIndex(index);
 		}
 
-		QModelIndex prevIndex = mp_listSortModel->mapToSource(list()->rootIndex());
-		QString prevPath = mp_listModel->filePath(prevIndex);
-		index = mp_listModel->index(current);
-		if (list()->rootIndex() != mp_listSortModel->mapFromSource(index)) {
+		if (listChanged) {
 			list()->clearSelection();
 			list()->setCurrentIndex(QModelIndex());
-			QModelIndex rootIndex = mp_listModel->setRootPath(current);
-			auto listSortRoot = mp_listSortModel->mapFromSource(rootIndex);
+			auto listSortRoot = mp_listSortModel->mapFromSource(listRootIndex);
 			list()->setRootIndex(listSortRoot);
 
 			if (current == mp_listModel->filePath(prevIndex.parent())) {
@@ -591,6 +698,7 @@ void TeFileFolderView::updatePath(const QString& root, const QString& current)
 		}
 	}
 
+	return true;
 }
 
 void TeFileFolderView::setFileShowMode(TeTypes::FileTypeFlags typeFlags, TeTypes::OrderType order, bool orderReversed)

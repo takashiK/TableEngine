@@ -157,16 +157,28 @@ Thoroughness: {quick|medium|thorough}
 モデルは常に各系列の**最新版**を使用する（版名は固定しない）。
 これらのタスクは、SubAgentに委託して実施する。モデル選択はタスク種別と複雑度に応じて行う。
 
+利用してよいモデルと別名
+| 別名 | モデル |
+|------|-------|
+|Luna  | GPT-6 Luna |
+|Terra | GPT-6.1 Terra |
+|Sol   | GPT-6.1 Sol |
+|SolH  | GPT-6.1 Sol Effort High |
+|Haiku | Claude Haiku 5.5 |
+|Sonnet| Claude Sonnet 5.5 |
+|Opus  | Claude Opus 5.5 |
+
+
 | タスク種別 | 複雑度 | 推奨モデル |
 |-----------|--------|-----------|
-| コード読解・検索 | 低 | GPT-5.6 Luna |
-| サブエージェント探索 | 低 | GPT-5.6 Luna  |
-| 一括置換・機械的修正 | 低 | GPT-5.6 Luna  |
-| ドキュメント更新 | 中 | Claude Sonnet 5 |
-| 実装 | 中 | Claude Sonnet 5 |
-| 分析・設計レポート生成 | 高 | Claude Opus 5 |
-| アーキテクチャ設計 | 高 | Claude Opus 5 |
-| 設計・実装のレビュー | 高 | Claude Opus 5 |
+| コード読解・検索 | 低 | Sol |
+| サブエージェント探索 | 低 | Luna  |
+| 一括置換・機械的修正 | 低 | Luna  |
+| ドキュメント更新 | 中 | Sonnet |
+| 実装 | 中 | Sonnet |
+| 分析・設計レポート生成 | 中 | Sonnet |
+| アーキテクチャ設計 | 高 | Opus |
+| 設計・実装のレビュー | 高 | 一次レビュー Sol / 最終レビュー Opus |
 
 - 優先順位: 品質 > トークンコスト
 - モデルは着手前に確定し、セッション途中で切り替えない（プロンプトキャッシュ失効を防ぐ。→ Token Efficiency 参照）

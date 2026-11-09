@@ -22,8 +22,9 @@
 
 #include <QFormLayout>
 #include <QLabel>
-#include <QFileIconProvider>
 #include <QLocale>
+
+#include "utils/TeFileIconProvider.h"
 
 /**
  * @file TeDetailFileInfoSection.cpp
@@ -77,8 +78,7 @@ void TeDetailFileInfoSection::load(const QFileInfo& info)
     mp_name->setText(info.fileName());
 
     // Type: use OS description string
-    QFileIconProvider prov;
-    mp_type->setText(prov.type(info));
+    mp_type->setText(TeFileIconProvider::instance()->type(info));
 
     // Size
     if (info.isDir()) {

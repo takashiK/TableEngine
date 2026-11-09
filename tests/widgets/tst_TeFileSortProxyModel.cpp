@@ -23,6 +23,8 @@
 #include <QStandardItem>
 #include <QFileSystemModel>
 #include "widgets/TeFileSortProxyModel.h"
+#include "utils/TeFileIconProvider.h"
+#include "utils/TeRemoteAccess.h"
 #include "TeTypes.h"
 
 using namespace ::testing;
@@ -122,4 +124,31 @@ TEST_F(tst_TeFileSortProxyModel, regex_filter_hides_non_matching_rows)
     proxy.setFileRegex(QRegularExpression("apple.*"));
     // Only "apple.txt" should match — row count must be less than or equal to source.
     EXPECT_LE(proxy.rowCount(), srcModel.rowCount());
+}
+
+TEST(tst_TeFileSortProxyModel_icons, dynamicFolderIcons_use_folderIcon_on_suppressed_path)
+{
+    TeRemoteAccess::setClassifierForTesting([](const QString&) { return TeRemoteAccess::Kind::Network; });
+
+    QPixmap red(16, 16);
+    red.fill(Qt::red);
+    auto* item = new QStandardItem("dir");
+    item->setData("remote/dir", QFileSystemModel::FilePathRole);
+    item->setData(QIcon(red), Qt::DecorationRole);
+    QStandardItemModel src;
+    src.appendRow(item);
+
+    TeFileSortProxyModel proxy;
+    proxy.setSourceModel(&src);
+    const QModelIndex idx = proxy.index(0, 0);
+
+    const QIcon plain = qvariant_cast<QIcon>(proxy.data(idx, Qt::DecorationRole));
+    EXPECT_EQ(plain.pixmap(16, 16).toImage(), red.toImage());
+
+    proxy.setDynamicFolderIcons(true);
+    const QIcon dynamic = qvariant_cast<QIcon>(proxy.data(idx, Qt::DecorationRole));
+    const QIcon expected = TeFileIconProvider::instance()->folderIcon("remote/dir");
+    EXPECT_EQ(dynamic.pixmap(16, 16).toImage(), expected.pixmap(16, 16).toImage());
+
+    TeRemoteAccess::setClassifierForTesting({});
 }

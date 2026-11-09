@@ -117,10 +117,12 @@ bool TeCmdArchive::execute(TeViewStore* p_store)
 			//get distination folder.
 			QString targetPath = QFileDialog::getSaveFileName(p_store->mainWindow(), QObject::tr("Archive file path"), p_folder->currentPath(), QObject::tr("Archive (*.zip *.tgz *.tar.gz *.tar.bz2 *.7z)"));
 			if (targetPath.isEmpty()) {
-				QMessageBox msg(p_store->mainWindow());
-				msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
-				msg.setText(QObject::tr("Failed Archive Function.\nArchive file path is not set."));
-				msg.exec();
+				//Too match message
+
+				//QMessageBox msg(p_store->mainWindow());
+				//msg.setIconPixmap(QIcon(":TableEngine/warning.png").pixmap(32, 32));
+				//msg.setText(QObject::tr("Failed Archive Function.\nArchive file path is not set."));
+				//msg.exec();
 			}
 			else {
 				archiveItems(p_store,paths, targetPath,p_folder->currentPath());

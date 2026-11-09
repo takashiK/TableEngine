@@ -49,6 +49,13 @@
 #include <QMessageBox>
 #include <QDirIterator>
 #include <QDateTime>
+#include <QElapsedTimer>
+#include <QEventLoop>
+#include <QPointer>
+#include <QScopeGuard>
+#include <QThread>
+#include <QTimer>
+#include <memory>
 /**
  * @file TeArchiveFolderView.cpp
  * @brief Implementation of TeArchiveFolderView.
@@ -274,6 +281,9 @@ TeFileInfo TeArchiveFolderView::currentFileInfo() const
 
 void TeArchiveFolderView::setRootPath(const QString & path)
 {
+	if (m_loading) {
+		return;
+	}
 	if (path.startsWith(URI_READ)) {
 		m_mode = MODE_READONLY;
 		setArchive(path.mid(URI_READ.size()));
@@ -380,6 +390,15 @@ TeFinder* TeArchiveFolderView::makeFinder()
 }
 
 void TeArchiveFolderView::clear()
+{
+	if (m_loading) {
+		m_loadCanceled = true;
+		return;
+	}
+	resetArchive();
+}
+
+void TeArchiveFolderView::resetArchive()
 {
 	if (mp_reader) {
 		delete mp_reader;
@@ -655,10 +674,22 @@ bool TeArchiveFolderView::commit(const QString& destPath, TeArchive::ArchiveType
 
 bool TeArchiveFolderView::setArchive(const QString & path)
 {
+	if (m_loading) {
+		return false;
+	}
+	QPointer<TeArchiveFolderView> guard(this);
+	m_loading = true;
+	m_loadCanceled = false;
+	auto loadingGuard = qScopeGuard([guard]() {
+		if (guard) {
+			guard->m_loading = false;
+			guard->m_loadCanceled = false;
+		}
+	});
 	QDir dir;
 	QString absPath = dir.absoluteFilePath(path);
 
-	TeArchive::Reader* p_archive = new TeArchive::Reader();
+	auto p_archive = std::make_unique<TeArchive::Reader>();
 	p_archive->open(absPath);
 
 	// Handle encrypted archives: prompt for the password and retry until the
@@ -669,9 +700,10 @@ bool TeArchiveFolderView::setArchive(const QString & path)
 	if (needPassword) {
 		bool ok = false;
 		while (true) {
-			TePasswordDialog dialog(this);
+			TePasswordDialog dialog;
 			dialog.setPrompt(tr("Enter the password for \"%1\":").arg(QFileInfo(absPath).fileName()));
-			if (dialog.exec() != QDialog::Accepted) {
+			int result = dialog.exec();
+			if (!guard || m_loadCanceled || result != QDialog::Accepted) {
 				break; // cancelled by the user
 			}
 			p_archive->setPassword(dialog.password());
@@ -681,23 +713,28 @@ bool TeArchiveFolderView::setArchive(const QString & path)
 			}
 		}
 		if (!ok) {
-			delete p_archive;
 			return false;
 		}
 	}
 	else if (p_archive->lastResult() != TeArchive::Reader::RESULT_OK) {
-		delete p_archive;
 		return false;
 	}
 
-	if (!setArchive(p_archive)) {
-		delete p_archive;
+	if (!guard || m_loadCanceled) {
 		return false;
 	}
+	m_loading = false;
+	if (!setArchive(p_archive.get())) {
+		return false;
+	}
+	p_archive.release();
 	return true;
 }
 
 bool TeArchiveFolderView::newArchive(const QString& path) {
+	if (m_loading) {
+		return false;
+	}
 	clear();
 	if (path.isEmpty()) {
 		return false;
@@ -712,16 +749,40 @@ bool TeArchiveFolderView::newArchive(const QString& path) {
 
 bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 {
-	clear();
-	if (p_archive == nullptr || p_archive->path().isEmpty()) {
+	if (m_loading || (p_archive != nullptr && p_archive == mp_reader)) {
 		return false;
 	}
 
-	// Take ownership of the reader for the lifetime of the mount.
-	mp_reader = p_archive;
+	QPointer<TeArchiveFolderView> guard(this);
+	QPointer<TeArchive::Reader> readerGuard(p_archive);
+	m_loading = true;
+	m_loadCanceled = false;
+	auto finish = [&guard](bool success) {
+		if (guard) {
+			if (!success) {
+				guard->mp_treeProxy->setDynamicSortFilter(true);
+				if (!guard) return false;
+				guard->mp_listProxy->setDynamicSortFilter(true);
+				if (!guard) return false;
+				guard->resetArchive();
+			}
+			if (guard) {
+				guard->m_loading = false;
+				guard->m_loadCanceled = false;
+			}
+		}
+		return success && !guard.isNull();
+	};
+	resetArchive();
+	if (!guard || !readerGuard || readerGuard->path().isEmpty() || m_loadCanceled) {
+		return finish(false);
+	}
+
+	const QString path = readerGuard->path();
+	const QString password = readerGuard->password();
 	m_mode = MODE_READONLY;
 
-	m_rootPath = p_archive->path();
+	m_rootPath = path;
 	m_history.push(TeHistory::PathPair(m_rootPath, QString()));
 
 	QFileInfo info(m_rootPath);
@@ -733,34 +794,127 @@ bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 	mp_treeProxy->setDynamicSortFilter(false);
 	mp_listProxy->setDynamicSortFilter(false);
 
-	// Enumerating archive entries can be slow; show a busy progress dialog so
-	// the user can distinguish processing from a frozen UI.
-	QProgressDialog progress(tr("Opening archive \"%1\"...").arg(info.fileName()),
-		QString(), 0, 0, this);
-	progress.setWindowModality(Qt::WindowModal);
-	progress.setMinimumDuration(500);
+	QVector<QPointer<QWidget>> disabledWindows;
+	for (QWidget* window : QApplication::topLevelWidgets()) {
+		if (window->isVisible() && window->isEnabled()) {
+			disabledWindows.append(window);
+			window->setEnabled(false);
+		}
+	}
+	auto inputGuard = qScopeGuard([&disabledWindows]() {
+		for (const auto& window : disabledWindows) {
+			if (window) window->setEnabled(true);
+		}
+	});
 
-	int count = 0;
-	for (const auto& entry : *p_archive) {
-		switch (entry.type) {
-		case TeFileInfo::EN_DIR:
-			internalAddDirEntry(entry.path);
-			break;
-		case TeFileInfo::EN_FILE:
-			internalAddEntry(entry.path, entry.size, entry.lastModified, entry.permissions);
-			break;
-		default:
-			break;
+	QProgressDialog progress(tr("Opening archive \"%1\"...").arg(info.fileName()),
+		QString(), 0, 0, nullptr);
+	progress.setWindowModality(Qt::ApplicationModal);
+	progress.setMinimumDuration(500);
+	progress.setValue(0);
+
+	struct EnumerationResult {
+		QVector<TeFileInfo> entries;
+		bool success = false;
+	};
+	auto result = std::make_shared<EnumerationResult>();
+	bool completed = false;
+	bool canceled = false;
+	QEventLoop loop;
+	QThread* worker = QThread::create([path, password, result]() {
+		try {
+			TeArchive::Reader reader;
+			reader.setPassword(password);
+			if (!reader.open(path)) {
+				return;
+			}
+			for (const auto& entry : reader) {
+				if (QThread::currentThread()->isInterruptionRequested()) {
+					return;
+				}
+				result->entries.append(entry);
+			}
+			result->success = true;
 		}
-		if ((++count % 64) == 0) {
-			QApplication::processEvents();
+		catch (...) {
+			result->success = false;
 		}
+	});
+	QPointer<QThread> workerGuard(worker);
+	connect(worker, &QThread::finished, &loop, [workerGuard, &completed, &loop]() {
+		if (workerGuard) workerGuard->wait();
+		completed = true;
+		loop.quit();
+	}, Qt::QueuedConnection);
+	connect(worker, &QThread::finished, worker, &QObject::deleteLater);
+	connect(this, &QObject::destroyed, &loop, [workerGuard, &progress]() {
+		if (workerGuard) workerGuard->requestInterruption();
+		progress.reset();
+	});
+	connect(&progress, &QProgressDialog::canceled, &loop, [workerGuard, &canceled]() {
+		canceled = true;
+		if (workerGuard) workerGuard->requestInterruption();
+	});
+	worker->start();
+	loop.exec();
+	if (!completed) {
+		if (workerGuard) workerGuard->requestInterruption();
+		return finish(false);
+	}
+	if (!guard || !readerGuard || !result->success || canceled || m_loadCanceled) {
+		return finish(false);
+	}
+
+	qsizetype nextEntry = 0;
+	QTimer batchTimer;
+	batchTimer.setInterval(0);
+	connect(&batchTimer, &QTimer::timeout, &loop, [&]() {
+		if (!guard || !readerGuard || canceled || m_loadCanceled) {
+			loop.quit();
+			return;
+		}
+		QElapsedTimer elapsed;
+		elapsed.start();
+		int count = 0;
+		while (nextEntry < result->entries.size() && count < 128 && elapsed.elapsed() < 8) {
+			const auto& entry = result->entries.at(nextEntry++);
+			switch (entry.type) {
+			case TeFileInfo::EN_DIR:
+				internalAddDirEntry(entry.path);
+				break;
+			case TeFileInfo::EN_FILE:
+				internalAddEntry(entry.path, entry.size, entry.lastModified, entry.permissions);
+				break;
+			default:
+				break;
+			}
+			if (!guard || !readerGuard || canceled || m_loadCanceled) {
+				loop.quit();
+				return;
+			}
+			++count;
+		}
+		if (nextEntry == result->entries.size()) {
+			loop.quit();
+		}
+	});
+	batchTimer.start();
+	loop.exec();
+	batchTimer.stop();
+	if (!guard || !readerGuard || canceled || m_loadCanceled || nextEntry != result->entries.size()) {
+		return finish(false);
 	}
 
 	mp_treeProxy->sort(0, mp_treeProxy->sortOrder());
+	if (!guard) return false;
 	mp_listProxy->sort(0, mp_listProxy->sortOrder());
+	if (!guard) return false;
 	mp_treeProxy->setDynamicSortFilter(true);
+	if (!guard) return false;
 	mp_listProxy->setDynamicSortFilter(true);
+	if (!guard || !readerGuard || canceled || m_loadCanceled) {
+		return finish(false);
+	}
 
 	// Place the cursor on the first entry for keyboard parity with the
 	// file-system folder view.
@@ -769,7 +923,11 @@ bool TeArchiveFolderView::setArchive(TeArchive::Reader * p_archive)
 		mp_listView->setCurrentIndex(mp_listProxy->mapFromSource(mp_listModel->index(0, 0, srcRoot)));
 	}
 
-	return true;
+	if (!guard || !readerGuard || canceled || m_loadCanceled) {
+		return finish(false);
+	}
+	mp_reader = p_archive;
+	return finish(true);
 }
 
 void TeArchiveFolderView::internalAddEntry(const QString & path, qint64 size, const QDateTime & lastModified, int permission)

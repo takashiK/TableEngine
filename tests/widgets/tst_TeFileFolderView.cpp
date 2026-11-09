@@ -28,6 +28,7 @@
 #include <QTest>
 #include "widgets/TeFileFolderView.h"
 #include "widgets/TeFileListView.h"
+#include "widgets/TeFileTreeView.h"
 #include "widgets/TeFileSortProxyModel.h"
 
 namespace {
@@ -176,4 +177,156 @@ TEST(tst_TeFileFolderView, right_click_selected_item_is_a_file_target)
 	EXPECT_TRUE(isItemTarget);
 	ASSERT_EQ(1, files.size());
 	EXPECT_EQ(QDir::cleanPath(firstPath), QDir::cleanPath(files.constFirst()));
+}
+TEST(tst_TeFileFolderView, invalid_root_keeps_previous_tree_list_and_history)
+{
+QTemporaryDir directory;
+ASSERT_TRUE(directory.isValid());
+const QString invalidPath = directory.filePath("missing/nested");
+
+TeFileFolderView view;
+ASSERT_TRUE(view.trySetRootPath(directory.path()));
+const QString rootBefore = view.rootPath();
+const QString currentBefore = view.currentPath();
+const QStringList historyBefore = view.getPathHistory();
+QFileSystemModel* model = sourceModel(view);
+ASSERT_NE(model, nullptr);
+const QString listRootBefore = model->rootPath();
+const QModelIndex listRootIndexBefore = view.list()->rootIndex();
+
+EXPECT_FALSE(view.trySetRootPath(invalidPath));
+
+EXPECT_EQ(rootBefore, view.rootPath());
+EXPECT_EQ(currentBefore, view.currentPath());
+EXPECT_EQ(historyBefore, view.getPathHistory());
+EXPECT_EQ(listRootBefore, model->rootPath());
+EXPECT_EQ(listRootIndexBefore, view.list()->rootIndex());
+EXPECT_EQ(QDir::cleanPath(directory.path()), QDir::cleanPath(view.rootPath()));
+}
+
+TEST(tst_TeFileFolderView, invalid_current_keeps_previous_state_and_valid_current_still_works)
+{
+QTemporaryDir directory;
+ASSERT_TRUE(directory.isValid());
+ASSERT_TRUE(QDir(directory.path()).mkpath("child"));
+const QString childPath = directory.filePath("child");
+
+TeFileFolderView view;
+ASSERT_TRUE(view.trySetRootPath(directory.path()));
+const QString currentBefore = view.currentPath();
+const QStringList historyBefore = view.getPathHistory();
+QFileSystemModel* model = sourceModel(view);
+ASSERT_NE(model, nullptr);
+const QString listRootBefore = model->rootPath();
+
+EXPECT_FALSE(view.trySetCurrentPath(directory.filePath("missing")));
+EXPECT_EQ(currentBefore, view.currentPath());
+EXPECT_EQ(historyBefore, view.getPathHistory());
+EXPECT_EQ(listRootBefore, model->rootPath());
+
+EXPECT_TRUE(view.trySetCurrentPath(childPath));
+EXPECT_EQ(QDir::cleanPath(childPath), QDir::cleanPath(view.currentPath()));
+EXPECT_EQ(QDir::cleanPath(childPath), QDir::cleanPath(model->rootPath()));
+}
+
+TEST(tst_TeFileFolderView, unc_wsl_root_never_commits_an_invalid_index)
+{
+// Optional: only meaningful where a WSL UNC share exists (Windows); the guard must hold either way.
+const QString wslPath = QStringLiteral("//wsl.localhost/Ubuntu");
+if (!QFileInfo::exists(wslPath))
+GTEST_SKIP() << "WSL UNC share is not available";
+
+QTemporaryDir directory;
+ASSERT_TRUE(directory.isValid());
+
+TeFileFolderView view;
+ASSERT_TRUE(view.trySetRootPath(directory.path()));
+const QString rootBefore = view.rootPath();
+
+if (view.trySetRootPath(wslPath)) {
+EXPECT_FALSE(view.rootPath().isEmpty());
+EXPECT_TRUE(view.list()->rootIndex().isValid());
+}
+else {
+EXPECT_EQ(rootBefore, view.rootPath());
+EXPECT_EQ(QDir::cleanPath(directory.path()), QDir::cleanPath(view.rootPath()));
+}
+}
+
+TEST(tst_TeFileFolderView, try_set_paths_with_invalid_current_keeps_root_list_and_history)
+{
+	QTemporaryDir first;
+	QTemporaryDir second;
+	ASSERT_TRUE(first.isValid());
+	ASSERT_TRUE(second.isValid());
+
+	TeFileFolderView view;
+	ASSERT_TRUE(view.trySetRootPath(first.path()));
+	const QString rootBefore = view.rootPath();
+	const QString currentBefore = view.currentPath();
+	const QStringList historyBefore = view.getPathHistory();
+	QFileSystemModel* model = sourceModel(view);
+	ASSERT_NE(model, nullptr);
+	const QString listRootBefore = model->rootPath();
+
+	EXPECT_FALSE(view.trySetPaths(second.path(), second.filePath("missing")));
+
+	EXPECT_EQ(rootBefore, view.rootPath());
+	EXPECT_EQ(currentBefore, view.currentPath());
+	EXPECT_EQ(historyBefore, view.getPathHistory());
+	EXPECT_EQ(listRootBefore, model->rootPath());
+}
+
+TEST(tst_TeFileFolderView, try_set_paths_with_valid_root_and_current_commits_once)
+{
+	QTemporaryDir first;
+	QTemporaryDir second;
+	ASSERT_TRUE(first.isValid());
+	ASSERT_TRUE(second.isValid());
+	ASSERT_TRUE(QDir(second.path()).mkpath("child"));
+	const QString childPath = second.filePath("child");
+
+	TeFileFolderView view;
+	ASSERT_TRUE(view.trySetRootPath(first.path()));
+	const int historyBefore = view.getPathHistory().size();
+
+	ASSERT_TRUE(view.trySetPaths(second.path(), childPath));
+
+	EXPECT_EQ(QDir::cleanPath(second.path()), QDir::cleanPath(view.rootPath()));
+	EXPECT_EQ(QDir::cleanPath(childPath), QDir::cleanPath(view.currentPath()));
+	EXPECT_EQ(QDir::cleanPath(childPath), QDir::cleanPath(sourceModel(view)->rootPath()));
+	EXPECT_EQ(historyBefore + 1, view.getPathHistory().size());
+}
+
+TEST(tst_TeFileFolderView, history_navigation_to_removed_path_does_not_advance_cursor)
+{
+	QTemporaryDir directory;
+	ASSERT_TRUE(directory.isValid());
+	ASSERT_TRUE(QDir(directory.path()).mkpath("a"));
+	ASSERT_TRUE(QDir(directory.path()).mkpath("b"));
+	const QString pathA = directory.filePath("a");
+	const QString pathB = directory.filePath("b");
+
+	TeFileFolderView view;
+	ASSERT_TRUE(view.trySetRootPath(directory.path()));
+	ASSERT_TRUE(view.trySetCurrentPath(pathA));
+	ASSERT_TRUE(view.trySetCurrentPath(pathB));
+	ASSERT_EQ(QDir::cleanPath(pathB), QDir::cleanPath(view.currentPath()));
+
+	// Wait until the tree model notices the removal; skip if this platform never reports it.
+	ASSERT_TRUE(QDir(directory.path()).rmdir("a"));
+	auto* treeProxy = qobject_cast<TeFileSortProxyModel*>(view.tree()->model());
+	auto* treeModel = treeProxy == nullptr ? nullptr : qobject_cast<QFileSystemModel*>(treeProxy->sourceModel());
+	ASSERT_NE(treeModel, nullptr);
+	for (int i = 0; i < 50 && treeModel->index(pathA).isValid(); ++i)
+		QTest::qWait(100);
+	if (treeModel->index(pathA).isValid())
+		GTEST_SKIP() << "File system model did not report the removal";
+
+	EXPECT_EQ(QDir::cleanPath(pathB), QDir::cleanPath(view.currentPath()));
+	view.movePrevPath();
+	EXPECT_EQ(QDir::cleanPath(pathB), QDir::cleanPath(view.currentPath()));
+	view.movePrevPath();
+
+	EXPECT_EQ(QDir::cleanPath(pathB), QDir::cleanPath(view.currentPath()));
 }

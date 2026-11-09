@@ -21,6 +21,8 @@
 #include "TeDriveBar.h"
 #include "platform/platform_util.h"
 #include "platform/TeNativeEvent.h"
+#include "utils/TeFileIconProvider.h"
+#include "utils/TeRemoteAccess.h"
 
 #include <QFileIconProvider>
 #include <QDir>
@@ -116,14 +118,12 @@ void TeDriveBar::loadQuickAccesses()
 	}
 	m_quickActions.clear();
 
-	QFileIconProvider provider;
-
 	QSettings settings;
 	settings.beginGroup("QuickAccess");
 	QStringList keys = settings.childKeys();
 	for (const auto& key : keys) {
 		QFileInfo info(settings.value(key).toString());
-		QAction* act = new QAction(provider.icon(info), key + ": " + info.fileName());
+		QAction* act = new QAction(TeFileIconProvider::instance()->folderIcon(info.filePath()), key + ": " + info.fileName());
 		act->setData(info.filePath());
 		act->setToolTip(info.filePath());
 		addAction(act);
@@ -146,8 +146,7 @@ void TeDriveBar::addQuickAccess(const QString& path)
 {
 	QFileInfo info(path);
 	if (info.exists()) {
-		QFileIconProvider provider;
-		QAction* act = new QAction(provider.icon(info), QString::number(m_quickActions.size()+1) + ": " + info.fileName());
+		QAction* act = new QAction(TeFileIconProvider::instance()->folderIcon(info.filePath()), QString::number(m_quickActions.size()+1) + ": " + info.fileName());
 		act->setData(info.filePath());
 		act->setToolTip(info.filePath());
 		addAction(act);
@@ -189,10 +188,9 @@ void TeDriveBar::setQuickAccess(const QStringList& paths)
 	}
 	m_quickActions.clear();
 	
-	QFileIconProvider provider;
 	for (const auto& path : paths) {
 		QFileInfo info(path);
-		QAction* act = new QAction(provider.icon(info), QString::number(m_quickActions.size() + 1) + ": " + info.fileName());
+		QAction* act = new QAction(TeFileIconProvider::instance()->folderIcon(info.filePath()), QString::number(m_quickActions.size() + 1) + ": " + info.fileName());
 		act->setData(info.filePath());
 		act->setToolTip(info.filePath());
 		addAction(act);
@@ -212,9 +210,16 @@ QStringList TeDriveBar::quickAccess() const
 	return paths;
 }
 
+void TeDriveBar::refreshIcons()
+{
+	for (QAction* action : m_driveActions + m_quickActions) {
+		action->setIcon(TeFileIconProvider::instance()->folderIcon(action->data().toString()));
+	}
+}
+
 void TeDriveBar::updateDrive(bool state)
 {
-	QFileIconProvider provider;
+	TeRemoteAccess::clearDriveCache();
 	//clear all drive
 	for (QAction* action : m_driveActions) {
 		removeAction(action);
@@ -223,7 +228,7 @@ void TeDriveBar::updateDrive(bool state)
 	m_driveActions.clear();
 
 	for (const TeDriveAction& drive : getDriveActions()) {
-		QAction* act = new QAction(provider.icon(QFileInfo(drive.path)), drive.text);
+		QAction* act = new QAction(TeFileIconProvider::instance()->folderIcon(drive.path), drive.text);
 		act->setData(drive.path);
 		act->setToolTip(drive.toolTip);
 		insertAction(mp_driveStart, act);

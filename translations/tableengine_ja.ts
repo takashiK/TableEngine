@@ -2145,6 +2145,29 @@ Open with the binary editor instead?</source>
     </message>
 </context>
 <context>
+    <name>TeFileIconProvider</name>
+    <message>
+        <location filename="../src/utils/TeFileIconProvider.cpp" line="52"/>
+        <source>Drive</source>
+        <translation>ドライブ</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/TeFileIconProvider.cpp" line="54"/>
+        <source>Folder</source>
+        <translation>フォルダ</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/TeFileIconProvider.cpp" line="57"/>
+        <source>File</source>
+        <translation>ファイル</translation>
+    </message>
+    <message>
+        <location filename="../src/utils/TeFileIconProvider.cpp" line="58"/>
+        <source>%1 File</source>
+        <translation>%1 ファイル</translation>
+    </message>
+</context>
+<context>
     <name>TeFilePathDialog</name>
     <message>
         <location filename="../src/commands/file/TeCmdCopyTo.cpp" line="105"/>
@@ -2679,6 +2702,41 @@ Open with the binary editor instead?</source>
         <location filename="../src/dialogs/TeOptionSetting.cpp" line="709"/>
         <source>Show Detail pane as floating window by default</source>
         <translation>詳細パネルをフローティングパネルとして表示する。</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="560"/>
+        <source>Remote Locations (WSL / Network Share / OneDrive)</source>
+        <translation>リモート先 (WSL / ネットワーク共有 / OneDrive)</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="564"/>
+        <source>WSL:</source>
+        <translation>WSL:</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="565"/>
+        <source>Network share (Samba):</source>
+        <translation>ネットワーク共有 (Samba):</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="566"/>
+        <source>OneDrive:</source>
+        <translation>OneDrive:</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="572"/>
+        <source>Icons only (no per-file icon lookups)</source>
+        <translation>アイコンのみ (ファイル毎のアイコン取得なし)</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="573"/>
+        <source>Icons and previews (no automatic previews)</source>
+        <translation>アイコンとプレビュー (自動プレビューなし)</translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/TeOptionSetting.cpp" line="574"/>
+        <source>Normal (existing behavior)</source>
+        <translation>通常 (従来の動作)</translation>
     </message>
 </context>
 <context>

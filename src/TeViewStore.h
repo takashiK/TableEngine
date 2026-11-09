@@ -211,9 +211,10 @@ public:
 	 * @brief Creates a new TeFileFolderView tab for @p path.
 	 * @param path  The initial root path to display.
 	 * @param place Target tab panel (-1 = active panel).
-	 * @return The newly created view.
+	 * @param currentPath Optional current path inside @p path, applied together with the root.
+	 * @return The newly created view, or nullptr if the paths were rejected by the file system model.
 	 */
-	TeFileFolderView* createFolderView( const QString& path, int place = -1 );
+	TeFileFolderView* createFolderView( const QString& path, int place = -1, const QString& currentPath = QString() );
 
 	/**
 	 * @brief Creates a new TeArchiveFolderView tab for @p path.
@@ -250,8 +251,10 @@ public:
 	 * @param path    The new root/current path.
 	 * @param newView If true, opens @p path in a new tab.
 	 * @param place   Target tab panel (-1 = active).
+	 * @param currentPath Optional current path inside @p path, committed atomically with the root.
+	 * @return false if the path was rejected (the previous view, tab and history are kept).
 	 */
-	void changeRootPath(const QString& path, bool newView = false, int place = -1);
+	bool changeRootPath(const QString& path, bool newView = false, int place = -1, const QString& currentPath = QString());
 
 	/**
 	 * @brief Registers @p widget as a floating window tracked by the store.
@@ -339,6 +342,7 @@ signals:
 
 private:
 	void applyLayoutSettings();
+	void refreshRemoteAccessViews();
 	void storeWindowSizeIfNeeded();
 	/** @brief Refreshes the status bar's right-hand label from currentFolderView()'s focused item. */
 	void updateStatusRightLabel();

@@ -68,6 +68,10 @@ void TeFolderView::execCommand(TeTypes::CmdId cmdId, TeTypes::WidgetType type, Q
 	}
 }
 
+void TeFolderView::refreshIcons()
+{
+}
+
 void TeFolderView::refresh()
 {
 	update();

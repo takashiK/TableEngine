@@ -104,6 +104,33 @@ namespace {
 		return cname;
 	}
 
+	void warmUpShellContextMenu(IShellFolder* pShellFolder, UINT childCount, LPCITEMIDLIST* pidlChildList)
+	{
+		static bool warmedUp = false;
+		if (warmedUp || pShellFolder == NULL) {
+			return;
+		}
+
+		IContextMenu* pWarmContextMenu = NULL;
+		HRESULT hr = pShellFolder->GetUIObjectOf(NULL, childCount, pidlChildList, IID_IContextMenu, NULL, (void**)&pWarmContextMenu);
+		if (FAILED(hr) || pWarmContextMenu == NULL) {
+			return;
+		}
+
+		HMENU hmenu = CreatePopupMenu();
+		if (hmenu != NULL) {
+			hr = pWarmContextMenu->QueryContextMenu(hmenu, 0, 1, 0x7fff, CMF_NORMAL);
+			DestroyMenu(hmenu);
+			if (SUCCEEDED(hr)) {
+				warmedUp = true;
+			}
+		}
+
+		pWarmContextMenu->Release();
+		// sleep 100ms to ensure context menu is fully warmed up
+		Sleep(100);
+	}
+
 	void popupContextWindows(int px, int py,  PIDLIST_ABSOLUTE parent, LPCITEMIDLIST* pidlChildList, UINT childCount) {
 		//show context menu for multiple files
 		int                 nId = 0;
@@ -120,6 +147,7 @@ namespace {
 			HWND_MESSAGE, NULL, static_cast<HINSTANCE>(GetModuleHandle(0)), NULL);
 
 		SHBindToParent(parent, IID_PPV_ARGS(&pShellFolder), NULL);
+		warmUpShellContextMenu(pShellFolder, childCount, pidlChildList);
 
 		hr = pShellFolder->GetUIObjectOf(NULL, childCount, pidlChildList, IID_IContextMenu, NULL, (void**)&pContextMenu);
 		IContextMenu2* pContextMenu2 = NULL;

@@ -20,6 +20,7 @@
 
 #include "TeDetailTextPreviewSection.h"
 #include "utils/TeUtils.h"
+#include "utils/TeRemoteAccess.h"
 
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
@@ -110,6 +111,7 @@ TeDetailTextPreviewSection::TeDetailTextPreviewSection(QWidget* parent)
 
 bool TeDetailTextPreviewSection::canHandle(const QFileInfo& info) const
 {
+    if (TeRemoteAccess::suppressAutoContent(info.absoluteFilePath())) return false;
     if (!info.isFile()) return false;
     return getFileType(info.absoluteFilePath()) == TE_FILE_TEXT;
 }
