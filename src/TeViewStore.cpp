@@ -34,6 +34,8 @@
 #include "TeDispatcher.h"
 #include "TeSettings.h"
 #include "utils/TeFileInfo.h"
+#include "utils/TeFileIconProvider.h"
+#include "utils/TeRemoteAccess.h"
 
 /**
  * @file TeViewStore.cpp
@@ -71,6 +73,7 @@
 #include <QCoreApplication>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QPointer>
 #include <QtWidgets/QApplication>
 #include "utils/TeFolderAppearance.h"
 
@@ -160,6 +163,9 @@ TeTypes::WidgetType TeViewStore::getType() const
 void TeViewStore::initialize()
 {
 	QSettings settings;
+
+	// Remote access modes must be known before the drive bar builds its icons.
+	TeRemoteAccess::loadFromSettings();
 
 	//Main window
 	mp_mainWindow = new TeMainWindow;
@@ -538,6 +544,37 @@ void TeViewStore::loadSetting()
 	applyStyleSheet();
 	applyLayoutSettings();
 	emit fileNameWidthChanged(m_minFileNameWidthChars, m_maxFileNameWidthChars);
+
+	if (TeRemoteAccess::loadFromSettings()) {
+		refreshRemoteAccessViews();
+	}
+}
+
+void TeViewStore::refreshRemoteAccessViews()
+{
+	if (mp_driveBar)
+		mp_driveBar->refreshIcons();
+
+	for (int place = 0; place < TAB_MAX; ++place) {
+		QTabWidget* tab = mp_tab[place];
+		if (!tab)
+			continue;
+		for (int i = 0; i < tab->count(); ++i) {
+			auto* view = qobject_cast<TeFolderView*>(tab->widget(i));
+			if (view && view->getType() == TeTypes::WT_FOLDERVIEW)
+				tab->setTabIcon(i, TeFileIconProvider::instance()->folderIcon(view->rootPath()));
+		}
+	}
+
+	for (TeFolderView* view : getFolderViews()) {
+		if (view) {
+			view->refreshIcons();
+			view->refresh();
+		}
+	}
+
+	if (mp_detailView)
+		mp_detailView->reload();
 }
 
 void TeViewStore::loadKeySetting()
@@ -606,7 +643,13 @@ void TeViewStore::loadStatus()
 	QFileInfo rootInfo(rootPath);
 	if(!rootInfo.exists() || !rootInfo.isDir()) rootPath = QDir::rootPath();
 
+	// The stored setting is left untouched; only this session falls back.
 	TeFileFolderView* folder = createFolderView(rootPath);
+	if (!folder && rootPath != QDir::rootPath()) {
+		rootPath = QDir::rootPath();
+		rootInfo = QFileInfo(rootPath);
+		folder = createFolderView(rootPath);
+	}
 	if(folder && (mode == TeSettings::INIT_FOLDER_MODE_PREVIOUS)){
 		if(info.exists() && info.isDir() && info.absoluteFilePath().startsWith(rootInfo.absoluteFilePath())){
 			folder->setCurrentPath(path);
@@ -887,7 +930,7 @@ void TeViewStore::storeWindowSizeIfNeeded()
 	}
 }
 
-TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place)
+TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place, const QString& currentPath)
 {
 	TeFileFolderView * folderView = new TeFileFolderView;
 	folderView->setDispatcher(this);
@@ -912,7 +955,10 @@ TeFileFolderView * TeViewStore::createFolderView(const QString & path, int place
 	connect(this, &TeViewStore::fileNameWidthChanged, folderView->list(), &TeFileListView::setFileNameWidthLimits);
 	connect(this, &TeViewStore::fileListShowModeChanged, folderView, &TeFileFolderView::setFileShowMode);
 
-	folderView->setRootPath(path);
+	if (!folderView->trySetPaths(path, currentPath)) {
+		delete folderView;
+		return nullptr;
+	}
 	addFolderView(folderView, place);
 
 	return folderView;
@@ -927,9 +973,11 @@ TeArchiveFolderView* TeViewStore::createArchiveFolderView(const QString& path, i
 	folderView->list()->setFileNameWidthLimits(m_minFileNameWidthChars, m_maxFileNameWidthChars);
 	folderView->tree()->setFocusPolicy(Qt::ClickFocus);
 
+	QPointer<TeViewStore> storeGuard(this);
+	QPointer<TeArchiveFolderView> viewGuard(folderView);
 	bool ok = folderView->setArchive(path);
-	if (!ok) {
-		delete folderView;
+	if (!ok || !storeGuard || !viewGuard) {
+		delete viewGuard.data();
 		return nullptr;
 	}
 	connect(this, &TeViewStore::selectionModeChanged, folderView->list(), &TeFileListView::setSelectionMode);
@@ -1074,9 +1122,9 @@ void TeViewStore::registerFloatingWidget(QWidget* widget)
 	}
 }
 
-void TeViewStore::changeRootPath(const QString& path, bool newView, int place)
+bool TeViewStore::changeRootPath(const QString& path, bool newView, int place, const QString& currentPath)
 {
-	if (place >= TAB_MAX) return;
+	if (place >= TAB_MAX) return false;
 
 	if (place < 0) {
 		place = currentTabPlace();
@@ -1088,18 +1136,21 @@ void TeViewStore::changeRootPath(const QString& path, bool newView, int place)
 	}
 
 	if (!newView && view && (view->getType() == TeTypes::WT_FOLDERVIEW)) {
+		// Tab metadata is updated only after the view accepted the new root.
+		if (!view->trySetPaths(path, currentPath))
+			return false;
+
 		int index = mp_tab[place]->currentIndex();
 		QDir dir(path);
-		QIcon icon = QFileIconProvider().icon(QFileInfo(path));
+		QIcon icon = TeFileIconProvider::instance()->folderIcon(path);
 
 		mp_tab[place]->setTabToolTip(index, path);
 		mp_tab[place]->setTabText(index, dir.isRoot() ? dir.path() : dir.dirName());
 		mp_tab[place]->setTabIcon(index, icon);
-		view->setRootPath(path);
+		return true;
 	}
-	else {
-		createFolderView(path, place);
-	}
+
+	return createFolderView(path, place, currentPath) != nullptr;
 }
 
 void TeViewStore::focusFolderViewChanged(QWidget* widget, QEvent* event)
@@ -1131,7 +1182,7 @@ void TeViewStore::addFolderView(TeFolderView* folderView, int place)
 		}
 	}
 	QDir dir(folderView->rootPath());
-	QIcon icon = QFileIconProvider().icon(QFileInfo(folderView->rootPath()));
+	QIcon icon = TeFileIconProvider::instance()->folderIcon(folderView->rootPath());
 	int index = mp_tab[place]->addTab(folderView, icon, dir.isRoot() ? dir.path() : dir.dirName());
 	mp_tab[place]->setTabToolTip(index, dir.absolutePath());
 	mp_tab[place]->setHidden(false);

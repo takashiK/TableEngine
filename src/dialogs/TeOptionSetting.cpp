@@ -25,6 +25,7 @@
 #include "widgets/TeFileListView.h"
 #include "platform/platform_util.h"
 #include "utils/TeToolCommand.h"
+#include "utils/TeRemoteAccess.h"
 
 #include <QApplication>
 #include <QColorDialog>
@@ -555,6 +556,35 @@ QWidget * TeOptionSetting::createPageFolder()
 	});
 	widthGroup->setLayout(widthLayout);
 	layout->addWidget(widthGroup);
+
+	QGroupBox* remoteGroup = new QGroupBox(tr("Remote Locations (WSL / Network Share / OneDrive)"));
+	QGridLayout* remoteLayout = new QGridLayout();
+	struct RemoteRow { TeRemoteAccess::Kind kind; QString label; };
+	const RemoteRow remoteRows[] = {
+		{ TeRemoteAccess::Kind::Wsl,      tr("WSL:") },
+		{ TeRemoteAccess::Kind::Network,  tr("Network share (Samba):") },
+		{ TeRemoteAccess::Kind::OneDrive, tr("OneDrive:") },
+	};
+	int remoteRow = 0;
+	for (const RemoteRow& row : remoteRows) {
+		const QString key = QString::fromLatin1(TeRemoteAccess::settingKey(row.kind));
+		QComboBox* combo = new QComboBox();
+		combo->addItem(tr("Icons only (no per-file icon lookups)"), int(TeSettings::REMOTE_ACCESS_SUPPRESS_ICON));
+		combo->addItem(tr("Icons and previews (no automatic previews)"), int(TeSettings::REMOTE_ACCESS_SUPPRESS_AUTO));
+		combo->addItem(tr("Normal (existing behavior)"), int(TeSettings::REMOTE_ACCESS_NORMAL));
+		const int stored = qBound(int(TeSettings::REMOTE_ACCESS_SUPPRESS_ICON),
+			settings.value(key, int(TeRemoteAccess::defaultMode())).toInt(),
+			int(TeSettings::REMOTE_ACCESS_NORMAL));
+		combo->setCurrentIndex(combo->findData(stored));
+		connect(combo, &QComboBox::currentIndexChanged, [this, combo, key](int) {
+			m_option[key] = combo->currentData();
+		});
+		remoteLayout->addWidget(new QLabel(row.label), remoteRow, 0);
+		remoteLayout->addWidget(combo, remoteRow, 1);
+		++remoteRow;
+	}
+	remoteGroup->setLayout(remoteLayout);
+	layout->addWidget(remoteGroup);
 
 	layout->addStretch();
 

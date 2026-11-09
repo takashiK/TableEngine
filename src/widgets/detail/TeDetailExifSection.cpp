@@ -20,6 +20,7 @@
 
 #include "TeDetailExifSection.h"
 #include "utils/TeQImageExifReader.h"
+#include "utils/TeRemoteAccess.h"
 
 #include <QFormLayout>
 #include <QLabel>
@@ -103,6 +104,7 @@ void TeDetailExifSection::setExifReader(std::unique_ptr<TeExifReader> reader)
 
 bool TeDetailExifSection::canHandle(const QFileInfo& info) const
 {
+    if (TeRemoteAccess::suppressAutoContent(info.absoluteFilePath())) return false;
     if (!info.isFile()) return false;
     return !QImageReader::imageFormat(info.absoluteFilePath()).isEmpty();
 }
